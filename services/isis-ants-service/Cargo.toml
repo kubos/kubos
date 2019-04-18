@@ -4,6 +4,9 @@ version = "0.1.0"
 authors = ["Catherine Garabedian <catherine@kubos.co>"]
 edition = "2018"
 
+[features]
+nos3 = ["isis-ants-api/nos3"]
+
 [dependencies]
 failure = "0.1.2"
 isis-ants-api = { path = "../../apis/isis-ants-api" }

@@ -14,10 +14,22 @@
 // limitations under the License.
 //
 
+#[cfg(not(feature = "nos3"))]
 use crate::ffi;
 use crate::parse::*;
 use failure::Fail;
+#[cfg(feature = "nos3")]
+use nom::*;
+#[cfg(feature = "nos3")]
+use rust_i2c::{Command, Connection};
+#[cfg(feature = "nos3")]
+use std::error::Error;
+#[cfg(feature = "nos3")]
+use std::io;
+#[cfg(not(feature = "nos3"))]
 use std::ptr;
+#[cfg(feature = "nos3")]
+use std::time::Duration;
 
 /// Common Error for AntS Actions
 #[derive(Fail, Debug, Clone)]
@@ -29,12 +41,41 @@ pub enum AntsError {
     /// is out-of-bounds.
     #[fail(display = "Configuration error")]
     ConfigError,
+    /// Error resulting from underlying Io functions
+    #[fail(display = "IO Error: {}", description)]
+    IoError {
+        /// Underlying cause captured from io function
+        cause: std::io::ErrorKind,
+        /// Error description
+        description: String,
+    },
+    /// Unsupported command error. Thrown when calling a command which an antenna system
+    /// does not support
+    #[cfg(feature = "nos3")]
+    #[fail(display = "Unsupported Command error")]
+    UnsupportedCmdError,
+    /// Parsing Error. Thrown when the raw data received from the bus cannot be parsed or recognized
+    #[cfg(feature = "nos3")]
+    #[fail(display = "Parsing error")]
+    ParsingFailure,
+}
+
+/// Convience converter from io::Error to AntsError
+#[cfg(feature = "nos3")]
+impl From<io::Error> for AntsError {
+    fn from(error: std::io::Error) -> Self {
+        AntsError::IoError {
+            cause: error.kind(),
+            description: error.description().to_owned(),
+        }
+    }
 }
 
 /// Custom result type for antenna operations
 pub type AntSResult<T> = Result<T, AntsError>;
 
 /// Trait used to represent the AntS object. Allows for mock objects to be created for unit tests
+#[cfg(not(feature = "nos3"))]
 pub trait IAntS: Send {
     /// Construct a new AntS instance
     fn new(bus: &str, primary: u8, secondary: u8, ant_count: u8, timeout: u32) -> AntSResult<Self>
@@ -74,9 +115,75 @@ pub trait IAntS: Send {
     fn passthrough(&self, tx: &[u8], rx_in: &mut [u8]) -> AntSResult<()>;
 }
 
+/// Trait used to represent the AntS object. Allows for mock objects to be created for unit tests
+#[cfg(feature = "nos3")]
+pub trait IAntS: Send {
+    /// Construct a new AntS instance
+    fn new(bus: &str, primary: u8, secondary: u8, ant_count: u8, timeout: u32) -> AntSResult<Self>
+    where
+        Self: ::std::marker::Sized;
+    /// Configure which microcontroller should be used to control the system
+    fn configure(&mut self, config: KANTSController) -> AntSResult<()>;
+    /// Perform a software reset of the microcontrollers
+    fn reset(&self) -> AntSResult<()>;
+    /// Arm the system for deployment
+    fn arm(&self) -> AntSResult<()>;
+    /// Disable deployment
+    fn disarm(&self) -> AntSResult<()>;
+    /// Deploy one antenna
+    fn deploy(&self, antenna: KANTSAnt, force: bool, timeout: u8) -> AntSResult<()>;
+    /// Automatically deploy all antennas
+    fn auto_deploy(&self, timeout: u8) -> AntSResult<()>;
+    /// Cancel all current deployment actions
+    fn cancel_deploy(&self) -> AntSResult<()>;
+    /// Get the current deployment status of the system
+    fn get_deploy(&self) -> AntSResult<DeployStatus>;
+    /// Get the system uptime
+    fn get_uptime(&self) -> AntSResult<u32>;
+    /// Get the system telemetry data
+    fn get_system_telemetry(&self) -> AntSResult<AntsTelemetry>;
+    /// Get an antenna's activation count
+    fn get_activation_count(&self, antenna: KANTSAnt) -> AntSResult<u8>;
+    /// Get the amount of time spent attempting to deploy an antenna
+    fn get_activation_time(&self, antenna: KANTSAnt) -> AntSResult<u16>;
+    /// Kick the hardware watchdog
+    fn watchdog_kick(&self) -> AntSResult<()>;
+    /// Start automatic watchdog kicking
+    fn watchdog_start(&self) -> AntSResult<()>;
+    /// Stop automatic watchdog kicking
+    fn watchdog_stop(&self) -> AntSResult<()>;
+    /// Pass a data packet directly through to the device
+    fn passthrough(&self, tx: &[u8], rx_in: &mut [u8]) -> AntSResult<()>;
+}
+
+/// Helper trait to allow us to clone our subsystem object
+pub trait IAntSClone {
+    /// Helper function to allow us to clone our subsystem object
+    fn box_clone(&self) -> Box<IAntS>;
+}
+
+impl<T> IAntSClone for T
+where
+    T: 'static + IAntS + Clone,
+{
+    fn box_clone(&self) -> Box<IAntS> {
+        Box::new(self.clone())
+    }
+}
+
+#[cfg(not(feature = "nos3"))]
+impl Clone for Box<IAntS> {
+    fn clone(&self) -> Box<IAntS> {
+        self.box_clone()
+    }
+}
+
 /// Structure for interacting with an ISIS Antenna System
+#[derive(Clone)]
+#[cfg(not(feature = "nos3"))]
 pub struct AntS;
 
+#[cfg(not(feature = "nos3"))]
 impl IAntS for AntS {
     /// Constructor
     ///
@@ -624,7 +731,230 @@ impl IAntS for AntS {
     }
 }
 
+/// Structure for interacting with an ISIS Antenna System
+#[cfg(feature = "nos3")]
+pub struct AntS {
+    bus: String,
+    controllers: AntSControllers,
+    connection: Connection,
+}
+
+#[cfg(feature = "nos3")]
+impl IAntS for AntS {
+    /// Constructor
+    ///
+    /// Creates new instance of AntS structure.
+    ///
+    /// # Arguments
+    /// `connection` - A [`Connection`] used as low-level connection to AntS hardware
+    ///
+    /// [`Connection`]: ../rust_i2c/struct.Connection.html
+    fn new(
+        bus: &str,
+        primary: u8,
+        secondary: u8,
+        _ant_count: u8,
+        _timeout: u32,
+    ) -> AntSResult<Self> {
+        let ants = AntS {
+            bus: bus.to_string(),
+            controllers: AntSControllers {
+                side_a: primary,
+                side_b: secondary,
+            },
+            connection: Connection::from_path(bus, primary as u16),
+        };
+        Ok(ants)
+    }
+
+    /// Configure the system to send future commands to the requested microcontroller
+    fn configure(&mut self, config: KANTSController) -> AntSResult<()> {
+        match config {
+            KANTSController::Primary => {
+                let path = self.controllers.side_a as u16;
+                self.connection = Connection::from_path(&self.bus, path);
+                Ok(())
+            }
+            KANTSController::Secondary => {
+                let path = self.controllers.side_b as u16;
+                self.connection = Connection::from_path(&self.bus, path);
+                Ok(())
+            }
+        }
+    }
+
+    /// Reset the Ant System
+    fn reset(&self) -> AntSResult<()> {
+        self.connection.write(Command {
+            cmd: 0xAA,
+            data: vec![],
+        })?;
+        Ok(())
+    }
+
+    /// Ready Ant System for deployment
+    fn arm(&self) -> AntSResult<()> {
+        self.connection.write(Command {
+            cmd: 0xAD,
+            data: vec![],
+        })?;
+        Ok(())
+    }
+
+    /// Disable deployment
+    fn disarm(&self) -> AntSResult<()> {
+        self.connection.write(Command {
+            cmd: 0xAC,
+            data: vec![],
+        })?;
+        Ok(())
+    }
+
+    /// Deploy one antenna
+    fn deploy(&self, antenna: KANTSAnt, force: bool, timeout: u8) -> AntSResult<()> {
+        let cmd = match force {
+            true => match antenna {
+                KANTSAnt::Ant1 => 0xBA,
+                KANTSAnt::Ant2 => 0xBB,
+                KANTSAnt::Ant3 => 0xBC,
+                KANTSAnt::Ant4 => 0xBD,
+            },
+            false => match antenna {
+                KANTSAnt::Ant1 => 0xA1,
+                KANTSAnt::Ant2 => 0xA2,
+                KANTSAnt::Ant3 => 0xA3,
+                KANTSAnt::Ant4 => 0xA4,
+            },
+        };
+        self.connection.write(Command {
+            cmd: cmd,
+            data: vec![timeout],
+        })?;
+        Ok(())
+    }
+
+    /// Automatically deploy all antennas
+    fn auto_deploy(&self, timeout: u8) -> AntSResult<()> {
+        self.connection.write(Command {
+            cmd: 0xA5,
+            data: vec![timeout],
+        })?;
+        Ok(())
+    }
+
+    /// Cancel all current deployment actions
+    fn cancel_deploy(&self) -> AntSResult<()> {
+        self.connection.write(Command {
+            cmd: 0xA9,
+            data: vec![],
+        })?;
+        Ok(())
+    }
+
+    /// Get the current deployment status of the system
+    fn get_deploy(&self) -> AntSResult<DeployStatus> {
+        let cmd = Command {
+            cmd: 0xC3,
+            data: vec![],
+        };
+        let status = self.connection.transfer(cmd, 2, Duration::from_millis(1))?;
+        let decoded = DeployStatus::new(&status)?;
+        Ok(decoded)
+    }
+
+    /// Get the system uptime
+    fn get_uptime(&self) -> AntSResult<u32> {
+        Err(AntsError::UnsupportedCmdError)
+    }
+
+    /// Get the system telemetry data
+    fn get_system_telemetry(&self) -> AntSResult<AntsTelemetry> {
+        let cmd = Command {
+            cmd: 0xC0,
+            data: vec![],
+        };
+        let temp = self.connection.transfer(cmd, 2, Duration::from_millis(2))?;
+        let temp = match le_u16(&temp) {
+            Ok((_rem, res)) => res,
+            Err(_) => return Err(AntsError::ParsingFailure),
+        };
+        let status = self.get_deploy()?;
+        let uptime = 0;
+
+        let telem = AntsTelemetry {
+            raw_temp: temp,
+            deploy_status: status,
+            uptime: uptime,
+        };
+        Ok(telem)
+    }
+
+    /// Get an antenna's activation count
+    fn get_activation_count(&self, antenna: KANTSAnt) -> AntSResult<u8> {
+        let cmd = match antenna {
+            KANTSAnt::Ant1 => 0xB0,
+            KANTSAnt::Ant2 => 0xB1,
+            KANTSAnt::Ant3 => 0xB2,
+            KANTSAnt::Ant4 => 0xB3,
+        };
+        let cmd = Command {
+            cmd: cmd,
+            data: vec![],
+        };
+        let count = self.connection.transfer(cmd, 1, Duration::from_millis(1))?;
+        Ok(count[0])
+    }
+
+    /// Get the amount of time spent attempting to deploy an antenna
+    fn get_activation_time(&self, antenna: KANTSAnt) -> AntSResult<u16> {
+        let cmd = match antenna {
+            KANTSAnt::Ant1 => 0xB4,
+            KANTSAnt::Ant2 => 0xB5,
+            KANTSAnt::Ant3 => 0xB6,
+            KANTSAnt::Ant4 => 0xB7,
+        };
+        let cmd = Command {
+            cmd: cmd,
+            data: vec![],
+        };
+        let time = self.connection.transfer(cmd, 2, Duration::from_millis(1))?;
+
+        match le_u16(&time) {
+            Ok((_rem, res)) => Ok(res / 20),
+            Err(_) => Err(AntsError::ParsingFailure),
+        }
+    }
+
+    /// Kick the hardware watchdog
+    fn watchdog_kick(&self) -> AntSResult<()> {
+        Err(AntsError::UnsupportedCmdError)
+    }
+
+    /// Start automatic watchdog kicking
+    fn watchdog_start(&self) -> AntSResult<()> {
+        Err(AntsError::UnsupportedCmdError)
+    }
+
+    /// Stop automatic watchdog kicking
+    fn watchdog_stop(&self) -> AntSResult<()> {
+        Err(AntsError::UnsupportedCmdError)
+    }
+
+    /// Pass a data packet directly through to the device
+    fn passthrough(&self, _tx: &[u8], _rx_in: &mut [u8]) -> AntSResult<()> {
+        Err(AntsError::UnsupportedCmdError)
+    }
+}
+
+/// Structure for respresenting each microcontroller address
+#[cfg(feature = "nos3")]
+struct AntSControllers {
+    side_a: u8,
+    side_b: u8,
+}
+
 /// Close the connection to the I2C bus
+#[cfg(not(feature = "nos3"))]
 impl Drop for AntS {
     fn drop(&mut self) {
         let _ = self.watchdog_stop();
