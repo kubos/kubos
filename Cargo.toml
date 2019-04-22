@@ -28,6 +28,7 @@ members = [
 "libs/cbor-protocol",
 "libs/channel-protocol",
 "libs/comms-service",
+"libs/ground-comms-service",
 "libs/file-protocol",
 "libs/shell-protocol",
 "services/app-service",
