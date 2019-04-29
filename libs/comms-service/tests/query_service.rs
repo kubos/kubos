@@ -65,19 +65,14 @@ fn query_monitor_service() {
     // Initialize new `CommsTelemetry` object.
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 
-    let ground_packet = build_packet(
-        &query,
-        ground_port,
-        service_port,
-        12,
-        Ipv4Addr::from_str(sat_ip).unwrap(),
-        Ipv4Addr::from_str(ground_ip).unwrap(),
-    )
-    .unwrap();
+    let ground_packet = SpacePacket::build(100, LinkType::GraphQL, service_port, &query).unwrap();
 
     // Pretend to be the ground and provide a packet
     // for the comms service to read from the radio
-    mock_comms.lock().unwrap().push_read(&ground_packet);
+    mock_comms
+        .lock()
+        .unwrap()
+        .push_read(&ground_packet.to_bytes().unwrap());
 
     // Start communication service.
     CommsService::start(controls, &telem).unwrap();
@@ -88,8 +83,9 @@ fn query_monitor_service() {
     // Pretend to be the ground and read the
     // packet which was written to the radio
     let data = mock_comms.lock().unwrap().pop_write().unwrap();
-    let packet = UdpPacket::new(&data).unwrap();
+    let packet = SpacePacket::parse(&data).unwrap();
 
     assert_eq!(packet.payload().to_vec(), response);
-    assert_eq!(packet.get_destination(), ground_port);
+    assert_eq!(packet.destination(), 0);
+    assert_eq!(packet.command_id(), 100);
 }

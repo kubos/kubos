@@ -16,7 +16,7 @@
 // Contributed by: William Greer (wgreer184@gmail.com) and Sam Justice (sam.justice1@gmail.com)
 //
 
-#![deny(missing_docs)]
+// #![deny(missing_docs)]
 #![deny(warnings)]
 
 //!
@@ -78,9 +78,14 @@ extern crate juniper;
 #[macro_use]
 extern crate log;
 
+extern crate failure;
+extern crate byteorder;
+
 mod config;
 mod errors;
+mod packet;
 mod service;
+mod spacepacket;
 mod telemetry;
 
 #[cfg(test)]
@@ -97,3 +102,7 @@ pub use crate::telemetry::CommsTelemetry;
 
 /// Communication Service configuration parsing.
 pub use crate::config::*;
+
+pub use packet::LinkPacket;
+pub use packet::LinkType;
+pub use spacepacket::SpacePacket;

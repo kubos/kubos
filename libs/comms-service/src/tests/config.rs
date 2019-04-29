@@ -79,26 +79,6 @@ fn config_no_satellite_ip() {
 }
 
 #[test]
-fn config_no_ground_ip() {
-    let config = kubos_system::Config::new_from_str(
-        "comms-service",
-        r#"
-        [comms-service.comms]
-        downlink_ports = [14011, 14000]
-        ground_port = 8080
-        satellite_ip = "0.0.0.0"
-        "#,
-    );
-
-    let result = CommsConfig::new(config);
-
-    assert_eq!(
-        format!("{}", result.unwrap_err()),
-        "Config error: Failed to parse config: missing field `ground_ip`"
-    );
-}
-
-#[test]
 fn config_no_ground_port_bad() {
     let config = kubos_system::Config::new_from_str(
         "comms-service",
