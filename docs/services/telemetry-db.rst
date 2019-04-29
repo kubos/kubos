@@ -60,8 +60,8 @@ It will return an array of database entries.
 The query has the following schema::
 
     query {
-        telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, limit: Integer): [{
-            timestamp: Integer!
+        telemetry(timestampGe: Float, timestampLe: Float, subsystem: String, parameter: String, limit: Integer): [{
+            timestamp: Float!
             subsystem: String!
             parameter: String!
             value: String!
@@ -93,7 +93,7 @@ compressed format, reducing the amount of data which needs to be transferred.
 The query has the following schema::
 
     query {
-        telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, output: String!, compress: Boolean = true): String! 
+        telemetry(timestampGe: Float, timestampLe: Float, subsystem: String, parameter: String, output: String!, compress: Boolean = true): String! 
     }
 
 The ``output`` argument specifies the output file to write the query results to. It may be a relative or absolute path.
@@ -117,23 +117,24 @@ The ``insert`` mutation can be used to add an entry to the telemetry database.
 It has the following schema::
 
     mutation {
-        insert(timestamp: Integer, subsystem: String!, parameter: String!, value: String!): {
+        insert(timestamp: Float, subsystem: String!, parameter: String!, value: String!): {
             success: Boolean!,
             errors: String!
         }
     }
 
 The ``timestamp`` argument is optional. If it is not specified, one will be generated based on the current system time,
-in milliseconds.
+in seconds.
 
 Limitations
 ~~~~~~~~~~~
 
-The generated timestamp value will be the current system time in milliseconds.
+The generated timestamp value will be the current system time in seconds.
 The database uses the combination of ``timestamp``, ``subsystem``, and ``parameter`` as the primary key.
 This primary key must be unique for each entry.
 
-    - As a result, any one subsystem parameter may not be logged more than once per millisecond.
+    - As a result, there may be issues when attempting to log any one subsystem parameter more than
+      once per millisecond
 
 Adding Entries to the Database Asynchronously
 ---------------------------------------------
@@ -147,7 +148,7 @@ Insert requests should be sent as individual UDP messages in JSON format.
 The requests have the following schema::
 
     {
-        "timestamp": Integer,
+        "timestamp": Float,
         "subsystem": String!,
         "parameter": String!,
         "value": String!,
@@ -166,11 +167,12 @@ For example::
 Limitations
 ~~~~~~~~~~~
 
-The generated timestamp value will be the current system time in milliseconds.
+The generated timestamp value will be the current system time in seconds.
 The database uses the combination of ``timestamp``, ``subsystem``, and ``parameter`` as the primary key.
 This primary key must be unique for each entry.
 
-    - As a result, any one subsystem parameter may not be logged more than once per millisecond.
+    - As a result, there may be issues when attempting to log any one subsystem parameter more than
+      once per millisecond
 
 This asynchronous method sends requests to the telemetry database service much more quickly than time needed for the
 service to process each request. The service's direct UDP socket buffer can store up to 256 packets at a time.
@@ -193,7 +195,7 @@ The ``delete`` mutation can be used to remove a selection of entries from the te
 It has the following schema::
 
     mutation {
-        delete(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String): [{
+        delete(timestampGe: Float, timestampLe: Float, subsystem: String, parameter: String): [{
             success: Boolean!,
             errors: String!,
             entriesDeleted: Integer
