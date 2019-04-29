@@ -72,8 +72,8 @@ fn downlink_to_ground() {
     // Pretend to be the ground and read the
     // packet which was written to the radio
     let data = mock_comms.lock().unwrap().pop_write().unwrap();
-    let packet = UdpPacket::new(&data).unwrap();
+    let packet = SpacePacket::parse(&data).unwrap();
 
-    assert_eq!(packet.get_destination(), ground_port);
+    assert_eq!(packet.destination(), ground_port);
     assert_eq!(packet.payload().to_vec(), payload);
 }

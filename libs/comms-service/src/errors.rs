@@ -41,6 +41,11 @@ pub enum CommsServiceError {
     /// All of the ports allocated for handling packets are binded and unable to be used.
     #[fail(display = "All of the ports allocated for handling packets are binded.")]
     NoAvailablePorts,
+    #[fail(display = "Parsing error {}", _0)]
+    ParsingError(String),
+    /// Generic error encountered
+    #[fail(display = "Error encountered {}", _0)]
+    GenericError(String)
 }
 
 /// Result returned by the `comms-service`.

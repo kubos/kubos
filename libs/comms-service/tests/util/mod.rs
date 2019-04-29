@@ -93,7 +93,7 @@ pub fn write(socket: &Arc<Mutex<MockComms>>, data: &[u8]) -> CommsResult<()> {
 // Convenience config generator
 pub fn comms_config(
     sat_ip: &str,
-    ground_ip: &str,
+    _ground_ip: &str,
     ground_port: u16,
     downlink_port: u16,
 ) -> CommsConfig {
@@ -101,7 +101,6 @@ pub fn comms_config(
         max_num_handlers: Some(10),
         downlink_ports: Some(vec![downlink_port]),
         timeout: Some(1000),
-        ground_ip: ground_ip.to_owned(),
         ground_port: Some(ground_port),
         satellite_ip: sat_ip.to_owned(),
     }
