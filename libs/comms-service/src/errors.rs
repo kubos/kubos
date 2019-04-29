@@ -44,6 +44,11 @@ pub enum CommsServiceError {
     /// No data available for reading
     #[fail(display = "No data available for reading")]
     NoReadData,
+    #[fail(display = "Parsing error {}", _0)]
+    ParsingError(String),
+    /// Generic error encountered
+    #[fail(display = "Error encountered {}", _0)]
+    GenericError(String)
 }
 
 /// Result returned by the `comms-service`.

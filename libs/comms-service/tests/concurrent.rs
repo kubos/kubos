@@ -60,19 +60,15 @@ fn concurrent_uplinks_to_service_with_handler_response() {
     let barrier = Arc::new(Barrier::new(11));
     let mut recv_data_list: Vec<Arc<Mutex<Vec<u8>>>> = vec![];
     for i in 0..(num_tests) {
-        let ground_packet = build_packet(
-            &payload,
-            ground_port,
-            service_port + i,
-            12,
-            Ipv4Addr::from_str(sat_ip).unwrap(),
-            Ipv4Addr::from_str(ground_ip).unwrap(),
-        )
-        .unwrap();
+        let ground_packet =
+            SpacePacket::build(i, LinkType::GraphQL, (service_port + i) as u16, &payload).unwrap();
 
         // Pretend to be the ground and provide a packet
         // for the comms service to read from the radio
-        mock_comms.lock().unwrap().push_read(&ground_packet);
+        mock_comms
+            .lock()
+            .unwrap()
+            .push_read(&ground_packet.to_bytes().unwrap());
 
         // Setup & start HTTP server
         let recv_data: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![]));
@@ -109,10 +105,10 @@ fn concurrent_uplinks_to_service_with_handler_response() {
         // Pretend to be the ground and read the
         // packet which was written to the radio
         let data = mock_comms.lock().unwrap().pop_write().unwrap();
-        let packet = UdpPacket::new(&data).unwrap();
+        let packet = SpacePacket::parse(&data).unwrap();
 
         assert_eq!(packet.payload().to_vec(), resp_payload);
-        assert_eq!(packet.get_destination(), ground_port);
+        assert_eq!(packet.destination(), 0);
     }
 }
 
@@ -146,19 +142,15 @@ fn too_many_concurrent_uplinks_to_service_with_handler_response() {
     let num_tests = 15;
     let mut recv_data_list: Vec<Arc<Mutex<Vec<u8>>>> = vec![];
     for i in 0..(num_tests) {
-        let ground_packet = build_packet(
-            &payload,
-            ground_port,
-            service_port + i,
-            12,
-            Ipv4Addr::from_str(sat_ip).unwrap(),
-            Ipv4Addr::from_str(ground_ip).unwrap(),
-        )
-        .unwrap();
+        let ground_packet =
+            SpacePacket::build(i, LinkType::GraphQL, (service_port + i) as u16, &payload).unwrap();
 
         // Pretend to be the ground and provide a packet
         // for the comms service to read from the radio
-        mock_comms.lock().unwrap().push_read(&ground_packet);
+        mock_comms
+            .lock()
+            .unwrap()
+            .push_read(&ground_packet.to_bytes().unwrap());
 
         // Setup & start HTTP server
         let recv_data: Arc<Mutex<Vec<u8>>> = Arc::new(Mutex::new(vec![]));
@@ -206,9 +198,9 @@ fn too_many_concurrent_uplinks_to_service_with_handler_response() {
         // packet which was written to the radio
         let data = mock_comms.lock().unwrap().pop_write();
         if let Some(data) = data {
-            let packet = UdpPacket::new(&data).unwrap();
+            let packet = SpacePacket::parse(&data).unwrap();
             assert_eq!(packet.payload().to_vec(), resp_payload);
-            assert_eq!(packet.get_destination(), ground_port);
+            assert_eq!(packet.destination(), 0);
             num_packet_correct += 1;
         } else {
             num_packet_empty += 1;

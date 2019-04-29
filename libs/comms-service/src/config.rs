@@ -40,8 +40,6 @@ pub struct CommsConfig {
     /// Timeout for the completion of GraphQL operations within message handlers (in milliseconds).
     /// Default: 1500
     pub timeout: Option<u64>,
-    /// Required. IP address of the ground gateway.
-    pub ground_ip: String,
     /// Required if downlink_ports is not `None`. Specifies the port to which the ground gateway is bound.
     pub ground_port: Option<u16>,
     /// Required. Satellite's IP address.
