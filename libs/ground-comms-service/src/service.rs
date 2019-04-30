@@ -123,7 +123,7 @@ impl CommsService {
 
         // Spawn gateway read thread
         let control_ref = control.clone();
-        thread::spawn(move || radio_to_gateway_thread(control_ref));
+        thread::spawn(move || gateway_to_radio_thread(control_ref));
 
         info!("Communication service started");
         Ok(())
@@ -137,18 +137,21 @@ pub fn radio_to_gateway_thread<
     comms: CommsControlBlock<T, U>,
 ) {
     loop {
+        println!("radio_to_gateway read radio");
         let data: Option<Vec<u8>> = if let Ok(radio) = comms.radio_conn.lock() {
             // Attempt to read packet from the radio
             match radio.read() {
                 Ok(bytes) => Some(bytes),
                 Err(e) => {
-                    println!("Failed to read {:?}", e);
+                    // println!("Failed to read {:?}", e);
                     None
                 }
             }
         } else {
             None
         };
+
+        println!("write gateway");
 
         // Send packet to the gateway
         if let Ok(gateway) = comms.gateway_conn.lock() {
@@ -172,6 +175,7 @@ pub fn gateway_to_radio_thread<
     comms: CommsControlBlock<T, U>,
 ) {
     loop {
+        println!("read gateway");
         let data: Option<Vec<u8>> = if let Ok(gateway) = comms.gateway_conn.lock() {
             // Attempt to read packet from the gateway
             match gateway.read() {
@@ -185,6 +189,7 @@ pub fn gateway_to_radio_thread<
             None
         };
 
+        println!("write radio");
         // Send packet to the radio
         if let Ok(radio) = comms.radio_conn.lock() {
             if let Some(data) = data {
