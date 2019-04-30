@@ -220,6 +220,12 @@ pub struct QueryRoot;
 
 /// Base GraphQL query model
 graphql_object!(QueryRoot : Context as "Query" |&self| {
+    field ping() -> FieldResult<String>
+        as "Test service query"
+    {
+        Ok(String::from("pong"))
+    }
+
     field supervisor(&executor) -> FieldResult<&Supervisor>
         as "Supervisor Query"
     {

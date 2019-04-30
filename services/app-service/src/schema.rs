@@ -27,6 +27,18 @@ pub struct QueryRoot;
 
 /// Base GraphQL query model
 graphql_object!(QueryRoot : Context as "Query" |&self| {
+    // Test query to verify service is running without
+    // attempting to execute an actual logic
+    //
+    // {
+    //    ping: "pong"
+    // }
+    field ping() -> FieldResult<String>
+        as "Test service query"
+    {
+        Ok(String::from("pong"))
+    }
+
     field apps(&executor,
                name: Option<String>,
                version: Option<String>,

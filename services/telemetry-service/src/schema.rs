@@ -137,6 +137,18 @@ fn query_db(
 pub struct QueryRoot;
 
 graphql_object!(QueryRoot: Context |&self| {
+    // Test query to verify service is running without
+    // attempting to execute any actual logic
+    //
+    // {
+    //    ping: "pong"
+    // }
+    field ping() -> FieldResult<String>
+        as "Test service query"
+    {
+        Ok(String::from("pong"))
+    }
+
     field telemetry(
         &executor,
         timestamp_ge: Option<f64>,
