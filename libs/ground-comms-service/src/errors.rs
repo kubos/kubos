@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 Kubos Corporation
+// Copyright (C) 2019 Kubos Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
@@ -13,8 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Contributed by: William Greer (wgreer184@gmail.com) and Sam Justice (sam.justice1@gmail.com)
-//
 
 use failure::{Error, Fail};
 
@@ -27,20 +25,10 @@ pub enum CommsServiceError {
     /// The mutex guarding the telemetry cache has been poisoned.
     #[fail(display = "The mutex guarding the telemetry cache has been poisoned.")]
     MutexPoisoned,
-    /// A UDP header was unable to be correctly parsed.
-    #[fail(display = "A UDP header was unable to be correctly parsed.")]
-    HeaderParsing,
-    /// The checksum of a UDP packet does not match the one found in the header.
-    #[fail(display = "The checksum of a UDP packet does not match the one found in the header.")]
-    InvalidChecksum,
-    /// The number of `write` methods and the number of downlink ports are not the same.
-    #[fail(
-        display = "The number of write methods and the number of downlink ports are not the same."
-    )]
-    ParameterLengthMismatch,
-    /// All of the ports allocated for handling packets are binded and unable to be used.
-    #[fail(display = "All of the ports allocated for handling packets are binded.")]
-    NoAvailablePorts,
+    #[fail(display = "Reading data failed {}", _0)]
+    ReadFailed(String),
+    #[fail(display = "Writing data failed {}", _0)]
+    WriteFailed(String)
 }
 
 /// Result returned by the `comms-service`.

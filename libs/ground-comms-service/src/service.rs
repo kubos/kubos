@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 Kubos Corporation
+// Copyright (C) 2019 Kubos Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
@@ -15,27 +15,14 @@
 //
 
 use crate::config::*;
-use crate::errors::*;
-use crate::telemetry::*;
-use byteorder::{BigEndian, ByteOrder};
+use crate::errors::CommsResult;
 use log::info;
-use pnet::packet::udp::{ipv4_checksum, UdpPacket};
-use pnet::packet::Packet;
 use std::fmt::Debug;
-use std::net::{Ipv4Addr, UdpSocket};
-use std::ops::Range;
+use std::net::Ipv4Addr;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-
-// UDP header length.
-const HEADER_LEN: usize = 8;
-// Checksum location in UDP packet.
-const CHKSUM_RNG: Range<usize> = 6..8;
-// Communication service maximum packet size (65,535 - 20 byte IP header - 8 byte UDP header
-//  - 8 byte UDP header).
-const MAX_SIZE: usize = 65499;
 
 /// Type definition for a "read" function pointer.
 pub type ReadFn<T> = Fn(&T) -> CommsResult<Vec<u8>> + Send + Sync + 'static;
@@ -50,14 +37,14 @@ pub trait CommsConnection {
     fn write(&self, data: &[u8]) -> CommsResult<()>;
 }
 
-/// Struct that holds configuration data to allow users to set up a Communication Service.
+/// Struct that holds configuration data to allow users to set up a Ground Communication Service.
 #[derive(Clone)]
 pub struct CommsControlBlock<T: Clone + CommsConnection, U: Clone + CommsConnection> {
     /// Connection to gateway
     pub gateway_conn: Arc<Mutex<T>>,
     /// Connection to radio
     pub radio_conn: Arc<Mutex<U>>,
-    /// Timeout for the completion of GraphQL operations within message handlers (in milliseconds).
+    /// Timeout for the completion of send/receive operations in ms
     pub timeout: u64,
     /// IP address of the ground comms service.
     pub ground_ip: Ipv4Addr,
@@ -112,38 +99,38 @@ pub struct CommsService;
 impl CommsService {
     /// Starts an instance of the Communication Service and its associated background threads.
     pub fn start<
-        T: CommsConnection + Clone + Send + 'static,
-        U: CommsConnection + Clone + Send + 'static,
+        T: CommsConnection + Debug + Clone + Send + 'static,
+        U: CommsConnection + Debug + Clone + Send + 'static,
     >(
         control: CommsControlBlock<T, U>,
     ) -> CommsResult<()> {
         // Spawn a radio read thread
         let control_ref = control.clone();
-        thread::spawn(move || radio_to_gateway_thread(control_ref));
+        thread::spawn(move || comms_loop_thread(control_ref.radio_conn, control_ref.gateway_conn));
 
         // Spawn gateway read thread
         let control_ref = control.clone();
-        thread::spawn(move || gateway_to_radio_thread(control_ref));
+        thread::spawn(move || comms_loop_thread(control_ref.gateway_conn, control_ref.radio_conn));
 
         info!("Communication service started");
         Ok(())
     }
 }
 
-pub fn radio_to_gateway_thread<
-    T: CommsConnection + Clone + Send + 'static,
-    U: CommsConnection + Clone + Send + 'static,
+pub fn comms_loop_thread<
+    T: CommsConnection + Debug + Clone + Send + 'static,
+    U: CommsConnection + Debug + Clone + Send + 'static,
 >(
-    comms: CommsControlBlock<T, U>,
+    sender: Arc<Mutex<T>>,
+    receiver: Arc<Mutex<U>>,
 ) {
     loop {
-        println!("radio_to_gateway read radio");
-        let data: Option<Vec<u8>> = if let Ok(radio) = comms.radio_conn.lock() {
-            // Attempt to read packet from the radio
-            match radio.read() {
+        let data: Option<Vec<u8>> = if let Ok(sender) = sender.lock() {
+            // Attempt to read packet from the sender
+            match sender.read() {
                 Ok(bytes) => Some(bytes),
                 Err(e) => {
-                    // println!("Failed to read {:?}", e);
+                    warn!("Failed to read {:?}", e);
                     None
                 }
             }
@@ -151,56 +138,19 @@ pub fn radio_to_gateway_thread<
             None
         };
 
-        println!("write gateway");
-
-        // Send packet to the gateway
-        if let Ok(gateway) = comms.gateway_conn.lock() {
-            if let Some(data) = data {
-                info!("sending radio -> gateway {:?}", data);
-                match gateway.write(&data) {
-                    Ok(_) => {}
-                    Err(e) => {
-                        println!("Failed to write {:?}", e);
-                    }
-                }
-            }
-        }
-    }
-}
-
-pub fn gateway_to_radio_thread<
-    T: CommsConnection + Clone + Send + 'static,
-    U: CommsConnection + Clone + Send + 'static,
->(
-    comms: CommsControlBlock<T, U>,
-) {
-    loop {
-        println!("read gateway");
-        let data: Option<Vec<u8>> = if let Ok(gateway) = comms.gateway_conn.lock() {
-            // Attempt to read packet from the gateway
-            match gateway.read() {
-                Ok(bytes) => Some(bytes),
-                Err(e) => {
-                    println!("Failed to read {:?}", e);
-                    None
-                }
-            }
-        } else {
-            None
-        };
-
-        println!("write radio");
-        // Send packet to the radio
-        if let Ok(radio) = comms.radio_conn.lock() {
-            if let Some(data) = data {
+        // Send packet to the receiver
+        if let Some(data) = data {
+            if let Ok(receiver) = receiver.lock() {
                 info!("sending gateway -> radio {:?}", data);
-                match radio.write(&data) {
+                match receiver.write(&data) {
                     Ok(_) => {}
                     Err(e) => {
-                        println!("Failed to write {:?}", e);
+                        warn!("Failed to write {:?}", e);
                     }
                 }
             }
         }
+
+        thread::sleep(Duration::from_millis(10));
     }
 }

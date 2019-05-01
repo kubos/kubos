@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 Kubos Corporation
+// Copyright (C) 2019 Kubos Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
@@ -13,75 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Contributed by: William Greer (wgreer184@gmail.com) and Sam Justice (sam.justice1@gmail.com)
-//
 
 // #![deny(missing_docs)]
-// #![deny(warnings)]
-
-//!
-//! This library allows users to define and start communication services within their hardware services.
-//!
-//! # Example Usage
-//!
-//! ```rust,no_run
-//! use comms_service::*;
-//! use std::net::{Ipv4Addr, UdpSocket};
-//! use std::sync::{Arc, Mutex};
-//!
-//! // Example setup.
-//! fn read(socket: &Arc<UdpSocket>) -> CommsResult<Vec<u8>> { Ok(vec![]) }
-//! fn write(socket: &Arc<UdpSocket>, data: &[u8]) -> CommsResult<()> { Ok(()) }
-//!
-//! # fn func() -> CommsResult<()> {
-//! // Defining connections.
-//! let read_conn = Arc::new(UdpSocket::bind(("192.168.8.1", 13000)).unwrap());
-//! let write_conn = Arc::new(UdpSocket::bind(("192.168.8.1", 13001)).unwrap());
-//!
-//! // Fetching communications settings from the common config.toml file.
-//! let service_config = kubos_system::Config::new("service-name");
-//! let comms_config = CommsConfig::new(service_config)?;
-//!
-//! // Putting everything into the control block.
-//! let controls = CommsControlBlock::new(
-//!     Some(Arc::new(read)),
-//!     vec![Arc::new(write)],
-//!     read_conn,
-//!     write_conn,
-//!     comms_config
-//! )?;
-//!
-//! // Get telemetry from communication service.
-//! let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
-//!
-//! // Start communication service.
-//! CommsService::start(controls, &telem);
-//! # Ok(())
-//! # }
-//! ```
-//!
-//! ## Comms Service Config File Format
-//!
-//! ```toml
-//! [service-name.comms]
-//! max_num_handlers = 50
-//! downlink_ports = [13011]
-//! ground_port = 9001
-//! timeout = 1500
-//! ground_ip = "192.168.8.1"
-//! satellite_ip = "192.168.8.2"
-//! ```
-
-#[macro_use]
-extern crate juniper;
+#![deny(warnings)]
 
 #[macro_use]
 extern crate log;
 
+#[macro_use]
+extern crate failure;
+
 mod config;
 mod errors;
+mod gateway;
 mod service;
-mod telemetry;
 
 /// Communication Service library.
 pub use crate::service::*;
@@ -89,8 +34,8 @@ pub use crate::service::*;
 /// Communication Service errors.
 pub use crate::errors::*;
 
-/// Communication Service telemetry.
-pub use crate::telemetry::CommsTelemetry;
-
 /// Communication Service configuration parsing.
 pub use crate::config::*;
+
+/// Standard Gateway Comms
+pub use crate::gateway::GatewayComms;

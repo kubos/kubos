@@ -20,19 +20,19 @@
 use crate::errors::*;
 use serde_derive::Deserialize;
 
-/// Default message handler timeout
-pub const DEFAULT_TIMEOUT: u64 = 1500;
+/// Default read/write timeout
+pub const DEFAULT_TIMEOUT: u64 = 500;
 
 /// A struct that holds useful configuration options to use in a `ground-comms-service` implementation.
 /// Created by parsing a configuration file in the `toml` file format.
 #[derive(Clone, Debug, Deserialize)]
 pub struct CommsConfig {
-    /// Timeout for something....
-    /// Default: 1500
+    /// Timeout for read/write operations in ms
+    /// Default: 500
     pub timeout: Option<u64>,
-    /// Required. IP address of the ground comms service
+    /// Required. IP address of this service
     pub ground_ip: String,
-    /// Specifies the port on which the ground comms service listens to the gateway
+    /// Specifies the port on which this service listens to the gateway
     pub ground_port: u16,
     /// Required. IP address of the ground gateway.
     pub gateway_ip: String,
