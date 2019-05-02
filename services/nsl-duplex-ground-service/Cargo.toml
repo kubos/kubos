@@ -1,0 +1,14 @@
+[package]
+name = "nsl-duplex-ground-service"
+version = "0.1.0"
+authors = ["Ryan Plauche <ryan@kubos.co>"]
+edition = "2018"
+
+[dependencies]
+reqwest = "0.9.14"
+serde_json = "*"
+serde_derive = "*"
+serde = "*"
+ground-comms-service = { path = "../../libs/ground-comms-service" }
+kubos-service = { path = "../../services/kubos-service" }
+failure = "*"
