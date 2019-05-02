@@ -120,7 +120,7 @@ fn main() -> NslDuplexCommsResult<()> {
         Some(Arc::new(read)),
         vec![Arc::new(write)],
         duplex_comms.clone(),
-        duplex_comms,
+        duplex_comms.clone(),
         comms_config,
     )?;
 
@@ -132,7 +132,7 @@ fn main() -> NslDuplexCommsResult<()> {
     CommsService::start(controls, &telem.clone())?;
 
     // Start up graphql server
-    let subsystem = Subsystem::new(telem);
+    let subsystem = Subsystem::new(telem, duplex_comms);
     Service::new(service_config, subsystem, QueryRoot, MutationRoot).start();
 
     Ok(())

@@ -24,10 +24,10 @@ use std::str::from_utf8;
 #[derive(Debug, PartialEq)]
 /// Struct for storing geo-records.
 pub struct GeoRecord {
-    lon: f32,
-    lat: f32,
-    time: i64,
-    max_error: u32,
+    pub lon: f32,
+    pub lat: f32,
+    pub time: i64,
+    pub max_error: u32,
 }
 
 fn parse_coord(input: &[u8]) -> IResult<&[u8], f32> {

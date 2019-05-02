@@ -86,7 +86,6 @@ pub fn ping_loop(radio: Arc<Mutex<DuplexComms>>) -> NslDuplexCommsResult<()> {
                 Ok(_) => {}
                 Err(e) => {
                     warn!("Failed to send ping to radio {}", e);
-                    // bail!("Failed to send ping to radio {}", e);
                 }
             }
         }

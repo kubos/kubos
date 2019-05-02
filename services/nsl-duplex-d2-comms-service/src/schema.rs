@@ -19,7 +19,7 @@
 //! telemetry information.
 //!
 
-use crate::model::Subsystem;
+use crate::model::{Subsystem, GeoRecordResponse, StateOfHealthResponse};
 use juniper::FieldResult;
 
 type Context = kubos_service::Context<Subsystem>;
@@ -149,6 +149,26 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     field errors(&executor) -> FieldResult<Vec<String>>
     {
         Ok(executor.context().subsystem().errors()?)
+    }
+
+    field modem_health(&executor) -> FieldResult<StateOfHealthResponse>
+    {
+        Ok(executor.context().subsystem().modem_health()?)
+    }
+
+    field geolocation(&executor) -> FieldResult<GeoRecordResponse>
+    {
+        Ok(executor.context().subsystem().geolocation()?)
+    }
+
+    field file_queue_count(&executor) -> FieldResult<i32>
+    {
+        Ok(executor.context().subsystem().file_queue_count()?)
+    }
+
+    field alive(&executor) -> FieldResult<bool>
+    {
+        Ok(executor.context().subsystem().get_alive()?)
     }
 });
 
