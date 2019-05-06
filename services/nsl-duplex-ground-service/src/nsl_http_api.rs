@@ -98,7 +98,11 @@ impl RadioConn {
 
     fn get_min_id(&self) -> u16 {
         let list = self.get_download_list(None);
-        list[list.len() - 1].FileID.parse::<u16>().unwrap()
+        if list.len() > 0 {
+            list[list.len() - 1].FileID.parse::<u16>().unwrap()
+        } else {
+            0
+        }
     }
 
     fn upload_file(&self, file_name: &str, file_body: &[u8]) {
