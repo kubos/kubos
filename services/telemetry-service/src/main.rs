@@ -61,6 +61,7 @@
 //!   value: Float!
 //! }
 //!
+//! query ping: "pong"
 //! query telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String): Entry
 //! query routedTelemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, output: String!, compress: Boolean = true): String!
 //!
