@@ -124,17 +124,14 @@ It has the following schema::
     }
 
 The ``timestamp`` argument is optional. If it is not specified, one will be generated based on the current system time,
-in seconds.
+in fractional seconds.
 
 Limitations
 ~~~~~~~~~~~
 
-The generated timestamp value will be the current system time in seconds.
+The generated timestamp value will be the current system time in fractional seconds.
 The database uses the combination of ``timestamp``, ``subsystem``, and ``parameter`` as the primary key.
 This primary key must be unique for each entry.
-
-    - As a result, there may be issues when attempting to log any one subsystem parameter more than
-      once per millisecond
 
 Adding Entries to the Database Asynchronously
 ---------------------------------------------
@@ -167,12 +164,9 @@ For example::
 Limitations
 ~~~~~~~~~~~
 
-The generated timestamp value will be the current system time in seconds.
+The generated timestamp value will be the current system time in fractional seconds.
 The database uses the combination of ``timestamp``, ``subsystem``, and ``parameter`` as the primary key.
 This primary key must be unique for each entry.
-
-    - As a result, there may be issues when attempting to log any one subsystem parameter more than
-      once per millisecond
 
 This asynchronous method sends requests to the telemetry database service much more quickly than time needed for the
 service to process each request. The service's direct UDP socket buffer can store up to 256 packets at a time.
