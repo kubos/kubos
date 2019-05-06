@@ -47,6 +47,7 @@
 //!
 //! ```json
 //! query {
+//!     ping: "pong",
 //! 	supervisor: {
 //! 		version: {
 //! 			dummy,
