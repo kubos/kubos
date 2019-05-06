@@ -19,7 +19,7 @@
 //! telemetry information.
 //!
 
-use crate::model::{Subsystem, GeoRecordResponse, StateOfHealthResponse};
+use crate::model::{GeoRecordResponse, StateOfHealthResponse, Subsystem};
 use juniper::FieldResult;
 
 type Context = kubos_service::Context<Subsystem>;
