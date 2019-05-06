@@ -1,5 +1,5 @@
 [package]
-name = "nsl-dupex-d2-comms-service"
+name = "nsl-duplex-d2-comms-service"
 version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.com>"]
 edition = "2018"
