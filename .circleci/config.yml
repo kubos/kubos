@@ -44,7 +44,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: cargo test -j 8
+        - run: cargo test -j 7
 
     # Rust testing - large upload test
     # Run for all PR commits

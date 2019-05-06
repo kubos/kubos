@@ -82,7 +82,8 @@ TELEMETRY = {
         "globalstar_uart":    {"command": "RHM:TEL? 4,data", "length": 1, "parsing": "<B"},
         "globalstar_din_out": {"command": "RHM:TEL? 5,data", "length": 1, "parsing": "hex"},
         "globalstar_busy":    {"command": "RHM:TEL? 6,data", "length": 1, "parsing": "hex"},
-        "watchdog_period":    {"command": "RHM:TEL? 7,data", "length": 4, "parsing": "<I"}
+        "watchdog_period":    {"command": "RHM:TEL? 7,data", "length": 4, "parsing": "<I"},
+        "globalstar_status":  {"command": "RHM:TEL? 8,data", "length": 1, "parsing": "<B"}
     },
     "pim": {
         "channel_currents": {"command": "PIM:TEL? 0,data", "length": 8, "parsing": "<HHHH",
