@@ -21,6 +21,7 @@
 //!
 
 #![deny(warnings)]
+#![deny(missing_docs)]
 
 extern crate comms_service;
 #[macro_use]
@@ -65,7 +66,7 @@ fn log_init() -> NslDuplexCommsResult<()> {
         SyslogAppender::builder()
             .encoder(syslog_encoder)
             .openlog(
-                "serial-comms-service",
+                "nsl-duplex-comms-service",
                 log4rs_syslog::LogOption::LOG_PID | log4rs_syslog::LogOption::LOG_CONS,
                 log4rs_syslog::Facility::Daemon,
             )
@@ -105,11 +106,17 @@ fn main() -> NslDuplexCommsResult<()> {
         .unwrap()
         .to_owned();
 
+    let ping_freq = service_config
+        .get("ping_freq")
+        .expect("No `ping_freq` parameter in config.toml")
+        .as_integer()
+        .unwrap_or(DEFAULT_PING_FREQ as i64) as u64;
+
     // Read configuration from config file.
     let comms_config = CommsConfig::new(service_config.clone())?;
 
     // Open radio serial connection
-    let duplex_comms = Arc::new(Mutex::new(DuplexComms::new(&bus)));
+    let duplex_comms = Arc::new(Mutex::new(DuplexComms::new(&bus, ping_freq)));
 
     // Start keep alive loop
     let radio = duplex_comms.clone();

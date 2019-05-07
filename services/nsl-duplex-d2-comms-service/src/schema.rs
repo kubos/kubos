@@ -142,7 +142,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //
     // {
     //     "data":{
-    //                "errors" : ""
+    //                "errors" : []
     //            },
     //     "errors" : ""
     // }
@@ -151,21 +151,119 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
         Ok(executor.context().subsystem().errors()?)
     }
 
+    // Request current modem health information
+    //
+    // Query
+    //
+    // {
+    //     modemHealth {
+    //         resetCount,
+    //         currentTime,
+    //         currentRssi,
+    //         connectionStatus,
+    //         globalstarGateway,
+    //         lastContactTime,
+    //         lastAttemptTime,
+    //         callAttemptsSinceReset,
+    //         successfulConnectsSinceReset,
+    //         averageConnectionDuration,
+    //         connectionDurationStdDev
+    //     }
+    // }
+    //
+    // Response
+    //
+    // {
+    //     "data":{
+    //         "modemHealth": {
+    //             "resetCount": 1,
+    //             "currentTime": 1025,
+    //             "currentRssi": 3,
+    //             "connectionStatus": 1,
+    //             "globalstarGateway": 45,
+    //             "lastContactTime": 500,
+    //             "lastAttemptTime": 10,
+    //             "callAttemptsSinceReset": 4,
+    //             "successfulConnectsSinceReset": 25,
+    //             "averageConnectionDuration": 120,
+    //             "connectionDurationStdDev": 10,
+    //         }
+    //     },
+    //     "errors" : ""
+    // }
     field modem_health(&executor) -> FieldResult<StateOfHealthResponse>
     {
         Ok(executor.context().subsystem().modem_health()?)
     }
 
+    // Request current geolocation data
+    //
+    // Query
+    //
+    // {
+    //     geolocation {
+    //         lon
+    //         lat
+    //         time
+    //         maxError
+    //     }
+    // }
+    //
+    // Response
+    //
+    // {
+    //    "data": {
+    //         "geolocation": {
+    //             "lat": 22202.22,
+    //             "lon": 3333.2,
+    //             "time": 1818119191,
+    //             "maxError": 100
+    //         }
+     //    },
+    //     "errors" : ""
+    // }
     field geolocation(&executor) -> FieldResult<GeoRecordResponse>
     {
         Ok(executor.context().subsystem().geolocation()?)
     }
 
-    field file_queue_count(&executor) -> FieldResult<i32>
+    // Request number of files in the downlink queue
+    //
+    // Query
+    //
+    // {
+    //     downlink_queue_count
+    // }
+    //
+    // Response
+    //
+    // {
+    //     "data":{
+    //                "downlink_queue_count" : 10
+    //            },
+    //     "errors" : ""
+    // }
+    field downlink_queue_count(&executor) -> FieldResult<i32>
     {
         Ok(executor.context().subsystem().file_queue_count()?)
     }
 
+    // Queries the modem's 'is_alive' status
+    //
+    // Query
+    //
+    // {
+    //     alive
+    // }
+    //
+    // Response
+    //
+    // {
+    //     "data":{
+    //                "alive": true
+    //            },
+    //     "errors" : ""
+    // }
     field alive(&executor) -> FieldResult<bool>
     {
         Ok(executor.context().subsystem().get_alive()?)

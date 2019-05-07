@@ -3,7 +3,7 @@
 This communications service provides communications functionality over the NSL
 Duplex radio.
 
-## Running 
+## Running
 
 This service expects a service configuration file in either the default location
 or to be passed in at runtime like so `cargo run -- -c config.toml`.
@@ -11,18 +11,34 @@ or to be passed in at runtime like so `cargo run -- -c config.toml`.
 The service expects the following sections and settings to be present:
 
 ```toml
-[nsl-duplex-comms-service] -- Service specific configuration
-bus = "/dev/ttyUSB0" -- Serial bus to use for talking with the radio
-[nsl-duplex-comms-service.addr] -- GraphQL configuration
-ip = "127.0.0.1" -- IP to bind GraphQL server to
-port = 8012 -- Port to listen on for GraphQL queries
-[nsl-duplex-comms-service.comms] -- Communications service configuration
-max_num_handlers = 10 -- Maximum number of concurrent message handlers
-downlink_ports = [14011] -- Ports to listen for local traffic on
-timeout = 1 -- Timeout when listening for packet response
-ground_port = 14020 -- Port to send ground communications on
-ground_ip = "192.168.0.1" -- IP to expect ground communications from
-satellite_ip = "0.0.0.0" -- IP to bind Communications service listener to
+# Service specific configuration
+[nsl-duplex-comms-service]
+# Serial bus to use for talking with the radio
+bus = "/dev/ttyUSB0"
+# How frequently to queue pings in downlink queue (in seconds)
+ping_freq = 10
+
+# GraphQL configuration
+[nsl-duplex-comms-service.addr]
+# IP to bind GraphQL server to
+ip = "127.0.0.1"
+# Port to listen on for GraphQL queries
+port = 8012
+
+# Communications service configuration
+[nsl-duplex-comms-service.comms]
+# Maximum number of concurrent message handlers
+max_num_handlers = 10
+# Ports to listen for local traffic on
+downlink_ports = [14011]
+#  Timeout when listening for packet response
+timeout = 1
+# Port to send ground communications on
+ground_port = 14020
+# IP to expect ground communications from
+ground_ip = "192.168.0.1"
+# IP to bind Communications service listener to
+satellite_ip = "0.0.0.0"
 ```
 
 When the service has started correctly it will display output like so:

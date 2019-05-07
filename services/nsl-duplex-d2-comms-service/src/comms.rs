@@ -20,22 +20,37 @@
 //!
 
 use crate::NslDuplexCommsResult;
+use comms_service::CommsServiceError;
 use nsl_duplex_d2::{serial_connection, DuplexD2, File};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
+/// Default ping frequency in seconds
+pub const DEFAULT_PING_FREQ: u64 = 10;
+
+/// Struct for wrapping around radio interface
 pub struct DuplexComms {
+    /// Actual radio interface
     pub radio: DuplexD2,
-    counter: u16,
+    /// Count of downlinked packets
+    /// Used to create unique filenames for duplex downlink queue
+    downlink_counter: u16,
+    /// Ping Frequency - How often to check and queue up a ping
+    /// in the radio's downlink queue (in seconds)
+    pub ping_freq: u64,
 }
 
 impl DuplexComms {
-    pub fn new(path: &str) -> Self {
+    pub fn new(path: &str, ping_freq: u64) -> Self {
         let serial_conn = serial_connection(path);
         let radio = DuplexD2::new(serial_conn);
 
-        DuplexComms { radio, counter: 0 }
+        DuplexComms {
+            radio,
+            downlink_counter: 0,
+            ping_freq,
+        }
     }
 
     pub fn read(&self) -> NslDuplexCommsResult<Vec<u8>> {
@@ -45,13 +60,13 @@ impl DuplexComms {
             let file = self.radio.get_uploaded_file()?;
             Ok(file.body)
         } else {
-            bail!("No data available");
+            bail!(CommsServiceError::NoReadData);
         }
     }
 
     pub fn write(&mut self, data: &[u8]) -> NslDuplexCommsResult<()> {
-        let file_name = format!("udp{:03}", self.counter);
-        self.counter += 1;
+        let file_name = format!("udp{:03}", self.downlink_counter);
+        self.downlink_counter += 1;
         let file = File::new(&file_name, &data);
         match self.radio.put_download_file(&file) {
             Ok(true) => Ok(()),
@@ -80,6 +95,10 @@ impl DuplexComms {
 // to make contact with the ground. This loop is used to ensure
 // there is always at least one generic file queued up.
 pub fn ping_loop(radio: Arc<Mutex<DuplexComms>>) -> NslDuplexCommsResult<()> {
+    let ping_freq = radio
+        .lock()
+        .and_then(|radio| Ok(radio.ping_freq))
+        .unwrap_or(DEFAULT_PING_FREQ);
     loop {
         if let Ok(mut radio) = radio.lock() {
             match radio.download_ping() {
@@ -89,7 +108,7 @@ pub fn ping_loop(radio: Arc<Mutex<DuplexComms>>) -> NslDuplexCommsResult<()> {
                 }
             }
         }
-        thread::sleep(Duration::from_secs(10));
+        thread::sleep(Duration::from_secs(ping_freq));
     }
 }
 
