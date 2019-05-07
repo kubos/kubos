@@ -18,22 +18,42 @@
 
 use comms_service::{CommsConfig, CommsResult};
 use std::net::UdpSocket;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
+
+pub struct LocalComms {
+    pub socket: UdpSocket,
+    pub gateway_ip: String,
+    pub gateway_port: u16,
+}
+
+impl LocalComms {
+    pub fn read(&self) -> CommsResult<Vec<u8>> {
+        let mut buf = [0; 4096];
+        let (size, _) = self.socket.recv_from(&mut buf)?;
+        Ok(buf[0..size].to_vec())
+    }
+
+    pub fn write(&self, data: &[u8]) -> CommsResult<()> {
+        self.socket
+            .send_to(data, (self.gateway_ip.as_str(), self.gateway_port))?;
+        Ok(())
+    }
+}
 
 // Function to allow reading from a UDP socket.
-pub fn read(socket: &Arc<UdpSocket>) -> CommsResult<Vec<u8>> {
-    let mut buf = [0; 4096];
-    let (size, _) = socket.recv_from(&mut buf)?;
-    Ok(buf[0..size].to_vec())
+pub fn read(socket: &Arc<Mutex<LocalComms>>) -> CommsResult<Vec<u8>> {
+    if let Ok(socket) = socket.lock() {
+        socket.read()
+    } else {
+        bail!("Failed to lock socket")
+    }
 }
 
 // Function to allow writing over a UDP socket.
-pub fn write(socket: &Arc<UdpSocket>, data: &[u8]) -> CommsResult<()> {
-    let service_config = kubos_system::Config::new("ethernet-service");
-    let config = CommsConfig::new(service_config)?;
-    socket.send_to(
-        data,
-        (&*config.ground_ip, config.ground_port.unwrap_or_default()),
-    )?;
-    Ok(())
+pub fn write(socket: &Arc<Mutex<LocalComms>>, data: &[u8]) -> CommsResult<()> {
+    if let Ok(socket) = socket.lock() {
+        socket.write(data)
+    } else {
+        bail!("Failed to lock socket")
+    }
 }
