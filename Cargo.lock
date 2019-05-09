@@ -1661,13 +1661,9 @@ dependencies = [
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "juniper 0.11.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "kubos-service 0.1.0",
- "kubos-system 0.1.0",
  "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "log4rs 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "log4rs-syslog 3.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "nsl-duplex-d2 0.1.0",
- "rust-uart 0.2.0",
- "serial 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syslog 4.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

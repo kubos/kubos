@@ -15,9 +15,198 @@
 //
 
 //!
-//! Hardware service to allow for communications over a NSL Duplex Radio.
+//! Hardware service to allow for communications over a NSL Duplex D2 Radio.
 //! This service starts up a communication service to allow transfer of UDP
 //! packets over a serial link to and from the radio.
+//!
+//! # Configuration
+//!
+//! The service can be configured in the `config.toml` with the following fields:
+//!
+//! ```toml
+//! [nsl-duplex-comms-service]
+//! bus = "/dev/ttyUSB0"
+//! ping_freq = 10
+//!
+//! [nsl-duplex-comms-service.comms]
+//! max_num_handlers = 10
+//! downlink_ports = [15001]
+//! timeout = 15000
+//! ground_ip = "127.0.0.3"
+//! ground_port = 15002
+//! satellite_ip = "127.0.0.2"
+//!
+//! [nsl-duplex-comms-service.addr]
+//! ip = "127.0.0.1"
+//! port = 8089
+//! ```
+//!
+//! The configuration of this service is split into three parts:
+//!   - Service Specific
+//!     This section is found under `[nsl-duplex-comms-service]'`
+//!     - `bus` - Specifies which UART bus the Duplex is on
+//!     - `ping_freq` - Specifies how often the downlink queue is checked for queueing up pings
+//!   - Communications Service Configs
+//!     This section is found under `[nsl-duplex-comms-service.comms]'
+//!     - `max_num_handlers` - Maximum number of concurrent message handlers
+//!     - `downlink_ports` - Optional list of downlink endpoints
+//!     - `timeout` - Timeout for completion of GraphQL requests
+//!     - `ground_ip` - IP Address of ground gateway
+//!     - `ground_port` - Listening port of ground gateway
+//!     - `satellite_ip` - Local IP of satellite
+//!   - GraphQL Server Configs
+//!     This section is found under `[nsl-duplex-comms-service.addr]'
+//!     - `ip` - The service's IP address, used for its GraphQL interface
+//!     - `port` - The service's port, used for its GraphQL interface
+
+//! Where `bus` specifies the UART bus the Duplex is on, `ping_freq` specifies how often
+//! the downlink queue should be checked for queueing up pings, `ip` specifies the
+//! service's IP address, and `port` specifies the port on which the service will be
+//! listening for UDP packets.
+//!
+//! # Running the Service
+//!
+//! The service should be started automatically by its init script, but may also be started manually:
+//!
+//! ```bash
+//! $ nsl-duplex-d2-comms-service
+//! NSL Duplex Communications Service starting on /dev/ttyUSB0
+//! ```
+//!
+//! If no config file is specified, then the service will look at `/home/system/etc/config.toml`.
+//! An alternative config file may be specified on the command line at run time:
+//!
+//! ```bash
+//! $ nsl-duplex-d2-comms-service -c config.toml
+//! ```
+//!
+//! # Panics
+//!
+//! This service will panic on start if no config sections are found for the service or
+//! if the `bus` parameter is not provided.
+//!
+//! # GraphQL Schema
+//!
+//! ## Queries
+//!
+//! ### Failed Packets Up
+//!
+//! Request number of bad uplink packets
+//!
+//! ```
+//! {
+//!     failedPacketsUp: Int!
+//! }
+//! ```
+//!
+//! ### Failed Packets Down
+//!
+//! Request number of bad downlink packets
+//!
+//! ```
+//! {
+//!     failedPacketsDown: Int!
+//! }
+//! ```
+//!
+//! ### Packets Up
+//!
+//! Request number of packets successfully uplinked
+//!
+//! ```
+//! {
+//!     packetsUp: Int!
+//! }
+//! ```
+//!
+//! ### Packets Down
+//!
+//! Request number of packets successfully downlinked
+//!
+//! ```
+//! {
+//!     packetsDown: Int!
+//! }
+//! ```
+//!
+//! ### Errors
+//!
+//! Request errors that have occurred
+//!
+//! ```
+//! {
+//!     errors: [String]
+//! }
+//! ```
+//!
+//! ### Modem Health
+//!
+//! Request current modem health information
+//!
+//! ```json
+//! {
+//!     modemHealth {
+//!         resetCount: Int!
+//!         currentTime: Int!
+//!         currentRssi: Int!
+//!         connectionStatus: Int!
+//!         globalstarGateway: Int!
+//!         lastContactTime: Int!
+//!         lastAttemptTime: Int!
+//!         callAttemptsSinceReset: Int!
+//!         successfulConnectsSinceReset: Int!
+//!         averageConnectionDuration: Int!
+//!         connectionDurationStdDev: Int!
+//!     }
+//! }
+//! ```
+//!
+//! ### Geolocation
+//!
+//! Request current geolocation data
+//!
+//! ```jso
+//! {
+//!     geolocation {
+//!         lon: Float!
+//!         lat: Float!
+//!         time: Int!
+//!         maxError: Int!
+//!     }
+//! }
+//! ```
+//!
+//! ### Downlink Queue Count
+//!
+//! Request number of files in the downlink queue
+//!
+//! ```json
+//! {
+//!     downlink_queue_count: Int!
+//! }
+//! ```
+//!
+//! ### Is Alive
+//!
+//! Queries the modem's 'is_alive' status
+//!
+//! ```json
+//! {
+//!     alive: Boolean!
+//! }
+//! ```
+//!
+//! ## Mutations
+//!
+//! ### NoOp
+//!
+//! Execute a trivial command against the system
+//!
+//! ```json
+//! mutation {
+//!     noop: Boolean!
+//! }
+//! ```
 //!
 
 #![deny(warnings)]
@@ -26,16 +215,11 @@
 extern crate comms_service;
 #[macro_use]
 extern crate failure;
-extern crate kubos_service;
-extern crate kubos_system;
 #[macro_use]
 extern crate juniper;
-extern crate rust_uart;
-extern crate serial;
+extern crate kubos_service;
 #[macro_use]
 extern crate log;
-extern crate log4rs;
-extern crate log4rs_syslog;
 extern crate nsl_duplex_d2;
 
 mod comms;
@@ -49,53 +233,18 @@ use comms_service::*;
 use failure::Error;
 use kubos_service::{Config, Service};
 use std::sync::{Arc, Mutex};
+use syslog::Facility;
 
 // Generic return type
 type NslDuplexCommsResult<T> = Result<T, Error>;
 
-// Initialize logging for the service
-// All messages will be routed to syslog and echoed to the console
-fn log_init() -> NslDuplexCommsResult<()> {
-    use log4rs::append::console::ConsoleAppender;
-    use log4rs::encode::pattern::PatternEncoder;
-    use log4rs_syslog::SyslogAppender;
-    // Use custom PatternEncoder to avoid duplicate timestamps in logs.
-    let syslog_encoder = Box::new(PatternEncoder::new("{m}"));
-    // Set up logging which will be routed to syslog for processing
-    let syslog = Box::new(
-        SyslogAppender::builder()
-            .encoder(syslog_encoder)
-            .openlog(
-                "nsl-duplex-comms-service",
-                log4rs_syslog::LogOption::LOG_PID | log4rs_syslog::LogOption::LOG_CONS,
-                log4rs_syslog::Facility::Daemon,
-            )
-            .build(),
-    );
-
-    // Set up logging which will be routed to stdout
-    let stdout = Box::new(ConsoleAppender::builder().build());
-
-    // Combine the loggers into one master config
-    let config = log4rs::config::Config::builder()
-        .appender(log4rs::config::Appender::builder().build("syslog", syslog))
-        .appender(log4rs::config::Appender::builder().build("stdout", stdout))
-        .build(
-            log4rs::config::Root::builder()
-                .appender("syslog")
-                .appender("stdout")
-                // Set the minimum logging level to record
-                .build(log::LevelFilter::Debug),
-        )?;
-
-    // Start the logger
-    log4rs::init_config(config)?;
-
-    Ok(())
-}
-
 fn main() -> NslDuplexCommsResult<()> {
-    log_init()?;
+    syslog::init(
+        Facility::LOG_DAEMON,
+        log::LevelFilter::Debug,
+        Some("nsl-duplex-comms-service"),
+    )
+    .unwrap();
 
     let service_config = Config::new("nsl-duplex-comms-service");
 
@@ -106,11 +255,11 @@ fn main() -> NslDuplexCommsResult<()> {
         .unwrap()
         .to_owned();
 
-    let ping_freq = service_config
-        .get("ping_freq")
-        .expect("No `ping_freq` parameter in config.toml")
-        .as_integer()
-        .unwrap_or(DEFAULT_PING_FREQ as i64) as u64;
+    let ping_freq = if let Some(ping_freq) = service_config.get("ping_freq") {
+        ping_freq.as_integer().unwrap_or(DEFAULT_PING_FREQ as i64) as u64
+    } else {
+        DEFAULT_PING_FREQ
+    };
 
     // Read configuration from config file.
     let comms_config = CommsConfig::new(service_config.clone())?;

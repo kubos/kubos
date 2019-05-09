@@ -142,7 +142,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //
     // {
     //     "data":{
-    //                "errors" : []
+    //                "errors" : ["A UDP header was unable to be correctly parsed"]
     //            },
     //     "errors" : ""
     // }
@@ -274,5 +274,24 @@ pub struct MutationRoot;
 
 /// Base GraphQL mutation model
 graphql_object!(MutationRoot: Context as "Mutation" |&self| {
-
+    // Execute a trivial command against the system
+    //
+    // Mutation
+    //
+    // mutation {
+    //     noop
+    // }
+    //
+    // Response
+    //
+    // {
+    //     "data":{
+    //                "noop": true
+    //            },
+    //     "errors" : ""
+    // }
+    field noop(&executor) -> FieldResult<bool>
+    {
+        Ok(executor.context().subsystem().get_alive()?)
+    }
 });

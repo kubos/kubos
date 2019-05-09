@@ -36,8 +36,8 @@ pub struct GeoRecordResponse {
 impl From<GeoRecord> for GeoRecordResponse {
     fn from(item: GeoRecord) -> GeoRecordResponse {
         GeoRecordResponse {
-            lon: item.lon as f64,
-            lat: item.lat as f64,
+            lon: f64::from(item.lon),
+            lat: f64::from(item.lat),
             time: item.time as i32,
             max_error: item.max_error as i32,
         }
@@ -76,9 +76,9 @@ impl From<StateOfHealth> for StateOfHealthResponse {
         StateOfHealthResponse {
             reset_count: item.reset_count as i32,
             current_time: item.current_time as i32,
-            current_rssi: item.current_rssi as i32,
-            connection_status: item.connection_status as i32,
-            globalstar_gateway: item.globalstar_gateway as i32,
+            current_rssi: i32::from(item.current_rssi),
+            connection_status: i32::from(item.connection_status),
+            globalstar_gateway: i32::from(item.globalstar_gateway),
             last_contact_time: item.last_contact_time as i32,
             last_attempt_time: item.last_attempt_time as i32,
             call_attempts_since_reset: item.call_attempts_since_reset as i32,
