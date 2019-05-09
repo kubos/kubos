@@ -48,7 +48,7 @@ pub enum CommsServiceError {
     ParsingError(String),
     /// Generic error encountered
     #[fail(display = "Error encountered {}", _0)]
-    GenericError(String)
+    GenericError(String),
 }
 
 /// Result returned by the `comms-service`.

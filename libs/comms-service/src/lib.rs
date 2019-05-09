@@ -78,8 +78,8 @@ extern crate juniper;
 #[macro_use]
 extern crate log;
 
-extern crate failure;
 extern crate byteorder;
+extern crate failure;
 
 mod config;
 mod errors;

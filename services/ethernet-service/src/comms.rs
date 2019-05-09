@@ -33,7 +33,7 @@ pub fn write(socket: &Arc<UdpSocket>, data: &[u8]) -> CommsResult<()> {
     let config = CommsConfig::new(service_config)?;
     socket.send_to(
         data,
-        (&*config.ground_ip, config.ground_port.unwrap_or_default()),
+        ("127.0.0.1", config.ground_port.unwrap_or_default()),
     )?;
     Ok(())
 }

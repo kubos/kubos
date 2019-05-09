@@ -103,12 +103,12 @@ impl LinkPacket for SpacePacket {
         let mut bytes = vec![];
 
         let header_0: u16 = (self.primary_header.app_proc_id) as u16
-            | (self.primary_header.sec_header_flag as u16) << 11
-            | (self.primary_header.packet_type as u16) << 12
-            | (self.primary_header.version as u16) << 13;
+            | u16::from(self.primary_header.sec_header_flag) << 11
+            | u16::from(self.primary_header.packet_type) << 12
+            | u16::from(self.primary_header.version) << 13;
 
         let header_1 = (self.primary_header.sequence_count as u16)
-            | (self.primary_header.sequence_flags as u16) << 14;
+            | u16::from(self.primary_header.sequence_flags) << 14;
 
         let header_2 = self.primary_header.data_length;
 
