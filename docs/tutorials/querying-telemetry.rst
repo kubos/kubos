@@ -60,7 +60,7 @@ It will return an array of database entries.
 The query has the following schema::
 
     query {
-        telemetry(timestampGe: Float, timestampLe: Float, subsystem: String, parameter: String, limit: Integer): [{
+        telemetry(timestampGe: Float, timestampLe: Float, subsystem: String, parameter: String, parameters: [String], limit: Integer): [{
             timestamp: Float!
             subsystem: String!
             parameter: String!
@@ -73,7 +73,10 @@ Each of the input arguments acts as a filter for the database query:
     - timestampGe - Return entries with timestamps occurring on or after the given value
     - timestampLe - Return entries with timestamps occurring on or before the given value
     - subsystem - Return entries which match the given subsystem name
-    - parameter - Return entries which match the given parameter name
+    - parameter - (Mutually exlusive with ``parameters``) Return entries which match the given
+      parameter name
+    - parameters - (Mutually exlusive with ``parameter``) Return entries which match any of the
+      given parameter names
     - limit - Return only the first `n` entries found
 
 Using the ``telemetry`` query without specifying any of the input arguments will result in all
