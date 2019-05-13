@@ -20,8 +20,6 @@ extern crate failure;
 mod util;
 
 use comms_service::*;
-use pnet::packet::udp::UdpPacket;
-use pnet::packet::Packet;
 use std::net::UdpSocket;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -33,10 +31,8 @@ use util::*;
 #[test]
 fn downlink_to_ground() {
     let sat_ip = "127.0.0.3";
-    let ground_ip = "127.0.0.2";
-    let ground_port = 16001;
     let downlink_port = 16002;
-    let config = comms_config(sat_ip, ground_ip, ground_port, downlink_port);
+    let config = comms_config(sat_ip, downlink_port);
     let mock_comms = Arc::new(Mutex::new(MockComms::new()));
     let payload = vec![5, 4, 3, 2];
 
@@ -74,6 +70,6 @@ fn downlink_to_ground() {
     let data = mock_comms.lock().unwrap().pop_write().unwrap();
     let packet = SpacePacket::parse(&data).unwrap();
 
-    assert_eq!(packet.destination(), ground_port);
+    assert_eq!(packet.destination(), 0);
     assert_eq!(packet.payload().to_vec(), payload);
 }

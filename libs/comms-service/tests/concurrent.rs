@@ -20,10 +20,6 @@ extern crate failure;
 mod util;
 
 use comms_service::*;
-use pnet::packet::udp::UdpPacket;
-use pnet::packet::Packet;
-use std::net::Ipv4Addr;
-use std::str::FromStr;
 use std::sync::{Arc, Barrier, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -34,11 +30,9 @@ use util::*;
 #[test]
 fn concurrent_uplinks_to_service_with_handler_response() {
     let sat_ip = "127.0.0.9";
-    let ground_ip = "127.0.0.10";
-    let ground_port = 18001;
     let downlink_port = 18002;
     let service_port = 18005;
-    let config = comms_config(sat_ip, ground_ip, ground_port, downlink_port);
+    let config = comms_config(sat_ip, downlink_port);
     let mock_comms = Arc::new(Mutex::new(MockComms::new()));
     let payload = vec![0, 1, 4, 5];
     let resp_payload = vec![9, 8, 7, 6];
@@ -117,11 +111,9 @@ fn concurrent_uplinks_to_service_with_handler_response() {
 #[test]
 fn too_many_concurrent_uplinks_to_service_with_handler_response() {
     let sat_ip = "127.0.0.11";
-    let ground_ip = "127.0.0.12";
-    let ground_port = 19001;
     let downlink_port = 19002;
     let service_port = 19005;
-    let config = comms_config(sat_ip, ground_ip, ground_port, downlink_port);
+    let config = comms_config(sat_ip, downlink_port);
     let mock_comms = Arc::new(Mutex::new(MockComms::new()));
     let payload = vec![0, 1, 4, 5];
     let resp_payload = vec![9, 8, 7, 6];

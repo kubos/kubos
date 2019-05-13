@@ -54,12 +54,10 @@ pub struct CommsControlBlock<T: Clone> {
     /// Timeout for the completion of GraphQL operations within message handlers (in milliseconds).
     pub timeout: u64,
     /// IP address of the computer that is running the communication service.
-    pub satellite_ip: Ipv4Addr,
+    pub ip: Ipv4Addr,
     /// Optional list of ports used by downlink endpoints that send messages to the ground.
     /// Each port in the list will be used by one downlink endpoint.
     pub downlink_ports: Option<Vec<u16>>,
-    /// Specifies the port to which the ground gateway is bound.
-    pub ground_port: Option<u16>,
 }
 
 impl<T: Clone + Debug> Debug for CommsControlBlock<T> {
@@ -81,17 +79,15 @@ impl<T: Clone + Debug> Debug for CommsControlBlock<T> {
         write!(
             f,
             "CommsControlBlock {{ read: {}, write: {:?}, read_conn: {:?}, write_conn: {:?},
-            max_num_handlers: {:?}, timeout: {:?}, satellite_ip: {:?},
-            downlink_ports: {:?}, ground_port: {:?} }}",
+            max_num_handlers: {:?}, timeout: {:?}, ip: {:?}, downlink_ports: {:?} }}",
             read,
             write,
             self.read_conn,
             self.write_conn,
             self.max_num_handlers,
             self.timeout,
-            self.satellite_ip,
+            self.ip,
             self.downlink_ports,
-            self.ground_port
         )
     }
 }
@@ -127,9 +123,8 @@ impl<T: Clone> CommsControlBlock<T> {
             write_conn,
             max_num_handlers: config.max_num_handlers.unwrap_or(DEFAULT_MAX_HANDLERS),
             timeout: config.timeout.unwrap_or(DEFAULT_TIMEOUT),
-            satellite_ip: Ipv4Addr::from_str(&config.satellite_ip)?,
+            ip: Ipv4Addr::from_str(&config.ip)?,
             downlink_ports: config.downlink_ports,
-            ground_port: config.ground_port,
         })
     }
 }
@@ -157,19 +152,9 @@ impl CommsService {
                 let port_ref = *port;
                 let conn_ref = control.write_conn.clone();
                 let write_ref = write.clone();
-                let sat_ip = control.satellite_ip;
-                let ground_port = control.ground_port.ok_or_else(|| {
-                    CommsServiceError::ConfigError("Missing ground_port parameter".to_owned())
-                })?;
+                let ip = control.ip;
                 thread::spawn(move || {
-                    downlink_endpoint(
-                        &telem_ref,
-                        port_ref,
-                        conn_ref,
-                        &write_ref,
-                        sat_ip,
-                        ground_port,
-                    );
+                    downlink_endpoint(&telem_ref, port_ref, conn_ref, &write_ref, ip);
                 });
             }
         }
@@ -243,7 +228,7 @@ fn read_thread<T: Clone + Send + 'static>(
                 let conn_ref = comms.write_conn.clone();
                 let write_ref = comms.write[0].clone();
                 let data_ref = data.clone();
-                let sat_ref = comms.satellite_ip;
+                let sat_ref = comms.ip;
                 let time_ref = comms.timeout;
                 let num_handlers_ref = num_handlers.clone();
                 thread::spawn(move || {
@@ -315,7 +300,6 @@ fn downlink_endpoint<T: Clone>(
     write_conn: T,
     write: &Arc<WriteFn<T>>,
     sat_ip: Ipv4Addr,
-    ground_port: u16,
 ) {
     // Bind the downlink endpoint to a UDP socket.
     let socket = match UdpSocket::bind((sat_ip, port)) {
@@ -336,7 +320,9 @@ fn downlink_endpoint<T: Clone>(
         };
 
         // Take received message and wrap it in a Link packet.
-        let packet = match SpacePacket::build(0, LinkType::UDP, ground_port, &buf[0..size])
+        // Setting port to 0 because we don't know the ground port...
+        // That is known by the ground comms service
+        let packet = match SpacePacket::build(0, LinkType::UDP, 0, &buf[0..size])
             .and_then(|packet| packet.to_bytes())
         {
             Ok(packet) => packet,

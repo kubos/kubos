@@ -40,10 +40,8 @@ pub struct CommsConfig {
     /// Timeout for the completion of GraphQL operations within message handlers (in milliseconds).
     /// Default: 1500
     pub timeout: Option<u64>,
-    /// Required if downlink_ports is not `None`. Specifies the port to which the ground gateway is bound.
-    pub ground_port: Option<u16>,
-    /// Required. Satellite's IP address.
-    pub satellite_ip: String,
+    /// Required. IP address on which comms service will listens.
+    pub ip: String,
 }
 
 impl CommsConfig {
@@ -58,13 +56,6 @@ impl CommsConfig {
             let msg = format!("Failed to parse config: {}", err);
             CommsServiceError::ConfigError(msg)
         })?;
-
-        if config.downlink_ports.is_some() && config.ground_port.is_none() {
-            return Err(CommsServiceError::ConfigError(
-                "ground_port parameter is required when downlink_ports is used".to_owned(),
-            )
-            .into());
-        }
 
         Ok(config)
     }

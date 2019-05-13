@@ -66,9 +66,7 @@
 //! [service-name.comms]
 //! max_num_handlers = 50
 //! downlink_ports = [13011]
-//! ground_port = 9001
-//! timeout = 1500
-//! ground_ip = "192.168.8.1"
+//! timeout = 1500"
 //! satellite_ip = "192.168.8.2"
 //! ```
 

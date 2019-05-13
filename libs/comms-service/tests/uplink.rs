@@ -20,11 +20,7 @@ extern crate failure;
 mod util;
 
 use comms_service::*;
-use pnet::packet::udp::UdpPacket;
-use pnet::packet::Packet;
-use std::net::Ipv4Addr;
 use std::net::UdpSocket;
-use std::str::FromStr;
 use std::sync::{Arc, Barrier, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -35,11 +31,9 @@ use util::*;
 #[test]
 fn uplink_to_service_no_response() {
     let sat_ip = "127.0.0.3";
-    let ground_ip = "127.0.0.2";
-    let ground_port = 15001;
     let downlink_port = 15002;
     let service_port = 15005;
-    let config = comms_config(sat_ip, ground_ip, ground_port, downlink_port);
+    let config = comms_config(sat_ip, downlink_port);
     let mock_comms = Arc::new(Mutex::new(MockComms::new()));
     let payload = vec![0, 1, 4, 5];
 
@@ -93,11 +87,9 @@ fn uplink_to_service_no_response() {
 #[test]
 fn uplink_to_service_with_handler_response() {
     let sat_ip = "127.0.0.5";
-    let ground_ip = "127.0.0.6";
-    let ground_port = 16001;
     let downlink_port = 16002;
     let service_port = 16005;
-    let config = comms_config(sat_ip, ground_ip, ground_port, downlink_port);
+    let config = comms_config(sat_ip, downlink_port);
     let mock_comms = Arc::new(Mutex::new(MockComms::new()));
     let payload = vec![0, 1, 4, 5];
     let resp_payload = vec![9, 8, 7, 6];
@@ -165,11 +157,9 @@ fn uplink_to_service_with_handler_response() {
 #[test]
 fn uplink_to_service_with_downlink_response() {
     let sat_ip = "127.0.0.7";
-    let ground_ip = "127.0.0.8";
-    let ground_port = 17001;
     let downlink_port = 17002;
     let service_port = 17005;
-    let config = comms_config(sat_ip, ground_ip, ground_port, downlink_port);
+    let config = comms_config(sat_ip, downlink_port);
     let mock_comms = Arc::new(Mutex::new(MockComms::new()));
     let payload = vec![0, 1, 4, 5];
     let resp_payload = vec![9, 8, 7, 6];
@@ -236,5 +226,5 @@ fn uplink_to_service_with_downlink_response() {
     let packet = SpacePacket::parse(&data).unwrap();
 
     assert_eq!(packet.payload().to_vec(), resp_payload);
-    assert_eq!(packet.destination(), ground_port);
+    assert_eq!(packet.destination(), 0);
 }
