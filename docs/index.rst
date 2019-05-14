@@ -60,8 +60,9 @@ Contributing to KubOS
 
 Want to get your code into space? Become a KubOS contributor and you will!
 We welcome community developers, and are always looking for new people to collaborate with us.
-Come check out our `community Trello Board <https://trello.com/b/pIWxmFua/kubos-community>`__ to see what's being worked on and what's next on the horizon!
-`Join us on Slack <https://slack.kubos.co/>`__ to participate in discussion of features or bugs, see what you can work on, and to give feedback.
+`Join us on Slack <https://slack.kubos.co/>`__ or visit our
+`GitHub Issues <https://github.com/kubos/kubos/issues>`__ page to participate in discussion of features
+ or bugs, see what you can work on, and to give feedback.
 
 .. toctree::
     :hidden:
