@@ -50,7 +50,7 @@ fn downlink_to_ground() {
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 
     // Start communication service.
-    CommsService::start(controls, &telem).unwrap();
+    CommsService::start::<Arc<Mutex<MockComms>>, SpacePacket>(controls, &telem).unwrap();
 
     let downlink_writer = UdpSocket::bind((sat_ip, 0)).unwrap();
 

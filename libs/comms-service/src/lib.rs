@@ -55,7 +55,7 @@
 //! let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 //!
 //! // Start communication service.
-//! CommsService::start(controls, &telem);
+//! CommsService::start::<Arc<UdpSocket>, SpacePacket>(controls, &telem);
 //! # Ok(())
 //! # }
 //! ```

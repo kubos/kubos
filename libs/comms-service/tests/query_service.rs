@@ -69,7 +69,7 @@ fn query_monitor_service() {
         .push_read(&ground_packet.to_bytes().unwrap());
 
     // Start communication service.
-    CommsService::start(controls, &telem).unwrap();
+    CommsService::start::<Arc<Mutex<MockComms>>, SpacePacket>(controls, &telem).unwrap();
 
     // Let the wheels turn
     thread::sleep(Duration::from_millis(500));

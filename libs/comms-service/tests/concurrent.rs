@@ -80,7 +80,7 @@ fn concurrent_uplinks_to_service_with_handler_response() {
     }
 
     // Start communication service.
-    CommsService::start(controls, &telem).unwrap();
+    CommsService::start::<Arc<Mutex<MockComms>>, SpacePacket>(controls, &telem).unwrap();
 
     // Wait until HTTP servers are ready
     barrier.wait();
@@ -159,7 +159,7 @@ fn too_many_concurrent_uplinks_to_service_with_handler_response() {
     }
 
     // Start communication service.
-    CommsService::start(controls, &telem).unwrap();
+    CommsService::start::<Arc<Mutex<MockComms>>, SpacePacket>(controls, &telem).unwrap();
 
     // Wait for HTTP server to get ready
     barrier.wait();

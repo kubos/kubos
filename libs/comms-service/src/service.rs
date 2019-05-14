@@ -133,8 +133,9 @@ impl<T: Clone> CommsControlBlock<T> {
 pub struct CommsService;
 
 impl CommsService {
+
     /// Starts an instance of the Communication Service and its associated background threads.
-    pub fn start<T: Clone + Send + 'static>(
+    pub fn start<T: Clone + Send + 'static, Packet: LinkPacket + Send + 'static>(
         control: CommsControlBlock<T>,
         telem: &Arc<Mutex<CommsTelemetry>>,
     ) -> CommsResult<()> {
@@ -142,7 +143,7 @@ impl CommsService {
         if control.read.is_some() {
             let telem_ref = telem.clone();
             let control_ref = control.clone();
-            thread::spawn(move || read_thread(control_ref, &telem_ref));
+            thread::spawn(move || read_thread::<T, Packet>(control_ref, &telem_ref));
         }
 
         // For each provided `write()` function, spawn a downlink endpoint thread.
@@ -154,7 +155,7 @@ impl CommsService {
                 let write_ref = write.clone();
                 let ip = control.ip;
                 thread::spawn(move || {
-                    downlink_endpoint(&telem_ref, port_ref, conn_ref, &write_ref, ip);
+                    downlink_endpoint::<T, Packet>(&telem_ref, port_ref, conn_ref, &write_ref, ip);
                 });
             }
         }
@@ -165,7 +166,7 @@ impl CommsService {
 }
 
 // This thread reads from a gateway and passes received messages to message handlers.
-fn read_thread<T: Clone + Send + 'static>(
+fn read_thread<T: Clone + Send + 'static, Packet: LinkPacket + Send + 'static>(
     comms: CommsControlBlock<T>,
     data: &Arc<Mutex<CommsTelemetry>>,
 ) {
@@ -186,7 +187,7 @@ fn read_thread<T: Clone + Send + 'static>(
         };
 
         // Create a link packet from the received information.
-        let packet = match SpacePacket::parse(&bytes) {
+        let packet = match Packet::parse(&bytes) {
             Ok(packet) => packet,
             Err(e) => {
                 log_telemetry(&data, &TelemType::UpFailed).unwrap();
@@ -259,10 +260,10 @@ fn read_thread<T: Clone + Send + 'static>(
 // This thread sends a query/mutation to its intended destination and waits for a response.
 // The thread then writes the response to the gateway.
 #[allow(clippy::too_many_arguments)]
-fn handle_graphql_request<T: Clone>(
+fn handle_graphql_request<T: Clone, Packet: LinkPacket>(
     write_conn: T,
     write: &Arc<WriteFn<T>>,
-    message: &SpacePacket,
+    message: &Box<Packet>,
     timeout: u64,
     sat_ip: Ipv4Addr,
 ) -> Result<(), String> {
@@ -294,7 +295,7 @@ fn handle_graphql_request<T: Clone>(
 
 // This thread reads indefinitely from a UDP socket, creating link packets from
 // the UDP packet payload and then writes the link packets to a gateway.
-fn downlink_endpoint<T: Clone>(
+fn downlink_endpoint<T: Clone, Packet: LinkPacket>(
     data: &Arc<Mutex<CommsTelemetry>>,
     port: u16,
     write_conn: T,
@@ -322,7 +323,7 @@ fn downlink_endpoint<T: Clone>(
         // Take received message and wrap it in a Link packet.
         // Setting port to 0 because we don't know the ground port...
         // That is known by the ground comms service
-        let packet = match SpacePacket::build(0, LinkType::UDP, 0, &buf[0..size])
+        let packet = match Packet::build(0, LinkType::UDP, 0, &buf[0..size])
             .and_then(|packet| packet.to_bytes())
         {
             Ok(packet) => packet,

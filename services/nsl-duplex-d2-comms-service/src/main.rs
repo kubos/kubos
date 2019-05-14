@@ -288,7 +288,7 @@ fn main() -> NslDuplexCommsResult<()> {
 
     // Start communication service.
     info!("NSL Duplex Communications Service starting on {}", bus);
-    CommsService::start(controls, &telem.clone())?;
+    CommsService::start::<Arc<Mutex<DuplexComms>>, SpacePacket>(controls, &telem.clone())?;
 
     // Start up graphql server
     let subsystem = Subsystem::new(telem, duplex_comms);

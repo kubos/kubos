@@ -71,7 +71,7 @@ fn uplink_to_service_no_response() {
     );
 
     // Start communication service.
-    CommsService::start(controls, &telem).unwrap();
+    CommsService::start::<Arc<Mutex<MockComms>>, SpacePacket>(controls, &telem).unwrap();
 
     // Let the wheels turn
     barrier.wait();
@@ -129,7 +129,7 @@ fn uplink_to_service_with_handler_response() {
     );
 
     // Start communication service.
-    CommsService::start(controls, &telem).unwrap();
+    CommsService::start::<Arc<Mutex<MockComms>>, SpacePacket>(controls, &telem).unwrap();
 
     // Let the wheels turn
     barrier.wait();
@@ -197,7 +197,7 @@ fn uplink_to_service_with_downlink_response() {
     );
 
     // Start communication service.
-    CommsService::start(controls, &telem).unwrap();
+    CommsService::start::<Arc<Mutex<MockComms>>, SpacePacket>(controls, &telem).unwrap();
 
     // Let the wheels turn
     barrier.wait();
