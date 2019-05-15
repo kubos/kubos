@@ -44,9 +44,10 @@ fn uninstall_last_app() {
     app.install(&fixture.registry_dir.path());
     fixture.start_service(false);
 
-    // Make sure our app directory exists
+    // Make sure our app directory and active symlink exist
     assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
-
+    assert!(fs::symlink_metadata(fixture.registry_dir.path().join("active/dummy")).is_ok(), true);
+    
     let result = panic::catch_unwind(|| {
         let result = send_query(
             ServiceConfig::new_from_path("app-service", config.to_owned()),
@@ -70,6 +71,9 @@ fn uninstall_last_app() {
 
     // Our app directory should now no longer exist
     assert_eq!(fixture.registry_dir.path().join("dummy").exists(), false);
+    
+    // The app's active version symlink should also no longer exist
+    assert_eq!(format!("{}", fs::symlink_metadata(fixture.registry_dir.path().join("active/dummy")).err().unwrap()), "No such file or directory (os error 2)");
 
     fixture.teardown();
     assert!(result.is_ok());
