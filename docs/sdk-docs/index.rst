@@ -61,8 +61,8 @@ This documentation section contains the various guides related to using the Kubo
 
     ../installation-docs/sdk-installing
     sdk-examples
-    sdk-c
     sdk-rust
     sdk-python
+    sdk-c
     windows-dev-environment
     Upgrading Kubos SDK <sdk-upgrading>
