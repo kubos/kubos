@@ -158,6 +158,16 @@ impl AppRegistry {
         }
 
         if let Err(err) = unix::fs::symlink(app_dir, active_symlink.clone()) {
+            // Make sure the 'active' directory exists
+            // If it doesn't, we'll go ahead and recreate it and try again
+            let active_dir = PathBuf::from(format!("{}/active", self.apps_dir));
+            if !active_dir.exists() {
+                fs::create_dir_all(&active_dir)?;
+
+                if unix::fs::symlink(app_dir, active_symlink.clone()).is_ok() {
+                    return Ok(());
+                }
+            }
             return Err(AppError::RegisterError {
                 err: format!(
                     "Couldn't symlink {} to {}: {:?}",
