@@ -1,4 +1,4 @@
-# kubos/kubos-dev:1.14.0
+# kubos/kubos-dev:1.15.0
 
 FROM phusion/baseimage:0.9.22
 
@@ -56,5 +56,14 @@ RUN pip install breathe
 RUN pip install sphinx-rtd-theme==0.2.4
 RUN pip install sphinxcontrib-plantuml sphinxcontrib-versioning
 RUN pip install sphinx-jsondomain
+
+# Install NOS3 dependencies
+RUN wget https://github.com/nasa/nos3/raw/master/support/packages/ubuntu/itc-common-cxx11-Release_1.9.1_amd64.deb
+RUN apt-get install -y ./itc-common-cxx11-Release_1.9.1_amd64.deb
+RUN rm itc-common-cxx11-Release_1.9.1_amd64.deb
+
+RUN wget https://github.com/nasa/nos3/raw/master/support/packages/ubuntu/nos-engine-cxx11-Release_1.4.0_amd64.deb
+RUN apt-get install -y ./nos-engine-cxx11-Release_1.4.0_amd64.deb
+RUN rm nos-engine-cxx11-Release_1.4.0_amd64.deb
 
 ENV PATH "$PATH:/usr/bin/iobc_toolchain/usr/bin:/usr/bin/bbb_toolchain/usr/bin"
