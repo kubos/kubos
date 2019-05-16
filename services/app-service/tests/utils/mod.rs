@@ -282,7 +282,9 @@ pub fn send_query(config: ServiceConfig, query: &str) -> serde_json::Value {
         .json()
         .expect("Couldn't deserialize response");
 
-    let data = response.get("data").unwrap();
-
-    data.clone()
+    if let Some(data) = response.get("data") {
+        return data.clone();
+    } else {
+        panic!("Bad query response: {:?}", response);
+    }
 }
