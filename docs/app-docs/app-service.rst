@@ -188,8 +188,11 @@ Starting an Application
 
 To manually start an application, the ``startApp`` mutation can be used.
 
-The mutation takes two arguments: the name of the application to start and the run level which the
+The mutation has two required arguments: the name of the application to start and the run level which the
 app should execute with.
+
+The optional ``args`` input argument allows additional arguments to be passed through to the
+underlying application. These arguments will be passed behind a ``--`` separator.
 
 The mutation will return three fields:
 
@@ -200,7 +203,7 @@ The mutation will return three fields:
 For example::
 
     mutation {
-        startApp(name: "mission-app", runLevel: "OnCommand") {
+        startApp(name: "mission-app", runLevel: "OnCommand", args: ["-m", "safemode"]) {
             success,
             errors,
             pid
@@ -208,7 +211,8 @@ For example::
     }
     
 Under the covers, the service receives the mutation and identifies the current active version of the
-application specified. It then calls that version's binary, passing along the run level as a command argument.
+application specified. It then calls that version's binary, passing along the run level as a command
+argument, as well as any additional arguments specified with ``args``.
 
 If the application immediately fails, the ``errors`` field will contain a message with the
 application's return code.

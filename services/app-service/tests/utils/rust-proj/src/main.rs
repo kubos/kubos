@@ -31,7 +31,7 @@ impl AppHandler for MyApp {
         }
 
         // Check for a positional arg
-        if !matches.free.is_empty() && matches.free[0] == "test" {
+        if !matches.free.is_empty() && matches.free[0] == "pos" {
             success = true;
         }
 
