@@ -158,6 +158,16 @@ impl AppRegistry {
         }
 
         if let Err(err) = unix::fs::symlink(app_dir, active_symlink.clone()) {
+            // Make sure the 'active' directory exists
+            // If it doesn't, we'll go ahead and recreate it and try again
+            let active_dir = PathBuf::from(format!("{}/active", self.apps_dir));
+            if !active_dir.exists() {
+                fs::create_dir_all(&active_dir)?;
+
+                if unix::fs::symlink(app_dir, active_symlink.clone()).is_ok() {
+                    return Ok(());
+                }
+            }
             return Err(AppError::RegisterError {
                 err: format!(
                     "Couldn't symlink {} to {}: {:?}",
@@ -347,7 +357,15 @@ impl AppRegistry {
         // If that was the last version, also remove the parent directory.
         // (If this call fails, it's probably because the directory wasn't empty because some
         // version of the app still exists, so ignore the error)
-        let _ = fs::remove_dir(format!("{}/{}", self.apps_dir, app_name));
+        if fs::remove_dir(format!("{}/{}", self.apps_dir, app_name)).is_ok() {
+            // That worked, so we also want to remove the active version symlink
+            if let Err(error) = fs::remove_file(format!("{}/active/{}", self.apps_dir, app_name)) {
+                errors = Some(format!(
+                    "{}. Failed to remove active symlink for {}: {}",
+                    error, app_name, error
+                ));
+            }
+        }
 
         // Remove the app entry from the registry list
         let mut entries = self

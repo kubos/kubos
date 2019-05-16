@@ -78,7 +78,7 @@ In order to build Kubos Linux, two components are needed:
 - The `kubos-linux-build repo <https://github.com/kubos/kubos-linux-build>`__ - Contains the configurations, patches, and extra tools needed to build Kubos Linux
 - `BuildRoot <https://buildroot.org/>`__ - The actual build system
 
-These components should be setup as children of the same parent directory. 
+These components should be setup as children of the same parent directory.
 There are several commands and variables in the build process which use relative file paths to navigate between the components.
 
 After the environment has been set up, all build commands will be run from the BuildRoot directory unless otherwise stated.
@@ -100,11 +100,11 @@ Enter the new folder
 Download BuildRoot-2017.02 (more current versions of BuildRoot may work as well,
 but all testing has been done against 2017.02)
 
-.. note:: All Kubos documentation will refer to v2017.02.8, which is the latest version of the LTS release at the time of this writing.
+.. note:: All Kubos documentation will refer to v2019.02.2, which is the latest version of the LTS release at the time of this writing.
 
 ::
 
-    $ wget https://buildroot.uclibc.org/downloads/buildroot-2017.02.8.tar.gz && tar xvzf buildroot-2017.02.8.tar.gz && rm buildroot-2017.02.8.tar.gz
+    $ wget https://buildroot.uclibc.org/downloads/buildroot-2019.02.2.tar.gz && tar xvzf buildroot-2019.02.2.tar.gz && rm buildroot-2019.02.2.tar.gz
 
 Pull the kubos-linux-build repo
 
@@ -116,7 +116,7 @@ Move into the buildroot directory
 
 ::
 
-    $ cd buildroot-2017.02.8
+    $ cd buildroot-2019.02.2
 
 Point BuildRoot to the external kubos-linux-build folder and tell it to build
 the iOBC.
@@ -145,7 +145,7 @@ only certain sections and it will go much more quickly (<5 min).
 BuildRoot documentation can be found
 `**here** <https://buildroot.org/docs.html>`__
 
-The generated files will be located in buildroot-2017.02.8/output/images. They are:
+The generated files will be located in buildroot-2019.02.2/output/images. They are:
 
 -  uboot.bin - The U-Boot binary
 -  zImage - The compressed Linux kernel file
@@ -162,7 +162,7 @@ If you would like to build your toolchain in somewhere other than the
 
 If you would like BuildRoot to just build the toolchain locally, you may remove
 the ``BR2_HOST_DIR`` variable entirely. The toolchain will then be built under the
-main "buildroot-2017.02.8" directory in a new "output/host" folder.
+main "buildroot-2019.02.2" directory in a new "output/host" folder.
 
 Create an SD Card Image
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -183,18 +183,18 @@ Navigate to the 'kubos-linux-build/tools' directory.
 Run the ``format-image.sh`` script. You might need to run as root to get
 permissions for certain steps.
 
-The script has optional parameters: 
+The script has optional parameters:
 
 - ``-d {device}`` - Sets the SD card device name to flash the newly created image to
   (does not flash by default)
 - ``-i {name}`` - Specifies the output file name of the image file to be created.
   (default: "kubos-linux.img")
 - ``-p`` - Specify that existing kpack-base.itb and kernel files should be
-  copied into the appropriate partitions 
+  copied into the appropriate partitions
 - ``-pp`` - Specify that the kpack-base.itb and kernel files should be built
-  and then copied to their partitions 
-- ``-ppp`` - Only build and copy the kpack and kernel files. Skip all other steps. 
-- ``-s {size}`` - Size, in MB, of the SD card. The default is 3800 (~4GB). 
+  and then copied to their partitions
+- ``-ppp`` - Only build and copy the kpack and kernel files. Skip all other steps.
+- ``-s {size}`` - Size, in MB, of the SD card. The default is 3800 (~4GB).
 - ``-b {branch}`` - Specify the branch name of U-Boot that has been built. The
   default is 'master'. This option should not need to be used outside of
   development.

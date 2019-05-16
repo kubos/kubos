@@ -83,22 +83,22 @@ make_telemetry!(
     /// I5V_DRW - 5V Current Draw of EPS (A)
     CurrentDraw5V => {vec![0xE2, 0x15], |d| 0.001_327_547 * d},
 
-    /// IPCM12V - Output Current of 12V bus (A)
+    /// IPCM12V - Output Current of 12V bus (mA)
     OutputCurrent12V => {vec![0xE2, 0x34], |d| (2.069_546_232 * d) + 9.158_584_601},
     /// VPCM12V - Output Voltage of 12V bus (V)
     OutputVoltage12V => {vec![0xE2, 0x30], |d| 0.013_468_447 * d},
-    /// IPCMBATV - Output Current of Battery Bus (A)
+    /// IPCMBATV - Output Current of Battery Bus (mA)
     OutputCurrentBattery => {vec![0xE2, 0x24], |d| (5.277_754_989 * d) + 7.128_757_361},
     /// VPCMBATV - Output Voltage of Battery Bus (V)
     OutputVoltageBattery => {vec![0xE2, 0x20], |d| 0.000_901_295_7 * d},
-    /// IPCM5V - Output Current of 5V bus (A)
-    OutputCurrent5v => {vec![0xE2, 0x14], |d| (5.244_380_133 * d) + 4.352_775_681},
+    /// IPCM5V - Output Current of 5V bus (mA)
+    OutputCurrent5V => {vec![0xE2, 0x14], |d| (5.244_380_133 * d) + 4.352_775_681},
     /// VPCM5V - Output Voltage of 5V bus (V)
-    OutputVoltage5v => {vec![0xE2, 0x10], |d| 0.005_846_589 * d},
-    /// IPCM3V3 - Output Current of 3.3V Bus (A)
-    OutputCurrent33v => {vec![0xE2, 0x04], |d| (5.255_897_808 * d) + 32.568_735_93},
+    OutputVoltage5V => {vec![0xE2, 0x10], |d| 0.005_846_589 * d},
+    /// IPCM3V3 - Output Current of 3.3V Bus (mA)
+    OutputCurrent33V => {vec![0xE2, 0x04], |d| (5.255_897_808 * d) + 32.568_735_93},
     /// VPCM3V3 - Output Voltage of 3.3V Bus (V)
-    OutputVoltage33v => {vec![0xE2, 0x00], |d| 0.004_288_677 * d},
+    OutputVoltage33V => {vec![0xE2, 0x00], |d| 0.004_288_677 * d},
 
     /// VSW1 - Output Voltage Switch 1 (V)
     OutputVoltageSwitch1 => {vec![0xE4, 0x10], |d| 0.013_458_119 * d},

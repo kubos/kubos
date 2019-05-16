@@ -37,7 +37,7 @@ class Query(graphene.ObjectType):
         fields=graphene.List(graphene.String, default_value=["all"]))
 
     def resolve_ping(self, info):
-        return "PONG"
+        return "pong"
 
     def resolve_moduleList(self, info):
         """
@@ -151,7 +151,7 @@ class Test(graphene.Mutation):
         errors = []
         test_output = {}
         if test == 0:  # PING
-            test_output = "PONG"
+            test_output = "pong"
         elif test == 1:  # NOOP
             for module in MODULES:
                 try:

@@ -37,7 +37,7 @@ ROM Bootloader
 The ROM bootloader lives in a small section of ROM space. It should come
 pre-loaded on the board and should not need to be modified. It selects the
 next bootloader depending on whether the boot mode button is being held.
-If not held, it attempts to run the next boot step from eMMC storage; 
+If not held, it attempts to run the next boot step from eMMC storage;
 otherwise, it attempts to boot from the microSD card.
 
 U-Boot
@@ -45,7 +45,7 @@ U-Boot
 This board utilizes U-Boot's SPL feature. A small boot file called "MLO" is
 run and that file then loads the main U-Boot image into SDRAM.
 
-The main U-Boot image iterates through the `boot_targets` variable to attempt 
+The main U-Boot image iterates through the `boot_targets` variable to attempt
 to boot from an available MMC device. The partuuid of the first successful
 device is passed off to Linux to be used to mount the root filesystem.
 
@@ -77,7 +77,7 @@ In order to build Kubos Linux, two components are needed:
 - The `kubos-linux-build repo <https://github.com/kubos/kubos-linux-build>`__ - Contains the configurations, patches, and extra tools needed to build Kubos Linux
 - `BuildRoot <https://buildroot.org/>`__ - The actual build system
 
-These components should be setup as children of the same parent directory. 
+These components should be setup as children of the same parent directory.
 There are several commands and variables in the build process which use relative file paths to navigate between the components.
 
 After the environment has been set up, all build commands will be run from the BuildRoot directory unless otherwise stated.
@@ -99,11 +99,11 @@ Enter the new folder
 Download BuildRoot-2017.02 (more current versions of BuildRoot may work as well,
 but all testing has been done against 2017.02)
 
-.. note:: All Kubos documentation will refer to v2017.02.8, which is the latest version of the LTS release at the time of this writing.
+.. note:: All Kubos documentation will refer to v2019.02.2, which is the latest version of the LTS release at the time of this writing.
 
 ::
 
-    $ wget https://buildroot.uclibc.org/downloads/buildroot-2017.02.8.tar.gz && tar xvzf buildroot-2017.02.8.tar.gz && rm buildroot-2017.02.8.tar.gz
+    $ wget https://buildroot.uclibc.org/downloads/buildroot-2019.02.2.tar.gz && tar xvzf buildroot-2019.02.2.tar.gz && rm buildroot-2019.02.2.tar.gz
 
 Pull the kubos-linux-build repo
 
@@ -115,7 +115,7 @@ Move into the buildroot directory
 
 ::
 
-    $ cd buildroot-2017.02.8
+    $ cd buildroot-2019.02.2
 
 Point BuildRoot to the external kubos-linux-build folder and tell it to build
 for the Beaglebone Black.
@@ -144,7 +144,7 @@ only certain sections and it will go much more quickly (<5 min).
 BuildRoot documentation can be found
 `**here** <https://buildroot.org/docs.html>`__
 
-The generated files will be located in buildroot-2017.02.8/output/images.
+The generated files will be located in buildroot-2019.02.2/output/images.
 The relevant files are:
 
 -  uboot.bin - The U-Boot binary
@@ -167,7 +167,7 @@ If you would like to build your toolchain in somewhere other than the
 
 If you would like BuildRoot to just build the toolchain locally, you may remove
 the ``BR2_HOST_DIR`` variable entirely. The toolchain will then be built under the
-main "buildroot-2017.02.8" directory in a new "output/host" folder.
+main "buildroot-2019.02.2" directory in a new "output/host" folder.
 
 Using Kubos Linux
 -----------------
