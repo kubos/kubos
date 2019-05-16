@@ -62,8 +62,8 @@
 //! }
 //!
 //! query ping: "pong"
-//! query telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String): Entry
-//! query routedTelemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, output: String!, compress: Boolean = true): String!
+//! query telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, parameters: [String]): Entry
+//! query routedTelemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, parameters: [String], output: String!, compress: Boolean = true): String!
 //!
 //! mutation insert(timestamp: Integer, subsystem: String!, parameter: String!, value: String!):{ success: Boolean!, errors: String! }
 //! ```
@@ -94,10 +94,22 @@
 //! }
 //! ```
 //!
-//! ## Select all attributes of all telemetry entries for the voltage parametereter of the eps subsystem
+//! ## Select all attributes of all telemetry entries for the voltage parameter of the eps subsystem
 //! ```graphql
 //! {
 //!   telemetry(subsystem: "eps", parameter: "voltage") {
+//!     timestamp,
+//!     subsystem,
+//!     parameter,
+//!     value
+//!   }
+//! }
+//! ```
+//!
+//! ## Select all attributes of all telemetry entries for the voltage and current parameters of the eps subsystem
+//! ```graphql
+//! {
+//!   telemetry(subsystem: "eps", parameters: ["voltage", "current"]) {
 //!     timestamp,
 //!     subsystem,
 //!     parameter,
