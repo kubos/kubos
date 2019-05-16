@@ -11,7 +11,7 @@ All contributors must sign the Kubos Contributor License Agreement
 before their changes can be merged into the main codebase.
 
 The Kubos CLA can be found
-`here <https://www.clahub.com/agreements/kubostech/KubOS>`__.
+`here <https://cla-assistant.io/kubos/kubos>`__.
 
 Create an Issue
 ---------------
