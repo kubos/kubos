@@ -24,6 +24,38 @@ use std::process::{Command, Stdio};
 use std::str;
 use tempfile::tempdir;
 
+pub struct TestCommand {
+    command: String,
+    args: Vec<&'static str>,
+    child_handle: RefCell<Box<Option<process::Child>>>,
+}
+
+impl TestCommand {
+    pub fn new(command: &str, args: Vec<&'static str>) -> TestCommand {
+        TestCommand {
+            command: String::from(command),
+            args,
+            child_handle: RefCell::new(Box::new(None)),
+        }
+    }
+
+    /// Ask Cargo to run the command.
+    /// This is *not* a blocking function. The command is
+    /// spawned in the background, allowing the test
+    /// to continue on.
+    pub fn spawn(&self) {
+        let child = Command::new(self.command.to_owned())
+            .args(&self.args)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .expect("Failed to start");
+
+        let mut child_handle = self.child_handle.borrow_mut();
+        *child_handle = Box::new(Some(child));
+    }
+}
+
 /// This structure allows the creation of an instance
 /// of an actual service/binary crate for use in
 /// integration tests within the same crate.

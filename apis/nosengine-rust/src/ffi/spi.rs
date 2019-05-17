@@ -2,7 +2,7 @@
 //!
 //! # Examples
 //!
-//! ```
+//! ```norun
 //! # extern crate nosengine_rust;
 //! # use nosengine_rust::ffi::spi::*;
 //! # use std::ffi::CString;
@@ -50,7 +50,8 @@ use libc::c_char;
 /// * `bus`: Name of bus to use for SPI
 ///
 /// # Examples
-/// ```
+///
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::spi::*;
 /// # use std::ffi::CString;
@@ -85,7 +86,7 @@ pub fn spi_init_master(connection: *const c_char, bus: *const c_char) -> *mut SP
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::spi::*;
 /// # use std::ffi::CString;
@@ -115,7 +116,7 @@ pub fn spi_init_slave(
 ///     function.
 ///
 /// # Examples
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::spi::*;
 /// # use std::ffi::CString;
@@ -162,7 +163,7 @@ pub fn spi_unselect_chip(spi: *mut SPIHandle) {
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::spi::*;
 /// # use std::ffi::CString;
@@ -211,7 +212,7 @@ pub fn spi_read(spi: *mut SPIHandle, rbuf: *mut u8, rlen: usize) -> SPIStatus {
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::spi::*;
 /// # use std::ffi::CString;

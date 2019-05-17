@@ -21,7 +21,7 @@ pub enum UARTHandle {}
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::uart::*;
 /// # use std::ffi::CString;
@@ -63,7 +63,8 @@ pub fn uart_open(
 /// If any functions are called on the UART handle after closing it, they will fail.
 ///
 /// # Examples
-/// ```
+///
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::uart::*;
 /// # use std::ffi::CString;
@@ -97,7 +98,7 @@ pub fn uart_close(uart: *mut *mut UARTHandle) -> UARTStatus {
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # extern crate libc;
 /// # use nosengine_rust::ffi::uart::*;
@@ -142,7 +143,7 @@ pub fn uart_set_read_callback(
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::uart::*;
 /// # use std::ffi::CString;
@@ -176,7 +177,7 @@ pub fn uart_read(uart: *mut UARTHandle, buffer: *mut u8, len: usize) -> usize {
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::uart::*;
 /// # use std::ffi::CString;
@@ -211,7 +212,7 @@ pub fn uart_getc(uart: *mut UARTHandle, c: *mut u8) -> UARTStatus {
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::uart::*;
 /// # use std::ffi::CString;
@@ -244,7 +245,7 @@ pub fn uart_write(uart: *mut UARTHandle, buffer: *const u8, length: usize) -> us
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::uart::*;
 /// # use std::ffi::CString;
@@ -276,7 +277,7 @@ pub fn uart_putc(uart: *mut UARTHandle, c: u8) {
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::uart::*;
 /// # use std::ffi::CString;

@@ -2,7 +2,7 @@
 //!
 //! # Examples
 //!
-//! ```
+//! ```norun
 //! # extern crate nosengine_rust;
 //! # use nosengine_rust::client::spi::*;
 //! # use nosengine_rust::ffi::spi::SPIDirection;
@@ -100,7 +100,7 @@ impl<'a> SPIMaster<'a> {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```norun
     /// # extern crate nosengine_rust;
     /// # use nosengine_rust::client::spi::*;
     /// let master = SPIMaster::new("tcp://localhost:12001", "spi20");

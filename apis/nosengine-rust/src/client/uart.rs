@@ -77,7 +77,7 @@ impl UART {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```norun
     /// # extern crate nosengine_rust;
     /// # use nosengine_rust::client::uart::*;
     /// let uart = UART::new("uart1", "tcp://localhost:12001", "uart2", 10);
@@ -86,7 +86,7 @@ impl UART {
     ///
     /// If there is already a node on the bus with the same name, this function returns `None`.
     ///
-    /// ```
+    /// ```norun
     /// # extern crate nosengine_rust;
     /// # use nosengine_rust::client::uart::*;
     /// let uart = UART::new("uart14", "tcp://localhost:12001", "uart2", 10);
@@ -97,7 +97,7 @@ impl UART {
     ///
     /// However, once a UART is dropped, you can create another node with the same name.
     ///
-    /// ```
+    /// ```norun
     /// # extern crate nosengine_rust;
     /// # use nosengine_rust::client::uart::*;
     /// {
@@ -137,7 +137,7 @@ impl UART {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```norun
     /// # extern crate nosengine_rust;
     /// # use nosengine_rust::client::uart::*;
     /// let uart1 = UART::new("uart2", "tcp://localhost:12001", "uart2", 11).unwrap();
@@ -161,7 +161,7 @@ impl UART {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```norun
     /// # extern crate nosengine_rust;
     /// # use nosengine_rust::client::uart::*;
     /// let uart1 = UART::new("uart4", "tcp://localhost:12001", "uart2", 12).unwrap();
@@ -179,7 +179,7 @@ impl UART {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```norun
     /// # extern crate nosengine_rust;
     /// # use nosengine_rust::client::uart::*;
     /// let uart1 = UART::new("uart6", "tcp://localhost:12001", "uart2", 13).unwrap();
@@ -197,7 +197,7 @@ impl UART {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```norun
     /// # extern crate nosengine_rust;
     /// # use nosengine_rust::client::uart::*;
     /// let uart1 = UART::new("uart8", "tcp://localhost:12001", "uart2", 14).unwrap();
@@ -226,7 +226,7 @@ impl UART {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```norun
     /// # extern crate nosengine_rust;
     /// # use nosengine_rust::client::uart::*;
     /// let uart1 = UART::new("uart10", "tcp://localhost:12001", "uart2", 15).unwrap();
@@ -261,7 +261,7 @@ impl UART {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```norun
     /// # extern crate nosengine_rust;
     /// # use nosengine_rust::client::uart::*;
     /// let uart1 = UART::new("uart12", "tcp://localhost:12001", "uart2", 16).unwrap();

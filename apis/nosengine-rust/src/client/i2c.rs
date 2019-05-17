@@ -2,7 +2,7 @@
 //!
 //! # Examples
 //!
-//! ```
+//! ```norun
 //! # extern crate nosengine_rust;
 //! # use nosengine_rust::client::i2c::*;
 //! # use nosengine_rust::ffi::i2c::I2CDirection;
@@ -121,7 +121,7 @@ impl<'a> I2CMaster<'a> {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```norun
     /// # extern crate nosengine_rust;
     /// # use nosengine_rust::client::i2c::*;
     /// let master = I2CMaster::new(9u16, "tcp://localhost:12001", "i2c20");

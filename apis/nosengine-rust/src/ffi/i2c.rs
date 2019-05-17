@@ -2,7 +2,7 @@
 //!
 //! # Examples
 //!
-//! ```
+//! ```norun
 //! # extern crate nosengine_rust;
 //! # use nosengine_rust::ffi::i2c::*;
 //! # use std::ffi::CString;
@@ -51,7 +51,7 @@ use libc::c_char;
 /// * `bus`: Name of bus to use for I2C
 ///
 /// # Examples
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::i2c::*;
 /// # use std::ffi::CString;
@@ -91,7 +91,7 @@ pub fn i2c_init_master(
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::i2c::*;
 /// # use std::ffi::CString;
@@ -121,7 +121,7 @@ pub fn i2c_init_slave(
 ///     function.
 ///
 /// # Examples
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::i2c::*;
 /// # use std::ffi::CString;
@@ -148,7 +148,7 @@ pub fn i2c_close(i2c: *mut *mut I2CHandle) {
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::i2c::*;
 /// # use std::ffi::CString;
@@ -192,7 +192,7 @@ pub fn i2c_read(i2c: *mut I2CHandle, address: u16, rbuf: *mut u8, rlen: usize) -
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::i2c::*;
 /// # use std::ffi::CString;

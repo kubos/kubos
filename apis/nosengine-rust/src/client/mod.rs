@@ -11,7 +11,7 @@
 //!
 //! Using multithreading to send and receive messages. Note that multiple instances of the
 //! same `Bus` can be created.
-//! ```
+//! ```norun
 //! # extern crate nosengine_rust;
 //! # use nosengine_rust::client::*;
 //! # use std::thread;
@@ -33,7 +33,7 @@
 //!
 //! Sending and receiving messages on one thread.
 //!
-//! ```
+//! ```norun
 //! # extern crate nosengine_rust;
 //! # use nosengine_rust::client::*;
 //! let bus = Bus::new("testbus2", "tcp://localhost:12001").unwrap();
@@ -47,7 +47,7 @@
 //!
 //! Sending and receiving messages using a callback.
 //!
-//! ```
+//! ```norun
 //! # extern crate nosengine_rust;
 //! # use nosengine_rust::client::*;
 //! # use nosengine_rust::ffi;
@@ -171,7 +171,7 @@ impl Bus {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```norun
     /// # extern crate nosengine_rust;
     /// # use nosengine_rust::client::*;
     /// #
@@ -255,7 +255,7 @@ impl DataNode {
     /// thrown if they are not unique! For example, the following code will result in an invalid
     /// memory access:
     ///
-    /// ```ignore
+    /// ```norun
     /// # extern crate nosengine_rust;
     /// # use nosengine_rust::client::*;
     /// let bus = Bus::new("testbus2", "tcp://localhost:12001").unwrap();
@@ -275,7 +275,7 @@ impl DataNode {
     /// * `name`: Name of the node to be created. Must be unique on a bus.
     ///
     /// # Examples
-    /// ```
+    /// ```norun
     /// # extern crate nosengine_rust;
     /// # use nosengine_rust::client::*;
     /// let bus = Bus::new("testbus2", "tcp://localhost:12001").unwrap();
@@ -307,7 +307,7 @@ impl DataNode {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```norun
     /// # extern crate nosengine_rust;
     /// # use nosengine_rust::client::*;
     /// let bus = Bus::new("testbus2", "tcp://localhost:12001").unwrap();

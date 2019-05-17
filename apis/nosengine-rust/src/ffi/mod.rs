@@ -6,7 +6,7 @@
 //!
 //! This example demonstrates the use of a callback to asynchronously reply to a message.
 //!
-//! ```
+//! ```norun
 //! extern crate nosengine_rust;
 //! use std::ffi::CString;
 //! use nosengine_rust::ffi::*;
@@ -60,7 +60,7 @@
 //!
 //! This example uses a separate thread with a second data node synchronously waiting for a message.
 //!
-//! ```
+//! ```norun
 //! # extern crate nosengine_rust;
 //! # use std::ffi::CString;
 //! # use nosengine_rust::ffi::*;
@@ -145,7 +145,7 @@ pub fn error_string() -> *const c_char {
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use std::ffi::CString;
 /// # use nosengine_rust::ffi::*;
@@ -170,7 +170,7 @@ pub fn create_bus2(name: *const c_char, server_uri: *const c_char) -> *mut BusHa
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use std::ffi::CString;
 /// # use nosengine_rust::ffi::*;
@@ -200,7 +200,7 @@ pub fn destroy_bus(bus: *mut *mut BusHandle) {
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::*;
 /// # use std::ffi::CString;
@@ -237,7 +237,7 @@ pub fn create_data_node(bus: *mut BusHandle, name: *const c_char) -> *mut DataNo
 ///
 /// # Examples
 ///
-/// ```
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::*;
 /// # use std::ffi::CString;
@@ -270,7 +270,8 @@ pub fn destroy_data_node(bus: *mut BusHandle, node: *mut *mut DataNodeHandle) {
 ///     valid memory after this pointer
 ///
 /// # Examples
-/// ```
+///
+/// ```norun
 /// # extern crate nosengine_rust;
 /// # use nosengine_rust::ffi::*;
 /// # use std::ffi::CString;
