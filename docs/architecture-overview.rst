@@ -3,6 +3,7 @@ KubOS Architecture Overview
 
 The KubOS system is designed to take care of every aspect of a satellite's flight software.
 
+TODO: Rework the descriptions. Links can be added to some (like the comms service)
 
 The KubOS Stack
 ---------------

@@ -24,7 +24,7 @@ you may edit the build configuration to select additional packages.
 
 From the `buildroot-2019.02.2` directory, run ``sudo make menuconfig``. This will bring up the graphical configuration interface.
 
-.. figure:: ../images/br_config.png
+.. figure:: ../../images/br_config.png
    :alt: Buildroot Configuration Interface
 
    Buildroot Configuration Interface
@@ -36,7 +36,7 @@ From here, press `Enter` to go into the Kubos Packages sub-menu. You should now 
 
 Using the up/down arrow keys, navigate to the package you would like to include and then press the space bar to enable it.
 
-.. figure:: ../images/br_kubos_packages.png
+.. figure:: ../../images/br_kubos_packages.png
    :alt: Kubos Package Selection
 
    Kubos Package Selection
@@ -51,7 +51,7 @@ Press `Enter` again to save the new value and return to the previous menu.
 For more information about any of the options in this menu system, navigate to the option and then press `Shift+?`.
 This will display the option's help information. Press the `Enter` key to exit.
 
-.. figure:: ../images/br_package_help.png
+.. figure:: ../../images/br_package_help.png
    :alt: Buildroot Option Description
 
    Buildroot Option Description

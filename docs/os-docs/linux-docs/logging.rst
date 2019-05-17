@@ -40,7 +40,7 @@ This facility is used by all :doc:`Kubos services <../services/index>`.
 
 Messages written using the `user` facility will be routed to files with the naming scheme
 ``app-*.log``.
-This facility should be used by all :doc:`mission applications <../app-docs/index>`.
+This facility should be used by all :doc:`mission applications <../mission-dev/index>`.
 
 For each of these naming schemes, the following files may be created:
 

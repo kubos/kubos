@@ -1,6 +1,8 @@
 KubOS Service Outlines
 ======================
 
+TODO: Review this. Is any of it outdated?
+
 This guide covers the development of KubOS hardware services and provides an outline for several major types of hardware.
 For general information about hardware services, their role, and how they work, check out :doc:`the hardware services documentation. <../services/hardware-services>`
 Make sure you reference the general hardware service when looking at the schema for all others, because they simply build on that schema, and each section covers what is added to that base schema.

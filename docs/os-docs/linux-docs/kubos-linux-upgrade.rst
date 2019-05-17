@@ -23,7 +23,7 @@ and then boot into the new version of Kubos Linux.
 
 The overall flow looks like this:
 
-.. figure:: ../images/kubos_linux_upgrade.png
+.. figure:: ../../images/kubos_linux_upgrade.png
    :alt: Kubos Linux Upgrade
 
    Kubos Linux Upgrade
@@ -51,10 +51,6 @@ not, refer to the :ref:`install-sd` instructions.
 
 The host computer should be connected to the target board, which should
 be on and running Kubos Linux.
-
-A Kubos SDK Vagrant box should be installed on your host computer and at least
-one shared folder should be set up. Installation instructions can be
-found :doc:`here <../installation-docs/sdk-installing>`.
 
 Installation
 ~~~~~~~~~~~~
@@ -126,6 +122,7 @@ want to generate an upgrade package.
 Pre-requisite
 ~~~~~~~~~~~~~
 
+TODO: New SDK instructions
 Build the new OS. Refer to the :ref:`build-os` instructions.
 
 Run the Packaging Script
@@ -172,5 +169,5 @@ Distribute the Package
 ~~~~~~~~~~~~~~~~~~~~~~
 
 There isn't currently a central storage location or procedure for
-non-release upgrade packages. 
+non-release upgrade packages.
 This section should be upgraded once something has been implemented.

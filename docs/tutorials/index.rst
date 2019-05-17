@@ -1,6 +1,8 @@
 Tutorials
 =========
 
+TODO: Re-work to reduce SDK requirements. This is in Python, so we don't need the SDK at all?
+
 Kubos users develop custom flight software for their OBCs using the :doc:`Kubos SDK <../sdk-docs/index>`.
 
 This custom software is then used to communicate with the various :doc:`core <../services/core-services>` and
@@ -14,7 +16,7 @@ mission logic.
     
     actor User
     
-    folder "Kubos SDK" {
+    folder "Host Machine" {
         [kubos-proj1] as proj1
         [kubos-proj2] as proj2
     }
@@ -54,7 +56,6 @@ data and then storing that data into the telemetry database.
 .. toctree::
     :maxdepth: 1
     
-    Installing the Kubos SDK <../installation-docs/sdk-installing>
     Creating Your First KubOS Project <first-project>
     Creating Your First Mission Application <first-mission-app>
     
@@ -86,7 +87,8 @@ Important system tutorials which should be approached after mastering basic syst
 Other Resources
 ---------------
 
-These other docs give more information about various components of KubOS and the Kubos SDK:
+TODO: Re-work
+These other docs give more information about various components of KubOS and the Kubos ecosystem:
 
     - :doc:`KubOS Architecture Overview <../architecture-overview>`
     - :doc:`Using Rust with the Kubos SDK <../sdk-docs/sdk-rust>`

@@ -17,7 +17,7 @@ ground.
 Architecture
 ------------
 
-.. figure:: ../images/comms_arch.png
+.. figure:: ../../images/comms_arch.png
     :align: center
 
 Data Packets
@@ -208,16 +208,16 @@ For more information about how to implement a communications service, please ref
 resources:
 
 - |comms-service|
-- :doc:`Comms service tutorial <../tutorials/comms-service>`
+- :doc:`Comms service tutorial <../../tutorials/comms-service>`
 
 .. |comms-service| raw:: html
 
-    <a href="../rust-docs/comms_service/index.html" target="_blank">Framework Rust documentation</a>
+    <a href="../../rust-docs/comms_service/index.html" target="_blank">Framework Rust documentation</a>
     
 .. |CommsControlBlock| raw:: html
 
-    <a href="../rust-docs/comms_service/struct.CommsControlBlock.html" target="_blank">CommsControlBlock</a>
+    <a href="../../rust-docs/comms_service/struct.CommsControlBlock.html" target="_blank">CommsControlBlock</a>
 
 .. |CommsTelemetry| raw:: html
 
-    <a href="../rust-docs/comms_service/struct.CommsTelemetry.html" target="_blank">CommsTelemetry</a>
+    <a href="../../rust-docs/comms_service/struct.CommsTelemetry.html" target="_blank">CommsTelemetry</a>

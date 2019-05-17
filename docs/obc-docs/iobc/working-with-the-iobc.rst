@@ -7,7 +7,7 @@ Overview
 This document covers the Kubos Linux features which are specific to the
 ISIS-OBC target, also known as the iOBC.
 
-Please refer to :doc:`using-kubos-linux` for a general guide to using Kubos Linux.
+Please refer to :doc:`../../os-docs/using-kubos-linux` for a general guide to using Kubos Linux.
 
 Reference Documents
 -------------------
@@ -23,10 +23,10 @@ installed to support them.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../tutorials/first-project` - Basic tutorial for creating your first KubOS project
--  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
--  :doc:`kubos-linux-on-iobc` - Steps to build Kubos Linux for the iOBC
--  :doc:`../installation-docs/installing-linux-iobc` - Steps to install Kubos Linux
+-  :doc:`../../tutorials/first-project` - Basic tutorial for creating your first KubOS project
+-  :doc:`../../os-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`../../os-docs/kubos-linux-on-iobc` - Steps to build Kubos Linux for the iOBC
+-  :doc:`installing-linux-iobc` - Steps to install Kubos Linux
 
 Status LEDs
 -----------
@@ -196,7 +196,7 @@ speed of 100kHz.
 
 The I2C bus is available as ``/dev/i2c-0``, or through the Kubos C HAL as ``K_I2C1``.
 
-For examples and instructions, see the :doc:`I2C HAL documentation <../apis/kubos-hal/i2c-hal/index>`.
+For examples and instructions, see the :doc:`I2C HAL documentation <../../apis/kubos-hal/i2c-hal/index>`.
 
 PWM
 ~~~

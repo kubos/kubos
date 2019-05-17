@@ -6,7 +6,7 @@ The core services are all the services that provide critical flight software cap
 .. toctree::
     :maxdepth: 1
 
-    Applications Service <../app-docs/app-service>
+    Applications Service <../../mission-dev/app-service>
     Communications Service <comms-framework>
     File Transfer Service <file>
     Monitor Service <monitor-service>

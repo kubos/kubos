@@ -67,7 +67,7 @@ A login dialog will be presented; the login credentials are kubos/Kubos123.
 
 This will create a graphical display of the same information returned by ``monit status``:
 
-.. image:: ../images/monit.png
+.. image:: ../../images/monit.png
 
 
 Configuration

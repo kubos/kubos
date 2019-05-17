@@ -1,6 +1,8 @@
 Using Kubos Linux
 =================
 
+TODO: Review/update this doc once all the other new stuff is in place
+
 Overview
 --------
 
@@ -20,9 +22,9 @@ SDK Documentation
 Board-Specific Documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  :doc:`working-with-the-bbb`
--  :doc:`working-with-the-iobc`
--  :doc:`working-with-the-mbm2`
+-  :doc:`../obc-docs/bbb/index`
+-  :doc:`../obc-docs/iobc/index`
+-  :doc:`../obc-docs/mbm2/index`
 
 .. _obc-communication:
 

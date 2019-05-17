@@ -1,86 +1,89 @@
-Working with the Pumpkin MBM2
-=============================
+Working with the Beaglebone Black
+=================================
 
 Overview
 --------
 
 This document covers the Kubos Linux features which are specific to the
-Pumpkin MBM2 target.
+Beaglebone Black target.
 
 Please refer to :doc:`using-kubos-linux` for a general guide to using Kubos Linux.
 
 Reference Documents
 -------------------
 
-Pumpkin Documentation
-~~~~~~~~~~~~~~~~~~~~~
+Beaglebone Documentation
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :title:`CubeSat Kit Motherboard Module (MBM) 2` reference document
-is available from Pumpkin and is a useful document for learning what
-each of the hardware components are and how they are connected.
+- `Beaglebone Black Web Page <https://beagleboard.org/black>`__
+- `Beaglebone Black Wiki <http://elinux.org/Beagleboard:BeagleBoneBlack>`__
+- `Beaglebone Black Hardware Diagrams <http://beagleboard.org/Support/bone101/#hardware>`__
+- `Beaglebone Black System Reference Manual Rev C <http://static6.arrow.com/aropdfconversion/8fff89aa85f5c451318cbdee2facd9c9fac36872/bbb_srm.pdf>`__
 
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../tutorials/first-project` - Basic tutorial for creating your first KubOS project
--  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
--  :doc:`kubos-linux-on-mbm2` - Steps to build Kubos Linux for the Pumpkin MBM2
--  :doc:`../installation-docs/installing-linux-mbm2` - Steps to install Kubos Linux
+-  :doc:`../../tutorials/first-project` - Basic tutorial for creating your first KubOS project
+-  :doc:`../os-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`../os-docs/kubos-linux-on-bbb` - Steps to build Kubos Linux for the Beaglebone Black
+-  :doc:`installing-linux-bbb` - Steps to install Kubos Linux
+
+Debug Console Connection
+------------------------
+
+As documented in section 7.5 of the :title:`Beaglebone Black System
+Reference Manual`, an FTDI cable can be connected to the serial debug
+connector in order to establish a debug console connection.
+
+This connection will be passed through to a Kubos Vagrant image as
+`/dev/FTDI`.
 
 Status LEDs
 -----------
 
-There are four LEDs present on the Pumpkin MBM2 which give some indication of what state
+There are four LEDs present on the Beaglebone Black which give some indication of what state
 the board is in. When there is only one blinking LED, the board is running Kubos Linux and
 the system is currently idle. The LEDs will blink in correspondence with CPU and MMC activity.
 If all LEDs are solid, then the system has reached some kind of locked error state.
 
-USB Connection
---------------
-
-The Pumpkin MBM2 should be shipped with a USB Debug Adapter board.
-
-The white connection cable should be plugged into the labeled "UART0"
-port on the edge of the board, with the exposed pins facing up.
-
-The USB cable can then be plugged into your computer. Any required
-drivers should be automatically installed.
-
-This connection will be passed through to a Kubos Vagrant image as
-`/dev/FTDI` and will be used for the serial console.
-
-.. _peripherals-mbm2:
-
 Peripherals
 -----------
 
-The Pumpkin MBM2 has several different ports available for interacting
+The Beaglebone Black has several different ports available for interacting
 with peripheral devices. Currently, users should interact with these
 devices using the standard Linux functions. A Kubos HAL will be added
 in the future to abstract this process.
 
+.. note::
+
+    Kubos Linux for the Pumpkin MBM2 can be used instead of Kubos Linux
+    for the Beaglebone Black. In this case, some buses and pins won't be
+    available, since they aren't exposed in the MBM2's CSK headers, or are
+    dedicated to other uses. See the :ref:`peripherals-mbm2` section for 
+    more information.
+          
 ADC
 ~~~
 
-The Pumpkin MBM2 has seven analog input pins available:
+The Beaglebone Black has seven analog input pins available:
 
-+------+------+
-| Name | Pin  |
-+======+======+
-| AIN0 | H2.8 |
-+------+------+
-| AIN1 | H2.7 |
-+------+------+
-| AIN2 | H2.6 |
-+------+------+
-| AIN3 | H2.5 |
-+------+------+
-| AIN4 | H2.4 |
-+------+------+
-| AIN5 | H2.3 |
-+------+------+
-| AIN6 | H2.2 |
-+------+------+
++------+-------+
+| Name | Pin   |
++======+=======+
+| AIN0 | P9.39 |
++------+-------+
+| AIN1 | P9.40 |
++------+-------+
+| AIN2 | P9.37 |
++------+-------+
+| AIN3 | P9.38 |
++------+-------+
+| AIN4 | P9.33 |
++------+-------+
+| AIN5 | P9.36 |
++------+-------+
+| AIN6 | P9.35 |
++------+-------+
 
 The pins are available through the Linux device ``/sys/bus/iio/devices/iio\:device0/``.
 
@@ -103,18 +106,18 @@ Where:
     - :math:`n` = Number of ADC resolution bits
     - :math:`V_{ref}` =  Reference voltage
 
-The Pumpkin MBM2 uses 12 resolution bits and a reference voltage of 1.8V, so the
+The Beaglebone Black uses 12 resolution bits and a reference voltage of 1.8V, so the
 resulting equation is
 
 .. math::
 
     V_{in} = \frac{D * (4095)}{1.8}
-     
+    
 Ethernet
 ~~~~~~~~
 
-The Pumpkin MBM2, via the embedded Beaglebone Black, provides an ethernet
-port which can be used for things like inter-system communication.
+The Beaglebone Black provides an ethernet port which can be used for things
+like inter-system communication.
 
 The ethernet port is configured to have support for static IPv4 addressing and
 can be used with SSH via the included `Dropbear <https://en.wikipedia.org/wiki/Dropbear_(software)>`__
@@ -151,26 +154,10 @@ A couple example programs using the ethernet port can be found in the `examples`
 GPIO
 ~~~~
 
-The CSK headers have 6 GPIO pins available for use.
-These pins can be dynamically controlled via the `Linux GPIO Sysfs
-Interface for Userspace <https://www.kernel.org/doc/Documentation/gpio/sysfs.txt>`__
-as long as they have not already been assigned to another peripheral.
+The Beaglebone Black has many GPIO pins available for general use. Pinout diagrams
+are available on the `Beaglebone website <http://beagleboard.org/Support/bone101/#hardware>`__.
 
-+---------+------------------+-----------+
-| CSK Pin | Linux GPIO Value | Direction |
-+=========+==================+===========+
-| H1.6    | 65               | Input     |
-+---------+------------------+-----------+
-| H2.18   | 61               | Output    |
-+---------+------------------+-----------+
-| H2.21   | 89               | Output    |
-+---------+------------------+-----------+
-| H2.22   | 87               | Output    |
-+---------+------------------+-----------+
-| H2.23   | 86               | Output    |
-+---------+------------------+-----------+
-| H2.24   | 85               | Output    |
-+---------+------------------+-----------+
+Any pin that is not dedicated to a previously mentioned peripheral is available for use.
 
 CLI and Script Interface
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -182,11 +169,11 @@ generate the pin's device name:
 
     $ echo {pin} > /sys/class/gpio/export
 
-For example, to interact with pin H2.18, which corresponds with GPIO_61, the user will use:
+For example, to interact with pin P8.11, which corresponds with GPIO_45, the user will use:
 
 ::
 
-    $ echo 61 > /sys/class/gpio/export
+    $ echo 45 > /sys/class/gpio/export
 
 Once this command has been issued, the pin will be defined to the system
 as '/sys/class/gpio/gpio{pin}'. The user can then set and check the pins
@@ -195,13 +182,13 @@ direction and value.
 ::
 
     Set pin as output:
-    $ echo out > /sys/class/gpio/gpio61/direction
+    $ echo out > /sys/class/gpio/gpio45/direction
 
     Set pin's value to 1:
-    $ echo 1 > /sys/class/gpio/gpio61/value
+    $ echo 1 > /sys/class/gpio/gpio45/value
 
     Get pins's value:
-    $ cat /sys/class/gpio/gpio61/value
+    $ cat /sys/class/gpio/gpio45/value
 
 Once finished, the pin can be released:
 
@@ -227,7 +214,7 @@ An example program might look like this:
     #include <unistd.h>
     
     int fd;
-    int pin = 61;
+    int pin = 45;
     int value = 1;
     
     /* Define the pin to the system */
@@ -248,7 +235,7 @@ An example program might look like this:
     /* Read the value back */
     fd = open("/sys/class/gpio/gpio45/value", O_RDONLY);
     char strValue[3];
-    read(fd, strValue, 1);
+    read(fd, strValue, 3);
     value = atoi(strValue);
     close(fd);
     
@@ -256,13 +243,19 @@ An example program might look like this:
     fd = open("/sys/class/gpio/unexport", O_WRONLY);
     write(fd, &pin, sizeof(pin)); 
     close(fd);
-
+    
 I2C
 ~~~
 
-The Pumpkin MBM2 has one user-accessible I2C bus, ``/dev/i2c-1``
-Users can connect a new device to it via pins **H1.43** (SCL) and **H1.41** (SDA)
-of the CubeSat Kit Bus connectors.
+The Beaglebone Black has two user-accessible I2C buses.
+
++--------------+--------------+---------+---------+
+| Linux Device | Kubos Device | SCL Pin | SDA Pin |
++==============+==============+=========+=========+
+| /dev/i2c-1   | K_I2C1       | P9.17   | P9.18   |
++--------------+--------------+---------+---------+
+| /dev/i2c-2   | K_I2C2       | P9.19   | P9.20   |
++--------------+--------------+---------+---------+
 
 `I2C Standards
 Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
@@ -270,47 +263,130 @@ Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
 Kubos Linux is currently configured to support the I2C standard-mode
 speed of 100kHz.
 
-For examples and instructions, see the :doc:`I2C HAL documentation <../apis/kubos-hal/i2c-hal/index>`.
+For examples and instructions, see the :doc:`I2C HAL documentation <../../apis/kubos-hal/i2c-hal/index>`.
 
-.. note:: The I2C bus is available through the Kubos C HAL as ``K_I2C1``.
-
-RTC
+SPI
 ~~~
 
-The Pumpkin MBM2 has a real-time clock (RTC) which is used to maintain system time.
+The Beaglebone has one SPI bus available with a pre-allocated chip select pin.
 
-This clock can be queried or set using the ``hwclock`` command.
+**SPI Bus 1**
+
++------+-------+
+| Name | Pin   |
++======+=======+
+| MOSI | P9.30 |
++------+-------+
+| MISO | P9.29 |
++------+-------+
+| SCLK | P9.31 |
++------+-------+
+| CS0  | P9.28 |
++------+-------+
+
+Users can interact a device on this bus using Linux's `spidev interface <https://www.kernel.org/doc/Documentation/spi/spidev>`__
+The device name will be ``/dev/spidev1.0``.
+
+An example user program to read a value might look like this:
+
+.. code-block:: c
+
+    #include <fcntl.h>
+    #include <unistd.h>
+    #include <sys/ioctl.h>
+    #include <linux/types.h>
+    #include <linux/spi/spidev.h>
+      
+    #define SPI_DEV "/dev/spidev1.0"
+    
+    int fd;
+    uint8_t mode = SPI_MODE_0;
+    uint8_t bits = 8;
+    uint32_t speed = 100000;
+    uint16_t delay = 0;
+    
+    uint8_t register, shift_reg;
+    uint8_t value;
+    
+    fd = open(SPI_DEV, O_RDWR);
+    
+    /* Register to read from */
+    register = 0xD0;
+
+    struct spi_ioc_transfer tr = {
+        .tx_buf = (unsigned long)&register,
+        .rx_buf = (unsigned long)&register,
+        .len = 1,
+        .speed_hz = speed,
+        .bits_per_word = bits,
+        .cs_change = 0,
+        .delay_usecs = delay,
+    };
+
+    /* Send request to read */
+    ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+
+    /* Setup buffer to read to */
+    tr.tx_buf = &value;
+    tr.rx_buf = &value;    
+    
+    /* Read data */
+    ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+
+    close(fd);
 
 UART
 ~~~~
 
-The Pumpkin MBM2 has 5 UART ports available for use in varying capacities:
+The Beaglebone Black has 5 UART ports available for use:
 
 +-------------------+--------+--------+---------+---------+
 | Linux Device      | TX Pin | RX Pin | RTS Pin | CTS Pin |
 +===================+========+========+=========+=========+
-| /dev/ttyS1        | H1.18  | H1.17  | H1.10   | H1.9    |
+| /dev/ttyS1        | P9.24  | P9.26  |         |         |
 +-------------------+--------+--------+---------+---------+
-| /dev/ttyS2        | H1.8   | H1.7   |         |         |
+| /dev/ttyS2        | P9.21  | P9.22  |         |         |
 +-------------------+--------+--------+---------+---------+
-| /dev/ttyS3        | H1.5   |        |         |         |
+| /dev/ttyS3        | P9.42  |        | P8.34   | P8.36   |
 +-------------------+--------+--------+---------+---------+
-| /dev/ttyS4        | H1.16  | H1.15  |         |         |
+| /dev/ttyS4        | P9.13  | P9.11  | P8.33   | P8.35   |
 +-------------------+--------+--------+---------+---------+
-| /dev/ttyS5 (SLIP) | H1.20  | H1.19  | H1.12   | H1.11   |
+| /dev/ttyS5 (SLIP) | P8.37  | P8.38  | P8.32   | P8.31   |
 +-------------------+--------+--------+---------+---------+
 
-Users can interact with these ports using Linux's `termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
+.. note:: /dev/ttyS3 (UART3) is TX-only. /dev/ttyS1 and /dev/ttyS2 do not 
+    have RTS/CTS due to pin conflicts with other buses.
+
+Users can interact with these ports in their applications using Linux's
+`termios <http://man7.org/linux/man-pages/man3/termios.3.html>`__ interface.
 
 `A tutorial on this interface can be found here <http://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html>`__
 
+Additionally, the ports can be used from the command line:
+
+The ``stty -F {device} [parameters]`` command can be used to
+configure the port. For example, this command will set the
+baud rate of `/dev/ttyS1` to 4800::
+
+    $ stty -F /dev/ttyS1 4800
+    
+The ``echo`` command can be used to transmit basic data out of
+the TX pin. For example::
+
+    $ echo "Hello!" > /dev/ttyS1
+    
+The ``cat`` command can be used to read any data from the RX
+pin. For example::
+
+    $ cat < /dev/ttyS1
+    
 The ``/dev/ttyS5`` device has been preconfigured to be used for SLIP connections.
 Please refer to the :ref:`SLIP instructions <slip>` for more information.
 
 User Data Partitions
 --------------------
 
-The Pumpkin MBM2 has multiple user data partitions available, one on each storage
+The Beaglebone Black has two user data partitions available, one on each storage
 device.
 
 eMMC
@@ -328,7 +404,6 @@ full file path.
 
 /home/system/etc/init.d
 ^^^^^^^^^^^^^^^^^^^^^^^
-
 All user-application initialization scripts live under this directory.
 The naming format is 'S{run-level}{application}'.
 
@@ -342,18 +417,12 @@ This directory points to a partition on the microSD device included with the
 base Beaglebone Black board
 
 .. todo::
-
-    SD over SPI - /home/spisd
-    (header characters here)
-    
-    This directory points to a partition on the SD over SPI device included as a
-    peripheral device of the Pumpkin MBM2 board.
     
     EEPROM - /home/eeprom
     (header characters here)
     
     This directory points to the available space of the EEPROM storage included with 
-    the base Beaglebone Black board. There are 4KB of space available for use.
+    the Beaglebone Black board. There are 4KB of space available for use.
     
     .. note:: 
     

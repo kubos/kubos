@@ -20,10 +20,10 @@ installed to support them.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../tutorials/first-project` - Basic tutorial for creating your first SDK project
--  :doc:`../os-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
--  :doc:`../os-docs/working-with-the-iobc` - Guide for interacting with iOBC-specific features
--  :doc:`../os-docs/kubos-linux-on-iobc` - Steps to build Kubos Linux
+-  :doc:`../../tutorials/first-project` - Basic tutorial for creating your first SDK project
+-  :doc:`../../os-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`working-with-the-iobc` - Guide for interacting with iOBC-specific features
+-  :doc:`../../os-docs/kubos-linux-on-iobc` - Steps to build Kubos Linux
 
 Components
 ----------
@@ -79,7 +79,7 @@ Using `Etcher <https://www.balena.io/etcher/>`__:
     in your system.)
   - Click the "Flash!" button to start the flashing process
 
-.. figure:: ../images/iOBC/etcher.png
+.. figure:: ../../images/iOBC/etcher.png
    :alt: Etcher Setup
 
    Etcher Setup
@@ -172,7 +172,7 @@ Issue the ``reboot`` command in order to restart the system.
 Hold down any key while the board is restarting. This will exit out of the auto-boot and
 bring up the CLI.
 
-.. figure:: ../images/iOBC/uboot_console.png
+.. figure:: ../../images/iOBC/uboot_console.png
    :alt: U-Boot Console
 
    U-Boot Console
@@ -227,7 +227,7 @@ Using Kubos Linux
 -----------------
 
 For information on how to create and run applications on your new Kubos Linux system, see the
-:doc:`../os-docs/working-with-the-iobc` guide.
+:doc:`working-with-the-iobc` guide.
 
 
 Non-Default Installation Process
@@ -493,7 +493,7 @@ Issue the ``reboot`` command in order to restart the system.
 Hold down any key while the board is restarting. This will exit out of the auto-boot and
 bring up the CLI.
 
-.. figure:: ../images/iOBC/uboot_console.png
+.. figure:: ../../images/iOBC/uboot_console.png
    :alt: U-Boot Console
 
    U-Boot Console
@@ -509,7 +509,7 @@ Start SAM-BA
 Start up SAM-BA. You'll want to select the at91sam9g20-ISISOBC option from the
 'Select your board' drop-down.
 
-.. figure:: ../images/iOBC/samba_connection_select.png
+.. figure:: ../../images/iOBC/samba_connection_select.png
    :alt: SAM-BA Connection Selection
 
    SAM-BA Connection Selection
@@ -520,7 +520,7 @@ Enable Flashing
 Execute the 'Enable NorFlash' script. This will prep the board to enable
 flashing.
 
-.. figure:: ../images/iOBC/samba_enable_norflash.png
+.. figure:: ../../images/iOBC/samba_enable_norflash.png
    :alt: SAM-BA Enable NorFlash
 
    SAM-BA Enable NorFlash
@@ -534,7 +534,7 @@ Make sure that 'Address' is set to 0xA000.
 
 Click 'Send File'
 
-.. figure:: ../images/iOBC/samba_send_uboot.png
+.. figure:: ../../images/iOBC/samba_send_uboot.png
    :alt: SAM-BA Send U-Boot
 
    SAM-BA Send U-Boot
@@ -552,7 +552,7 @@ Set 'Address' to 0x70000.
 
 Click 'Send File'
 
-.. figure:: ../images/iOBC/samba_send_dtb.png
+.. figure:: ../../images/iOBC/samba_send_dtb.png
    :alt: SAM-BA Send DTB
 
    SAM-BA Send DTB

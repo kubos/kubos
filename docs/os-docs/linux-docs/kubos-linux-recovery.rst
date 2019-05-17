@@ -13,14 +13,14 @@ If the system has failed to boot twice already, then the custom Kubos recovery c
 Environment Variables
 ---------------------
 
-There are several U-Boot environment variables that are used to track the state of a Kubos Linux system: 
+There are several U-Boot environment variables that are used to track the state of a Kubos Linux system:
 
-* `bootcmd` - The usual set of commands that are used to boot into Kubos Linux. 
-* `altbootcmd` - The alternate set of commands that are used if the system cannot successfully boot into Kubos Linux. They will be set up to attempt to boot into an alternate OS. 
-* `recovery_available` - Indicates that recovery actions are available and should be taken, if necessary. 
-* `bootlimit` - The number of bad boots allowed before the system attempts to use altbootcmd instead of bootcmd to boot. 
-* `bootcount` - The number of boots that have been attempted. 
-* `kubos_curr_version` - The name of the kpack \*.itb file that the current Kubos Linux kernel and rootfs were loaded from. 
+* `bootcmd` - The usual set of commands that are used to boot into Kubos Linux.
+* `altbootcmd` - The alternate set of commands that are used if the system cannot successfully boot into Kubos Linux. They will be set up to attempt to boot into an alternate OS.
+* `recovery_available` - Indicates that recovery actions are available and should be taken, if necessary.
+* `bootlimit` - The number of bad boots allowed before the system attempts to use altbootcmd instead of bootcmd to boot.
+* `bootcount` - The number of boots that have been attempted.
+* `kubos_curr_version` - The name of the kpack \*.itb file that the current Kubos Linux kernel and rootfs were loaded from.
 * `kubos_prev_version` - The name of the kpack \*.itb file that was previously used to load the Kubos Linux kernel and rootfs.
 * `kubos_curr_tried` - Indicates that reloading the current version has been attempted.
 
@@ -29,7 +29,7 @@ The default values for these variables can be found in the configuration header 
 Boot Processing Diagram
 -----------------------
 
-.. figure:: ../images/kubos_linux_recovery.png
+.. figure:: ../../images/kubos_linux_recovery.png
    :alt: Boot Processing Diagram
 
    Boot Processing Diagram
@@ -37,10 +37,10 @@ Boot Processing Diagram
 Kubos Recovery
 --------------
 
-The Kubos recovery process has three main components: 
+The Kubos recovery process has three main components:
 
-* Attempt to reload the current version of Kubos Linux 
-* Attempt to load the previous version of Kubos Linux 
+* Attempt to reload the current version of Kubos Linux
+* Attempt to load the previous version of Kubos Linux
 * Attempt to load the base version of Kubos Linux
 
 The boot count will not be increased again until this full recovery process is determined to have failed.
@@ -93,8 +93,8 @@ From the Kubos Linux shell:
 Alternate Boot
 --------------
 
-If the system has failed to boot more times than the 'bootlimit' value allows, the system will attempt to boot using the 'altbootcmd' environment variable. 
-This variable contains all of the commands required to sanitize the current boot environment and then, if it has been set up, boot into an alternate operating system. 
+If the system has failed to boot more times than the 'bootlimit' value allows, the system will attempt to boot using the 'altbootcmd' environment variable.
+This variable contains all of the commands required to sanitize the current boot environment and then, if it has been set up, boot into an alternate operating system.
 Due to the low-portability of any commands that deal with memory, the exact format will change between boards (and potentially between customers), but should follow this rough format:
 
 -  Set the 'recovery\_available' variable to 0 (if we succesfully boot into an alternate OS, it should reset this back to 1. If we fail to boot into the alternate OS, then we should not keep attempting.)
@@ -117,11 +117,11 @@ Generic Alternate OS Setup
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The basic process for creating an alternate OS and loading it onto a board
-should be:  
+should be:
 
-* Build an application that is capable of running on the board. Pay attention to the SDRAM address that the application is configured to run from. Frequently, this is a static address (likely the very beginning of SDRAM), so the application must end up running from this location. 
-* Load it into the appropriate persistent storage (NOR/NAND flash, SD card, etc) 
-* Update the altbootcmd variable with the address to copy the application from, the address to copy the application to, and the length of the application. 
+* Build an application that is capable of running on the board. Pay attention to the SDRAM address that the application is configured to run from. Frequently, this is a static address (likely the very beginning of SDRAM), so the application must end up running from this location.
+* Load it into the appropriate persistent storage (NOR/NAND flash, SD card, etc)
+* Update the altbootcmd variable with the address to copy the application from, the address to copy the application to, and the length of the application.
   Then add a command to trigger the boot process. This can be done from the U-Boot CLI with the ``setenv`` and ``saveenv`` commands, or from Kubos Linux with the ``fw_setenv`` command.
 
 The updated altbootcmd might look something like this:
@@ -134,7 +134,7 @@ This command will go through the default alternate boot commands and then:
 
   - Copy 0x7000 bytes from address 0x10080000 (a permanent storage location) to address 0x20000000 (the beginning of SDRAM)
   - Use the ``go`` command to attempt to boot from address 0x20000000 (``go`` is used for generic executables)
-  
+
 U-Boot CLI
 ----------
 

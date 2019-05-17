@@ -1,6 +1,9 @@
 Kubos Mission Applications
 ==========================
 
+TODO: Re-work for the new "Mission Development" umbrella.
+It includes developing payload services and whatnot
+
 Mission applications include anything that makes decisions or governs autonomy on the satellite, as well as any other applications designed to address mission-specific concerns.
 
 Applications can be used to enable the satellite to act autonomously. Some basic versions of this are:
@@ -25,6 +28,12 @@ and how they are run. For example, when run on-demand, versus when run at startu
 
 Mission applications are monitored and managed by the :doc:`Kubos applications service <app-service>`.
 
+TODO: Typical mission needs:
+
+- apps (housekeeping, beacon, telemetry)
+- services
+- etc
+
 .. todo::
 
     This service is responsible for starting all applications at the requested time (or times), rebooting applications if they crash unexpectedly,
@@ -39,3 +48,4 @@ Mission applications are monitored and managed by the :doc:`Kubos applications s
     Applications Development Guide <app-guide>
     Kubos Applications Service Guide <app-service>
     Deployment Application Guide <deployment>
+    flight-ready
