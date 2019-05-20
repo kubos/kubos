@@ -46,6 +46,7 @@ impl TestCommand {
     pub fn spawn(&self) {
         let child = Command::new(self.command.to_owned())
             .args(&self.args)
+            .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
