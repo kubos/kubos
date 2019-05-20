@@ -1,6 +1,8 @@
 Kubos SDK Docs
 ==============
 
+TODO: Review all of these and edit/remove as necessary
+
 The "Kubos SDK" is a term used to describe all of the components used
 to build Kubos projects:
 
@@ -48,7 +50,7 @@ to build Kubos projects:
 
 This documentation section contains the various guides related to using the Kubos SDK:
 
-    - :doc:`../installation-docs/sdk-installing` - How to install the SDK onto your host machine
+    - :doc:`sdk-installing` - How to install the SDK onto your host machine
     - :doc:`sdk-examples` - A list of example projects using the SDK
     - :doc:`sdk-c` - A guide to using C with the Kubos SDK
     - :doc:`sdk-rust` - How to develop and run Kubos projects using Rust
@@ -59,7 +61,7 @@ This documentation section contains the various guides related to using the Kubo
 .. toctree::
     :hidden:
 
-    ../installation-docs/sdk-installing
+    sdk-installing
     sdk-examples
     sdk-rust
     sdk-python

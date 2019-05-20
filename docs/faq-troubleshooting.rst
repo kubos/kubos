@@ -1,6 +1,8 @@
 Kubos FAQs and Troubleshooting Tips
 ===================================
 
+TODO: Figure out what to do with this. Do we want to keep it? Is it useful?
+
 .. contents:: :local:
 
 FAQs
@@ -39,9 +41,9 @@ How do I see the debug output of my board?
 How do I check what version of Kubos Linux I'm running?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Issue the ``uname -r`` command on the target board to display the kernel information. 
+Issue the ``uname -r`` command on the target board to display the kernel information.
 The Kubos Linux version will be the *n.n.n* number after "KubOS".
-  
+
 :: 
 
     uname -r    
@@ -125,4 +127,4 @@ I transferred a script, but it won't run
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``scp`` does not preserve file modes by default, however ``scp -p`` should preserve
-the execute bit. Check that your file has the appropriate execute permissions turned on. 
+the execute bit. Check that your file has the appropriate execute permissions turned on.

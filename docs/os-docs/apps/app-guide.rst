@@ -113,16 +113,16 @@ Additional Resources
 
 Reference Docs:
 
-    - :doc:`Applications Service Guide <app-service>` - Goes over the basic capabilities of the
-      applications service and how it can be customized
-    - :doc:`Deployment Application Guide <deployment>` - Goes over the basic architecture required
-      to execute a mission's deployment logic
+    - :doc:`Applications Service Guide <../services/app-service>` - Goes over the basic capabilities
+      of the applications service and how it can be customized
+    - :doc:`Deployment Application Guide <../../mission-dev/deployment>` - Goes over the basic
+      architecture required to execute a mission's deployment logic
 
 Tutorials:
 
-    - :doc:`../tutorials/first-mission-app` - Walks the user through the process of creating their
+    - :doc:`../../tutorials/first-mission-app` - Walks the user through the process of creating their
       first mission application which is capable of interacting with Kubos services
-    - :doc:`../tutorials/app-register` - Walks the user through the process of registering a
+    - :doc:`../../tutorials/app-register` - Walks the user through the process of registering a
       mission application with the applications service and then starting, updating, and verifying
       the application
 

@@ -2,7 +2,7 @@ Shell Protocol
 ==============
 
 The shell protocol is implemented by both the
-:doc:`shell service <../../services/shell>` and any clients interfacing
+:doc:`shell service <../../../os-docs/services/shell>` and any clients interfacing
 with the service.
 
 All messages in the shell protocol are encoded as `CBOR` arrays
@@ -20,15 +20,15 @@ APIs
 - |channel-protocol|
 
  .. |shell-protocol| raw:: html
- 
+
     <a href="../../rust-docs/shell_protocol/index.html" target="_blank">Shell Protocol</a>
 
  .. |cbor-protocol| raw:: html
- 
+
     <a href="../../rust-docs/cbor_protocol/index.html" target="_blank">CBOR Protocol</a>
-    
+
  .. |channel-protocol| raw:: html
- 
+
     <a href="../../rust-docs/channel_protocol/index.html" target="_blank">Channel Protocol</a>
 
 Messages
@@ -45,7 +45,7 @@ Spawn Process
 This message is sent to the shell service to request a child
 process to be spawned. It contains a channel ID, the string
 'spawn', a command, and spawn options. The command can be an
-absolute path to a binary or something in the system ``$PATH``. 
+absolute path to a binary or something in the system ``$PATH``.
 
     ``{ channel_id, 'spawn', command, options.. }``
 

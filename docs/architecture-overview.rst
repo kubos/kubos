@@ -4,6 +4,7 @@ KubOS Architecture Overview
 The KubOS system is designed to take care of every aspect of a satellite's flight software.
 
 TODO: Rework the descriptions. Links can be added to some (like the comms service)
+Maybe break this into multiple docs
 
 The KubOS Stack
 ---------------
@@ -21,9 +22,11 @@ We are continually working to support new platforms, so make sure you `talk to u
 Kubos Linux
 ~~~~~~~~~~~
 
+TODO: expand me and mention u-boot
+
 Kubos Linux is Kubos's Linux distro.
 
-- :doc:`Kubos Linux docs <os-docs/index>`
+- :ref:`Kubos Linux docs <linux-docs>`
 
 Kubos Services
 ~~~~~~~~~~~~~~
@@ -31,7 +34,7 @@ Kubos Services
 A Kubos service is defined as any persistent process that is used to interact with the satellite.
 Services rarely make decisions, but will allow the user to accomplish typical flight software tasks such as telemetry storage, file management, shell access, and hardware interaction.
 
-- :doc:`Kubos Services <services/index>`
+- :ref:`Kubos Services <service-docs>`
 
 Mission Applications
 ~~~~~~~~~~~~~~~~~~~~
@@ -41,7 +44,7 @@ They govern state management, accomplish scripted tasks, monitor onboard behavio
 Each application is typically dedicated to a certain mode or isolated task the satellite is supposed to accomplish to keep them lightweight and portable.
 They can be simple, such as a telemetry beacon app, or complex, such as a payload operations app.
 
-- :doc:`Mission Applications <app-docs/index>`
+- :doc:`Mission Applications <os-docs/apps/index>`
 
 
 Typical Mission Architecture
@@ -73,16 +76,16 @@ Hardware Services
 Hardware services are GraphQL server endpoints that take in queries and mutations and exercise the hardware API to complete them.
 Typically, there is an accompanying hardware API to allow for easy interaction with the hardware.
 
- - :doc:`Hardware Services <services/hardware-services>`
- - :doc:`GraphQL <services/graphql>`
- - :doc:`Hardware APIs <apis/device-api/index>`
+ - :doc:`Hardware Services <os-docs/services/hardware-services>`
+ - :doc:`GraphQL <os-docs/services/graphql>`
+ - :doc:`Hardware APIs <deep-dev/apis/device-api/index>`
 
 Core Services
 ~~~~~~~~~~~~~
 
 Core services are all the services that provide critical flight software capability.
 Any service that does not interact with hardware and is not specific to a mission falls within this category.
-Currently, :doc:`core services <services/core-services>` include:
+Currently, :doc:`core services <os-docs/services/core-services>` include:
 
 - Shell service
 - Telemetry database service
@@ -98,7 +101,7 @@ Payload hardware can be integrated in any way desired by the user to accomplish 
 If possible, payload services should be modeled after hardware services to simplify the interface with the mission application.
 The documentation we have provided shows how to make a payload service mirror a hardware service:
 
- - :doc:`Payload Services <services/payload-services>`
+ - :doc:`Payload Services <os-docs/services/payload-services>`
 
 Mission Applications
 ~~~~~~~~~~~~~~~~~~~~
@@ -108,7 +111,9 @@ These are, by nature, mission specific, but some of them can be largely reused d
 These are typically written or adapted by the user and are the backbone of the operation of the satellite.
 It is highly recommended to read more in depth on them to truly understand KubOS.
 
- - :doc:`Mission Applications <app-docs/index>`
+TODO: Decide which specific doc this should point to
+
+ - :doc:`Mission Applications <mission-dev/index>`
 
 Communication and KubOS
 -----------------------
@@ -122,9 +127,9 @@ Onboard Communication
 ~~~~~~~~~~~~~~~~~~~~~
 
 Onboard the spacecraft, most communication is centered around mission applications.
-Mission applications use :doc:`Graphql <services/graphql>` over HTTP for controlling hardware services and payloads to change the state of the spacecraft or execute operations.
+Mission applications use :doc:`Graphql <os-docs/services/graphql>` over HTTP for controlling hardware services and payloads to change the state of the spacecraft or execute operations.
 Mission applications get all of their data directly from the hardware services, to ensure they have the most up-to-date information to make decisions.
-Typically, a telemetry application will fulfill the role of polling all the services to generate the health and status beacon and log data into the :doc:`telemetry database. <services/telemetry-db>`
+Typically, a telemetry application will fulfill the role of polling all the services to generate the health and status beacon and log data into the :doc:`telemetry database. <os-docs/services/telemetry-db>`
 There is no other onboard communication that is required by the KubOS system.
 
 Space/Ground Communication
@@ -140,10 +145,10 @@ Nominal Operations
 
 In day-to-day operations, the space/ground link will most commonly be used for a few different purposes:
 
-- Executing :doc:`mission applications <app-docs/index>` on-demand. For instance, triggering a mission application which orients an imaging device to the requested coordinates and takes a picture.
+- Executing :doc:`mission applications <os-docs/apps/index>` on-demand. For instance, triggering a mission application which orients an imaging device to the requested coordinates and takes a picture.
 - Automatically sending and receiving health and status information (health and status beacon).
-- Querying the :doc:`telemetry database <services/telemetry-db>` for specific hardware status information.
-- Downloading payload data files through the :doc:`file transfer service <services/file>`.
+- Querying the :doc:`telemetry database <os-docs/services/telemetry-db>` for specific hardware status information.
+- Downloading payload data files through the :doc:`file transfer service <os-docs/services/file>`.
 
 These are just examples of nominal communication.
 The core function of the communication service is providing a packet passthrough, so a mission operator or flight software developer can really use it in any way they see fit.
@@ -155,17 +160,17 @@ KubOS was designed to make recovery as easy, safe, and powerful as possible.
 When the satellite experiences an error or problem that the automatic recovery methods cannot handle, manual diagnosis and recovery might be necessary.
 We empower the mission operator to have as many tools as possible:
 
-- The :doc:`shell service <services/shell>` provides complete terminal access to the satellite
-- The :doc:`file transfer service <services/file>` allows corrected versions of the software to be uploaded and installed in the satellite
-- Each :doc:`hardware service <services/hardware-services>` endpoint can be directly queried/commanded to gather specific debugging data or control hardware, bypassing the core services
+- The :doc:`shell service <os-docs/services/shell>` provides complete terminal access to the satellite
+- The :doc:`file transfer service <os-docs/services/file>` allows corrected versions of the software to be uploaded and installed in the satellite
+- Each :doc:`hardware service <os-docs/services/hardware-services>` endpoint can be directly queried/commanded to gather specific debugging data or control hardware, bypassing the core services
 
 Available Languages in KubOS
 ----------------------------
 
 The primary languages used in KubOS are Rust and Python.
 
- - :doc:`Rust <sdk-docs/sdk-rust>` is the primary language for the :ref:`services <rust-service-ref>` and mission applications.
- - :doc:`Python <sdk-docs/sdk-python>` is used for easier development of mission applications and :ref:`some services <python-service-ref>`
+ - :doc:`Rust <getting-started/using-rust>` is the primary language for the :ref:`services <rust-service-ref>` and mission applications.
+ - :doc:`Python <getting-started/using-python>` is used for easier development of mission applications and :ref:`some services <python-service-ref>`
 
 Other languages (for example, C and C++) are compatible with KubOS, but are not currently directly supported.
 C is already used with KubOS for Linux and lower level functionality.

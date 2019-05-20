@@ -2,7 +2,7 @@ File Transfer Protocol
 ======================
 
 The file transfer protocol is implemented by both the
-:doc:`file transfer service <../../services/file>` and clients interacting
+:doc:`file transfer service <../../../os-docs/services/file>` and clients interacting
 with the service. This protocol uses a content-addressable
 methodology similar to Git for storing and chunking files.
 This document covers the content-addressable storage, all

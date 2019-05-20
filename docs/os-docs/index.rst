@@ -7,6 +7,36 @@ TODO: TOC formatting
 
 .. figure:: ../images/architecture_stack.png
     :align: center
+    
+Applications
+------------
+
+TODO: Expand?
+
+- What do apps do?
+- What apps do I need?
+- First time user example app walkthrough
+- App API walkthroughs
+- How to write apps in other languages
+
+
+Applications are user-level programs which can either be run as one-off executions or continuous
+processes.
+
+Mission applications include anything that makes decisions or governs autonomy on the satellite,
+as well as any other applications designed to address mission-specific concerns.
+
+More details about developing applications and how they can be used can be found in the
+:doc:`mission development <../mission-dev/index>` section.
+
+.. toctree::
+    :maxdepth: 1
+    
+    apps/app-guide
+    apps/python-app-api
+    apps/rust-app-api
+    
+.. _service-docs:
 
 Services
 --------
@@ -22,7 +52,11 @@ such as telemetry storage, file management, shell access, and hardware interacti
     Hardware Services <services/hardware-services>
     Payload Services <services/payload-services>
     Service Configuration <services/service-config>
+    Service Development <services/service-dev>
+    services/service-outline-guide
     GraphQL <services/graphql>
+    
+.. _linux-docs:
     
 Kubos Linux
 -----------
@@ -84,21 +118,3 @@ SysAdmin Docs
     Building Kubos Linux for Pumpkin MBM2 <linux-docs/kubos-linux-on-mbm2>
     Configuring KubOS <linux-docs/configuring-kubos>
     
-APIs
-----
-
-Kubos provides a variety of APIs to help with the development of mission software:
-
-  - :doc:`Device Interfaces <apis/device-api/index>` - APIs for external devices (ex. radio), built on top of the Kubos HAL
-  - :doc:`OBC APIs <apis/obc-api/index>` - APIs for features which are internal to a particular OBC
-  - :doc:`Kubos HAL <apis/kubos-hal/index>` - Hardware interface abstractions (I2C, SPI, etc)
-  - :doc:`Kubos Libraries <apis/kubos-libs/index>` - Non-hardware libraries
-
-.. toctree::
-    :caption: APIs
-    :hidden:
-    
-    Device Interfaces <apis/device-api/index>
-    OBC APIs <apis/obc-api/index>
-    Kubos HAL <apis/kubos-hal/index>
-    Kubos Libraries <apis/kubos-libs/index>

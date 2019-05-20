@@ -7,6 +7,7 @@ From bug reports, to feature implementations, we want to make contributing to Ku
 simple as possible.
 
 .. toctree::
+    :maxdepth: 1
     
     Reporting Bugs <reporting-bugs>
     Contributor Guidelines <contribution-process>

@@ -1,7 +1,7 @@
 Using the ISIS iMTQ in a Kubos Project
 ======================================
 
-This document covers the particular capabilities and requirements of the Kubos API for the 
+This document covers the particular capabilities and requirements of the Kubos API for the
 `ISIS iMTQ magnetorquer <https://www.isispace.nl/product/isis-magnetorquer-board/>`__.
 
 The API is split into four distinct categories:
@@ -28,14 +28,14 @@ ISIS
 Kubos
 ~~~~~
 
-    - :doc:`Creating a Kubos Project <../../../tutorials/first-project>`
-    - :doc:`Using Kubos Linux <../../../os-docs/using-kubos-linux>`
-    - :doc:`Working with the iOBC <../../../os-docs/working-with-the-iobc>`
+    - :doc:`Creating a Kubos Project <../../../../tutorials/first-project>`
+    - :doc:`Using Kubos Linux <../../../../os-docs/linux-docs/using-kubos-linux>`
+    - :doc:`Working with the iOBC <../../../../obc-docs/iobc/working-with-the-iobc>`
 
 Project Configuration
 ---------------------
 
-There are several options which may be specified within a project's ``config.json`` file under the ``adcs.imtq`` structure. 
+There are several options which may be specified within a project's ``config.json`` file under the ``adcs.imtq`` structure.
 These option values should match what was specified in your iMTQ options sheet.
 If they are not specified, the default value will be used.
 
@@ -77,15 +77,15 @@ This structure contains several useful pieces of information:
 
     - The command that the response corresponds to
     - A status byte containing
-    
+
         - A flag indicating whether this response has been fetched before
         - Flags indicating the validity of each axis' measurement data
         - An error code
-        
+
 The iMTQ API will automatically verify that the command echoed in the response matches the command that was sent.
 Additionally, it will extract and return the error code as a :cpp:type:`KADCSStatus` value.
 
-For commands returning axis measurement data, users should check the presence of the :c:macro:`RESP_IVA_X`, 
+For commands returning axis measurement data, users should check the presence of the :c:macro:`RESP_IVA_X`,
 :c:macro:`RESP_IVA_Y`, and :c:macro:`RESP_IVA_Z` flags. These flags are documented in section 3.2.4 of the
 *iMTQ User Manual* and indicate that the corresponding axis' data might be invalid.
 
@@ -162,7 +162,7 @@ Run-Time Configuration
     **These configuration changes will not persist through reboot, including one triggered by the watchdog**
 
 The ISIS iMTQ supports in-flight configuration changes and queries via the ``k_acds_configure`` function.
-The desired configuration should be passed to the function as a JSON structure (defined as ``JsonNode *``) 
+The desired configuration should be passed to the function as a JSON structure (defined as ``JsonNode *``)
 which has been built using the CCAN/JSON library in the Kubos repo.
 
 The user may either convert a character buffer containing JSON using ``json_decode`` and/or create a JSON structure manually
@@ -241,7 +241,7 @@ self-tests to verify that the system components are working correctly.
 
 These tests can be run using the :cpp:func:`k_adcs_run_test` function.
 This corresponds with commands TC-OP-08 and TC-DR-07 documented in the *iMTQ User Manual*.
-The function takes an :cpp:type:`imtq_test_axis` value indicating which axis to test and a JSON parent object 
+The function takes an :cpp:type:`imtq_test_axis` value indicating which axis to test and a JSON parent object
 (abstracted with :cpp:type:`adcs_test_results`) to which the results should be attached.
 
 The test results are documented in the TC-DR-07 command in section 3.3 of the *iMTQ User Manual*
@@ -369,32 +369,32 @@ The nominal telemetry will contain the following information:
 
   - Housekeeping - All values returned as both raw ADCS and calculated engineering values.
     Corresponds with the information returned by TC-DR-09 and TC-DR-10.
-  
+
       - Voltage of the digital supply
-      - Voltage of the analog supply 
+      - Voltage of the analog supply
       - Current of the digital supply
-      - Current of the analog supply 
+      - Current of the analog supply
       - Coil currents
       - Coil temperatures
       - MCU temperature
-      
+
   - Data during last detumble iteration. Corresponds with the information returned by TC-DR-08.
-  
+
       - Calibrated magnetometer data
       - Filtered magnetormeter data
       - B-Dot values
       - Commanded actuation dipole values
       - Command current values
       - Coil currents
-      
+
   - Current magnetometer measurements - *Note: this information will only be returned if the iMTQ is in IDLE mode.*
     Corresponds with the operational commands TC-DR-02 and TC-DR-03 and information returned by TC-DR-02 and TC-DR-03.
-  
+
       - Coils actuation status during measurement
       - Magnetometer measurement data (raw ADCS and calibrated values)
-  
+
   - Last measured dipole values
-  
+
 An example response might look like this:
 
 .. code-block:: json
@@ -464,7 +464,7 @@ The debug telemetry will contain the following information:
 
   - The current values of all iMTQ configuration options
   - The results of the last run self-test as triggered by ``k_adcs_run_test`` or ``k_imtq_start_test``
-  
+
 An example response might look like this:
 
 .. code-block:: json
@@ -609,7 +609,7 @@ iMTQ-specific Functions
 -----------------------
 
     - :cpp:func:`k_imtq_cancel` - (TC-OP-03) Cancel any ongoing actuation and switch to idle mode
-    
+
 Watchdog
 ~~~~~~~~
 
@@ -619,10 +619,10 @@ There are two provided functions to assist with its maintenance:
 
     - :cpp:func:`k_imtq_watchdog_start` - Start a thread to send a no-op command every (watchdog_interval/3) seconds to keep the watchdog from starving
     - :cpp:func:`k_imtq_watchdog_stop` - Terminate the watchdog thread
-    
+
 Configuration
 ~~~~~~~~~~~~~
-        
+
 Get Current Parameter Value
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -632,8 +632,8 @@ The function takes two parameters:
 
     - The parameter to fetch
     - A pointer to an :cpp:type:`imtq_config_resp` structure where the command response containing the parameter value should be put
-    
-If the function returns successfully, the value can be read from the appropriate unit submember of the 
+
+If the function returns successfully, the value can be read from the appropriate unit submember of the
 :cpp:member:`imtq_config_resp.value <mtq_config_resp::value>` structure member.
 
 For example:
@@ -686,8 +686,8 @@ The function takes three parameters:
     - The parameter to fetch
     - A pointer to an :cpp:type:`imtq_config_value` structure containing the new parameter value
     - A pointer to an :cpp:type:`imtq_config_resp` structure where the command response containing the updated parameter value should be put
-    
-If the function returns successfully, the updated value can be read from the appropriate unit submember of the 
+
+If the function returns successfully, the updated value can be read from the appropriate unit submember of the
 :cpp:member:`imtq_config_resp.value <mtq_config_resp::value>` structure member to verify that the parameter was updated as expected.
 
 For example:
@@ -739,9 +739,9 @@ The function takes two parameters:
 
     - The parameter to fetch
     - (optional) A pointer to an :cpp:type:`imtq_config_resp` structure where the command response containing the parameter value should be put
-    
-If the function returns successfully, the value can be read from the appropriate unit submember of the 
-:cpp:member:`imtq_config_resp.value <mtq_config_resp::value>` structure member. 
+
+If the function returns successfully, the value can be read from the appropriate unit submember of the
+:cpp:member:`imtq_config_resp.value <mtq_config_resp::value>` structure member.
 This value should match the default documented in section 3.4 of the *iMTQ User Manual*.
 
 For example:
@@ -777,15 +777,15 @@ For example:
 Magnetometer Measurements
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :cpp:func:`k_imtq_start_measurement` function should be called to request that the iMTQ start a 3-axis measurement 
-of the magnetic field. 
+The :cpp:func:`k_imtq_start_measurement` function should be called to request that the iMTQ start a 3-axis measurement
+of the magnetic field.
 This corresponds with command TC-OP-04 documented in the *iMTQ User Manual*.
 
 After this function has been called, either :cpp:func:`k_imtq_get_raw_mtm` or :cpp:func:`k_imtq_get_calib_mtm` can be
 called in order to read the results of the measurement.
 These functions correspond with commands TC-DR-02 and TC-DR-03 documented in the *iMTQ User Manual*.
 
-These functions take a pointer to an :cpp:type:`imtq_mtm_msg` structure where the command response containing the 
+These functions take a pointer to an :cpp:type:`imtq_mtm_msg` structure where the command response containing the
 measurement data should be put.
 
 For example:
@@ -853,7 +853,7 @@ This can be done by using one of three functions:
     - :cpp:func:`k_imtq_start_actuation_current` - (TC-OP-05) Actuate using desired coil currents
     - :cpp:func:`k_imtq_start_actuation_dipole` - (TC-OP-06) Actuate using desired dipole
     - :cpp:func:`k_imtq_start_actuation_PWM` - (TC-OP-07) Actuate using desired PWM duty cycle
-    
+
 .. note::
 
     Please refer to the corresponding command documentation in section 3.3 of the *iMTQ User Manual* for more
@@ -863,7 +863,7 @@ Each of these functions takes two parameters:
 
   - A pointer to an :cpp:type:`imtq_axis_data` structure containing the desired actuation value for the x-, y-, and z- axis
   - The duration, in milliseconds, which the actuation should be active for
-  
+
 .. note::
 
     The :cpp:func:`k_imtq_start_actuation_current` and :cpp:func:`k_imtq_start_actuation_PWM` functions both
@@ -910,7 +910,7 @@ This corresponds with the TC-OP-09 command documented in section 3.3 of the *iMT
 The function takes a single parameter indicating the time, in seconds, that the iMTQ should be in detumble mode before
 returning to idle mode.
 
-After this function has run, the :cpp:func:`k_imtq_get_detumble` function can be used to fetch the measurements and 
+After this function has run, the :cpp:func:`k_imtq_get_detumble` function can be used to fetch the measurements and
 computations generated while the iMTQ was in detumble mode.
 
 This corresponds with the TC-DR-08 command documented in section 3.3 of the *iMTQ User Manual*

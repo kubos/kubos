@@ -5,9 +5,9 @@
 Overview
 --------
 
-+----------------------------------------+------------------------------------------------+---------------------------+-------------------------------------------------+
-| `Stable Docs <http://docs.kubos.co>`__ | `Nightly Docs <http://docs.kubos.co/master>`__ | :doc:`dev-docs/changelog` | `Kubos Repo <https://github.com/kubos/kubos>`__ |
-+----------------------------------------+------------------------------------------------+---------------------------+-------------------------------------------------+
++----------------------------------------+------------------------------------------------+------------------+-------------------------------------------------+
+| `Stable Docs <http://docs.kubos.co>`__ | `Nightly Docs <http://docs.kubos.co/master>`__ | :doc:`changelog` | `Kubos Repo <https://github.com/kubos/kubos>`__ |
++----------------------------------------+------------------------------------------------+------------------+-------------------------------------------------+
 
 
 
@@ -52,7 +52,7 @@ Supported Hardware Devices
 
 KubOS supports a selection of hardware devices in varying capacities.
 
-All supported devices have a :doc:`device API <os-docs/apis/device-api/index>` which may be used.
+All supported devices have a :doc:`device API <deep-dive/apis/device-api/index>` which may be used.
 
 Some devices have an additional :doc:`hardware service <os-docs/services/hardware-services>` which can be built into
 KubOS and provides a long-running process which allows easy, streamlined communication with the device.
@@ -75,9 +75,10 @@ or bugs, see what you can work on, and to give feedback.
     Working with an OBC <obc-docs/index>
     Mission Development <mission-dev/index>
     KubOS Ecosystem <os-docs/index>
-    Deep Dive
+    Under the Hood <deep-dive/index>
+    Kubos SDK <sdk-docs/index>
     Contributing to KubOS <contributing/index>
-    changelog
+    Changelog <changelog>
 
 Indices and tables
 ------------------

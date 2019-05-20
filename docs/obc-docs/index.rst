@@ -15,7 +15,9 @@ For each OBC:
 .. toctree::
     :hidden:
     
+    cross-compile
     comms-setup
     bbb/index
     iobc/index
     mbm2/index
+    porting-kubos

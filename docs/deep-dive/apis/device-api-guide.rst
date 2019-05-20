@@ -1,6 +1,8 @@
 Kubos Device API Creation Guide/Framework
 =========================================
 
+TODO: Rework or remove this doc
+
 This guide covers the process developers should go through when writing an API for a new device.
 
 Our goal is to create an API which covers the *majority* of functions which a consumer might need.
@@ -128,7 +130,7 @@ While each API is highly device-specific, our goal is to keep the overall stylin
 This makes the codebase much more maintainable and reduces the amount of effort required for a service developer
 to navigate between APIs.
 
-In addition to mimicing existing APIs, please refer to the :doc:`kubos-standards` doc for more specific coding rules.
+In addition to mimicing existing APIs, please refer to the :doc:`../../contributing/kubos-standards` doc for more specific coding rules.
 
 Documentation
 -------------
