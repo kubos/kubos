@@ -71,7 +71,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: cd test/integration/nosengine-rust && nos_engine_server_standalone -f sim_config1.json
+        - run: cargo run --bin nosengine-integration-tests
 
     # Rust testing - Check formatting
     # Run for all PR commits
