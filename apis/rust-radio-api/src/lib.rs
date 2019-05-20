@@ -17,12 +17,11 @@
 //! A high level interface for interacting with radios
 
 #![deny(missing_docs)]
+#![deny(warnings)]
 
-use failure::Fail;
+use failure::{bail, Error, Fail};
 use nom::IResult;
 use std::cell::RefCell;
-
-use failure::Error;
 
 /// Common Error for Radio Actions
 #[derive(Debug, Fail)]
@@ -33,6 +32,9 @@ pub enum RadioError {
         /// The message from original error
         message: String,
     },
+    /// No data available
+    #[fail(display = "No data available")]
+    NoData,
 }
 
 fn nom_to_radio_error<T>(err: nom::Err<&[u8]>) -> Result<(&[u8], T), RadioError> {
@@ -66,13 +68,13 @@ pub trait Stream {
 /// A connection is like a stream, but allowed parsed reads with properly buffered
 /// input data.
 pub struct Connection {
-    stream: Box<Stream>,
+    stream: Box<Stream + Send>,
     buffer: RefCell<Vec<u8>>,
 }
 
 impl Connection {
     /// Convenience constructor to create connection from stream.
-    pub fn new(stream: Box<Stream>) -> Connection {
+    pub fn new(stream: Box<Stream + Send>) -> Connection {
         Connection {
             stream,
             buffer: RefCell::new(Vec::new()),
@@ -87,7 +89,7 @@ impl Connection {
     /// Read the next object using provided parser.
     pub fn read<T>(&self, parse: ParseFn<T>) -> RadioResult<T> {
         let mut buffer = self.buffer.borrow_mut();
-        loop {
+        for _ in 0..5 {
             let copy = buffer.clone();
             let res = parse(&copy);
 
@@ -102,5 +104,6 @@ impl Connection {
             buffer.extend_from_slice(extra);
             return Ok(value);
         }
+        bail!("Incomplete parsing".to_owned())
     }
 }
