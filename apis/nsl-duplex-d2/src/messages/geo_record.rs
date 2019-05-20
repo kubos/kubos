@@ -24,9 +24,13 @@ use std::str::from_utf8;
 #[derive(Debug, PartialEq)]
 /// Struct for storing geo-records.
 pub struct GeoRecord {
+    /// Modem' longitude at the time of the last connection
     pub lon: f32,
+    /// Modem's latitude at the time of the last connection
     pub lat: f32,
+    /// Time of modem's last connection
     pub time: i64,
+    /// Approximate error of location data (<300m to <100km)
     pub max_error: u32,
 }
 

@@ -43,11 +43,13 @@
 //!
 //! The configuration of this service is split into three parts:
 //!   - Service Specific
-//!     This section is found under `[nsl-duplex-comms-service]'`
+//!
+//!     This section is found under `[nsl-duplex-comms-service]`
 //!     - `bus` - Specifies which UART bus the Duplex is on
-//!     - `ping_freq` - Specifies how often the downlink queue is checked for queueing up pings
+//!     - `ping_freq` - Specifies how frequently the service sends ping packets when the downlink queue is empty (seconds)
 //!   - Communications Service Configs
-//!     This section is found under `[nsl-duplex-comms-service.comms]'
+//!
+//!     This section is found under `[nsl-duplex-comms-service.comms]`
 //!     - `max_num_handlers` - Maximum number of concurrent message handlers
 //!     - `downlink_ports` - Optional list of downlink endpoints
 //!     - `timeout` - Timeout for completion of GraphQL requests
@@ -55,10 +57,11 @@
 //!     - `ground_port` - Listening port of ground gateway
 //!     - `satellite_ip` - Local IP of satellite
 //!   - GraphQL Server Configs
-//!     This section is found under `[nsl-duplex-comms-service.addr]'
+//!
+//!     This section is found under `[nsl-duplex-comms-service.addr]`
 //!     - `ip` - The service's IP address, used for its GraphQL interface
 //!     - `port` - The service's port, used for its GraphQL interface
-
+//!
 //! Where `bus` specifies the UART bus the Duplex is on, `ping_freq` specifies how often
 //! the downlink queue should be checked for queueing up pings, `ip` specifies the
 //! service's IP address, and `port` specifies the port on which the service will be

@@ -59,8 +59,8 @@ The following list gives links to each service's documentation:
     - |ISIS-AntS|
     - |iOBC-Supervisor|
     - |NovAtel-OEM6|
-    - `Pumpkin Supervisor MCUs <https://github.com/kubos/kubos/blob/master/services/pumpkin-mcu-service/README.rst>`__
     - |NSL Duplex|
+    - `Pumpkin Supervisor MCUs <https://github.com/kubos/kubos/blob/master/services/pumpkin-mcu-service/README.rst>`__
 
 .. |MAI-400| raw:: html
 

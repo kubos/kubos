@@ -39,7 +39,10 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // Response
     //
     // {
-    //     ping: "pong"
+    //     "data":{
+    //                "ping": "pong"
+    //     },
+    //     "errors": ""
     // }
     field ping() -> FieldResult<String>
     {
@@ -202,9 +205,9 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //
     // {
     //     geolocation {
-    //         lon
-    //         lat
-    //         time
+    //         lon,
+    //         lat,
+    //         time,
     //         maxError
     //     }
     // }

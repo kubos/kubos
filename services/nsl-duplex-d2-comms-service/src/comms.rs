@@ -118,7 +118,7 @@ pub fn read(radio: &Arc<Mutex<DuplexComms>>) -> NslDuplexCommsResult<Vec<u8>> {
         radio.read()
     } else {
         warn!("Failed to lock radio");
-        bail!("Failed to lock radio");
+        panic!("Failed to lock radio");
     }
 }
 
@@ -128,6 +128,6 @@ pub fn write(radio: &Arc<Mutex<DuplexComms>>, data: &[u8]) -> NslDuplexCommsResu
         radio.write(data)
     } else {
         warn!("Failed to lock radio");
-        bail!("Failed to lock radio");
+        panic!("Failed to lock radio");
     }
 }

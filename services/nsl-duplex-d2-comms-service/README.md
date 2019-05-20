@@ -15,7 +15,7 @@ The service expects the following sections and settings to be present:
 [nsl-duplex-comms-service]
 # Serial bus to use for talking with the radio
 bus = "/dev/ttyUSB0"
-# How frequently to queue pings in downlink queue (in seconds)
+# Specifies how frequently the service sends ping packets when the downlink queue is empty (seconds)
 ping_freq = 10
 
 # GraphQL configuration
@@ -31,7 +31,7 @@ port = 8012
 max_num_handlers = 10
 # Ports to listen for local traffic on
 downlink_ports = [14011]
-#  Timeout when listening for packet response
+#  Timeout when listening for packet response (milliseconds)
 timeout = 1
 # Port to send ground communications on
 ground_port = 14020

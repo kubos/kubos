@@ -19,11 +19,7 @@
 #![deny(missing_docs)]
 #![deny(warnings)]
 
-#[macro_use]
-extern crate failure;
-
-use failure::Error;
-use failure::Fail;
+use failure::{bail, Error, Fail};
 use nom::IResult;
 use std::cell::RefCell;
 
