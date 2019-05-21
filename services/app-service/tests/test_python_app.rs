@@ -20,9 +20,12 @@
 // properly run these tests. You'll need to manually run these tests and verify the output by
 // checking for any extraneous error messages.
 
+use fs_extra;
 use kubos_app::ServiceConfig;
 use std::fs;
 use std::path::Path;
+use std::thread;
+use std::time::Duration;
 
 mod utils;
 pub use crate::utils::*;
@@ -33,8 +36,14 @@ fn setup_app(registry_dir: &Path) {
 
     fs::create_dir_all(app_dir.clone()).unwrap();
 
-    // Copy our app executable into our app registry
+    // Copy our app files into our app registry
     fs::copy("tests/utils/python-proj/main.py", app_dir.join("main.py")).unwrap();
+    fs_extra::dir::copy(
+        "tests/utils/python-proj/sub",
+        app_dir.clone(),
+        &fs_extra::dir::CopyOptions::new(),
+    )
+    .unwrap();
 
     // Create our manifest file
     let toml = format!(
@@ -83,6 +92,9 @@ fn app_no_args() {
         }"#,
     );
 
+    // Give the app a moment to run successfully before we tear everything down
+    thread::sleep(Duration::from_millis(100));
+
     fixture.teardown();
 
     assert!(result["startApp"]["success"].as_bool().unwrap());
@@ -116,6 +128,8 @@ fn app_single_pos_arg() {
             }
         }"#,
     );
+
+    thread::sleep(Duration::from_millis(100));
 
     fixture.teardown();
 
@@ -151,6 +165,8 @@ fn app_single_flag() {
         }"#,
     );
 
+    thread::sleep(Duration::from_millis(100));
+
     fixture.teardown();
 
     assert!(result["startApp"]["success"].as_bool().unwrap());
@@ -184,6 +200,8 @@ fn app_flag_arg() {
             }
         }"#,
     );
+
+    thread::sleep(Duration::from_millis(100));
 
     fixture.teardown();
 

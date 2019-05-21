@@ -44,6 +44,9 @@ fn setup_app(registry_dir: &Path) {
     )
     .unwrap();
 
+    // Copy our test file to make sure we can access it later
+    fs::copy("tests/utils/rust-proj/testfile", app_dir.join("testfile")).unwrap();
+
     // Create our manifest file
     let toml = format!(
         r#"

@@ -552,6 +552,12 @@ impl AppRegistry {
             return Err(AppError::StartError { err: msg });
         }
 
+        // Change our current directory to the app's directory so that it can access any
+        // auxiliary files with relative file paths
+        let cwd = ::std::env::current_dir()?;
+        let parent_dir = app_path.parent().unwrap_or(&cwd);
+        let _ = ::std::env::set_current_dir(parent_dir);
+
         let mut cmd = Command::new(app_path);
 
         cmd.arg("-r").arg(format!("{}", run_level));
