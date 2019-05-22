@@ -21,37 +21,61 @@
 
 use super::*;
 
+use failure::format_err;
+use std::collections::BTreeMap;
+use std::fs::File;
+use std::io::prelude::*;
+use toml;
+use toml::Value;
+
 pub fn ping_services() -> Result<u8, Error> {
     // Ping all the services to make sure they're still running
 
     let mut bad_count = 0;
 
-    // Core services:
-    if ping("app-service").is_err() {
-        bad_count += 1;
-    }
-    if ping("monitor-service").is_err() {
-        bad_count += 1;
-    }
-    if ping("telemetry-service").is_err() {
-        bad_count += 1;
-    }
+    let services = get_services()?;
 
-    // Hardware services:
-    //
-    // Add an entry for each hardware service present in the system.
-
-    // For example:
-    // if ping("pumpkin-mcu-service").is_err() {
-    //     bad_count += 1;
-    // }
+    for (name, config) in services.iter() {
+        if ping(&name, &config).is_err() {
+            bad_count += 1;
+        }
+    }
 
     Ok(bad_count)
 }
 
-fn ping(service: &str) -> Result<(), Error> {
-    let config = ServiceConfig::new(service);
-    match query(&config, "{ping}", Some(QUERY_TIMEOUT)) {
+fn get_services() -> Result<Vec<(String, ServiceConfig)>, Error> {
+    let mut services = vec![];
+
+    // Read the config.toml file
+    let mut raw = String::new();
+    let mut file = File::open(CONFIG_PATH)?;
+    file.read_to_string(&mut raw)?;
+
+    // Parse the config
+    let data: Value = toml::from_str(&raw)?;
+    let entries = data
+        .as_table()
+        .ok_or_else(|| format_err!("Failed to parse config.toml"))?;
+
+    for (name, value) in entries {
+        // If the config entry has an `addr` section, we should assume that it is a service
+        if value.get("addr").is_some() {
+            // Reassemble the TOML for this entry and then parse it
+            let mut map = BTreeMap::new();
+            map.insert(name, value);
+            let config = ServiceConfig::new_from_str(name, &toml::to_string(&map)?);
+
+            services.push((name.to_owned(), config));
+        }
+    }
+
+    // Return a list of tuples with the name and config for each service
+    Ok(services)
+}
+
+fn ping(service: &str, config: &ServiceConfig) -> Result<(), Error> {
+    match query(config, "{ping}", Some(QUERY_TIMEOUT)) {
         Ok(data) => match data["ping"].as_str() {
             Some("pong") => Ok(()),
             other => {

@@ -9,6 +9,12 @@ changes.
 Please refer to the following 'Configuration' section for settings which should be updated for your
 particular system prior to execution.
 
+Requirements
+------------
+
+In order to properly function, the telemetry database service and monitor service should be
+running on your target OBC.
+
 Configuration
 -------------
 
@@ -18,9 +24,9 @@ Before this application can be run on your particular stack, a few configuration
 set:
 
 - ``USER_PARTITION`` - (Default: ``"/dev/mmcblk1p4"``) The device name of the user data partition.
-  The default value is valid for BBB and MBM2 target OBCs
+  The default value is valid for BBB and MBM2 target OBCs.
 - ``MEM_TOTAL`` - (Default: ``515,340``) The amount of RAM (in bytes) present in the OBC.
-  The default value is valid for BBB and MBM2 target OBCs
+  The default value is valid for BBB and MBM2 target OBCs.
 - ``COMMS_SERVICE`` - (Default: ``"ethernet-service"``) The name of the comms service which should
   be used to send an emergency beacon if the OBC's filesystem becomes unrecoverably corrupted.
   This beacon may be disabled by making this value an empty string (``""``).
@@ -30,6 +36,8 @@ set:
 
 A few other configuration settings are present which may be optionally updated:
 
+- ``CONFIG_PATH`` - (Default: ``""/home/system/etc/config.toml"``) Location of the system's
+  configuration file.
 - ``TELEMETRY_AGE`` - (Default: 1 week) The maximum age allowed for a telemetry entry. Once this age
   is exceeded, the entry will be removed.
 - ``INTERVAL`` - (Default: 1 hour) The frequency with which the housekeeping tasks should run
@@ -81,9 +89,19 @@ partition.
 If this check fails, then we can determine that the file system has become corrupted.
 In this case, an emergency beacon will be sent out over the specified communications device.
 
-Other failed checks simple write an error message to the system logs, however these logs normally
+Other failed checks simply write an error message to the system logs, however these logs normally
 reside within the user data partition. As a result, if the file system becomes corrupted the logs
 are no longer accessible, so we send a beacon instead.
+
+Check for System Reset
+~~~~~~~~~~~~~~~~~~~~~~
+
+The ``check_reset`` function checks if the OBC has recently experienced a reboot.
+If so, an error message is generated.
+
+Worth noting, this will issue an error message whenever the system is first started, even if
+power-on/reboot was done on purpose.
+There's not an easy way to tell the difference between intentional and spurious reboots.
 
 Ping Services
 ~~~~~~~~~~~~~
@@ -91,6 +109,3 @@ Ping Services
 All Kubos services provide a "ping" request as part of their GraphQL schema.
 The ``ping_services`` function submits this ping request to all defined services and records which
 services fail to return the "pong" response.
-
-This function (located in `src/ping.rs`) should be updated to include all hardware services present
-in your system.

@@ -35,7 +35,10 @@ pub fn check_mem() -> Result<(), Error> {
 
     let result = query(&service, OBC_TELEMETRY, Some(QUERY_TIMEOUT))?;
 
-    let mem = result["memInfo"]["available"].as_u64().unwrap_or(0);
+    let mem = result["memInfo"]["available"].as_u64().unwrap_or_else(|| {
+        error!("Failed to fetch available memory");
+        0
+    });
 
     // Convert to percentage in use, since that's an easier number to work with
     let ram_in_use = (100 - mem * 100 / MEM_TOTAL) as u8;
@@ -82,7 +85,10 @@ pub fn check_mem() -> Result<(), Error> {
             })
             .collect::<String>();
 
-        percent.parse::<u8>().unwrap_or(100)
+        percent.parse::<u8>().unwrap_or_else(|err| {
+            error!("Failed to parse current disk usage info: {:?}", err);
+            100
+        })
     } else {
         error!("Failed to get current disk usage info");
         100
@@ -99,6 +105,10 @@ pub fn check_mem() -> Result<(), Error> {
         error!("Disk usage too high: {}%. Triggering cleanup", disk_in_use);
         // Delete everything from the database that's more than the critical age threshold
         clean_db::clean_db(CRITICAL_AGE)?;
+
+        // Reboot the system nicely. This will clean up any temporary storage which is being used
+        // (/tmp), freeing up some additional disk space.
+        Command::new("reboot").status()?;
     }
 
     Ok(())

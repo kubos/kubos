@@ -64,7 +64,10 @@ fn send_error() -> Result<(), Error> {
     let config = ServiceConfig::new(COMMS_SERVICE);
     let host = config.hosturl();
     let mut host_parts = host.split(':').map(|val| val.to_owned());
-    let comms_ip = host_parts.next().unwrap_or_else(|| "0.0.0.0".to_owned());
+    let comms_ip = host_parts.next().unwrap_or_else(|| {
+        error!("Failed to lookup comms service IP. Using default 0.0.0.0");
+        "0.0.0.0".to_owned()
+    });
     let downlink = format!("{}:{}", comms_ip, DOWNLINK_PORT);
 
     // Bind a socket for the host IP
