@@ -40,7 +40,7 @@ pub struct CommsConfig {
     /// Timeout for the completion of GraphQL operations within message handlers (in milliseconds).
     /// Default: 1500
     pub timeout: Option<u64>,
-    /// Required. IP address on which comms service will listens.
+    /// Required. IP address on which comms service will listen.
     pub ip: String,
 }
 

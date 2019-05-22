@@ -1,6 +1,22 @@
+//
+// Copyright (C) 2019 Kubos Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License")
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 //! Packet Definition for SpacePacket
 
-use crate::packet::{LinkPacket, LinkType};
+use crate::packet::{LinkPacket, PayloadType};
 use crate::CommsResult;
 use byteorder::{BigEndian, ReadBytesExt, WriteBytesExt};
 use std::io::Cursor;
@@ -31,6 +47,7 @@ struct SecondaryHeader {
     destination_port: u16,
 }
 
+/// Structure used to implement SpacePacket version of LinkPacket
 #[derive(Eq, Debug, PartialEq)]
 pub struct SpacePacket {
     primary_header: PrimaryHeader,
@@ -41,7 +58,7 @@ pub struct SpacePacket {
 impl LinkPacket for SpacePacket {
     fn build(
         command_id: u64,
-        link_type: LinkType,
+        link_type: PayloadType,
         destination_port: u16,
         payload: &[u8],
     ) -> CommsResult<Box<Self>> {
@@ -130,8 +147,8 @@ impl LinkPacket for SpacePacket {
         self.payload.clone()
     }
 
-    fn link_type(&self) -> LinkType {
-        LinkType::GraphQL
+    fn link_type(&self) -> PayloadType {
+        PayloadType::from(self.primary_header.packet_type)
     }
 
     fn destination(&self) -> u16 {
@@ -146,7 +163,7 @@ mod tests {
     #[test]
     fn do_build_parse() {
         let packet =
-            SpacePacket::build(1294, LinkType::GraphQL, 15001, &vec![5, 4, 3, 2, 1]).unwrap();
+            SpacePacket::build(1294, PayloadType::GraphQL, 15001, &vec![5, 4, 3, 2, 1]).unwrap();
         println!("packet {:?}", packet);
 
         let raw = packet.to_bytes();

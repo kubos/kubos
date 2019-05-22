@@ -1,21 +1,54 @@
-//! General packet definition used by Comms Service
+//
+// Copyright (C) 2018 Kubos Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License")
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+//! Link layer definitions used by the communications service
 
 use crate::CommsResult;
 
-pub enum LinkType {
+/// Enum representing the different payload types handled
+/// by the communications service
+#[repr(u8)]
+pub enum PayloadType {
     /// Packet intended for UDP passthrough
-    UDP,
-    /// Packet intended for GraphQL request/response
     GraphQL,
+    /// Packet intended for GraphQL request/response
+    UDP,
+    /// Unknown type
+    Unknown,
 }
 
+impl From<u8> for PayloadType {
+    fn from(num: u8) -> PayloadType {
+        match num {
+            0 => PayloadType::GraphQL,
+            1 => PayloadType::UDP,
+            _ => PayloadType::Unknown,
+        }
+    }
+}
+
+/// Generic LinkPacket trait which defines the internal packet requirements
+/// of the communications service.
 pub trait LinkPacket {
     /// Parse packet from raw bytes
     fn parse(raw: &[u8]) -> CommsResult<Box<Self>>;
     /// Build packet from necessary parts
     fn build(
         command_id: u64,
-        link_type: LinkType,
+        link_type: PayloadType,
         destination_port: u16,
         payload: &[u8],
     ) -> CommsResult<Box<Self>>;
@@ -26,11 +59,18 @@ pub trait LinkPacket {
     /// The payload or data of the packet
     fn payload(&self) -> Vec<u8>;
     /// The Link Type of the packet
-    fn link_type(&self) -> LinkType;
+    fn link_type(&self) -> PayloadType;
     /// The Destination port of the packet
     fn destination(&self) -> u16;
     /// Validate the contents of the link packet
     fn validate(&self) -> bool {
         true
+    }
+    /// The maximum allowed size of the packet
+    /// We are still assuming that at some point these packets
+    /// will be sent over IP/UDP
+    fn max_size() -> usize {
+        // (65,535 - 20 byte IP header - 8 byte UDP header)
+        65507
     }
 }

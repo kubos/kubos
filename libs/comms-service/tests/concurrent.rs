@@ -55,7 +55,8 @@ fn concurrent_uplinks_to_service_with_handler_response() {
     let mut recv_data_list: Vec<Arc<Mutex<Vec<u8>>>> = vec![];
     for i in 0..(num_tests) {
         let ground_packet =
-            SpacePacket::build(i, LinkType::GraphQL, (service_port + i) as u16, &payload).unwrap();
+            SpacePacket::build(i, PayloadType::GraphQL, (service_port + i) as u16, &payload)
+                .unwrap();
 
         // Pretend to be the ground and provide a packet
         // for the comms service to read from the radio
@@ -135,7 +136,8 @@ fn too_many_concurrent_uplinks_to_service_with_handler_response() {
     let mut recv_data_list: Vec<Arc<Mutex<Vec<u8>>>> = vec![];
     for i in 0..(num_tests) {
         let ground_packet =
-            SpacePacket::build(i, LinkType::GraphQL, (service_port + i) as u16, &payload).unwrap();
+            SpacePacket::build(i, PayloadType::GraphQL, (service_port + i) as u16, &payload)
+                .unwrap();
 
         // Pretend to be the ground and provide a packet
         // for the comms service to read from the radio

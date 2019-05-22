@@ -50,7 +50,8 @@ fn uplink_to_service_no_response() {
     // Initialize new `CommsTelemetry` object.
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 
-    let ground_packet = SpacePacket::build(1, LinkType::GraphQL, service_port, &payload).unwrap();
+    let ground_packet =
+        SpacePacket::build(1, PayloadType::GraphQL, service_port, &payload).unwrap();
 
     // Pretend to be the ground and provide a packet
     // for the comms service to read from the radio
@@ -107,7 +108,8 @@ fn uplink_to_service_with_handler_response() {
     // Initialize new `CommsTelemetry` object.
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 
-    let ground_packet = SpacePacket::build(1, LinkType::GraphQL, service_port, &payload).unwrap();
+    let ground_packet =
+        SpacePacket::build(1, PayloadType::GraphQL, service_port, &payload).unwrap();
 
     // Pretend to be the ground and provide a packet
     // for the comms service to read from the radio
@@ -177,7 +179,8 @@ fn uplink_to_service_with_downlink_response() {
     // Initialize new `CommsTelemetry` object.
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 
-    let ground_packet = SpacePacket::build(1, LinkType::GraphQL, service_port, &payload).unwrap();
+    let ground_packet =
+        SpacePacket::build(1, PayloadType::GraphQL, service_port, &payload).unwrap();
 
     // Pretend to be the ground and provide a packet
     // for the comms service to read from the radio

@@ -59,7 +59,8 @@ fn query_monitor_service() {
     // Initialize new `CommsTelemetry` object.
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 
-    let ground_packet = SpacePacket::build(100, LinkType::GraphQL, service_port, &query).unwrap();
+    let ground_packet =
+        SpacePacket::build(100, PayloadType::GraphQL, service_port, &query).unwrap();
 
     // Pretend to be the ground and provide a packet
     // for the comms service to read from the radio

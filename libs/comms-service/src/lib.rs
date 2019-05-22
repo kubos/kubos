@@ -16,7 +16,7 @@
 // Contributed by: William Greer (wgreer184@gmail.com) and Sam Justice (sam.justice1@gmail.com)
 //
 
-// #![deny(missing_docs)]
+#![deny(missing_docs)]
 #![deny(warnings)]
 
 //!
@@ -102,5 +102,5 @@ pub use crate::telemetry::CommsTelemetry;
 pub use crate::config::*;
 
 pub use packet::LinkPacket;
-pub use packet::LinkType;
+pub use packet::PayloadType;
 pub use spacepacket::SpacePacket;
