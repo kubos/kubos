@@ -57,7 +57,7 @@ fn config_full_good() {
 }
 
 #[test]
-fn config_no_satellite_ip() {
+fn config_no_comms_ip() {
     let config = kubos_system::Config::new_from_str(
         "comms-service",
         r#"

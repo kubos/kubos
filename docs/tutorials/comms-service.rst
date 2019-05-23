@@ -807,8 +807,7 @@ check the following:
     - Communications service is running on the target OBC
     - Telemetry service is running on the target OBC
     - OBC's UART port is correctly wired to the user's PC
-    - Source IP given to the client matches the ``ground_ip`` configuration parameter in the service
-    - Destination IP given to the client matches the ``satellite_ip`` parameter in the service
+    - Destination IP given to the client matches the ``ip`` parameter in the service
     - Port given to the client matches the port of the telemetry service (this is defined in
       the systems ``config.toml`` file. The default location is ``/home/system/etc/config.toml``)
 

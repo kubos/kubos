@@ -67,7 +67,7 @@
 //! max_num_handlers = 50
 //! downlink_ports = [13011]
 //! timeout = 1500"
-//! satellite_ip = "192.168.8.2"
+//! ip = "192.168.8.2"
 //! ```
 
 #[macro_use]
