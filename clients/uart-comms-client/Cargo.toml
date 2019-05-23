@@ -10,3 +10,4 @@ clap = "2.32"
 failure = "0.1.2"
 pnet = "0.22.0"
 serial = "0.4"
+comms-service = { path = "../../libs/comms-service" }

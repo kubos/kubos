@@ -58,8 +58,8 @@ pub trait LinkPacket {
     fn command_id(&self) -> u64;
     /// The payload or data of the packet
     fn payload(&self) -> Vec<u8>;
-    /// The Link Type of the packet
-    fn link_type(&self) -> PayloadType;
+    /// The type of payload contained in the packet
+    fn payload_type(&self) -> PayloadType;
     /// The Destination port of the packet
     fn destination(&self) -> u16;
     /// Validate the contents of the link packet

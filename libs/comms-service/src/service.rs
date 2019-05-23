@@ -206,7 +206,7 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
         info!("Packet successfully uplinked");
 
         // Check link type for appropriate message handling path
-        match packet.link_type() {
+        match packet.payload_type() {
             PayloadType::Unknown => {
                 unimplemented!();
             }
