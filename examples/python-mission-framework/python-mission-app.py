@@ -19,6 +19,7 @@ def main():
     parser = argparse.ArgumentParser()
     
     parser.add_argument('--run', '-r')
+    parser.add_argument('cmd_args', nargs='*')
     
     args = parser.parse_args()
     

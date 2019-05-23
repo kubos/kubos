@@ -76,16 +76,30 @@ def on_boot(logger):
 def on_command(logger, cmd_args):
 
     logger.info("OnCommand logic")
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-m',
+        '--mode',
+        help='System mode',
+        required=False)
+    parser.add_argument(
+        '-t',
+        '--time',
+        type=int,
+        help='Safemode time (in seconds)',
+        required=False)
+    
+    args = parser.parse_args(cmd_args)
 
-    if cmd_args.cmd_string == 'safemode':
-        if cmd_args.cmd_int > 0:
-            with open(LOGFILE, 'a+') as file:
-                logger.info(
-                    "Going into safemode for {} seconds".format(
-                        cmd_args.cmd_int))
-                logger.info("Sending commands to hardware to go into safemode")
-                time.sleep(cmd_args.cmd_int)
-                logger.info("Sending commands to hardware to normal operation")
+    if args.mode == 'safemode':
+        if args.time > 0:
+            logger.info(
+                "Going into safemode for {} seconds".format(
+                    args.time))
+            logger.info("Sending commands to hardware to go into safemode")
+            time.sleep(args.time)
+            logger.info("Sending commands to hardware to normal operation")
         else:
             raise ValueError("Command Integer must be positive and non-zero")
             sys.exit(1)
@@ -116,26 +130,15 @@ def main():
         nargs=1,
         help='Determines run behavior. Either "OnBoot" or "OnCommand"',
         required=True)
-    
-    # Other optional arguments
-    parser.add_argument(
-        '-s',
-        '--cmd_string',
-        help='Command Argument String passed into OnCommand behavior',
-        required=False)
-    parser.add_argument(
-        '-i',
-        '--cmd_int',
-        type=int,
-        help='Command Argument Integer passed into OnCommand behavior',
-        required=False)
+    # Other optional arguments which will be passed through to the underlying logic
+    parser.add_argument('cmd_args', nargs='*')
 
     args = parser.parse_args()
 
     if args.run[0] == 'OnBoot':
         on_boot(logger)
     elif args.run[0] == 'OnCommand':
-        on_command(logger, args)
+        on_command(logger, args.cmd_args)
     else:
         logger.error("Unknown run level specified")
         sys.exit(1)

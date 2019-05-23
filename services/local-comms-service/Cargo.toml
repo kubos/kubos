@@ -1,7 +1,7 @@
 [package]
-name = "ethernet-service"
+name = "local-comms-service"
 version = "0.1.0"
-authors = ["William Greer <wgreer184@gmail.com>"]
+authors = ["Ryan Plauche <ryan@kubos.com>", "William Greer <wgreer184@gmail.com>"]
 edition = "2018"
 
 [dependencies]
@@ -10,3 +10,5 @@ comms-service = { path = "../../libs/comms-service" }
 kubos-system = { path = "../../apis/system-api" }
 log = "^0.4.0"
 syslog = "4.0"
+log4rs = "*"
+log4rs-syslog = "*"
