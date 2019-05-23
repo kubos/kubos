@@ -1,10 +1,11 @@
-KubOS Service Outlines
+KubOS Service Outline
 ======================
 
 This guide covers an outline for the base Schema that should be implemented in all hardware services.
+Your service can and should implement more mutations and queries beyond those specified in the required base.
 For general information about hardware services, their role, and how they work, check out :doc:`the hardware services documentation. <../services/hardware-services>`
 
-All hardware services must follow the graphQL spec.
+All hardware services must follow the GraphQL spec.
 The mutation and query responses are the "data" and "errors" fields, and all errors experienced are returned in that "errors" field, even if they are from the underlying hardware.
 
 .. code-block:: graphql
@@ -22,7 +23,7 @@ The mutation and query responses are the "data" and "errors" fields, and all err
     }
 
     type Telemetry {
-        # All key value telemetry items for the Hardware
+        # All key value telemetry items for the hardware
         field1: Float
         # field2: whatever type
         # field3: whatever type
