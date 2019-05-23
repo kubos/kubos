@@ -1,21 +1,39 @@
 Kubos Changelog
 ===============
 
+v1.15.0 - May 23 2019
+---------------------
+
+- `Added a comms service implementation for the NSL EyeStar-D2 Duplex radio <https://docs.kubos.com/1.15.0/rust-docs/nsl_duplex_d2_comms_service/index.html>`__
+- `Updated comms service framework to use Space Packet Protocol <https://docs.kubos.com/1.15.0/services/comms-framework.html#data-packets>`__
+- Added 'ping' query to all Kubos services
+- `Added ability to query multiple telemetry fields in one request <https://docs.kubos.com/1.15.0/services/telemetry-db.html#querying-the-service>`__
+- Updated docs to reflect use of latest Buildroot LTS release, 2019.02.2
+- `Migrated to new CLA site <https://cla-assistant.io/kubos/kubos>`__
+- Expanded application unit tests
+- Added inter-service integration tests
+
+Bug Fixes:
+~~~~~~~~~~
+
+- Cleaning up orphaned files after app uninstall
+- Changing current working directory to an app's registered directory before starting it
+
 v1.14.0 - Apr 3 2019
 --------------------
 
-- `Added logic to the applications service to check if an app immediately fails after being started <https://docs.kubos.com/latest/app-docs/app-service.html#starting-an-application>`__
-- `Removed UUIDs from the applications service. Apps will now be referenced by name <https://docs.kubos.com/latest/app-docs/app-service.html>`__
-- `Added ability to uninstall all versions of an application <https://docs.kubos.com/latest/app-docs/app-service.html#de-registering>`__
+- `Added logic to the applications service to check if an app immediately fails after being started <https://docs.kubos.com/1.14.0/app-docs/app-service.html#starting-an-application>`__
+- `Removed UUIDs from the applications service. Apps will now be referenced by name <https://docs.kubos.com/1.14.0/app-docs/app-service.html>`__
+- `Added ability to uninstall all versions of an application <https://docs.kubos.com/1.14.0/app-docs/app-service.html#de-registering>`__
 - Updated app registration process to clean up all files if registration fails
-- `Added ability to manually set the active version of an application <https://docs.kubos.com/latest/app-docs/app-service.html#changing-versions>`__
-- `Added parameter to Rust app API to allow minimum logging level to be controlled <https://docs.kubos.com/latest/rust-docs/kubos_app/macro.app_main.html#arguments>`__
-- `Added parameter to Python app API to allow minimum logging level to be controlled <https://docs.kubos.com/latest/app-docs/python-app-api.html#app_api.logging_setup>`__
-- `Updated comms service framework to translate between UDP and HTTP <https://docs.kubos.com/latest/services/comms-framework.html>`__
+- `Added ability to manually set the active version of an application <https://docs.kubos.com/1.14.0/app-docs/app-service.html#changing-versions>`__
+- `Added parameter to Rust app API to allow minimum logging level to be controlled <https://docs.kubos.com/1.14.0/rust-docs/kubos_app/macro.app_main.html#arguments>`__
+- `Added parameter to Python app API to allow minimum logging level to be controlled <https://docs.kubos.com/1.14.0/app-docs/python-app-api.html#app_api.logging_setup>`__
+- `Updated comms service framework to translate between UDP and HTTP <https://docs.kubos.com/1.14.0/services/comms-framework.html>`__
 - Added comms service framework unit tests
-- `Added documentation for service configuration <https://docs.kubos.com/latest/services/service-config.html>`__
+- `Added documentation for service configuration <https://docs.kubos.com/1.14.0/services/service-config.html>`__
 - `Updated the Pumpkin supMCU API to match v4.22 of the firmware manual <https://github.com/kubos/kubos/blob/master/apis/pumpkin-mcu-api/mcu_api.py>`__
-- `Added GraphQL service for the Clyde Space 3rd generation EPS <https://docs.kubos.com/latest/rust-docs/clyde_3g_eps_service/index.html>`__
+- `Added GraphQL service for the Clyde Space 3rd generation EPS <https://docs.kubos.com/1.14.0/rust-docs/clyde_3g_eps_service/index.html>`__
 - Improved logging for all Kubos services
 
 Bug Fixes:
@@ -26,13 +44,13 @@ Bug Fixes:
 - Updated app registration process to ensure current active version remains active if new registration fails
 - Fixed Rust app API to use project name for logging
 - Migrated the Kubos contributor's agreement to https://cla-assistant.io/kubos/kubos
-- `Corrected the file transfer client syntax documentation <https://docs.kubos.com/latest/tutorials/file-transfer.html#syntax>`__
+- `Corrected the file transfer client syntax documentation <https://docs.kubos.com/1.14.0/tutorials/file-transfer.html#syntax>`__
 
 v1.13.0 - Feb 15 2019
 ---------------------
 
-- `Updated all Kubos services to use HTTP as their GraphQL front-end instead of UDP, allowing them to expose GraphiQL endpoints <https://docs.kubos.com/latest/tutorials/app-register.html#graphiql>`__
-- Removed all yotta usage. `C-based projects are now compiled using CMake <https://docs.kubos.com/latest/sdk-docs/sdk-c.html>`__
+- `Updated all Kubos services to use HTTP as their GraphQL front-end instead of UDP, allowing them to expose GraphiQL endpoints <https://docs.kubos.com/1.13.0/tutorials/app-register.html#graphiql>`__
+- Removed all yotta usage. `C-based projects are now compiled using CMake <https://docs.kubos.com/1.13.0/sdk-docs/sdk-c.html>`__
 - Pinning Rust version at v1.32.0 to prevent accidental version discrepancies
 
 v1.12.0 - Feb 1 2019
@@ -47,20 +65,20 @@ v1.12.0 - Feb 1 2019
 v1.11.0 - Jan 18 2019
 ---------------------
 
-- `Added communications service framework overview doc <https://docs.kubos.com/latest/services/comms-framework.html>`__
+- `Added communications service framework overview doc <https://docs.kubos.com/1.11.0/services/comms-framework.html>`__
 - `Added example communications service <https://github.com/kubos/kubos/tree/master/examples/serial-comms-service>`__
-- `Added communications service tutorial <https://docs.kubos.com/latest/tutorials/comms-service.html>`__
+- `Added communications service tutorial <https://docs.kubos.com/1.11.0/tutorials/comms-service.html>`__
 - Updated all Rust modules to use Rust 2018
 
 Community Contributions:
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-- `Added communications service framework <https://docs.kubos.com/latest/services/comms-framework.html>`__
+- `Added communications service framework <https://docs.kubos.com/1.11.0/services/comms-framework.html>`__
 
 v1.10.0 - Dec 20th 2018
 -----------------------
 
-- `Added process monitoring to most Kubos services <https://docs.kubos.com/latest/os-docs/monitoring.html>`__
+- `Added process monitoring to most Kubos services <https://docs.kubos.com/1.10.0/os-docs/monitoring.html>`__
 - `Updated the default logging template to include message severity <https://github.com/kubos/kubos-linux-build/blob/master/common/overlay/etc/rsyslog.conf#L31>`__
 - `Updated the logging tutorial and examples to use the app API's logging initialization <https://docs.kubos.com/master/1.9.1+3/tutorials/first-mission-app.html#adding-logging>`__
 - `Updated the BBB and MBM2 installation instructions to use the new eMMC install script <https://docs.kubos.com/master/1.9.1+3/installation-docs/installing-linux-bbb.html#flash-the-emmc>`__
@@ -68,10 +86,10 @@ v1.10.0 - Dec 20th 2018
 v1.9.0 - Dec 6th 2018
 ---------------------
 
-- `Added support for logging using rsyslog <https://docs.kubos.com/latest/tutorials/first-mission-app.html#adding-logging>`__
+- `Added support for logging using rsyslog <https://docs.kubos.com/1.9.0/tutorials/first-mission-app.html#adding-logging>`__
 - Updated all Kubos services to use new logging
-- `Updated file transfer service to clean up temporary storage directories after successful transfer and on-request <https://docs.kubos.com/latest/apis/kubos-libs/file-protocol.html#cleanup-request>`__
-- `Added SLIP support to all boards <https://docs.kubos.com/latest/os-docs/using-kubos-linux.html#slip>`__
+- `Updated file transfer service to clean up temporary storage directories after successful transfer and on-request <https://docs.kubos.com/1.9.0/apis/kubos-libs/file-protocol.html#cleanup-request>`__
+- `Added SLIP support to all boards <https://docs.kubos.com/1.9.0/os-docs/using-kubos-linux.html#slip>`__
 - Updated the applications service to allow more than two files to be present in the directory used
   to register an application
 
@@ -85,10 +103,10 @@ v1.8.0 - Nov 9th 2018
 ---------------------
 
 - `The shell service and client have both been rewritten into Rust <https://github.com/kubos/kubos/tree/master/services/shell-service>`__
-- `Updated the applications service's schema to match the styling of the other services <https://docs.kubos.com/latest/app-docs/app-service.html>`__
+- `Updated the applications service's schema to match the styling of the other services <https://docs.kubos.com/1.8.0/app-docs/app-service.html>`__
 - Added cleanup logic when the app service encounters a corrupted app entry
-- `Added the ability to upgrade an application with the applications service <https://docs.kubos.com/latest/app-docs/app-service.html#upgrading>`__
-- `Updated the Rust app API to utilize exit codes <https://docs.kubos.com/latest/rust-docs/kubos_app/index.html>`__
+- `Added the ability to upgrade an application with the applications service <https://docs.kubos.com/1.8.0/app-docs/app-service.html#upgrading>`__
+- `Updated the Rust app API to utilize exit codes <https://docs.kubos.com/1.8.0/rust-docs/kubos_app/index.html>`__
 - `Added Pumpkin MBM2 RTC support <https://docs.kubos.com/master/1.7.1+14/os-docs/working-with-the-mbm2.html#rtc>`__
 
 Bug Fixes:
@@ -104,9 +122,9 @@ Community Contributions:
 v1.7.0 - Oct 12th 2018
 ----------------------
 
-- `Added overview documentation for the monitor service <https://docs.kubos.com/latest/services/monitor-service.html>`__
-- `Added tutorials to help new users write their first mission application <https://docs.kubos.com/latest/tutorials/index.html#mission-development-tutorials>`__
-- `Added tutorials to help new users interact with the telemetry database and file transfer services <https://docs.kubos.com/latest/tutorials/index.html#system-interaction-tutorials>`__
+- `Added overview documentation for the monitor service <https://docs.kubos.com/1.7.0/services/monitor-service.html>`__
+- `Added tutorials to help new users write their first mission application <https://docs.kubos.com/1.7.0/tutorials/index.html#mission-development-tutorials>`__
+- `Added tutorials to help new users interact with the telemetry database and file transfer services <https://docs.kubos.com/1.7.0/tutorials/index.html#system-interaction-tutorials>`__
 
 Bug Fixes:
 ~~~~~~~~~~
@@ -120,25 +138,25 @@ v1.6.0 - Sept 28th 2018
 
 - Added corrupted chunk and file hash mismatch error handling to the file transfer service
 - Improved file transfer service multi-client handling
-- `Added timeout and chunk-size configuration options to the file transfer service <https://docs.kubos.com/latest/services/file.html#configuration>`__
-- `Updated the telemetry database service to allow query results to be written to an output file <https://docs.kubos.com/latest/services/telemetry-db.html#saving-results-for-later-processing>`__
-- `Added insert and delete capabilities to the telemetry database service <https://docs.kubos.com/latest/services/telemetry-db.html#adding-entries-to-the-database>`__
+- `Added timeout and chunk-size configuration options to the file transfer service <https://docs.kubos.com/1.6.0/services/file.html#configuration>`__
+- `Updated the telemetry database service to allow query results to be written to an output file <https://docs.kubos.com/1.6.0/services/telemetry-db.html#saving-results-for-later-processing>`__
+- `Added insert and delete capabilities to the telemetry database service <https://docs.kubos.com/1.6.0/services/telemetry-db.html#adding-entries-to-the-database>`__
 - Increased telemetry database timestamp key resolution from seconds to milliseconds
-- `Updated applications service to add ability to passthrough arguments to the application being called <https://docs.kubos.com/latest/app-docs/app-guide.html#additional-arguments>`__
+- `Updated applications service to add ability to passthrough arguments to the application being called <https://docs.kubos.com/1.6.0/app-docs/app-guide.html#additional-arguments>`__
 - `Added a basic system-resource monitoring service <https://github.com/kubos/kubos/tree/master/services/monitor-service>`__
 
 Bug Fixes:
 ~~~~~~~~~~
 
-- `Updated Rust cross-compiling instructions to handle new CC arg requirement <https://docs.kubos.com/latest/sdk-docs/sdk-rust.html#cross-compilation>`__
-- `Added doc links to the pre-built hardware services' documentation <https://docs.kubos.com/latest/services/hardware-services.html#pre-built-services>`__
+- `Updated Rust cross-compiling instructions to handle new CC arg requirement <https://docs.kubos.com/1.6.0/sdk-docs/sdk-rust.html#cross-compilation>`__
+- `Added doc links to the pre-built hardware services' documentation <https://docs.kubos.com/1.6.0/services/hardware-services.html#pre-built-services>`__
 
 v1.5.0 - Sep 7th 2018
 ---------------------
 
 - `Added a community Trello board for contributors and KubOS team members <https://trello.com/b/pIWxmFua/kubos-community>`__
 - `The file transfer service and client have both been rewritten into Rust <https://github.com/kubos/kubos/tree/master/services/file-service>`__
-- `Added documentation for how to handle the deployment hold time countdown <https://docs.kubos.com/latest/app-docs/deployment.html>`__
+- `Added documentation for how to handle the deployment hold time countdown <https://docs.kubos.com/1.5.0/app-docs/deployment.html>`__
 - Updated the app APIs to commonize behaviour between the `Python <https://github.com/kubos/kubos/tree/master/apis/app-api/python>`__ and `Rust <https://github.com/kubos/kubos/tree/master/apis/app-api/rust>`__ versions
 - Added example mission applications for both `Rust <https://github.com/kubos/kubos/tree/master/examples/rust-mission-app>`__ and `Python <https://github.com/kubos/kubos/tree/master/examples/python-mission-app>`__
 - `Added a verbose example mission application in Python for mission design <https://github.com/kubos/kubos/tree/master/examples/python-mission-application>`__
@@ -181,7 +199,7 @@ v1.3.0 - Jun 21 2018
 - `Added Rust crate for I2C HAL <https://github.com/kubos/kubos/tree/master/hal/rust-hal/rust-i2c>`__
 - Upgraded Kubos SDK Vagrant and Docker images to use `Rust 1.26 <https://blog.rust-lang.org/2018/05/10/Rust-1.26.html>`__
 - `Added link to nightly version of docs to main docs page <http://docs.kubos.co/master>`__
-- `Added documentation for using ethernet as primary board-communication method <http://docs.kubos.co/latest/os-docs/using-kubos-linux.html#ethernet>`__
+- `Added documentation for using ethernet as primary board-communication method <http://docs.kubos.co/1.3.0/os-docs/using-kubos-linux.html#ethernet>`__
 - Improved documentation about using Python and Rust for development with KubOS
 
 Bug Fixes:
