@@ -7,11 +7,12 @@
 import app_api
 import argparse
 import logging
+from sub import sub
 import sys
 
 def on_boot():
     
-    # Do nothing
+    sub.test_func()
     sys.exit(0)
     
 def on_command(args):
