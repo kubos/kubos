@@ -167,8 +167,8 @@ pub fn app_start(
         .unwrap_or_else(|| "OnCommand".to_owned());
 
     match run_level.as_ref() {
-        "OnBoot" => handler.on_boot(args),
-        "OnCommand" => handler.on_command(args),
+        "OnBoot" => handler.on_boot(matches.free),
+        "OnCommand" => handler.on_command(matches.free),
         level => {
             bail!(
                 "Error: Unknown run level was requested - {}. Available run levels: OnBoot, OnCommand", level
