@@ -1,7 +1,7 @@
 # Local Communications Service
 
 This communications service provides communications functionality over a local
-work. This service could be used to communicate with services which are running
+network. This service could be used to communicate with services which are running
 locally, or with a system which is accessible via the local network interfaces.
 
 ## Running
