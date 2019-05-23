@@ -18,7 +18,7 @@ mod utils;
 
 use crate::utils::*;
 use flate2::read::GzDecoder;
-use serde_json::json;
+use serde_json::{json, Value};
 use std::fs::{self, File};
 use std::io::Read;
 use tempfile::TempDir;
@@ -259,4 +259,86 @@ fn test_route_compress_response() {
     });
 
     assert_eq!(res, expected);
+}
+
+#[test]
+fn test_route_parameters() {
+    let db_dir = TempDir::new().unwrap();
+    let db_path = db_dir.path().join("test.db");
+
+    let db = db_path.to_str().unwrap();
+    let port = 8116;
+    let udp = 8126;
+
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
+
+    let output_dir = TempDir::new().unwrap();
+    let output_path = output_dir.path().join("output");
+
+    let query = format!(
+        r#"{{
+            routedTelemetry(
+                subsystem: "eps",
+                parameters: ["voltage", "current"],
+                output: "{}",
+                compress: false
+                )
+        }}"#,
+        output_path.to_str().unwrap()
+    );
+
+    do_query(Some(port), &query);
+
+    teardown(handle, sender);
+
+    let mut output_file = File::open(output_path).unwrap();
+    let mut contents = String::new();
+    output_file.read_to_string(&mut contents).unwrap();
+
+    let entries: serde_json::Value = serde_json::from_str(&contents).unwrap();
+
+    assert_eq!(
+        entries,
+        json!([
+            {"timestamp":1004.0,"subsystem":"eps","parameter":"voltage","value":"3.6"},
+            {"timestamp":1003.0,"subsystem":"eps","parameter":"current","value":"3.5"},
+            {"timestamp":1002.0,"subsystem":"eps","parameter":"voltage","value":"3.2"},
+            {"timestamp":1001.0,"subsystem":"eps","parameter":"current","value":"3.4"},
+            {"timestamp":1000.0,"subsystem":"eps","parameter":"voltage","value":"3.3"}
+        ])
+    );
+}
+
+#[test]
+fn test_route_conflict() {
+    let db_dir = TempDir::new().unwrap();
+    let db_path = db_dir.path().join("test.db");
+
+    let db = db_path.to_str().unwrap();
+    let port = 8117;
+    let udp = 8127;
+
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
+
+    let res = do_query(
+        Some(port),
+        r#"{
+        telemetry(parameter: "voltage", parameters: ["current"]) {
+            parameter,
+            value
+        }
+    }"#,
+    );
+    teardown(handle, sender);
+    assert_eq!(
+        res,
+        json!({
+                "data": Value::Null,
+                "errors": [{
+                    "locations": [{"column": 9, "line": 2}],
+                    "message": "The `parameter` and `parameters` input fields are mutually exclusive",
+                    "path": ["telemetry"]
+                }]
+        })
+    );
 }
