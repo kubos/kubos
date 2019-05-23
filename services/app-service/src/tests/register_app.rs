@@ -487,3 +487,64 @@ fn register_duplicate() {
 
     test!(service, register_query, expected);
 }
+
+#[test]
+fn register_no_active() {
+    let registry_dir = TempDir::new().unwrap();
+    let service = mock_service!(registry_dir);
+
+    // Remove the 'active' directory for this test case
+    // It should be automatically recreated as part of the registration process
+    fs::remove_dir_all(registry_dir.path().join("active")).unwrap();
+
+    let app_dir = TempDir::new().unwrap();
+    let app_bin = app_dir.path().join("dummy-app");
+
+    fs::create_dir(app_bin.clone()).unwrap();
+
+    // Create dummy app file
+    fs::File::create(app_bin.join("dummy")).unwrap();
+
+    // Create manifest file
+    let manifest = r#"
+            name = "dummy"
+            version = "0.0.1"
+            author = "user"
+            "#;
+    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
+
+    let register_query = format!(
+        r#"mutation {{
+        register(path: \"{}\") {{
+            entry {{
+                active, 
+                app {{
+                    author,
+                    name,
+                    version,
+                }}
+            }},
+            errors,
+            success,
+        }}
+    }}"#,
+        app_bin.to_str().unwrap()
+    );
+
+    let expected = json!({
+       "register": {
+           "entry": {
+              "active": true,
+               "app": {
+                   "author": "user",
+                   "name": "dummy",
+                   "version": "0.0.1",
+               }
+           },
+           "errors": "",
+           "success": true,
+       }
+    });
+
+    test!(service, register_query, expected);
+}

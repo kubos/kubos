@@ -22,7 +22,7 @@ Selecting Hardware Services
 Once the build environment has been set up, the build target has been set, and, optionally, a full build has been run,
 you may edit the build configuration to select additional packages.
 
-From the `buildroot-2017.02.8` directory, run ``sudo make menuconfig``. This will bring up the graphical configuration interface.
+From the `buildroot-2019.02.2` directory, run ``sudo make menuconfig``. This will bring up the graphical configuration interface.
 
 .. figure:: ../images/br_config.png
    :alt: Buildroot Configuration Interface

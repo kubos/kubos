@@ -18,6 +18,7 @@
 //! [NSL EyeStar-D2 Duplex radio](https://nearspacelaunch.com/product/eyestar-d2/)
 
 #![deny(missing_docs)]
+#![deny(warnings)]
 
 mod duplex_d2;
 mod messages;

@@ -41,6 +41,9 @@ pub enum CommsServiceError {
     /// All of the ports allocated for handling packets are binded and unable to be used.
     #[fail(display = "All of the ports allocated for handling packets are binded.")]
     NoAvailablePorts,
+    /// No data available for reading
+    #[fail(display = "No data available for reading")]
+    NoReadData,
 }
 
 /// Result returned by the `comms-service`.
