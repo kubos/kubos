@@ -50,6 +50,9 @@ pub enum CommsServiceError {
     /// Generic error encountered
     #[fail(display = "Error encountered {}", _0)]
     GenericError(String),
+    /// Unknown payload type encountered
+    #[fail(display = "Unknown payload type encountered: {}", _0)]
+    UnknownPayloadType(u16),
 }
 
 /// Result returned by the `comms-service`.

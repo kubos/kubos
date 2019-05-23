@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 Kubos Corporation
+// Copyright (C) 2019 Kubos Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
@@ -22,20 +22,30 @@ use crate::CommsResult;
 /// by the communications service
 #[repr(u8)]
 pub enum PayloadType {
-    /// Packet intended for UDP passthrough
-    GraphQL,
     /// Packet intended for GraphQL request/response
+    GraphQL,
+    /// Packet intended for UDP passthrough
     UDP,
     /// Unknown type
-    Unknown,
+    Unknown(u16),
 }
 
-impl From<u8> for PayloadType {
-    fn from(num: u8) -> PayloadType {
+impl From<u16> for PayloadType {
+    fn from(num: u16) -> PayloadType {
         match num {
             0 => PayloadType::GraphQL,
             1 => PayloadType::UDP,
-            _ => PayloadType::Unknown,
+            other => PayloadType::Unknown(other),
+        }
+    }
+}
+
+impl From<PayloadType> for u16 {
+    fn from(value: PayloadType) -> u16 {
+        match value {
+            PayloadType::GraphQL => 0,
+            PayloadType::UDP => 1,
+            PayloadType::Unknown(value) => value as u16,
         }
     }
 }

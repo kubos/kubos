@@ -207,8 +207,13 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
 
         // Check link type for appropriate message handling path
         match packet.payload_type() {
-            PayloadType::Unknown => {
-                unimplemented!();
+            PayloadType::Unknown(value) => {
+                log_error(
+                    &data,
+                    CommsServiceError::UnknownPayloadType(value).to_string(),
+                )
+                .unwrap();
+                error!("Unknown payload type encountered: {}", value);
             }
             PayloadType::UDP => {
                 unimplemented!();
@@ -242,12 +247,12 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
                     match res {
                         Ok(_) => {
                             log_telemetry(&data_ref, &TelemType::Down).unwrap();
-                            info!("UDP Packet successfully downlinked");
+                            info!("GraphQL Packet successfully downlinked");
                         }
                         Err(e) => {
                             log_telemetry(&data_ref, &TelemType::DownFailed).unwrap();
                             log_error(&data_ref, e.to_string()).unwrap();
-                            error!("UDP packet failed to downlink: {}", e.to_string());
+                            error!("GraphQL packet failed to downlink: {}", e.to_string());
                         }
                     }
                 });

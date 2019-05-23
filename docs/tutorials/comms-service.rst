@@ -407,7 +407,7 @@ After setting up logging, we'll want to fetch our service's configuration settin
         log_init()?;
 
         // Get the main service configuration from the system's config.toml file
-        let service_config = kubos_system::Config::new("uart-comms-service");
+        let service_config = kubos_system::Config::new("radio-service");
 
         // Pull out our communication settings
         let config = CommsConfig::new(service_config);
@@ -444,7 +444,7 @@ The initialization should look like this:
         log_init()?;
 
         // Get the main service configuration from the system's config.toml file
-        let service_config = kubos_system::Config::new("uart-comms-service");
+        let service_config = kubos_system::Config::new("radio-service");
 
         // Pull out our communication settings
         let config = CommsConfig::new(service_config);
@@ -483,7 +483,7 @@ For the moment, we'll put a loop at the end of our program to keep from exiting.
         log_init()?;
 
         // Get the main service configuration from the system's config.toml file
-        let service_config = kubos_system::Config::new("uart-comms-service");
+        let service_config = kubos_system::Config::new("radio-service");
 
         // Pull out our communication settings
         let config = CommsConfig::new(service_config);
@@ -554,7 +554,7 @@ All together, our code so far should look like this:
             SyslogAppender::builder()
                 .encoder(syslog_encoder)
                 .openlog(
-                    "uart-comms-service",
+                    "radio-service",
                     log4rs_syslog::LogOption::LOG_PID | log4rs_syslog::LogOption::LOG_CONS,
                     log4rs_syslog::Facility::Daemon,
                 )
@@ -685,7 +685,7 @@ All together, our code so far should look like this:
         log_init()?;
 
         // Get the main service configuration from the system's config.toml file
-        let service_config = kubos_system::Config::new("uart-comms-service");
+        let service_config = kubos_system::Config::new("radio-service");
 
         // Pull out our communication settings
         let config = CommsConfig::new(service_config);
@@ -973,7 +973,7 @@ We can now define and start our GraphQL front-end in the main code:
         log_init()?;
 
         // Get the main service configuration from the system's config.toml file
-        let service_config = kubos_system::Config::new("uart-comms-service");
+        let service_config = kubos_system::Config::new("radio-service");
 
         // Pull out our communication settings
         let config = CommsConfig::new(service_config.clone());

@@ -67,7 +67,7 @@ impl LinkPacket for SpacePacket {
                 version: 0,
                 packet_type: 0,
                 sec_header_flag: 0,
-                app_proc_id: payload_type as u16,
+                app_proc_id: u16::from(payload_type),
                 sequence_flags: 0,
                 sequence_count: 0,
                 data_length: (payload.len() + 10) as u16,
@@ -148,7 +148,7 @@ impl LinkPacket for SpacePacket {
     }
 
     fn payload_type(&self) -> PayloadType {
-        PayloadType::from(self.primary_header.packet_type)
+        PayloadType::from(self.primary_header.app_proc_id)
     }
 
     fn destination(&self) -> u16 {
