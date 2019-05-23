@@ -7,7 +7,7 @@ For general information about hardware services, their role, and how they work, 
 All hardware services must follow the graphQL spec.
 The mutation and query responses are the "data" and "errors" fields, and all errors experienced are returned in that "errors" field, even if they are from the underlying hardware.
 
-GraphQL Schema::
+.. code-block:: graphql
 
     type Query {
         ping(): String
