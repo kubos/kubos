@@ -32,9 +32,7 @@
 //! max_num_handlers = 10
 //! downlink_ports = [15001]
 //! timeout = 15000
-//! ground_ip = "127.0.0.3"
-//! ground_port = 15002
-//! satellite_ip = "127.0.0.2"
+//! ip = "127.0.0.2"
 //!
 //! [nsl-duplex-comms-service.addr]
 //! ip = "127.0.0.1"
@@ -53,9 +51,7 @@
 //!     - `max_num_handlers` - Maximum number of concurrent message handlers
 //!     - `downlink_ports` - Optional list of downlink endpoints
 //!     - `timeout` - Timeout for completion of GraphQL requests
-//!     - `ground_ip` - IP Address of ground gateway
-//!     - `ground_port` - Listening port of ground gateway
-//!     - `satellite_ip` - Local IP of satellite
+//!     - `ip` - Local IP of satellite
 //!   - GraphQL Server Configs
 //!
 //!     This section is found under `[nsl-duplex-comms-service.addr]`
@@ -288,7 +284,7 @@ fn main() -> NslDuplexCommsResult<()> {
 
     // Start communication service.
     info!("NSL Duplex Communications Service starting on {}", bus);
-    CommsService::start(controls, &telem.clone())?;
+    CommsService::start::<Arc<Mutex<DuplexComms>>, SpacePacket>(controls, &telem.clone())?;
 
     // Start up graphql server
     let subsystem = Subsystem::new(telem, duplex_comms);

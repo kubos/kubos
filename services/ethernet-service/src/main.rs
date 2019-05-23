@@ -60,13 +60,13 @@ fn main() -> EthernetServiceResult<()> {
     // Pull out our communication settings
     let config = CommsConfig::new(service_config)?;
 
-    let satellite_ip = config.satellite_ip.clone();
+    let ip = config.ip.clone();
 
     // Create socket to mock reading from a radio.
-    let read_conn = Arc::new(UdpSocket::bind((satellite_ip.as_str(), READ_PORT))?);
+    let read_conn = Arc::new(UdpSocket::bind((ip.as_str(), READ_PORT))?);
 
     // Create socket to mock writing to a radio.
-    let write_conn = Arc::new(UdpSocket::bind((satellite_ip.as_str(), WRITE_PORT))?);
+    let write_conn = Arc::new(UdpSocket::bind((ip.as_str(), WRITE_PORT))?);
 
     // Control block to configure communication service.
     let controls = CommsControlBlock::new(
@@ -81,7 +81,7 @@ fn main() -> EthernetServiceResult<()> {
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 
     // Start communication service.
-    CommsService::start(controls, &telem)?;
+    CommsService::start::<Arc<UdpSocket>, SpacePacket>(controls, &telem)?;
 
     // We will eventually start the GraphQL service here.
     loop {

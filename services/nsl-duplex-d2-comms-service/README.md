@@ -33,12 +33,8 @@ max_num_handlers = 10
 downlink_ports = [14011]
 #  Timeout when listening for packet response (milliseconds)
 timeout = 1
-# Port to send ground communications on
-ground_port = 14020
-# IP to expect ground communications from
-ground_ip = "192.168.0.1"
 # IP to bind Communications service listener to
-satellite_ip = "0.0.0.0"
+ip = "0.0.0.0"
 ```
 
 When the service has started correctly it will display output like so:
