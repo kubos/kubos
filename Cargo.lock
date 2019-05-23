@@ -531,17 +531,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ethernet-service"
-version = "0.1.0"
-dependencies = [
- "comms-service 0.1.0",
- "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "kubos-system 0.1.0",
- "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "syslog 4.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "example-rust-c-service"
 version = "0.1.0"
 dependencies = [
@@ -1281,6 +1270,19 @@ dependencies = [
 name = "linked-hash-map"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "local-comms-service"
+version = "0.1.0"
+dependencies = [
+ "comms-service 0.1.0",
+ "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "kubos-system 0.1.0",
+ "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "log4rs 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "log4rs-syslog 3.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syslog 4.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "lock_api"
