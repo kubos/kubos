@@ -14,7 +14,6 @@ GraphQL Schema::
         config(): ConfigObject
         power(): PowerState
         telemetry(): Telemetry
-        introspection(): RecommendedTelemetry
     }
 
     type PowerState {
@@ -74,6 +73,6 @@ GraphQL Schema::
 
     type IssueRawCommandPayload {
         response: String
-        # Format that the response will be in. Use HEX to pass binary data. 
+        # Format that the response will be in. Use HEX to pass binary data.
         format: FormatEnum
     }
