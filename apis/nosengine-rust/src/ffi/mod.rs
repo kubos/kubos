@@ -469,9 +469,6 @@ pub enum ErrorCode {
 extern "C" {
     fn NE_error() -> ErrorCode;
     fn NE_error_string() -> *const c_char;
-    //    fn NE_exception_string() -> *const c_char;
-    //    fn NE_ok() -> i32;
-    //    fn NE_failed() -> i32;
 
     fn NE_create_bus2(name: *const c_char, server_uri: *const c_char) -> *mut BusHandle;
     fn NE_destroy_bus(bus: *mut *mut BusHandle);
