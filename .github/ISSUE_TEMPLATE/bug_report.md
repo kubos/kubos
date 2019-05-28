@@ -11,7 +11,7 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **System Details**
-- The hardware running KubOS where the issue was encountered (ex. Beaglebone Black, host PC running Ubuntu, SDK,)
+- The hardware running KubOS where the issue was encountered (ex. Beaglebone Black, host PC running Ubuntu, SDK)
 - The version of KubOS being used (when encountered on an OBC, this is the output of the `uname -a` command)
 
 **Severity**
