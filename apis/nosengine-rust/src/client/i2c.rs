@@ -173,7 +173,6 @@ impl<'a> I2CMaster<'a> {
         }
         match i2c::i2c_write(self.i2c_ptr, address, data.as_ptr(), data.len()) {
             i2c::I2CStatus::Success => {
-                println!("i2c.write: {:?}", data);
                 Ok(())
             }
             i2c::I2CStatus::Failure => Err(I2CError::UnknownAddress { address }),
