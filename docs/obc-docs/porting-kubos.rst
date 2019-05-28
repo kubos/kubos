@@ -101,7 +101,7 @@ These files will be covered in more detail in later sections of this doc.
 Overlay
 ~~~~~~~
 
-Board-specific overlay files should be given in a subdirectory, `boards/{org}/{obc}/overlay`.
+Board-specific overlay files should be given in a subdirectory, `board/{company}/{obc}/overlay`.
 
 These files should be located under the same directories as the file target file system.
 
@@ -205,14 +205,25 @@ OS upgrade and recovery.
 U-Boot Board Package
 ~~~~~~~~~~~~~~~~~~~~
 
-Next, you'll need to create a new directory under `uboot/boards`.
-Boards currently supported by Kubos are located under `uboot/boards/kubos`.
+Next, you'll need to create a new directory under `uboot/board`.
+Boards currently supported by Kubos are located under `uboot/board/kubos`.
 
 Within this directory should be at least two files:
 
 - Kconfig - Defines the new board-specific configuration options, including a pointer to the
   previously mentioned configuration header file (``SYS_BOARD``)
 - Makefile - Defines the board-specific drivers which need to be compiled into U-Boot
+
+Installing U-Boot
+~~~~~~~~~~~~~~~~~
+
+Special care should be taken when determining where the final U-Boot binary should be installed.
+
+Many boards' initial bootloaders expect the starting executable (U-Boot, in this case) to be located
+in a particular memory location.
+
+Note: This same care is not required for installing the rest of the system since you'll be defining
+the location of the other major components (kernel, root FS, etc) within U-Boot.
 
 Linux
 -----
