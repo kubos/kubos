@@ -32,17 +32,21 @@
 //! ```
 
 use super::ffi::i2c;
+use failure::Fail;
 use std::error::Error;
 use std::ffi;
 use std::ffi::CString;
-use std::fmt;
 
 /// This enum represents any type of error that can occur when interacting with I2C
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Fail, Debug, Clone, PartialEq)]
 pub enum I2CError {
     /// An error occurred when converting a Rust string to a C string.
     /// Specifically, the Rust string contained a null character, which cannot be represented
     /// in C strings.
+    #[fail(
+        display = "String Error. Null character at index {}: {}",
+        position, description
+    )]
     StringError {
         /// Description from the underlying std::ffi::NulError
         description: String,
@@ -50,23 +54,23 @@ pub enum I2CError {
         position: usize,
     },
     /// There was an error when creating the I2C.
+    #[fail(display = "I2C Creation Error")]
     I2CCreationError,
     /// This error is raised when an I2C device is created with an invalid address.
+    #[fail(
+        display = "Invalid Address: {}. Must be between 8 and 127, inclusive.",
+        address
+    )]
     InvalidAddress {
         /// The address which was attempted
         address: u16,
     },
     /// Attempted to read or write to an address that doesn't exist.
+    #[fail(display = "Unknown Address: {} not found on this bus.", address)]
     UnknownAddress {
         /// The address which was not found
         address: u16,
     },
-}
-
-impl Error for I2CError {
-    fn description(&self) -> &str {
-        unimplemented!()
-    }
 }
 
 impl From<ffi::NulError> for I2CError {
@@ -74,26 +78,6 @@ impl From<ffi::NulError> for I2CError {
         I2CError::StringError {
             description: String::from(err.description()),
             position: err.nul_position(),
-        }
-    }
-}
-
-impl fmt::Display for I2CError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            I2CError::StringError {
-                description,
-                position,
-            } => write!(f, "Null character at index {}: {}", position, description),
-            I2CError::I2CCreationError => write!(f, "Error while creating I2C node"),
-            I2CError::InvalidAddress { address } => write!(
-                f,
-                "Invalid address {}: Must be between 8 and 127, inclusive.",
-                address
-            ),
-            I2CError::UnknownAddress { address } => {
-                write!(f, "Address {} not found on this bus.", address)
-            }
         }
     }
 }
