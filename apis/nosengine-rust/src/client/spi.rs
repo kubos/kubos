@@ -91,7 +91,7 @@ pub struct SPIMaster<'a> {
 
 impl<'a> SPIMaster<'a> {
     /// This function creates a new SPI master on the given bus. There can be only one: If you attempt to create
-    /// another master on the same bus, this function will return `None`.
+    /// another master on the same bus, this function will return `SPIError::SPICreationError`.
     ///
     /// # Arguments
     ///
@@ -194,7 +194,7 @@ pub struct SPISlave<'a> {
 impl<'a> SPISlave<'a> {
     /// Construct a new SPI slave. The given callback will be run every time the master reads
     /// from or writes to this slave. If a slave with the given chip select already exists on
-    /// this bus, this function returns `None`.
+    /// this bus, this function returns `SPIError::SPICreationError`.
     ///
     /// # Arguments
     ///
