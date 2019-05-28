@@ -180,8 +180,7 @@ impl SerialStream {
 #[cfg(feature = "nos3")]
 impl Stream for SerialStream {
     fn write(&self, data: &[u8]) -> UartResult<()> {
-        self.port.lock().unwrap().write(data);
-        Ok(())
+        self.port.lock().unwrap_or_default()
     }
 
     fn read(&self, len: usize, timeout: Duration) -> UartResult<Vec<u8>> {
