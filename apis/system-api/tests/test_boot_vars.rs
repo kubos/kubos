@@ -20,6 +20,7 @@ use std::env;
 use std::fs;
 use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
+use std::path::Path;
 use tempfile::TempDir;
 
 const DUMMY_PRINTENV: &'static str = r#"#!/bin/bash
@@ -28,8 +29,8 @@ VAR="$2"
 echo ${!VAR}
 "#;
 
-fn setup_dummy_vars(bin_dest: Path) -> UBootVars {
-    bin_dest.join("dummy-printenv");
+fn setup_dummy_vars(env_dir: &Path) -> UBootVars {
+    let bin_dest = env_dir.join("dummy-printenv");
 
     let mut file = fs::File::create(bin_dest.clone()).unwrap();
     file.write_all(DUMMY_PRINTENV.as_bytes())
