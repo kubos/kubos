@@ -15,12 +15,12 @@
  */
 #![deny(warnings)]
 
+use kubos_system::UBootVars;
 use std::env;
 use std::fs;
 use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
-
-use kubos_system::UBootVars;
+use tempfile::TempDir;
 
 const DUMMY_PRINTENV: &'static str = r#"#!/bin/bash
 VAR="$2"
@@ -28,9 +28,8 @@ VAR="$2"
 echo ${!VAR}
 "#;
 
-fn setup_dummy_vars() -> UBootVars {
-    let mut bin_dest = env::temp_dir();
-    bin_dest.push("dummy-printenv");
+fn setup_dummy_vars(bin_dest: Path) -> UBootVars {
+    bin_dest.join("dummy-printenv");
 
     let mut file = fs::File::create(bin_dest.clone()).unwrap();
     file.write_all(DUMMY_PRINTENV.as_bytes())
@@ -47,7 +46,8 @@ fn setup_dummy_vars() -> UBootVars {
 
 #[test]
 fn u32_vars() {
-    let vars = setup_dummy_vars();
+    let env_dir = TempDir::new().unwrap();
+    let vars = setup_dummy_vars(env_dir.path());
 
     env::set_var("count", "123");
     assert_eq!(vars.get_u32("count"), Some(123));
@@ -64,7 +64,8 @@ fn u32_vars() {
 
 #[test]
 fn bool_vars() {
-    let vars = setup_dummy_vars();
+    let env_dir = TempDir::new().unwrap();
+    let vars = setup_dummy_vars(env_dir.path());
     assert_eq!(vars.get_bool("abcdefg"), None);
 
     env::set_var("abcdefg", "0");
@@ -76,7 +77,8 @@ fn bool_vars() {
 
 #[test]
 fn str_vars() {
-    let vars = setup_dummy_vars();
+    let env_dir = TempDir::new().unwrap();
+    let vars = setup_dummy_vars(env_dir.path());
     assert_eq!(vars.get_str("currv"), None);
 
     env::set_var("currv", "1.23");
