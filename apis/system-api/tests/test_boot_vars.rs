@@ -21,6 +21,8 @@ use std::fs;
 use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
+use std::thread;
+use std::time::Duration;
 use tempfile::TempDir;
 
 const DUMMY_PRINTENV: &'static str = r#"#!/bin/bash
@@ -34,7 +36,7 @@ fn setup_dummy_vars(env_dir: &Path) -> UBootVars {
 
     let mut file = fs::File::create(bin_dest.clone()).unwrap();
     file.write_all(DUMMY_PRINTENV.as_bytes())
-        .expect("Failed to write dummy printenv");;
+        .expect("Failed to write dummy printenv");
 
     let mut perms = file.metadata().unwrap().permissions();
     perms.set_mode(0o755);
@@ -51,15 +53,18 @@ fn u32_vars() {
     let vars = setup_dummy_vars(env_dir.path());
 
     env::set_var("count", "123");
+    thread::sleep(Duration::from_millis(1));
     assert_eq!(vars.get_u32("count"), Some(123));
 
     env::set_var("count", "");
+    thread::sleep(Duration::from_millis(1));
     assert_eq!(vars.get_u32("count"), None);
 
     // should be undefined so far..
     assert_eq!(vars.get_u32("limit"), None);
 
     env::set_var("limit", "abc");
+    thread::sleep(Duration::from_millis(1));
     assert_eq!(vars.get_u32("limit"), None);
 }
 
@@ -70,9 +75,11 @@ fn bool_vars() {
     assert_eq!(vars.get_bool("abcdefg"), None);
 
     env::set_var("abcdefg", "0");
+    thread::sleep(Duration::from_millis(1));
     assert_eq!(vars.get_bool("abcdefg"), Some(false));
 
     env::set_var("abcdefg", "1");
+    thread::sleep(Duration::from_millis(1));
     assert_eq!(vars.get_bool("abcdefg"), Some(true));
 }
 
@@ -83,8 +90,10 @@ fn str_vars() {
     assert_eq!(vars.get_str("currv"), None);
 
     env::set_var("currv", "1.23");
+    thread::sleep(Duration::from_millis(1));
     assert_eq!(vars.get_str("currv"), Some(String::from("1.23")));
 
     env::set_var("currv", "");
+    thread::sleep(Duration::from_millis(1));
     assert_eq!(vars.get_str("currv"), Some(String::from("")));
 }
