@@ -269,3 +269,69 @@ fn test_insert_current_timestamp() {
     let difference = (now - timestamp).abs();
     assert!(difference < 1.0);
 }
+
+#[test]
+fn test_insert_bulk() {
+    let db_dir = TempDir::new().unwrap();
+    let db_path = db_dir.path().join("test.db");
+
+    let db = db_path.to_str().unwrap();
+    let port = 8115;
+    let udp = 8125;
+
+    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
+
+    let mutation = r#"mutation {
+            insertBulk(
+                entries: [
+                    { subsystem: "test2", parameter: "voltage", value: "4.0" },
+                    { subsystem: "test2", parameter: "amps", value: "0.3" },
+                    { subsystem: "test2", parameter: "cpu", value: "85.1" }
+                ])
+            {
+                success,
+                errors
+            }
+        }"#;
+    let mutation_expected = json!({
+        "data": {
+            "insertBulk": {
+                "errors": "",
+                "success": true
+            }
+        }
+    });
+    let mutation_result = do_query(Some(port), mutation);
+
+    let query = r#"{
+            telemetry(subsystem: "test2") {
+                subsystem,
+                parameter,
+                value
+            }
+        }"#;
+    let query_expected = json!({
+        "data": {
+            "telemetry": [{
+                "subsystem": "test2",
+                "parameter": "voltage",
+                "value": "4.0"
+            }, {
+                "subsystem": "test2",
+                "parameter": "cpu",
+                "value": "85.1"
+            }, {
+                "subsystem": "test2",
+                "parameter": "amps",
+                "value": "0.3"
+            }]
+        }
+    });
+
+    let query_result = do_query(Some(port), query);
+
+    teardown(handle, sender);
+
+    assert_eq!(mutation_result, mutation_expected);
+    assert_eq!(query_result, query_expected);
+}
