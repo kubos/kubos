@@ -216,7 +216,20 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
                 error!("Unknown payload type encountered: {}", value);
             }
             PayloadType::UDP => {
-                unimplemented!();
+                let sat_ref = comms.ip;
+                let data_ref = data.clone();
+
+                thread::spawn(move || match handle_udp_passthrough(packet, sat_ref) {
+                    Ok(_) => {
+                        log_telemetry(&data_ref, &TelemType::Down).unwrap();
+                        info!("UDP Packet successfully uplinked");
+                    }
+                    Err(e) => {
+                        log_telemetry(&data_ref, &TelemType::DownFailed).unwrap();
+                        log_error(&data_ref, e.to_string()).unwrap();
+                        error!("UDP packet failed to uplink: {}", e.to_string());
+                    }
+                });
             }
             PayloadType::GraphQL => {
                 if let Ok(mut num_handlers) = num_handlers.lock() {
@@ -295,6 +308,18 @@ fn handle_graphql_request<Connection: Clone, Packet: LinkPacket>(
 
     // Write packet to the gateway
     write(&write_conn.clone(), &packet).map_err(|e| e.to_string())
+}
+
+fn handle_udp_passthrough<Packet: LinkPacket>(
+    message: Box<Packet>,
+    sat_ip: Ipv4Addr,
+) -> Result<(), String> {
+    let socket = UdpSocket::bind((sat_ip, 0)).map_err(|e| e.to_string())?;
+
+    socket
+        .send_to(&message.payload(), (sat_ip, message.destination()))
+        .map_err(|e| e.to_string())
+        .map(|_c| ())
 }
 
 // This thread reads indefinitely from a UDP socket, creating link packets from
