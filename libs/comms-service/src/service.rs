@@ -310,6 +310,9 @@ fn handle_graphql_request<Connection: Clone, Packet: LinkPacket>(
     write(&write_conn.clone(), &packet).map_err(|e| e.to_string())
 }
 
+// This function takes a Packet with PayloadType::UDP and sends the payload over a
+// UdpSocket to the specified destination.
+#[allow(clippy::boxed_local)]
 fn handle_udp_passthrough<Packet: LinkPacket>(
     message: Box<Packet>,
     sat_ip: Ipv4Addr,
