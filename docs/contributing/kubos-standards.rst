@@ -1,8 +1,6 @@
 Kubos Coding and Documentation Standards
 ========================================
 
-TODO: Review me
-
 This is a doc to maintain the current naming and coding standards when
 working with the Kubos products.
 
@@ -26,7 +24,7 @@ Component Names
 
 Components within Kubos breakdown as follows:
 
-- API - a statically linked library
+- API - A library exposing an interface to some hardware or software functionality.
 - Service - A persistent process that is used to interact with the system. These typically utilize APIs.
 - Application - Makes decisions and uses the services.
 
@@ -35,15 +33,15 @@ Components added to the system should be referred to/labeled accordingly. See th
 File Naming
 ###########
 
-Code (\*.c, \*.h, scripts, etc)
--------------------------------
+Code (\*.rs, \*.py, \*.c, \*.h, scripts, etc)
+---------------------------------------------
 
 -  No spaces
 -  Use underscores to separate words
 -  All lowercase
 
-Docs (\*.rst)
--------------
+Docs (\*.rst, \*.md)
+--------------------
 
 -  No spaces
 -  Use hyphens to separate words
@@ -63,16 +61,6 @@ The CONTRIUBUTING, LICENSE, and README files should all be uppercased.
 
 'Vagrantfile', 'Makefile', 'CMake', and other similar files should all
 be cased to match industry standards.
-
-Them's Fightin' Words
-#####################
-A few of the more *controversial* rules:
-
--  Spaces, not tabs
--  No if/for/while statements without brackets
--  All brackets on their own line
--  Use oxford commas
--  Single space after periods and colons
 
 Documentation Standards
 #######################
@@ -137,6 +125,43 @@ Coding Standards
 
 This section covers the styling and standards for the various languages
 and tools that we use.
+
+Rust Standards
+--------------
+
+The `Rust code formatting RFCs <https://github.com/rust-lang-nursery/fmt-rfcs>`__
+are our preferred source for Rust styling.
+
+`rustfmt <https://github.com/rust-lang-nursery/rustfmt>`__ is our preferred tool
+for formatting code and enforcing these standards. It comes included in our
+SDK's Vagrant box.
+
+Python Standards
+----------------
+
+`Python's PEP8 Style
+Guide <https://www.python.org/dev/peps/pep-0008/>`__ is our preferred
+Python styling.
+
+`PyLint <https://pylint.readthedocs.io/en/latest/>`__ is a great tool
+which can be used to check the style and validity of your python files.
+It has support for a variety of `editors and
+IDEs <https://pylint.readthedocs.io/en/latest/user_guide/ide-integration.html>`__.
+
+-  `PyLint via PyDev for
+   Eclipse <http://www.pydev.org/manual_adv_pylint.html>`__
+-  `PyLint for Atom <https://atom.io/packages/linter-pylint>`__
+-  `PyLint for Visual
+   Studio <https://www.mantidproject.org/How_to_run_Pylint>`__
+
+`Autopep8 <https://pypi.python.org/pypi/autopep8>`__ can be used to
+automatically format your code to conform with the Python PEP8 standard.
+
+-  `Autopep8 via PyDev for
+   Eclipse <https://marketplace.eclipse.org/content/pydev-python-ide-eclipse>`__
+-  `Autopep8 for Atom <https://atom.io/packages/python-autopep8>`__
+-  `Autopep8 for Visual
+   Studio <https://marketplace.visualstudio.com/items?itemName=himanoa.Python-autopep8>`__
 
 C Standards
 -----------
@@ -452,44 +477,6 @@ Do not rely on implicit conversion to bool in conditions.
     if (ptr)         // wrong
     if (ptr != NULL) // ok
 
-Python Standards
-----------------
-
-`Python's PEP8 Style
-Guide <https://www.python.org/dev/peps/pep-0008/>`__ is our preferred
-Python styling.
-
-`PyLint <https://pylint.readthedocs.io/en/latest/>`__ is a great tool
-which can be used to check the style and validity of your python files.
-It has support for a variety of `editors and
-IDEs <https://pylint.readthedocs.io/en/latest/user_guide/ide-integration.html>`__.
-
--  `PyLint via PyDev for
-   Eclipse <http://www.pydev.org/manual_adv_pylint.html>`__
--  `PyLint for Atom <https://atom.io/packages/linter-pylint>`__
--  `PyLint for Visual
-   Studio <https://www.mantidproject.org/How_to_run_Pylint>`__
-
-`Autopep8 <https://pypi.python.org/pypi/autopep8>`__ can be used to
-automatically format your code to conform with the Python PEP8 standard.
-
--  `Autopep8 via PyDev for
-   Eclipse <https://marketplace.eclipse.org/content/pydev-python-ide-eclipse>`__
--  `Autopep8 for Atom <https://atom.io/packages/python-autopep8>`__
--  `Autopep8 for Visual
-   Studio <https://marketplace.visualstudio.com/items?itemName=himanoa.Python-autopep8>`__
-
-
-Rust Standards
---------------
-
-The `Rust code formatting RFCs <https://github.com/rust-lang-nursery/fmt-rfcs>`__
-are our preferred source for Rust styling.
-
-`rustfmt <https://github.com/rust-lang-nursery/rustfmt>`__ is our preferred tool
-for formatting code and enforcing these standards. It comes included in our
-SDK's Vagrant box.
-
 Working with External Projects
 ------------------------------
 
@@ -527,7 +514,11 @@ Bash - Refer to `Google's style
 guide <https://google.github.io/styleguide/shell.xml>`__. **Exception:**
 Use 4 spaces, since that's what we do in all of our other languages.
 
-`KConfig <https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt>`__
+
+KConfig is the tool used by Buildroot and the Linux Kernel for defining
+configuration files used in builds. You should refer to this 
+`documentation <https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt>`__
+when writing custom KConfig files.
 
 CONSISTENCY
 ###########
