@@ -18,59 +18,44 @@
 
 use crate::config::*;
 use crate::errors::*;
+use crate::packet::{LinkPacket, PayloadType};
 use crate::telemetry::*;
-use byteorder::{BigEndian, ByteOrder};
 use log::info;
-use pnet::packet::udp::{ipv4_checksum, UdpPacket};
-use pnet::packet::Packet;
 use std::fmt::Debug;
 use std::net::{Ipv4Addr, UdpSocket};
-use std::ops::Range;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
-// UDP header length.
-const HEADER_LEN: usize = 8;
-// Checksum location in UDP packet.
-const CHKSUM_RNG: Range<usize> = 6..8;
-// Communication service maximum packet size (65,535 - 20 byte IP header - 8 byte UDP header
-//  - 8 byte UDP header).
-const MAX_SIZE: usize = 65499;
-
 /// Type definition for a "read" function pointer.
-pub type ReadFn<T> = Fn(&T) -> CommsResult<Vec<u8>> + Send + Sync + 'static;
+pub type ReadFn<Connection> = Fn(&Connection) -> CommsResult<Vec<u8>> + Send + Sync + 'static;
 /// Type definition for a "write" function pointer.
-pub type WriteFn<T> = Fn(&T, &[u8]) -> CommsResult<()> + Send + Sync + 'static;
+pub type WriteFn<Connection> = Fn(&Connection, &[u8]) -> CommsResult<()> + Send + Sync + 'static;
 
 /// Struct that holds configuration data to allow users to set up a Communication Service.
 #[derive(Clone)]
-pub struct CommsControlBlock<T: Clone> {
+pub struct CommsControlBlock<Connection: Clone> {
     /// Function pointer to a function that defines how to read from a gateway.
-    pub read: Option<Arc<ReadFn<T>>>,
+    pub read: Option<Arc<ReadFn<Connection>>>,
     /// Function pointers to functions that define methods for writing data over a gateway.
-    pub write: Vec<Arc<WriteFn<T>>>,
+    pub write: Vec<Arc<WriteFn<Connection>>>,
     /// Gateway connection to read from.
-    pub read_conn: T,
+    pub read_conn: Connection,
     /// Gateway connection to write to.
-    pub write_conn: T,
+    pub write_conn: Connection,
     /// Maximum number of concurrent message handlers allowed.
     pub max_num_handlers: u16,
     /// Timeout for the completion of GraphQL operations within message handlers (in milliseconds).
     pub timeout: u64,
-    /// IP address of the ground gateway.
-    pub ground_ip: Ipv4Addr,
     /// IP address of the computer that is running the communication service.
-    pub satellite_ip: Ipv4Addr,
+    pub ip: Ipv4Addr,
     /// Optional list of ports used by downlink endpoints that send messages to the ground.
     /// Each port in the list will be used by one downlink endpoint.
     pub downlink_ports: Option<Vec<u16>>,
-    /// Specifies the port to which the ground gateway is bound.
-    pub ground_port: Option<u16>,
 }
 
-impl<T: Clone + Debug> Debug for CommsControlBlock<T> {
+impl<Connection: Clone + Debug> Debug for CommsControlBlock<Connection> {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         let read = if self.read.is_some() {
             "Some(fn)"
@@ -89,29 +74,26 @@ impl<T: Clone + Debug> Debug for CommsControlBlock<T> {
         write!(
             f,
             "CommsControlBlock {{ read: {}, write: {:?}, read_conn: {:?}, write_conn: {:?},
-            max_num_handlers: {:?}, timeout: {:?}, ground_ip: {:?}, satellite_ip: {:?},
-            downlink_ports: {:?}, ground_port: {:?} }}",
+            max_num_handlers: {:?}, timeout: {:?}, ip: {:?}, downlink_ports: {:?} }}",
             read,
             write,
             self.read_conn,
             self.write_conn,
             self.max_num_handlers,
             self.timeout,
-            self.ground_ip,
-            self.satellite_ip,
+            self.ip,
             self.downlink_ports,
-            self.ground_port
         )
     }
 }
 
-impl<T: Clone> CommsControlBlock<T> {
+impl<Connection: Clone> CommsControlBlock<Connection> {
     /// Creates a new instance of the CommsControlBlock
     pub fn new(
-        read: Option<Arc<ReadFn<T>>>,
-        write: Vec<Arc<WriteFn<T>>>,
-        read_conn: T,
-        write_conn: T,
+        read: Option<Arc<ReadFn<Connection>>>,
+        write: Vec<Arc<WriteFn<Connection>>>,
+        read_conn: Connection,
+        write_conn: Connection,
         config: CommsConfig,
     ) -> CommsResult<Self> {
         if write.is_empty() {
@@ -136,10 +118,8 @@ impl<T: Clone> CommsControlBlock<T> {
             write_conn,
             max_num_handlers: config.max_num_handlers.unwrap_or(DEFAULT_MAX_HANDLERS),
             timeout: config.timeout.unwrap_or(DEFAULT_TIMEOUT),
-            ground_ip: Ipv4Addr::from_str(&config.ground_ip)?,
-            satellite_ip: Ipv4Addr::from_str(&config.satellite_ip)?,
+            ip: Ipv4Addr::from_str(&config.ip)?,
             downlink_ports: config.downlink_ports,
-            ground_port: config.ground_port,
         })
     }
 }
@@ -149,15 +129,15 @@ pub struct CommsService;
 
 impl CommsService {
     /// Starts an instance of the Communication Service and its associated background threads.
-    pub fn start<T: Clone + Send + 'static>(
-        control: CommsControlBlock<T>,
+    pub fn start<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + 'static>(
+        control: CommsControlBlock<Connection>,
         telem: &Arc<Mutex<CommsTelemetry>>,
     ) -> CommsResult<()> {
         // If desired, spawn a read thread
         if control.read.is_some() {
             let telem_ref = telem.clone();
             let control_ref = control.clone();
-            thread::spawn(move || read_thread(control_ref, &telem_ref));
+            thread::spawn(move || read_thread::<Connection, Packet>(control_ref, &telem_ref));
         }
 
         // For each provided `write()` function, spawn a downlink endpoint thread.
@@ -167,20 +147,10 @@ impl CommsService {
                 let port_ref = *port;
                 let conn_ref = control.write_conn.clone();
                 let write_ref = write.clone();
-                let ground_ip = control.ground_ip;
-                let sat_ip = control.satellite_ip;
-                let ground_port = control.ground_port.ok_or_else(|| {
-                    CommsServiceError::ConfigError("Missing ground_port parameter".to_owned())
-                })?;
+                let ip = control.ip;
                 thread::spawn(move || {
-                    downlink_endpoint(
-                        &telem_ref,
-                        port_ref,
-                        conn_ref,
-                        &write_ref,
-                        ground_ip,
-                        sat_ip,
-                        ground_port,
+                    downlink_endpoint::<Connection, Packet>(
+                        &telem_ref, port_ref, conn_ref, &write_ref, ip,
                     );
                 });
             }
@@ -192,8 +162,8 @@ impl CommsService {
 }
 
 // This thread reads from a gateway and passes received messages to message handlers.
-fn read_thread<T: Clone + Send + 'static>(
-    comms: CommsControlBlock<T>,
+fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + 'static>(
+    comms: CommsControlBlock<Connection>,
     data: &Arc<Mutex<CommsTelemetry>>,
 ) {
     // Take reader from control block.
@@ -212,19 +182,19 @@ fn read_thread<T: Clone + Send + 'static>(
             }
         };
 
-        // Create a UDP packet from the received information.
-        let packet = match UdpPacket::owned(bytes) {
-            Some(packet) => packet,
-            None => {
+        // Create a link packet from the received information.
+        let packet = match Packet::parse(&bytes) {
+            Ok(packet) => packet,
+            Err(e) => {
                 log_telemetry(&data, &TelemType::UpFailed).unwrap();
                 log_error(&data, CommsServiceError::HeaderParsing.to_string()).unwrap();
-                error!("Failed to parse packet header");
+                error!("Failed to parse packet header {}", e);
                 continue;
             }
         };
 
-        // Verify checksum of the UDP Packet.
-        if packet.get_checksum() != ipv4_checksum(&packet, &comms.ground_ip, &comms.satellite_ip) {
+        // Validate the link packet
+        if packet.validate() != true {
             log_telemetry(&data, &TelemType::UpFailed).unwrap();
             log_error(&data, CommsServiceError::InvalidChecksum.to_string()).unwrap();
             error!("Packet checksum failed");
@@ -233,58 +203,73 @@ fn read_thread<T: Clone + Send + 'static>(
 
         // Update number of packets up.
         log_telemetry(&data, &TelemType::Up).unwrap();
-        info!("UDP Packet successfully uplinked");
+        info!("Packet successfully uplinked");
 
-        if let Ok(mut num_handlers) = num_handlers.lock() {
-            if *num_handlers >= comms.max_num_handlers {
-                log_error(&data, CommsServiceError::NoAvailablePorts.to_string()).unwrap();
-                error!("No message handler ports available");
-                continue;
-            } else {
-                *num_handlers += 1;
+        // Check link type for appropriate message handling path
+        match packet.payload_type() {
+            PayloadType::Unknown(value) => {
+                log_error(
+                    &data,
+                    CommsServiceError::UnknownPayloadType(value).to_string(),
+                )
+                .unwrap();
+                error!("Unknown payload type encountered: {}", value);
+            }
+            PayloadType::UDP => {
+                unimplemented!();
+            }
+            PayloadType::GraphQL => {
+                if let Ok(mut num_handlers) = num_handlers.lock() {
+                    if *num_handlers >= comms.max_num_handlers {
+                        log_error(&data, CommsServiceError::NoAvailablePorts.to_string()).unwrap();
+                        error!("No message handler ports available");
+                        continue;
+                    } else {
+                        *num_handlers += 1;
+                    }
+                }
+
+                // Spawn new message handler.
+                let conn_ref = comms.write_conn.clone();
+                let write_ref = comms.write[0].clone();
+                let data_ref = data.clone();
+                let sat_ref = comms.ip;
+                let time_ref = comms.timeout;
+                let num_handlers_ref = num_handlers.clone();
+                thread::spawn(move || {
+                    let res =
+                        handle_graphql_request(conn_ref, &write_ref, packet, time_ref, sat_ref);
+
+                    if let Ok(mut num_handlers) = num_handlers_ref.lock() {
+                        *num_handlers -= 1;
+                    }
+
+                    match res {
+                        Ok(_) => {
+                            log_telemetry(&data_ref, &TelemType::Down).unwrap();
+                            info!("GraphQL Packet successfully downlinked");
+                        }
+                        Err(e) => {
+                            log_telemetry(&data_ref, &TelemType::DownFailed).unwrap();
+                            log_error(&data_ref, e.to_string()).unwrap();
+                            error!("GraphQL packet failed to downlink: {}", e.to_string());
+                        }
+                    }
+                });
             }
         }
-
-        // Spawn new message handler.
-        let conn_ref = comms.write_conn.clone();
-        let write_ref = comms.write[0].clone();
-        let data_ref = data.clone();
-        let sat_ref = comms.satellite_ip;
-        let ground_ref = comms.ground_ip;
-        let time_ref = comms.timeout;
-        let num_handlers_ref = num_handlers.clone();
-        thread::spawn(move || {
-            let res = handle_message(conn_ref, &write_ref, &packet, time_ref, sat_ref, ground_ref);
-
-            if let Ok(mut num_handlers) = num_handlers_ref.lock() {
-                *num_handlers -= 1;
-            }
-
-            match res {
-                Ok(_) => {
-                    log_telemetry(&data_ref, &TelemType::Down).unwrap();
-                    info!("UDP Packet successfully downlinked");
-                }
-                Err(e) => {
-                    log_telemetry(&data_ref, &TelemType::DownFailed).unwrap();
-                    log_error(&data_ref, e.to_string()).unwrap();
-                    error!("UDP packet failed to downlink: {}", e.to_string());
-                }
-            }
-        });
     }
 }
 
 // This thread sends a query/mutation to its intended destination and waits for a response.
 // The thread then writes the response to the gateway.
-#[allow(clippy::too_many_arguments)]
-fn handle_message<T: Clone>(
-    write_conn: T,
-    write: &Arc<WriteFn<T>>,
-    message: &UdpPacket,
+#[allow(clippy::boxed_local)]
+fn handle_graphql_request<Connection: Clone, Packet: LinkPacket>(
+    write_conn: Connection,
+    write: &Arc<WriteFn<Connection>>,
+    message: Box<Packet>,
     timeout: u64,
     sat_ip: Ipv4Addr,
-    ground_ip: Ipv4Addr,
 ) -> Result<(), String> {
     let payload = message.payload().to_vec();
 
@@ -294,7 +279,7 @@ fn handle_message<T: Clone>(
         .map_err(|e| e.to_string())?;
 
     let mut res = client
-        .post(&format!("http://{}:{}", sat_ip, message.get_destination()))
+        .post(&format!("http://{}:{}", sat_ip, message.destination()))
         .body(payload)
         .send()
         .map_err(|e| e.to_string())?;
@@ -303,42 +288,35 @@ fn handle_message<T: Clone>(
     let buf = res.text().unwrap_or_else(|_| "".to_owned());
     let buf = buf.as_bytes();
 
-    // Take received message and wrap it in a UDP packet.
-    let packet = build_packet(
-        &buf[0..size],
-        message.get_destination(),
-        message.get_source(),
-        (size + HEADER_LEN) as u16,
-        sat_ip,
-        ground_ip,
-    )
-    .map_err(|e| e.to_string())?;
+    // Take received message and wrap it in a LinkPacket
+    let packet = Packet::build(message.command_id(), PayloadType::GraphQL, 0, &buf[0..size])
+        .and_then(|packet| packet.to_bytes())
+        .map_err(|e| e.to_string())?;
 
     // Write packet to the gateway
-    write(&write_conn.clone(), packet.as_slice()).map_err(|e| e.to_string())
+    write(&write_conn.clone(), &packet).map_err(|e| e.to_string())
 }
 
-// This thread reads indefinitely from a UDP socket and then writes received packets to a gateway.
-fn downlink_endpoint<T: Clone>(
+// This thread reads indefinitely from a UDP socket, creating link packets from
+// the UDP packet payload and then writes the link packets to a gateway.
+fn downlink_endpoint<Connection: Clone, Packet: LinkPacket>(
     data: &Arc<Mutex<CommsTelemetry>>,
     port: u16,
-    write_conn: T,
-    write: &Arc<WriteFn<T>>,
-    ground_ip: Ipv4Addr,
+    write_conn: Connection,
+    write: &Arc<WriteFn<Connection>>,
     sat_ip: Ipv4Addr,
-    ground_port: u16,
 ) {
-    // Bind the downlink endpoint to a socket.
+    // Bind the downlink endpoint to a UDP socket.
     let socket = match UdpSocket::bind((sat_ip, port)) {
         Ok(sock) => sock,
         Err(e) => return log_error(&data, e.to_string()).unwrap(),
     };
 
     loop {
-        let mut buf = [0; MAX_SIZE];
+        let mut buf = vec![0; Packet::max_size()];
 
         // Indefinitely wait for a message from any application or service.
-        let (size, address) = match socket.recv_from(&mut buf) {
+        let (size, _address) = match socket.recv_from(&mut buf) {
             Ok(tuple) => tuple,
             Err(e) => {
                 log_error(&data, e.to_string()).unwrap();
@@ -346,15 +324,12 @@ fn downlink_endpoint<T: Clone>(
             }
         };
 
-        // Take received message and wrap it in a UDP packet.
-        let packet = match build_packet(
-            &buf[0..size],
-            address.port(),
-            ground_port,
-            (size + HEADER_LEN) as u16,
-            sat_ip,
-            ground_ip,
-        ) {
+        // Take received message and wrap it in a Link packet.
+        // Setting port to 0 because we don't know the ground port...
+        // That is known by the ground comms service
+        let packet = match Packet::build(0, PayloadType::UDP, 0, &buf[0..size])
+            .and_then(|packet| packet.to_bytes())
+        {
             Ok(packet) => packet,
             Err(e) => {
                 log_error(&data, e.to_string()).unwrap();
@@ -363,48 +338,16 @@ fn downlink_endpoint<T: Clone>(
         };
 
         // Write packet to the gateway and update telemetry.
-        match write(&write_conn.clone(), packet.as_slice()) {
+        match write(&write_conn.clone(), &packet) {
             Ok(_) => {
                 log_telemetry(&data, &TelemType::Down).unwrap();
-                info!("UDP Packet successfully downlinked");
+                info!("Packet successfully downlinked");
             }
             Err(e) => {
                 log_telemetry(&data, &TelemType::DownFailed).unwrap();
                 log_error(&data, e.to_string()).unwrap();
-                error!("UDP Packet failed to downlink");
+                error!("Packet failed to downlink");
             }
         };
     }
-}
-
-/// Takes the payload and then wraps it into a UDP packet.
-pub fn build_packet(
-    payload: &[u8],
-    source: u16,
-    dest: u16,
-    length: u16,
-    sat: Ipv4Addr,
-    ground: Ipv4Addr,
-) -> CommsResult<Vec<u8>> {
-    // Create a new UDP packet.
-    let mut header = [0; HEADER_LEN];
-    let fields = [source, dest, length, 0];
-    BigEndian::write_u16_into(&fields, &mut header);
-    let mut packet = header.to_vec();
-    packet.append(&mut payload.to_vec());
-
-    // Calculate the checksum for the UDP packet.
-    let packet_without_checksum = match UdpPacket::owned(packet.clone()) {
-        Some(bytes) => bytes,
-        None => return Err(CommsServiceError::HeaderParsing.into()),
-    };
-    let mut checksum = [0; 2];
-    BigEndian::write_u16(
-        &mut checksum,
-        ipv4_checksum(&packet_without_checksum, &sat, &ground),
-    );
-
-    // Splice the checksum back into UDP packet.
-    packet.splice(CHKSUM_RNG, checksum.iter().cloned());
-    Ok(packet)
 }

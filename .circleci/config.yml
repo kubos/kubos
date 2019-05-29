@@ -44,6 +44,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
+        - run: cd apis/app-api/python && pip3 install .
         - run: cargo test -j 7
 
     # Rust testing - large upload test
@@ -113,6 +114,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
+        - run: cd apis/app-api/python && pip3 install .
         - run: pip install semantic-version
         - run: ./deploy.sh
 
@@ -123,6 +125,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
+        - run: cd apis/app-api/python && pip install .
         - run: ssh-keyscan docs.kubos.co >> ~/.ssh/known_hosts
         - run: pip install semantic-version
         - run: ./prep_docs.sh

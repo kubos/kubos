@@ -17,30 +17,80 @@ ground.
 Architecture
 ------------
 
-.. figure:: ../images/comms_arch.png
-    :align: center
+.. uml::
 
-Data Packets
-~~~~~~~~~~~~
+   @startuml
 
-All packets sent to/from the communication device will be encapsulated in several layers.
+   skinparam linetype polyline
+   skinparam linetype ortho
+   left to right direction
+   rectangle "Telemetry Service" as Telemetry
+   rectangle "Mission Application" as App
+   rectangle "Radio" as Radio
+
+   package "Communications Service" {
+       rectangle "Read Thread" as Read
+       rectangle "Message Handler" as Message
+       rectangle "Downlink Endpoint" as Downlink
+   }
+
+   Radio -right-> Read
+   Downlink -up-> Radio
+   Message -left-> Radio
+
+   Telemetry .left.> Message
+   Message .right.> Telemetry
+
+   Telemetry .> App
+   App .> Telemetry
+
+   App .> Downlink
+
+   @enduml
 
 .. uml::
 
     @startuml
-    
+
+    hide footbox
+
+    actor "Ground Control" as ground_control
+    participant "Radio" as radio
+    participant "Communications Services" as comms_service
+    participant "Flight Software" as software
+
+    ground_control -> radio: 1. Send command to satellite
+    radio -> comms_service: 2. Read data packets from radio
+    comms_service -> software: 3. Send packet payload to appropriate service
+    software -> comms_service: 4. Send response back
+    comms_service -> radio: 5. Send data packet to radio with response
+    radio -> ground_control: 6. Send response to ground control
+
+    @enduml
+
+
+Data Packets
+~~~~~~~~~~~~
+
+All packets sent to/from the communication device, over the wire (or air),
+will be encapsulated in several layers.
+
+.. uml::
+
+    @startuml
+
     package "Radio Protocol" {
-        package "UDP" {
-            rectangle "Message Data"
+        package "Space Packet" {
+            rectangle "Payload"
         }
     }
-    
+
     @enduml
 
 The first layer will be whatever communication protocol the device requires.
 For example, AX.25 is frequently used as the header protocol for radio communication.
 
-Inside of this will be a UDP packet containing one of the following:
+Inside of this will be a |Space Packet| containing one of the following payloads:
 
 - GraphQL query or mutation
 - JSON GraphQL responses
@@ -53,47 +103,41 @@ Ground Communication
 The communications service maintains a constant read thread which listens for messages from the
 ground via the communications device.
 
-Once a message is received, a message handler thread is spawned. This message handler examines the destination
-port embedded in the message's UDP packet header to determine the internal message destination
+Once a message is received, a message handler thread is spawned. This message handler examines the
+port embedded in the message's Space Packet header to determine the internal message destination
 and then makes an HTTP POST to the appropriate service.
 The handler then waits for a response (within a specified timeout duration), wraps the response in a
-UDP packet, and then sends the packet to the communications device for transmission.
+Space Packet, and then sends the packet to the communications device for transmission.
 Once this transaction has completed, the message handler thread exits.
 
 .. uml::
 
     @startuml
-    
+
     hide footbox
-    
-    actor "Ground Station" as ground
-    participant Radio
-    
-    ground -> Radio : 1. Send command to satellite
-    
+
+    actor Radio
+
     box "Communications Service" #LightBlue
         participant "Read Thread" as read
 
-        Radio <- read : 2. Read data packets from radio
-        read -> read : 3. Deframe data packets
-        read -> read : 4. Reassemble data packet
-        
+        Radio <- read : 1. Read data packets from radio
+        read -> read : 2. Deframe data packets
+        read -> read : 3. Reassemble data packet
+
         create "Message Handler" as handler
-        read -> handler : 5. Spawn new message handler
+        read -> handler : 4. Spawn new message handler
         activate handler
     end box
-    
+
     participant "Kubos Service" as service
-    
-    handler -> service : 6. Posts GraphQL query/mutation to service
-    service -> handler : 7. Return result of query/mutation
-    handler -> handler : 8. Wrap result in UDP packet
-    handler -> Radio : 9. Send response packet to radio
+
+    handler -> service : 5. Posts GraphQL query/mutation to service
+    service -> handler : 6. Return result of query/mutation
+    handler -> handler : 7. Wrap result in Space Packet
+    handler -> Radio : 8. Send response packet to radio
     destroy handler
-    
-    Radio -> ground : 10. Send response packet to ground
-    
-    
+
     @enduml
 
 Downlink Endpoints
@@ -109,25 +153,25 @@ threads if more than one method may be used for downlink communication).
 Each endpoint is assigned its own UDP port and maintains a constant read thread which listens for
 messages from within the satellite which should be transmitted.
 
-When the endpoint's read thread receives a message, it wraps it up in a UDP packet and then sends
+When the endpoint's read thread receives a message, it wraps it up in a Space Packet and then sends
 it to the communications device, via the user-defined write function.
 
 .. uml::
 
     @startuml
-    
+
     hide footbox
-    
+
     actor "Mission application" as app
     participant "Communications Service\nDownlink Endpoint" as downlink
     participant Radio
     actor "Ground Station" as ground
-    
+
     app -> downlink : 1. Send data to downlink endpoint
-    downlink -> downlink : 2. Wrap data in UDP packet
-    downlink -> Radio : 3. Send data packet to radio
-    Radio -> ground : 4. Send data packet to ground
-    
+    downlink -> downlink : 2. Wrap data in Space Packet
+    downlink -> Radio : 3. Send Space Packet to radio
+    Radio -> ground : 4. Send Space Packet to ground
+
     @enduml
 
 Configuration
@@ -148,9 +192,7 @@ The service's :doc:`config.toml <../services/service-config>` file should contai
 - ``downlink_ports`` - (Optional) List of ports used by downlink endpoints that send messages to the
   ground. Each port in the list will be used by one downlink endpoint
 - ``timeout`` - (Default: 1500) Length of time a message handler should wait for a reply, in milliseconds
-- ``ground_ip`` - (Required) IP address of the ground gateway
-- ``ground_port`` - (Required if ``downlink_ports`` is present) UDP port of the ground gateway
-- ``satellite_ip`` - (Required) IP address of the communications service
+- ``ip`` - (Required) IP address of the communications service
 
 The service which implements the framework should create a |CommsControlBlock|, which
 provides the final configuration to the main communication logic.
@@ -167,9 +209,7 @@ It contains the following members:
 - ``max_num_handlers`` - Should be copied from the corresponding `config.toml` value
 - ``downlink_ports`` - Should be copied from the corresponding `config.toml` value or ``None``
 - ``timeout`` - Should be copied from the corresponding `config.toml` value
-- ``ground_ip`` - Should be copied from the corresponding `config.toml` value
-- ``ground_port`` - Should be copied from the corresponding `config.toml` value
-- ``satellite_ip`` - Should be copied from the corresponding `config.toml` value
+- ``ip`` - Should be copied from the corresponding `config.toml` value
 
 .. warning::
 
@@ -213,7 +253,7 @@ resources:
 .. |comms-service| raw:: html
 
     <a href="../rust-docs/comms_service/index.html" target="_blank">Framework Rust documentation</a>
-    
+
 .. |CommsControlBlock| raw:: html
 
     <a href="../rust-docs/comms_service/struct.CommsControlBlock.html" target="_blank">CommsControlBlock</a>
@@ -221,3 +261,7 @@ resources:
 .. |CommsTelemetry| raw:: html
 
     <a href="../rust-docs/comms_service/struct.CommsTelemetry.html" target="_blank">CommsTelemetry</a>
+
+.. |Space Packet| raw:: html
+
+    <a href="https://public.ccsds.org/Pubs/133x0b1c2.pdf" target="_blank">Space Packet</a>

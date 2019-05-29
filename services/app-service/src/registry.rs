@@ -570,6 +570,16 @@ impl AppRegistry {
             return Err(AppError::StartError { err: msg });
         }
 
+        // Change our current directory to the app's directory so that it can access any
+        // auxiliary files with relative file paths
+        let cwd = ::std::env::current_dir()?;
+        let parent_dir = app_path.parent().unwrap_or(&cwd);
+        if let Err(err) = ::std::env::set_current_dir(parent_dir) {
+            // If we can't change the current directory, we'll log an error and then just
+            // continue trying to execute the application
+            warn!("Failed to set cwd before executing {}: {:?}", app_name, err);
+        }
+
         let mut cmd = Command::new(app_path);
 
         cmd.arg("-r").arg(format!("{}", run_level));
