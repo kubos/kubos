@@ -150,7 +150,6 @@ impl UART {
     pub fn read(&self, num_bytes: usize) -> Vec<u8> {
         let mut buffer: Vec<u8> = Vec::with_capacity(num_bytes);
         let len = uart::uart_read(self.uart_ptr, buffer.as_mut_ptr(), num_bytes);
-        assert!(len <= num_bytes);
         unsafe {
             buffer.set_len(len);
         }
