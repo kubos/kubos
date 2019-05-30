@@ -43,6 +43,7 @@ def build(dir):
 
 def run_test(dir):
     build_dir = "build"
+    os.environ["CTEST_OUTPUT_ON_FAILURE"] = "1"
     subprocess.run(["make", "test"], cwd=build_dir, check=True)
 
 def test(dir):
