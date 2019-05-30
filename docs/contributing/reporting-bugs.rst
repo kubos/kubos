@@ -6,7 +6,11 @@ While all devs like to think that they write perfect code, we know that reality 
 If you encounter a bug while using KubOS or while working with our source code, please open
 a `GitHub issue <https://github.com/kubos/kubos/issues/new/choose>`__ and tell us about it.
 
-Note: This process does require that you have a GitHub account.
+Notes:
+
+- This process does require that you have a GitHub account
+- If you find a small bug that is very easily fixed (like a typo or one-line change), feel free to
+  just correct it and submit a PR, instead of going through this full process
 
 Creating an Issue
 -----------------

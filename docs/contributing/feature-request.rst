@@ -57,8 +57,8 @@ If the feature request is accepted, there will likely be some back and forth bet
 Kubos team members in order to determine the specifics of how the feature request should be
 implemented and the low-level desired behavior.
 
-The team (or potentially a community member!) will then implement the changes needed to fufill the
-request.
+The team (or potentially you or another community member!) will then implement the changes needed to
+fulfill the request.
 The exact timeframe required to complete this work will be dictated by current team resources and
 the request's relevance to current priorities.
 
