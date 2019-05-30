@@ -134,7 +134,11 @@ are our preferred source for Rust styling.
 
 `rustfmt <https://github.com/rust-lang-nursery/rustfmt>`__ is our preferred tool
 for formatting code and enforcing these standards. It comes included in our
-SDK's Vagrant box.
+SDK's Vagrant box and compliance is a required part of our CI checks.
+
+`Clippy <https://github.com/rust-lang/rust-clippy>`___ is our preferred tool for
+linting our Rust code. It comes included in our SDK's Vagrant box and compliance
+is a required part of our CI checks.
 
 Python Standards
 ----------------
@@ -515,10 +519,9 @@ guide <https://google.github.io/styleguide/shell.xml>`__. **Exception:**
 Use 4 spaces, since that's what we do in all of our other languages.
 
 
-KConfig is the tool used by Buildroot and the Linux Kernel for defining
-configuration files used in builds. You should refer to this 
-`documentation <https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt>`__
-when writing custom KConfig files.
+KConfig is the language used by Buildroot and the other OS-related components for defining configuration options used in builds.
+You should refer to this `documentation <https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt>`__
+when writing or modifying KConfig files.
 
 CONSISTENCY
 ###########
