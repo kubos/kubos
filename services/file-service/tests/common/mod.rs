@@ -36,6 +36,8 @@ macro_rules! service_new {
                 storage_dir = "service"
                 chunk_size = {}
                 hold_count = 5
+                downlink_ip = "127.0.0.1"
+                downlink_port = 7000
                 [file-transfer-service.addr]
                 ip = "127.0.0.1"
                 port = {}
