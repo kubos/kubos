@@ -10,5 +10,6 @@ simple as possible.
     :maxdepth: 1
     
     Reporting Bugs <reporting-bugs>
+    Requesting New Features <feature-request>
     Contributor Guidelines <contribution-process>
     Style Guides <kubos-standards>
