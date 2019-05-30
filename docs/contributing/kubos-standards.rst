@@ -136,7 +136,7 @@ are our preferred source for Rust styling.
 for formatting code and enforcing these standards. It comes included in our
 SDK's Vagrant box and compliance is a required part of our CI checks.
 
-`Clippy <https://github.com/rust-lang/rust-clippy>`___ is our preferred tool for
+`Clippy <https://github.com/rust-lang/rust-clippy>`__ is our preferred tool for
 linting our Rust code. It comes included in our SDK's Vagrant box and compliance
 is a required part of our CI checks.
 
