@@ -19,10 +19,10 @@ each of the hardware components are and how they are connected.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../../tutorials/first-project` - Basic tutorial for creating your first Kubos SDK project
--  :doc:`../../os-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`../../tutorials/first-project` - Basic tutorial for creating your first KubOS project
+-  :doc:`../../os-docs/linux-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`working-with-the-mbm2` - Guide for interacting with MBM2-specific features
--  :doc:`../../os-docs/kubos-linux-on-mbm2` - Steps to build Kubos Linux
+-  :doc:`../../os-docs/linux-docs/kubos-linux-on-mbm2` - Steps to build Kubos Linux
 
 Components
 ----------
@@ -34,8 +34,8 @@ The Kubos Linux installation process is composed of two high-level steps:
 
 To perform a full default installation, two files are needed:
 
-  - A Kubos Linux SD card image
-  - An aux_sd image
+  - A Kubos Linux SD card image (kubos-linux.img)
+  - An Auxilliary SD card image (aux-sd.img)
 
 All of these files can be obtained from `our Kubos Linux Releases page on GitHub <https://github.com/kubos/kubos-linux-build/releases>`__
 
@@ -44,7 +44,7 @@ Download the latest `KubOS-v{version}.tar.gz` file and then unzip the files for 
 Pre-Requisites
 --------------
 
-1. Obtain an SD card that is at least 4GB.
+1. Obtain a microSD card that is at least 4GB.
 
 .. note:: 
 
@@ -87,7 +87,7 @@ Boot into U-Boot
     or some other Linux distribution.
 
 We now want to overwrite the eMMC, so we'll need to use U-Boot in order to boot
-Kubos Linux from the SD card.
+Kubos Linux from the microSD card.
 
 You'll need to establish a serial connection with the board in order to connect
 to the console.
@@ -97,14 +97,15 @@ bring up the CLI.
 
 ::
 
-    U-Boot 2016.09 (Jul 17 2017 - 11:43:29 -0500)
+    U-Boot 2016.09 (May 23 2019 - 21:19:32 +0000)
 
     I2C:   ready
     DRAM:  512 MiB
     MMC:   OMAP SD/MMC: 0, OMAP SD/MMC: 1
     Net:   cpsw, usb_ether
-    Hit any key to stop autoboot:  0 
+    Hit any key to stop autoboot:  0
     U-Boot>
+
    
 Copy/paste these commands:
 
@@ -114,6 +115,22 @@ Copy/paste these commands:
     
 This will cause the board to load Kubos Linux off of the microSD card, allowing us to flash
 the eMMC.
+
+Alternative Boot
+~~~~~~~~~~~~~~~~
+
+When loading Kubos Linux for the first time, the prior instructions may fail for boards which come
+from certain hardware providers.
+This failure will be indicated by the following error message::
+
+    Wrong Image Format for bootm command
+    
+In this case, you will need to boot off of the microSD card by using the embedded Beaglebone's
+`boot button <https://cdn-learn.adafruit.com/assets/assets/000/008/680/medium800/beaglebone_BeagleBoneBlack.jpeg>`__.
+Power off the board. Hold down the boot button and then apply power to the board.
+You may let go of the boot button once you start seeing boot messages from the debug port.
+
+The system will now boot off of the microSD card and into Kubos Linux.
 
 Flash the eMMC
 ~~~~~~~~~~~~~~
@@ -191,4 +208,4 @@ Using Kubos Linux
 -----------------
 
 For information on how to create and run applications on your new Kubos Linux system, see the
-:doc:`../../os-docs/using-kubos-linux` and :doc:`working-with-the-mbm2` guides.
+:doc:`../../os-docs/linux-docs/using-kubos-linux` and :doc:`working-with-the-mbm2` guides.
