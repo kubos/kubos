@@ -1,8 +1,6 @@
 Kubos Contribution Process
 ==========================
 
-TODO: Review me
-
 This is the workflow you should go through in order to create and
 complete a task to contribute to the KubOS project
 
@@ -15,27 +13,20 @@ before their changes can be merged into the main codebase.
 The Kubos CLA can be found
 `here <https://cla-assistant.io/kubos/kubos>`__.
 
-Create an Issue
----------------
+Create or Select an Issue
+-------------------------
 
 GitHub issues allow us to track what problems have been found and which
 problems are currently being addressed.
 
--  Navigate to the repo you'd like to open an issue against (most likely
-   kubos/kubos)
--  Click the 'Issues' tab
--  Click the 'New Issue' button
--  The title should be a descriptive overview of the problem
--  The description should go into more detail about what the
-   problem/feature is and what needs to be done in order to complete the
-   task.
+If an issue does not already exist for the work you would like to contribute, please open one using
+the process layed out in the following docs:
 
-   -  If you are creating a story, the description should follow the
-      `Agile user story
-      template <https://www.mountaingoatsoftware.com/agile/user-stories>`__
+- :doc:`reporting-bugs`
+- :doc:`feature-request`
 
--  Click the 'Labels' link and add a tag for 'Bug' or 'Enhancement'
-   depending on what kind of work should be done
+The issue will be automatically labeled with "bug" or "enhancement" depending on the issue template
+you use.
 
 Mark the Issue as 'In Progress'
 -------------------------------
@@ -119,8 +110,7 @@ likely be "origin". If you're committing against your personal fork,
 then the remote name will match what you specified in the
 ``git remote add`` command.
 
-`Commit early, commit
-often <http://www.databasically.com/2011/03/14/git-commit-early-commit-often/>`__
+Commit early, commit often.
 
 Create a Pull Request
 ---------------------
@@ -194,6 +184,22 @@ your remote repo
 If you navigate to your pull request, you should now see that github
 says "This branch has no conflicts with the base branch", indicating
 that the changes okay to merge (pending pull request approval).
+
+Verify CI Tests Pass
+--------------------
+
+When you create a PR, our CI tests will automatically be run against your new code.
+The results of these tests are displayed at the bottom of the PR page.
+
+If all tests have passed, you will see a green checkmark icon and "All checks have passed".
+
+If a test failed, then you will see "Some checks were not successful".
+The test/s which failed will be marked with a red 'X'.
+If you click on the "Details" link for a test, it will take you to the particular CI test that
+failed.
+From there, you can review the test output and determine what needs to be fixed.
+
+All tests must pass before your PR can be approved.
 
 Wait for Pull Request Approval
 ------------------------------
