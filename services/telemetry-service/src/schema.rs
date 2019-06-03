@@ -285,7 +285,7 @@ graphql_object!(MutationRoot: Context | &self | {
 
         let mut new_entries: Vec<kubos_telemetry_db::Entry> = Vec::new();
         for entry in entries {
-            let ts = timestamp.or(entry.timestamp).unwrap_or(systime);
+            let ts = entry.timestamp.or(timestamp).unwrap_or(systime);
 
             new_entries.push(kubos_telemetry_db::Entry {
                 timestamp: ts,

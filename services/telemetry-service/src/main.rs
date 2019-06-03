@@ -204,7 +204,6 @@
 
 #[macro_use]
 extern crate juniper;
-extern crate time;
 
 mod schema;
 mod udp;
