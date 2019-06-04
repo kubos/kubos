@@ -53,5 +53,6 @@ members = [
 
 [profile.release]
 lto = true
-opt-level = 3
+opt-level = "z"
 panic = "abort"
+codegen-units = 1
