@@ -20,10 +20,10 @@ installed to support them.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../../tutorials/first-project` - Basic tutorial for creating your first SDK project
--  :doc:`../../os-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`../../tutorials/first-project` - Basic tutorial for creating your first KubOS project
+-  :doc:`../../os-docs/linux-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`working-with-the-iobc` - Guide for interacting with iOBC-specific features
--  :doc:`../../os-docs/kubos-linux-on-iobc` - Steps to build Kubos Linux
+-  :doc:`../../os-docs/linux-docs/kubos-linux-on-iobc` - Steps to build Kubos Linux
 
 Components
 ----------
@@ -113,7 +113,7 @@ The SD card does not need to be inserted into the iOBC in order for this step to
 Pre-Requisites
 ~~~~~~~~~~~~~~
 
-1. Obtain an `Atmel SAM-ICE programmer/debugger <http://www.atmel.com/tools/atmelsam-ice.aspx>`__.
+1. Obtain an `Atmel SAM-ICE programmer/debugger <https://www.microchip.com/DevelopmentTools/ProductDetails/AT91SAM-ICE>`__.
 2. Install programming drivers from https://www.segger.com/jlink-software.html.
 3. Install FTDI USB-to-serial drivers from http://www.ftdichip.com/Drivers/VCP.htm
 4. Install SAM-BA from the ISIS-OBC SDK installer.
@@ -444,7 +444,7 @@ the previously provided script.
 Pre-Requisites
 ^^^^^^^^^^^^^^
 
-1. Obtain an `Atmel SAM-ICE programmer/debugger <http://www.atmel.com/tools/atmelsam-ice.aspx>`__.
+1. Obtain an `Atmel SAM-ICE programmer/debugger <https://www.microchip.com/DevelopmentTools/ProductDetails/AT91SAM-ICE>`__.
 2. Install programming drivers from https://www.segger.com/jlink-software.html.
 3. Install FTDI USB-to-serial drivers from http://www.ftdichip.com/Drivers/VCP.htm
 4. Install SAM-BA from the ISIS-OBC SDK installer.
