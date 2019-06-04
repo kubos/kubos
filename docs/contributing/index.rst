@@ -13,3 +13,5 @@ simple as possible.
     Requesting New Features <feature-request>
     Contributor Guidelines <contribution-process>
     Style Guides <kubos-standards>
+    Documentation Guides <documentation>
+    Testing Guides <testing>
