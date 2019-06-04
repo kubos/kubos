@@ -97,8 +97,8 @@ Enter the new folder
 
     $ cd kubos-linux
 
-Download BuildRoot-2017.02 (more current versions of BuildRoot may work as well,
-but all testing has been done against 2017.02)
+Download BuildRoot-2019.02.2 (more current versions of BuildRoot may work as well,
+but all testing has been done against 2019.02.2)
 
 .. note:: All Kubos documentation will refer to v2019.02.2, which is the latest version of the LTS release at the time of this writing.
 
@@ -145,13 +145,14 @@ only certain sections and it will go much more quickly (<5 min).
 BuildRoot documentation can be found
 `**here** <https://buildroot.org/docs.html>`__
 
-The generated files will be located in buildroot-2019.02.2/output/images. They are:
+The generated files will be located in buildroot-2019.02.2/output/images.
+The relevant files are:
 
 -  uboot.bin - The U-Boot binary
--  zImage - The compressed Linux kernel file
 -  at91sam9g20isis.dtb - The Device Tree Binary that Linux uses to configure itself
    for the iOBC
--  rootfs.tar - The root file system. Contains BusyBox and other libraries
+-  kubos-linux.tar.gz - A compressed file containing the complete Kubos Linux SD card
+   image
 
 Changing the Output Toolchain Directory (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -164,51 +165,8 @@ If you would like BuildRoot to just build the toolchain locally, you may remove
 the ``BR2_HOST_DIR`` variable entirely. The toolchain will then be built under the
 main "buildroot-2019.02.2" directory in a new "output/host" folder.
 
-Create an SD Card Image
-~~~~~~~~~~~~~~~~~~~~~~~
+Using Kubos Linux
+-----------------
 
-.. note::
-
-    The image script will use 4GB of system RAM during execution. By default,
-    the Kubos Vagrant box only provides 2GB. As a result, you'll either need to `increase
-    the amount of RAM provided to your box 
-    <https://askubuntu.com/questions/510134/how-to-increase-vm-hdd-and-ram-sizes>`__,
-    or run the script natively.
-
-A script is available to create an SD card image with the latest
-Kubos Linux kernel and root filesystem.
-
-Navigate to the 'kubos-linux-build/tools' directory.
-
-Run the ``format-image.sh`` script. You might need to run as root to get
-permissions for certain steps.
-
-The script has optional parameters:
-
-- ``-d {device}`` - Sets the SD card device name to flash the newly created image to
-  (does not flash by default)
-- ``-i {name}`` - Specifies the output file name of the image file to be created.
-  (default: "kubos-linux.img")
-- ``-p`` - Specify that existing kpack-base.itb and kernel files should be
-  copied into the appropriate partitions
-- ``-pp`` - Specify that the kpack-base.itb and kernel files should be built
-  and then copied to their partitions
-- ``-ppp`` - Only build and copy the kpack and kernel files. Skip all other steps.
-- ``-s {size}`` - Size, in MB, of the SD card. The default is 3800 (~4GB).
-- ``-b {branch}`` - Specify the branch name of U-Boot that has been built. The
-  default is 'master'. This option should not need to be used outside of
-  development.
-
-So if I wanted to create a custom-named image with brand new kernel files,
-I would run:
-
-::
-
-    $ ./format-image.sh -i kubos-linux-v1.0.img -pp
-
-Create an Upgrade Package
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-If you would like to distribute your changes as a Kubos upgrade package instead,
-please refer to the :ref:`upgrade-creation` instructions.
-
+For information on how to create and run applications on your new Kubos Linux system, see the
+:doc:`working-with-the-iobc` guide.
