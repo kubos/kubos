@@ -199,6 +199,10 @@ If you click on the "Details" link for a test, it will take you to the particula
 failed.
 From there, you can review the test output and determine what needs to be fixed.
 
+If you're having a difficult time parsing the test output, or if something fails which appears to be
+unrelated to your changes, please feel free to contact a Kubos team member via
+`Slack <https://slack.kubos.co/>`__ for support.
+
 All tests must pass before your PR can be approved.
 
 Wait for Pull Request Approval
