@@ -1,4 +1,4 @@
-# kubos/kubos-dev:1.15.1
+# kubos/kubos-dev:1.15.2
 
 FROM phusion/baseimage:0.9.22
 
@@ -21,8 +21,6 @@ RUN easy_install pip
 
 # Set up pip for Python3.5
 RUN apt-get install -y python3-pip
-RUN pip3 install --upgrade pip
-RUN pip3 install --upgrade setuptools
 
 #Kubos Linux setup
 RUN echo "Installing Kubos Linux Toolchain"
