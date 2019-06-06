@@ -20,6 +20,10 @@ Running Locally
 If you are not using the Kubos SDK image and are instead running everything locally, you will need
 to manually set up a serial connection.
 
+Connect your OBC to your host computer and then determine the device name which it was assigned.
+It will likely be a ``/dev/ttyUSB*`` device for Linux users, a ``dev/tty.usb*`` device for OSX
+users, and a ``COM*`` device for Windows users.
+
 Open your terminal application of choice (PuTTY, minicom, etc) and set up a connection with the
 following configuration values:
 
@@ -34,6 +38,22 @@ following configuration values:
 +-----------+--------+
 | Stop Bits | 1      |
 +-----------+--------+
+
+Minicom
+^^^^^^^
+
+In case you have not ever set up a serial connection to a device before, here are the instructions
+to set up a connection using `minicom <https://en.wikipedia.org/wiki/Minicom>`__:
+
+- Execute this command: `minicom -s`
+- The "configuration" menu will be displayed. Use the arrow keys to navigate to "Serial port setup"
+  and press Enter
+- Press 'A' to navigate to the "Serial Device" field. Update the field with the serial debug device
+  name. Press Enter to apply the change
+- Press 'F' to toggle "Hardware Flow Control" to "No"
+- Press Enter to exit this submenu
+- Navigate down to "Exit" (not "Exit from Minicom"!) and press Enter to exit the configuration menu
+  and start the serial connection
 
 Using the SDK
 ~~~~~~~~~~~~~
@@ -63,8 +83,6 @@ Fully logged in, the console should look like this:
     Kubos login: kubos
     Password: 
     /home/kubos # 
-    
-test line
 
 .. _ethernet:
 
