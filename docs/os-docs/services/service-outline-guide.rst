@@ -5,8 +5,11 @@ This guide covers an outline for the base Schema that should be implemented in a
 Your service can and should implement more mutations and queries beyond those specified in the required base.
 For general information about hardware services, their role, and how they work, check out :doc:`the hardware services documentation. <../services/hardware-services>`
 
-All hardware services must follow the GraphQL spec.
+All hardware services must follow the :url:`GraphQL spec. <https://graphql.github.io/graphql-spec/>`
 The mutation and query responses are the "data" and "errors" fields, and all errors experienced are returned in that "errors" field, even if they are from the underlying hardware.
+If there is any functionality in the below schema that is unable to be implemented by the service, return an error with the string "Not Implemented".
+
+The following top level queries must be supported:
 
 .. code-block:: graphql
 
@@ -29,6 +32,10 @@ The mutation and query responses are the "data" and "errors" fields, and all err
         # field3: whatever type
         # ...
     }
+
+Mutations are harder to standardize across all hardware, but make your best attempt to fully implement the short list of mutations below. As noted before, any that cannot be implement but return a response:: {"errors": ["Not Implemented"], "data": null}
+
+.. code-block:: graphql
 
     type Mutation {
         # When the service receives a noop mutation, it should send a command and make sure it sees the appropriate response from the hardware.
