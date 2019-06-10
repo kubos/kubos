@@ -185,7 +185,7 @@ impl Stream for SerialStream {
                 port.write(data);
                 Ok(())
             }
-            Err(e) => UartError::from(e),
+            Err(e) => Err(UartError::from(e)),
         }
     }
 
