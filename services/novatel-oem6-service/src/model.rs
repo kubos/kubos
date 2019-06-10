@@ -140,11 +140,12 @@ impl Subsystem {
     pub fn new(bus: &str, data: Arc<LockData>) -> OEMResult<Subsystem> {
         let (log_send, log_recv) = sync_channel(5);
         let (response_send, response_recv) = sync_channel(5);
+        let (response_abbrv_send, response_abbrv_recv) = sync_channel(5);
 
-        let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv)?;
+        let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv, response_abbrv_recv)?;
 
         let rx_conn = oem.conn.clone();
-        thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
+        thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send, &response_abbrv_send));
 
         let (error_send, error_recv) = sync_channel(10);
         let (version_send, version_recv) = sync_channel(1);
