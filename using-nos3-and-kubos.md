@@ -2,7 +2,7 @@
 
 ## Setting up the NOS3 vm
 1. Pull NOS3 from the NOS3 repo (temporarily the kubos integration NOS3 fork at https://github.com/Seabass247/nos3/tree/kubos-provisioning, until the August NOS3 release is out)
-2. cd ./support, edit Vagrantfile
+2. cd `./support`, edit Vagrantfile
 3. change `loi` to 'K'; uncomment the associated line
 4. run `vagrant up`
 5. once finished, do `vagrant reload`
@@ -36,4 +36,4 @@ query {
 ```
 
 ### Other Sims & Future Compatibility
-Clyde 3G EPS and ISIS AntS can be interacted with on port `8124` and `8125` respectively.  Currently the open source NOS3 repo does not contain these sims;they should come in an August NOS3 open source release.
+Clyde 3G EPS and ISIS AntS can be interacted with on port `8124` and `8125` respectively.  Currently the open source NOS3 repo does not contain these sims; they should come in an August NOS3 open source release.
