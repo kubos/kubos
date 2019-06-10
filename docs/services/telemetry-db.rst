@@ -129,6 +129,52 @@ It has the following schema::
 The ``timestamp`` argument is optional. If it is not specified, one will be generated based on the current system time,
 in fractional seconds.
 
+Adding Multiple Entries to the Database
+---------------------------------------
+
+The ``insertBulk`` mutation can be used to add multiple entries to the telemetry database at the
+same time. It has the following schema::
+
+   type InsertEntry {
+      timestamp: Float,
+      subsystem: String!,
+      parameter: String!,
+      value: String!
+   }
+
+   mutation {
+      insertBulk(timestamp: Float, entries: [InsertEntry!]!): {
+         success: Boolean!,
+         errors: String!
+      }
+   }
+
+Each individual telemetry entry has an optional ``timestamp`` field. If it is not specified, the optional
+``timestamp`` argument to this function will be used if it is specified, otherwise one will be
+generated based on the current system time in fractional seconds.
+
+For example, to insert multiple telemetry data points all with the same current system time::
+
+   mutation {
+      insertBulk(entries: [
+          { subsystem: "adcs", parameter: "voltage", value: "3.3" },
+          { subsystem: "eps", parameter: "voltage", value: "5.0" },
+          { subsystem: "obc", parameter: "cpu", value: "45.1" }
+      ])
+   }
+
+Or to insert multiple entries with a single pre-generated timestamp::
+
+   mutation {
+      insertBulk(
+         timestamp: 1559594402.0,
+         entries: [
+             { subsystem: "adcs", parameter: "voltage", value: "3.3" },
+             { subsystem: "eps", parameter: "voltage", value: "5.0" },
+             { subsystem: "obc", parameter: "cpu", value: "45.1" }
+         ])
+   }
+
 Limitations
 ~~~~~~~~~~~
 

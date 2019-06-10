@@ -14,8 +14,12 @@
 // limitations under the License.
 //
 
+#[macro_use]
+extern crate prettytable;
+
 use kubos_system::Config;
-use kubos_telemetry_db::Database;
+use kubos_telemetry_db::{Database, Entry};
+use prettytable::{Row, Table};
 use rand::{thread_rng, Rng};
 use serde_json::{json, ser};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket};
@@ -25,7 +29,7 @@ use time::PreciseTime;
 
 const ITERATIONS: i64 = 1000;
 
-fn db_test(config: &Config) {
+fn db_insert_test(config: &Config) -> Row {
     let db_path = config
         .get("database")
         .expect("No database path found in config file");
@@ -53,13 +57,41 @@ fn db_test(config: &Config) {
 
     let average = sum / num_entries;
 
-    println!(
-        "Average insert time after {} runs: {} us",
-        num_entries, average
-    );
+    row!["DB API insert (local)", average, sum]
 }
 
-fn graphql_test(config: &Config) {
+fn db_insert_bulk_test(config: &Config) -> Row {
+    let db_path = config
+        .get("database")
+        .expect("No database path found in config file");
+    let db_path = db_path.as_str().unwrap();
+
+    let db = Database::new(&db_path);
+    db.setup();
+
+    let mut entries: Vec<Entry> = Vec::new();
+
+    for _ in 0..ITERATIONS {
+        let timestamp: f64 = thread_rng().gen_range(0.0, 99999999999999999.9);
+
+        entries.push(Entry {
+            timestamp,
+            subsystem: "db-test".to_string(),
+            parameter: "parameter".to_string(),
+            value: "value".to_string(),
+        });
+    }
+
+    let start = PreciseTime::now();
+    let end = match db.insert_bulk(entries) {
+        Ok(_) => start.to(PreciseTime::now()).num_microseconds().unwrap(),
+        Err(e) => panic!("insert_bulk function failed: {:?}", e),
+    };
+
+    row!["DB API insert_bulk (local)", end / ITERATIONS, end]
+}
+
+fn graphql_insert_test(config: &Config) -> Row {
     let mut times: Vec<i64> = Vec::new();
 
     for _ in 0..ITERATIONS {
@@ -96,13 +128,49 @@ fn graphql_test(config: &Config) {
 
     let average = sum / num_entries;
 
-    println!(
-        "Average mutation time after {} runs: {} us",
-        num_entries, average
-    );
+    row!["GQL insert (remote)", average, sum]
 }
 
-fn direct_udp_test(config: &Config) {
+fn graphql_insert_bulk_test(config: &Config) -> Row {
+    let mut bulk_entries = String::from("[");
+    for i in 0..ITERATIONS {
+        let mut rng = thread_rng();
+        let timestamp = rng.gen_range(0, ::std::i32::MAX);
+        let next = if i < ITERATIONS - 1 { "," } else { "]" };
+
+        let entry = format!(
+            r#"{{ timestamp: {}, subsystem: "db-test", parameter: "voltage", value: "5.0" }}{}"#,
+            timestamp, next
+        );
+        bulk_entries.push_str(&entry);
+    }
+
+    let mutation = format!(
+        r#"
+        mutation {{
+            insertBulk(entries: {}) {{
+                success,
+                errors
+            }}
+        }}"#,
+        bulk_entries
+    );
+
+    let start = PreciseTime::now();
+    let client = reqwest::Client::builder().build().unwrap();
+    let uri = format!("http://{}", config.hosturl());
+    let mut map = ::std::collections::HashMap::new();
+    map.insert("query", mutation);
+
+    let end = match client.post(&uri).json(&map).send() {
+        Ok(_) => start.to(PreciseTime::now()).num_microseconds().unwrap(),
+        Err(e) => panic!("recv function failed: {:?}", e),
+    };
+
+    row!["GQL insertBulk (remote)", end / ITERATIONS, end]
+}
+
+fn direct_udp_test(config: &Config) -> Row {
     let mut times: Vec<i64> = Vec::new();
 
     let port = config.get("direct_port").unwrap();
@@ -139,10 +207,7 @@ fn direct_udp_test(config: &Config) {
 
     let average = sum / num_entries;
 
-    println!(
-        "Average UDP send time after {} runs: {} us",
-        num_entries, average
-    );
+    row!["UDP insert (remote)", average, sum]
 }
 
 fn test_cleanup(config: &Config) {
@@ -184,20 +249,29 @@ fn test_cleanup(config: &Config) {
 
 fn main() {
     let config = Config::new("telemetry-service");
+    let mut table = Table::new();
 
-    db_test(&config);
+    table.add_row(row!["NAME", "Avg us per-entry", "Total us"]);
+    table.add_row(db_insert_test(&config));
+    table.add_row(db_insert_bulk_test(&config));
 
     // This sleep likely isn't necessary, but I'd like to make extra sure nothing about a test
     // lingers to affect the next one
     thread::sleep(Duration::new(1, 0));
 
-    graphql_test(&config);
+    table.add_row(graphql_insert_test(&config));
 
     thread::sleep(Duration::new(1, 0));
 
-    direct_udp_test(&config);
+    table.add_row(graphql_insert_bulk_test(&config));
+
+    thread::sleep(Duration::new(1, 0));
+
+    table.add_row(direct_udp_test(&config));
 
     thread::sleep(Duration::new(1, 0));
 
     test_cleanup(&config);
+
+    table.printstd();
 }

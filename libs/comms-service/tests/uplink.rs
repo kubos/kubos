@@ -231,3 +231,51 @@ fn uplink_to_service_with_downlink_response() {
     assert_eq!(packet.payload().to_vec(), resp_payload);
     assert_eq!(packet.destination(), 0);
 }
+
+// Tests sending a udp packet from the ground
+#[test]
+fn uplink_udp_passthrough() {
+    let sat_ip = "127.0.0.8";
+    let downlink_port = 17002;
+    let service_port = 17006;
+    let config = comms_config(sat_ip, downlink_port);
+    let mock_comms = Arc::new(Mutex::new(MockComms::new()));
+    let payload = vec![0, 1, 4, 5];
+
+    // Control block to configure communication service.
+    let controls = CommsControlBlock::new(
+        Some(Arc::new(read)),
+        vec![Arc::new(write)],
+        mock_comms.clone(),
+        mock_comms.clone(),
+        config,
+    )
+    .unwrap();
+
+    // Initialize new `CommsTelemetry` object.
+    let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
+
+    let ground_packet = SpacePacket::build(1, PayloadType::UDP, service_port, &payload).unwrap();
+
+    let downlink_reader = UdpSocket::bind((sat_ip, service_port)).unwrap();
+
+    // Start communication service.
+    CommsService::start::<Arc<Mutex<MockComms>>, SpacePacket>(controls, &telem).unwrap();
+
+    // Pretend to be the ground and provide a packet
+    // for the comms service to read from the radio
+    mock_comms
+        .lock()
+        .unwrap()
+        .push_read(&ground_packet.to_bytes().unwrap());
+
+    // Let the wheels turn
+    thread::sleep(Duration::from_millis(200));
+
+    let mut recv_buffer = vec![0; 4];
+
+    // Send packet to comm service's downlink port
+    downlink_reader.recv(&mut recv_buffer).unwrap();
+
+    assert_eq!(recv_buffer, payload);
+}
