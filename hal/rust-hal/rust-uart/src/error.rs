@@ -51,7 +51,7 @@ pub enum UartError {
     /// A poison error from the nosengine-rust uart client
     #[cfg(feature = "nos3")]
     #[fail(display = "Mutex Poison Error")]
-    MutexPoisonError
+    MutexPoisonError,
 }
 
 impl From<std::io::Error> for UartError {
@@ -101,8 +101,14 @@ impl From<sync::mpsc::RecvError> for UartError {
 }
 
 #[cfg(feature = "nos3")]
-impl From<std::sync::PoisonError<std::sync::MutexGuard<'_,nosengine_rust::client::uart::UART>>> for UartError {
-    fn from(_error: std::sync::PoisonError<std::sync::MutexGuard<'_,nosengine_rust::client::uart::UART>>) -> Self {
+impl From<std::sync::PoisonError<std::sync::MutexGuard<'_, nosengine_rust::client::uart::UART>>>
+    for UartError
+{
+    fn from(
+        _error: std::sync::PoisonError<
+            std::sync::MutexGuard<'_, nosengine_rust::client::uart::UART>,
+        >,
+    ) -> Self {
         UartError::MutexPoisonError
     }
 }
