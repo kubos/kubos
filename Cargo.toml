@@ -48,8 +48,12 @@ members = [
 "test/integration/linux/mai400",
 "test/integration/large_download",
 "test/integration/large_upload",
-"test/integration/nosengine-rust",
 "utils"
+]
+
+exclude = [
+"apis/nosengine-rust",
+"test/integration/nosengine-rust"
 ]
 
 [profile.release]

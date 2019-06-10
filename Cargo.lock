@@ -1658,14 +1658,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "nosengine-integration-tests"
-version = "0.1.0"
-dependencies = [
- "nosengine-rust 0.1.0",
- "utils 0.1.0",
-]
-
-[[package]]
 name = "nosengine-rust"
 version = "0.1.0"
 dependencies = [
