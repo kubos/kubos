@@ -16,5 +16,24 @@ You can specify a fork of KubOS by changing the path `KUBOS` in scripts `kubos-n
 ### Novatel OEM6 GPS
 The Novatel OEM6 GPS is the only hardware model that is currently supported.  To issue queries and mutations against the sim, go to "localhost:8123" from a web browser in the vm.  To verify everything is working, issue a query to enable bestxyz log messages.  You should see the sim sending log messages from the `[DEBUG]` prints in the GPS sim terminal tab.  If all goes well, querying `lockinfo` should return good position and velocity data from the sim.
 
+Example: 
+1. Issue mutation to log bestxyz messages 
+```
+mutation {
+  configureHardware(config: {option: LOG_POSITION_DATA, hold: true, interval: 1, offset: 1}) {
+    success
+  }
+}
+```
+2. Query `lockinfo`
+```
+query {
+  lockInfo {
+    position
+    velocity
+  }
+}
+```
+
 ### Other Sims & Future Compatibility
-Clyde 3G EPS and ISIS AntS can be interacted with on port `8124` and `8125` respectively.  Currently the open source NOS3 master does not contain these sims; they should come in an August release.
+Clyde 3G EPS and ISIS AntS can be interacted with on port `8124` and `8125` respectively.  Currently the open source NOS3 repo does not contain these sims;they should come in an August NOS3 open source release.
