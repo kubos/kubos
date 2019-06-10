@@ -16,6 +16,7 @@
 
 use crate::crc32::*;
 use crate::messages::*;
+#[cfg(not(feature = "nos3"))]
 use byteorder::{LittleEndian, WriteBytesExt};
 use failure::Fail;
 use nom;
@@ -71,6 +72,7 @@ pub fn read_thread(
     rx_conn: &Arc<Mutex<Connection>>,
     log_send: &SyncSender<(Header, Vec<u8>)>,
     response_send: &SyncSender<(Header, Vec<u8>)>,
+    response_abbrv_send: &SyncSender<Vec<u8>>,
 ) {
     let mut log_err = false;
     let mut response_err = false;
@@ -101,6 +103,49 @@ pub fn read_thread(
                     _ => panic!(err),
                 },
             };
+
+            // If message is abbrv. ascii message (starts with "<")
+            if message[0] == 0x3c {
+                let mut ascii_message = vec![];
+                ascii_message.push(message[1].clone());
+                ascii_message.push(message[2].clone());
+                let mut ascii_char;
+
+                // Read response ASCII string byte by byte until it ends (no valid character is read)
+                loop {
+                    ascii_char = match conn.read(1, Duration::from_millis(250)) {
+                        Ok(v) => match v {
+                            _ if v[0] == SYNC[0] || v[0] == 0x23 => break,
+                            _ => v,
+                        },
+                        Err(err) => match err {
+                            _ => break,
+                        },
+                    };
+
+                    ascii_message.append(&mut ascii_char);
+                }
+
+                // Send the abbrv ascii response
+                response_abbrv_send
+                    .try_send(ascii_message)
+                    .or_else::<TrySendError<Vec<u8>>, _>(|err| match err {
+                        // Our buffer is full, but the receiver should still be alive, so let's keep going
+                        TrySendError::Full(_) => Ok(()),
+                        // The receiver is gone. If both receivers are gone, then there's no point in this
+                        // loop still trying
+                        TrySendError::Disconnected(_) => {
+                            if log_err {
+                                panic!("Both message receivers have disconnected")
+                            }
+                            response_err = true;
+                            Ok(())
+                        }
+                    })
+                    .unwrap();
+
+                continue;
+            }
 
             if message != SYNC {
                 continue;
@@ -200,6 +245,8 @@ pub struct OEM6 {
     pub log_recv: Arc<Mutex<Receiver<(Header, Vec<u8>)>>>,
     /// Channel for receiveing response messages
     pub response_recv: Arc<Mutex<Receiver<(Header, Vec<u8>)>>>,
+    /// Channel for receiving abbreviated response messages
+    pub response_abbrv_recv: Arc<Mutex<Receiver<(Vec<u8>)>>>,
 }
 
 impl OEM6 {
@@ -239,6 +286,7 @@ impl OEM6 {
         baud_rate: serial::BaudRate,
         log_recv: Receiver<(Header, Vec<u8>)>,
         response_recv: Receiver<(Header, Vec<u8>)>,
+        response_abbrv_recv: Receiver<Vec<u8>>,
     ) -> OEMResult<OEM6> {
         let settings = serial::PortSettings {
             baud_rate,
@@ -254,6 +302,7 @@ impl OEM6 {
             conn,
             log_recv: Arc::new(Mutex::new(log_recv)),
             response_recv: Arc::new(Mutex::new(response_recv)),
+            response_abbrv_recv: Arc::new(Mutex::new(response_abbrv_recv)),
         })
     }
 
@@ -313,8 +362,8 @@ impl OEM6 {
     /// [`OEMError`]: enum.OEMError.html
     pub fn request_version(&self) -> OEMResult<()> {
         let request = LogCmd::new(
-            Port::COM1 as u32,
-            MessageID::Version as u16,
+            Port::COM1,
+            MessageID::Version,
             LogTrigger::Once,
             0.0,
             0.0,
@@ -386,8 +435,8 @@ impl OEM6 {
         };
 
         let request = LogCmd::new(
-            Port::COM1 as u32,
-            MessageID::BestXYZ as u16,
+            Port::COM1,
+            MessageID::BestXYZ,
             trigger,
             interval,
             offset,
@@ -431,8 +480,8 @@ impl OEM6 {
     /// [`OEMError`]: enum.OEMError.html
     pub fn request_errors(&self, hold: bool) -> OEMResult<()> {
         let request = LogCmd::new(
-            Port::COM1 as u32,
-            MessageID::RxStatusEvent as u16,
+            Port::COM1,
+            MessageID::RxStatusEvent,
             LogTrigger::OnChanged,
             0.0,
             0.0,
@@ -473,7 +522,7 @@ impl OEM6 {
     ///
     /// [`OEMError`]: enum.OEMError.html
     pub fn request_unlog(&self, id: MessageID) -> OEMResult<()> {
-        let request = UnlogCmd::new(Port::COM1 as u32, id as u16);
+        let request = UnlogCmd::new(Port::COM1, id);
 
         self.send_message(&request)
             .and_then(|_| self.get_response(MessageID::Unlog))
@@ -588,6 +637,7 @@ impl OEM6 {
         }
     }
 
+    #[cfg(not(feature = "nos3"))]
     fn send_message<T: Message>(&self, msg: &T) -> OEMResult<()> {
         let mut raw = msg.serialize();
 
@@ -608,6 +658,24 @@ impl OEM6 {
         }
     }
 
+    #[cfg(feature = "nos3")]
+    fn send_message<T: Message>(&self, msg: &T) -> OEMResult<()> {
+        let raw = msg.serialize();
+
+        // If the mutex has been poisoned by the read thread,
+        // go ahead and attempt the write anyways, to try to
+        // preserve functionality, but inform the caller afterwards
+        match self.conn.lock() {
+            Ok(conn) => conn.write(raw.as_slice()).map_err(|err| err.into()),
+            Err(conn) => conn
+                .into_inner()
+                .write(raw.as_slice())
+                .map_err(|err| err.into())
+                .and(Err(OEMError::ThreadCommError)),
+        }
+    }
+
+    #[cfg(not(feature = "nos3"))]
     fn get_response(&self, id: MessageID) -> OEMResult<()> {
         let (hdr, body) = self
             .response_recv
@@ -642,6 +710,52 @@ impl OEM6 {
         Ok(())
     }
 
+    #[cfg(feature = "nos3")]
+    fn get_response(&self, _id: MessageID) -> OEMResult<()> {
+        // Give time for the abbrv. message to be processed in read_thread
+        ::std::thread::sleep(Duration::from_millis(100));
+
+        let body = self
+            .response_abbrv_recv
+            .lock()
+            .map_err(|_| OEMError::MutexError)?
+            .recv_timeout(Duration::from_millis(500))
+            .map_err(|_| OEMError::NoResponse)?;
+
+        let resp_str = match String::from_utf8(body) {
+            Ok(result) => result,
+            Err(err) => {
+                return Err(OEMError::CommandError {
+                    id: ResponseID::Unknown,
+                    description: format!("Invalid UTF-8 sequence in response: {}", err),
+                });
+            }
+        };
+
+        let resp_id = match resp_str.as_ref() {
+            "OK" => ResponseID::Ok,
+            "TRIGGER ALREADY EXISTS; NOT VALID FOR THIS LOG" => ResponseID::InvalidTrigger,
+            "REQUESTED RATE IS INVALID" => ResponseID::InvalidRate,
+            "INVALID MESSAGE ID" => ResponseID::InvalidID,
+            _ => ResponseID::Unknown,
+        };
+
+        match resp_id {
+            ResponseID::Ok => Ok(()),
+            ResponseID::InvalidID => {
+                return Err(OEMError::CommandError {
+                    id: resp_id,
+                    description: format!("{}, not (yet) supported", resp_str.clone()),
+                });
+            }
+            _ => {
+                return Err(OEMError::CommandError {
+                    id: resp_id,
+                    description: resp_str.clone(),
+                });
+            }
+        }
+    }
     /// Fetch a log message from the OEM6 read thread
     ///
     /// # Errors
