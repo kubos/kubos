@@ -1,7 +1,7 @@
 # Using NOS3 & KubOS Together
 
 ## Setting up the NOS3 vm
-1. Pull NOS3 from the NOS3 repo (temporarily the kubos integration NOS3 fork)
+1. Pull NOS3 from the NOS3 repo (temporarily the kubos integration NOS3 fork at https://github.com/Seabass247/nos3/tree/kubos-provisioning, until the August NOS3 release is out)
 2. cd ./support, edit Vagrantfile
 3. change `loi` to 'K'; uncomment the associated line
 4. run `vagrant up`
