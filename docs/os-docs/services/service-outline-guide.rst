@@ -5,7 +5,7 @@ This guide covers an outline for the base Schema that should be implemented in a
 Your service can and should implement more mutations and queries beyond those specified in the required base.
 For general information about hardware services, their role, and how they work, check out :doc:`the hardware services documentation. <../services/hardware-services>`
 
-All hardware services must follow the :url:`GraphQL spec. <https://graphql.github.io/graphql-spec/>`
+All hardware services must follow the `GraphQL spec. <https://graphql.github.io/graphql-spec/>`__.
 The mutation and query responses are the "data" and "errors" fields, and all errors experienced are returned in that "errors" field, even if they are from the underlying hardware.
 See the GraphQL spec for further information on the behavior of these fields.
 If there is any functionality in the below schema that is unable to be implemented by the service, return an error with the string ``"Not Implemented"``.
