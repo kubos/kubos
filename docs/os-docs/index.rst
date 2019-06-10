@@ -73,13 +73,10 @@ applications.
 Installation Docs
 ~~~~~~~~~~~~~~~~~
 
-.. toctree::
-    :maxdepth: 1
-    
-    Installing Kubos Linux on Beaglebone Black <../obc-docs/bbb/installing-linux-bbb>
-    Installing Kubos Linux on ISIS-OBC <../obc-docs/iobc/installing-linux-iobc>
-    Installing Kubos Linux on Pumpkin MBM2 <../obc-docs/mbm2/installing-linux-mbm2>
-    
+- :doc:`Installing Kubos Linux on Beaglebone Black <../obc-docs/bbb/installing-linux-bbb>`
+- :doc:`Installing Kubos Linux on ISIS-OBC <../obc-docs/iobc/installing-linux-iobc>`
+- :doc:`Installing Kubos Linux on Pumpkin MBM2 <../obc-docs/mbm2/installing-linux-mbm2>`
+
 General Guides
 ~~~~~~~~~~~~~~
 
@@ -95,13 +92,10 @@ General Guides
 System Guides
 ~~~~~~~~~~~~~
 
-.. toctree::
-    :maxdepth: 1
-    
-    Working with the Beaglebone Black <../obc-docs/bbb/working-with-the-bbb>
-    Working with the iOBC <../obc-docs/iobc/working-with-the-iobc>
-    Working with the Pumpkin MBM2 <../obc-docs/mbm2/working-with-the-mbm2>
-    
+- :doc:`Working with the Beaglebone Black <../obc-docs/bbb/working-with-the-bbb>`
+- :doc:`Working with the iOBC <../obc-docs/iobc/working-with-the-iobc>`
+- :doc:`Working with the Pumpkin MBM2 <../obc-docs/mbm2/working-with-the-mbm2>`
+
 .. _sysadmin:
     
 SysAdmin Docs
