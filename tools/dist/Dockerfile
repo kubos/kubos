@@ -1,4 +1,4 @@
-# kubos/kubos-dev:1.15.0
+# kubos/kubos-dev:1.15.2
 
 FROM phusion/baseimage:0.9.22
 
@@ -52,7 +52,7 @@ COPY cargo_config /root/.cargo/config
 #Tools to generate docs
 RUN apt-get install -y doxygen graphviz plantuml
 RUN pip install Sphinx==1.5.6
-RUN pip install breathe
+RUN pip install breathe==4.12.0
 RUN pip install sphinx-rtd-theme==0.2.4
 RUN pip install sphinxcontrib-plantuml sphinxcontrib-versioning
 RUN pip install sphinx-jsondomain

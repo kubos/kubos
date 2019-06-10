@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+use failure::{bail, Error};
 use kubos_app::ServiceConfig;
-use std::io::{self, Write};
+use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -160,12 +162,27 @@ pub struct AppServiceFixture {
 }
 
 impl AppServiceFixture {
-    fn service_port() -> io::Result<u16> {
+    fn service_port() -> Result<u16, Error> {
         use std::net::{Ipv4Addr, SocketAddrV4, TcpListener};
         let port = {
             let loopback = Ipv4Addr::new(127, 0, 0, 1);
-            let socket = SocketAddrV4::new(loopback, 0);
-            let listener = TcpListener::bind(socket)?;
+            // Every now and again we get port collisions, so we'll retry a couple times to set up
+            // a socket for our service
+            let mut counter = 0;
+            let listener = loop {
+                let socket = SocketAddrV4::new(loopback, 0);
+
+                match TcpListener::bind(socket) {
+                    Ok(obj) => break obj,
+                    Err(error) => {
+                        if counter == 2 {
+                            bail!("Failed to bind socket: {:?}", error);
+                        }
+                    }
+                }
+
+                counter += 1;
+            };
             listener.local_addr()?.port()
         };
         Ok(port)

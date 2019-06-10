@@ -42,10 +42,11 @@ jobs:
     rust_test:
       docker:
         - image: kubos/kubos-dev:latest
+      resource_class: xlarge
       steps:
         - checkout
         - run: cd apis/app-api/python && pip3 install .
-        - run: cargo test -j 7
+        - run: cargo test --release
 
     # Rust testing - large upload test
     # Run for all PR commits
@@ -54,7 +55,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: cargo run --bin large_upload
+        - run: cargo run --bin large_upload --release
 
     # Rust testing - large download
     # Run for all PR commits
@@ -63,7 +64,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: cargo run --bin large_download
+        - run: cargo run --bin large_download --release
 
     # Rust testing - NOS integration tests
     # Run for all PR commits
