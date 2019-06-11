@@ -9,7 +9,7 @@ This framework is used to simplify the process of reading messages from the grou
 to the appropriate internal destination, and then sending properly formatted messages back to the
 ground.
 This framework is meant to be an extension of a hardware service, such that the hardware service GraphQL interface is used for commanding and telemetry to/from the radio hardware itself.
-For example, power on/off, configuring downlink frequencies, getting health and status, etc. would be accomplished through the hardware service GraphQL interface.
+For example, powering on/off, configuring downlink frequencies, getting health and status, etc. would be accomplished through the hardware service GraphQL interface.
 
 .. note::
 
