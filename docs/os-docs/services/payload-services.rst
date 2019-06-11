@@ -5,6 +5,10 @@ Payload services are essentially hardware services which have been custom design
 for mission payload hardware. They share the same architecture as the hardware
 services, exposing low-level device APIs through a GraphQL interface.
 
+They primarily differ from hardware services in how they are integrated into the final system.
+Hardware services each have an accompanying Buildroot package for including them at build time, so they are part of the rootfs and it's associated recovery process.
+Payload services are generally intended to have the ability to be easily updated on orbit, so they should be run as processes in the user partition that are started on boot.
+
 The `examples folder of the Kubos repo <https://github.com/kubos/kubos/tree/master/examples>`__ includes
 two example payload services: one written in `Python <https://github.com/kubos/kubos/tree/master/examples/python-service>`_,
 and one written in `Rust <https://github.com/kubos/kubos/tree/master/examples/rust-service>`__.
@@ -441,7 +445,7 @@ copy of the Rust service example.
 
 Issue ``cargo build`` in order to build the service.
 
-.. note:: 
+.. note::
 
     The ``cargo build`` command can be used to build any Rust service
     or crate from within the Vagrant box.

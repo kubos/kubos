@@ -8,6 +8,8 @@ creating their specific radio's hardware service.
 This framework is used to simplify the process of reading messages from the ground, forwarding them
 to the appropriate internal destination, and then sending properly formatted messages back to the
 ground.
+This framework is meant to be an extension of a hardware service, such that the hardware service GraphQL interface is used for commanding and telemetry to/from the radio hardware itself.
+For example, power on/off, configuring downlink frequencies, getting health and status, etc. would be accomplished through the hardware service GraphQL interface.
 
 .. note::
 
@@ -28,13 +30,13 @@ All packets sent to/from the communication device will be encapsulated in severa
 .. uml::
 
     @startuml
-    
+
     package "Radio Protocol" {
         package "UDP" {
             rectangle "Message Data"
         }
     }
-    
+
     @enduml
 
 The first layer will be whatever communication protocol the device requires.
@@ -63,37 +65,37 @@ Once this transaction has completed, the message handler thread exits.
 .. uml::
 
     @startuml
-    
+
     hide footbox
-    
+
     actor "Ground Station" as ground
     participant Radio
-    
+
     ground -> Radio : 1. Send command to satellite
-    
+
     box "Communications Service" #LightBlue
         participant "Read Thread" as read
 
         Radio <- read : 2. Read data packets from radio
         read -> read : 3. Deframe data packets
         read -> read : 4. Reassemble data packet
-        
+
         create "Message Handler" as handler
         read -> handler : 5. Spawn new message handler
         activate handler
     end box
-    
+
     participant "Kubos Service" as service
-    
+
     handler -> service : 6. Posts GraphQL query/mutation to service
     service -> handler : 7. Return result of query/mutation
     handler -> handler : 8. Wrap result in UDP packet
     handler -> Radio : 9. Send response packet to radio
     destroy handler
-    
+
     Radio -> ground : 10. Send response packet to ground
-    
-    
+
+
     @enduml
 
 Downlink Endpoints
@@ -115,19 +117,19 @@ it to the communications device, via the user-defined write function.
 .. uml::
 
     @startuml
-    
+
     hide footbox
-    
+
     actor "Mission application" as app
     participant "Communications Service\nDownlink Endpoint" as downlink
     participant Radio
     actor "Ground Station" as ground
-    
+
     app -> downlink : 1. Send data to downlink endpoint
     downlink -> downlink : 2. Wrap data in UDP packet
     downlink -> Radio : 3. Send data packet to radio
     Radio -> ground : 4. Send data packet to ground
-    
+
     @enduml
 
 Configuration
@@ -213,7 +215,7 @@ resources:
 .. |comms-service| raw:: html
 
     <a href="../../rust-docs/comms_service/index.html" target="_blank">Framework Rust documentation</a>
-    
+
 .. |CommsControlBlock| raw:: html
 
     <a href="../../rust-docs/comms_service/struct.CommsControlBlock.html" target="_blank">CommsControlBlock</a>
