@@ -25,7 +25,7 @@ To expose their downlink and uplink capability to the rest of the system, we pro
 In KubOS, services only implement the minimal amount of decision making necessary to accomplish their given task.
 Instead, we rely on :doc:`mission applications <#####>` to handle the decision making for the mission.
 Kubos has some mission applications that are open sourced in the repo, and others that we can offer to aid in mission development.
-We've listed the typical necessary applications in the :doc:`mission needs doc. <#####>`
+We've listed the typical necessary applications in the :doc:`mission needs doc. <mission-needs>`
 
 3. Update and Recovery
 ----------------------
@@ -47,8 +47,8 @@ _________________
 
 The :doc:`KubOS recovery process <#####>` is defaulted to be configured for a development environment, where you have access to the hardware and are actively developing on it.
 As a result, it **requires** augmentation before being flight ready, as it is not initially configured for desired on-orbit behavior.
-Before you finish development, we recommend studying the recovery process and looking for any possible edge cases that your hardware might encounter, augmenting the recovery process as necessary to account for them.
-In addition, we also recommend doing several test cycles forcing the recovery to take place, verifying that your mission specific code is effected integrated into the recovery process.
+Before you finish development, we recommend studying the recovery process and augmenting it as necessary to cover any possible edge cases that your hardware or software might encounter.
+In addition, we also recommend doing several test cycles forcing the recovery to take place under various conditions, verifying that your mission specific code is effectively integrated into the recovery process.
 
 Kubos offers `SLAs <https://www.kubos.com/kubos/>` to aid in the augmentation of the process and/or auditing your mission's recovery process.
 
@@ -56,5 +56,5 @@ Kubos offers `SLAs <https://www.kubos.com/kubos/>` to aid in the augmentation of
 -------------------
 
 You have all the hardware integrated, you have all the required mission applications, and you've tested everything to your heart's content...you're ready for launch.
-We've created a checklist for the likely steps to the software configured to a launch-ready state.
+We've created a checklist for the :doc:`likely steps <flight-ready>` to the prepare the software to be launch-ready.
 Please note that this is only a recommended list of steps, and will definitely change depending on your launch provider, mission requirements, and hardware configuration.
