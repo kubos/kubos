@@ -1,13 +1,13 @@
 Typical Required Mission Applications
 =====================================
 
-Every mission is unique, but with this doc, we've attempted to highlight what applications your mission with most likely need:
+Every mission is unique, but with this doc, we've attempted to highlight what applications your mission will most likely need.
 
 Telemetry Collection
 --------------------
 
 Since all services are passive, it falls to an application to collect and store telemetry in the telemetry database service.
-Kubos provides this application, and augmenting it for your mission should be simple given that all hardware services follow the service outline.
+Kubos provides an `example of this application, <#####>` and augmenting it for your mission should be simple given that all hardware services follow the service outline.
 
 Housekeeping
 ------------
@@ -25,9 +25,9 @@ These are by no means the *only* housekeeping applications that should be includ
 OBC
 ~~~
 
-The OBC housekeeping application (`example here <######>`) should ensure the OBC itself and the critical processes are running smoothly.
-For instance, the example app cleans the telemetry database, checks file system and memory usage, and does a test query to running services.
-See the example application documentation to understand more of what it does, and what you might want to do with it.
+The OBC housekeeping application should ensure the OBC itself and the critical processes are running smoothly.
+Kubos provides an `example of this application <######>`, which cleans the telemetry database, checks file system and memory usage, and does a test query to running services.
+See the :doc:`example application documentation <#######>` to understand more of what it does, and what you might want to do with it or another similar application.
 
 ADCS/GPS
 ~~~~~~~~
@@ -53,7 +53,7 @@ Deployment
 ----------
 
 The deployment application should handle the required sequence during the initial deployment from the launch vehicle.
-We have a :doc:`dedicated guide <deployment>` for the recommended behavior of this application. a
+We have a :doc:`dedicated guide <deployment>` for the recommended behavior of this application.
 
 Kubos offers configurable deployment applications for customer missions, as well as SLAs for helping develop and/or reviewing your mission's deployment application.
 You can reach out to us on `Slack <https://slack.kubos.co>` or through the `website <https://www.kubos.com/kubos/>` for more information about these.
@@ -82,4 +82,4 @@ As a result, they can vary greatly in their functionality, but here are some exa
 An app can really do anything you want it to, but we suggest you keep them as simple as possible to reduce complexity.
 If you find yourself building several modes into an operational application, maybe split it into several smaller ones that are each dedicated for the specific mode.
 
-If you want help architecting or developing your operations applications, Kubos offers `SLAs <https://www.kubos.com/kubos/>` to aid in mission development. 
+If you want help architecting or developing your operations applications, Kubos offers `SLAs <https://www.kubos.com/kubos/>` to aid in mission development.
