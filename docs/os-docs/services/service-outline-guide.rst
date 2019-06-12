@@ -82,7 +82,7 @@ The only exception to this rule is the ``noop()`` mutation, as it is essential f
     }
 
     input CommandRawInput {
-        # "command" must always be a utf-8 string. Use "format" to convert as necessary.
+        # "command" must always be a utf-8 string. Use "format" to encode as necessary.
         command: String!
         format: FormatEnum!
         # Number of bytes to be read from the hardware as a response. Can be excluded if the hardware does not support it.
@@ -90,9 +90,7 @@ The only exception to this rule is the ``noop()`` mutation, as it is essential f
     }
 
     enum FormatEnum {
-        # Necessary for binary data to be passed to the hardware
         HEX
-        # For plain text passthrough
         STR
     }
 
@@ -105,8 +103,8 @@ The only exception to this rule is the ``noop()`` mutation, as it is essential f
 ``commandRaw`` mutation
 _______________________
 
-Direct hardware commands are often issued in binary format that does not comply with the utf-8 string requirements.
-Since we want to support the passing of raw binary commands to underlying hardware, but do not want to deviate from the GraphQL specification, we've added the FormatEnum to specify how the utf-8 compatible string can be converted to the raw data that must be passed to the hardware.
+Direct hardware commands are often issued in binary format, which GraphQL does not have a built in type for.
+Since we want to support the passing of raw binary commands to underlying hardware, but do not want to deviate from the GraphQL specification, we've added the FormatEnum to specify how the utf-8 compatible string can be decoded to the raw data that must be passed to the hardware.
 The ``HEX`` format is for those cases, such that passing a hex string: ``74657374636f6d6d616e64``, causes the bytearray: ``[116,101,115,116,99,111,109,109,97,110,100]`` to be passed to the hardware.
 
-Some hardware expects utf-8 compatible string commands, so those services would leverage the ``STR`` format to pass the data directly to the hardware. EG: the string ``testcommand`` gets passed to the hardware as the bytearray: ``[116,101,115,116,99,111,109,109,97,110,100]``.
+Some hardware expects string commands, so those services would leverage the ``STR`` format to pass the data directly to the hardware, with no decode necessary. EG: the string ``testcommand`` gets passed to the hardware as the bytearray: ``[116,101,115,116,99,111,109,109,97,110,100]``.
