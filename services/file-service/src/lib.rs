@@ -54,8 +54,9 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
 
     let downlink_ip = match config.get("downlink_ip") {
         Some(val) => val.as_str().and_then(|str| Some(str.to_owned())),
-        None => None,
-    }.unwrap();
+        None => Some("127.0.0.1".to_owned()),
+    }
+    .unwrap();
 
     let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
 
@@ -100,8 +101,7 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
             let (sender, receiver): (Sender<serde_cbor::Value>, Receiver<serde_cbor::Value>) =
                 mpsc::channel();
             threads.lock().unwrap().insert(channel_id, sender.clone());
-            
-            
+
             // Break the processing work off into its own thread so we can
             // listen for requests from other clients
             let shared_threads = threads.clone();
@@ -113,7 +113,12 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
                 };
 
                 // Set up the file system processor with the reply socket information
-                let f_protocol = FileProtocol::new(&host_ref, &format!("{}:{}", downlink_ip_ref, downlink_port), config_ref);
+                let f_protocol = FileProtocol::new(
+                    &host_ref,
+                    0,
+                    &format!("{}:{}", downlink_ip_ref, downlink_port),
+                    config_ref,
+                );
 
                 // Listen, process, and react to the remaining messages in the
                 // requested operation

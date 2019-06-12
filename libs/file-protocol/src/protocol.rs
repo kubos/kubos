@@ -126,10 +126,10 @@ impl Protocol {
     /// let f_protocol = FileProtocol::new("0.0.0.0", "192.168.0.1:7000", config);
     /// ```
     ///
-    pub fn new(host_ip: &str, remote_addr: &str, config: ProtocolConfig) -> Self {
+    pub fn new(host_ip: &str, host_port: u16, remote_addr: &str, config: ProtocolConfig) -> Self {
         // Get a local UDP socket (Bind)
-
-        let c_protocol = CborProtocol::new(&format!("{}:0", host_ip), config.chunk_size);
+        let c_protocol =
+            CborProtocol::new(&format!("{}:{}", host_ip, host_port), config.chunk_size);
 
         // Set up the full connection info
         Protocol {

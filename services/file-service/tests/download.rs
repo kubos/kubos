@@ -38,15 +38,17 @@ fn download_single() {
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
     let service_port = 8000;
+    let downlink_port = 7000;
 
     let contents = "download_single".as_bytes();
 
-    create_test_file(&source, &contents);
+    let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, 4096);
+    service_new!(service_port, downlink_port, 4096);
 
     let result = download(
         "127.0.0.1",
+        downlink_port,
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
@@ -58,6 +60,11 @@ fn download_single() {
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
     assert_eq!(&contents[..], dest_contents.as_slice());
+
+    // Cleanup the temporary files so that the test can be repeatable
+    // The client folder is cleaned up by the protocol as a result
+    // of the hash mismatch
+    let _ = fs::remove_dir_all(format!("service/storage/{}", hash));
 }
 
 // Download multi-chunk file from scratch
@@ -68,15 +75,17 @@ fn download_multi_clean() {
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
     let service_port = 8001;
+    let downlink_port = 7001;
 
     let contents = [1; 6000];
 
-    create_test_file(&source, &contents);
+    let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, 4096);
+    service_new!(service_port, downlink_port, 4096);
 
     let result = download(
         "127.0.0.1",
+        downlink_port,
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
@@ -88,6 +97,11 @@ fn download_multi_clean() {
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
     assert_eq!(&contents[..], dest_contents.as_slice());
+
+    // Cleanup the temporary files so that the test can be repeatable
+    // The client folder is cleaned up by the protocol as a result
+    // of the hash mismatch
+    let _ = fs::remove_dir_all(format!("service/storage/{}", hash));
 }
 
 // Download multi-chunk file which we already have 1 chunk for
@@ -98,16 +112,18 @@ fn download_multi_resume() {
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
     let service_port = 8002;
+    let downlink_port = 7002;
 
     let contents = [2; 6000];
 
-    create_test_file(&source, &contents);
+    let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, 4096);
+    service_new!(service_port, downlink_port, 4096);
 
     // Download a partial file so that we can resume the download later
     let result = download_partial(
         "127.0.0.1",
+        downlink_port,
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
@@ -121,6 +137,7 @@ fn download_multi_resume() {
     // download the file again
     let result = download(
         "127.0.0.1",
+        downlink_port,
         "127.0.0.1:8002",
         &source,
         &dest,
@@ -132,6 +149,11 @@ fn download_multi_resume() {
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
     assert_eq!(&contents[..], dest_contents.as_slice());
+
+    // Cleanup the temporary files so that the test can be repeatable
+    // The client folder is cleaned up by the protocol as a result
+    // of the hash mismatch
+    let _ = fs::remove_dir_all(format!("service/storage/{}", hash));
 }
 
 // Download multi-chunk file which we already have downloaded
@@ -142,17 +164,19 @@ fn download_multi_complete() {
     let test_dir_str = test_dir.path().to_str().unwrap();
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
-    let service_port = 8005;
+    let service_port = 8003;
+    let downlink_port = 7003;
 
-    let contents = [3; 6000];
+    let contents = "download_multi_complete".as_bytes();
 
-    create_test_file(&source, &contents);
+    let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, 4096);
+    service_new!(service_port, downlink_port, 4096);
 
     // download the file once (clean download)
     let result = download(
         "127.0.0.1",
+        downlink_port,
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
@@ -161,10 +185,13 @@ fn download_multi_complete() {
     );
     assert!(result.is_ok());
 
+    thread::sleep(Duration::from_millis(100));
+
     // download the file again
     let result = download(
         "127.0.0.1",
-        "127.0.0.1:8005",
+        downlink_port,
+        &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
         Some("client".to_owned()),
@@ -176,6 +203,11 @@ fn download_multi_complete() {
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
     assert_eq!(&contents[..], dest_contents.as_slice());
+
+    // Cleanup the temporary files so that the test can be repeatable
+    // The client folder is cleaned up by the protocol as a result
+    // of the hash mismatch
+    let _ = fs::remove_dir_all(format!("service/storage/{}", hash));
 }
 
 // Download. Create hash mismatch.
@@ -185,17 +217,19 @@ fn download_bad_hash() {
     let test_dir_str = test_dir.path().to_str().unwrap();
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
-    let service_port = 8003;
+    let service_port = 8004;
+    let downlink_port = 7004;
 
     let contents = "download_bad_hash".as_bytes();
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, 4096);
+    service_new!(service_port, downlink_port, 4096);
 
     // Download the file so we can mess with the temporary storage
     let result = download(
         "127.0.0.1",
+        downlink_port,
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
@@ -210,7 +244,8 @@ fn download_bad_hash() {
 
     let result = download(
         "127.0.0.1",
-        "127.0.0.1:8003",
+        downlink_port,
+        &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
         Some("client".to_owned()),
@@ -221,48 +256,5 @@ fn download_bad_hash() {
     // Cleanup the temporary files so that the test can be repeatable
     // The client folder is cleaned up by the protocol as a result
     // of the hash mismatch
-    fs::remove_dir_all(format!("service/storage/{}", hash)).unwrap();
-}
-
-// Download a single file in 5 simultaneous client instances
-#[test]
-fn download_multi_client() {
-    let service_port = 8004;
-
-    // Spawn our single service
-    service_new!(service_port, 4096);
-
-    let mut thread_handles = vec![];
-
-    // Spawn 5 simultaneous clients
-    for num in 0..5 {
-        thread_handles.push(thread::spawn(move || {
-            let test_dir = TempDir::new().expect("Failed to create test dir");
-            let test_dir_str = test_dir.path().to_str().unwrap();
-            let source = format!("{}/source", test_dir_str);
-            let dest = format!("{}/dest", test_dir_str);
-            let contents = [num; 6500];
-
-            create_test_file(&source, &contents);
-
-            let result = download(
-                "127.0.0.1",
-                &format!("127.0.0.1:{}", service_port),
-                &source,
-                &dest,
-                Some("client".to_owned()),
-                4096,
-            );
-            assert!(result.is_ok());
-
-            // Verify the final file's contents
-            let dest_contents = fs::read(dest).unwrap();
-            assert_eq!(&contents[..], dest_contents.as_slice());
-        }));
-    }
-
-    for entry in thread_handles {
-        // Check for any thread failures
-        assert!(entry.join().is_ok());
-    }
+    let _ = fs::remove_dir_all(format!("service/storage/{}", hash));
 }
