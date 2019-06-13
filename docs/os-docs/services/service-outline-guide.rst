@@ -19,7 +19,7 @@ Omitting any of the following queries will cause compatibility issues with the r
 Adding additional queries is highly encouraged, especially if it will further ease integration with the underlying hardware.
 For example, a ``currentPosition`` query on a gps service could provide faster access to apps that need it.
 
-.. code-block:: graphql
+.. code-block:: none
 
     type Query {
         # Used for doing regular health checks on the service
@@ -52,7 +52,7 @@ Mutations are harder to standardize across all hardware, but make your best atte
 As noted before, any that cannot be implement must return a response: ``{"errors": ["Not Implemented"], "data": null}``.
 The only exception to this rule is the ``noop()`` mutation, as it is essential for diagnosing hardware state and **must** be implemented.
 
-.. code-block:: graphql
+.. code-block:: none
 
     type Mutation {
         # When the service receives a noop mutation, it should send a command and make sure it sees the appropriate response from the hardware.
