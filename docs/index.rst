@@ -67,26 +67,26 @@ All supported devices have a :doc:`device API <deep-dive/apis/device-api/index>`
 
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
 | Vendor                                        | Device                                                                                                                       | Service                                                                                      | API |
-+===============================================+==============================================================================================================================+==============================================================================================+=====+
-| `Adcole Maryland Aerospace <adcolemai.com>`__ | `MAI 400 <https://www.adcolemai.com/wp-content/uploads/2019/02/AMA-MAI-400-Datasheet.pdf>`__                                 | :doc:`Yes <rust-docs/mai400_service/index.html>'                                             | Yes |
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
-| `Clyde Space <clyde.space>`__                 | `3rd Generation 1U EPS <https://www.clyde.space/products/18-3rd-generation-1u-eps>`__                                        | :doc:`Yes <rust-docs/clyde_3g_eps_service/index.html>'                                       | Yes |
+| `Adcole Maryland Aerospace <adcolemai.com>`__ | `MAI 400 <https://www.adcolemai.com/wp-content/uploads/2019/02/AMA-MAI-400-Datasheet.pdf>`__                                 | |MAI-400|                                                                                    | Yes |
++-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
+| `Clyde Space <clyde.space>`__                 | `3rd Generation 1U EPS <https://www.clyde.space/products/18-3rd-generation-1u-eps>`__                                        | |Clydespace-EPS|                                                                             | Yes |
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
 | `GOMspace <gomspace.com>`__                   | `NanoPower P31u power supply <https://gomspace.com/shop/subsystems/power-supplies/nanopower-p31u.aspx>`__                    | No                                                                                           | Yes |
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
-| `ISIS <isispace.nl>`__                        | `Antenna System <https://www.isispace.nl/products/cubesat-antenna-systems/>`__                                               | :doc:`Yes <rust-docs/isis_ants_service/index.html>'                                          | Yes |
+| `ISIS <isispace.nl>`__                        | `Antenna System <https://www.isispace.nl/products/cubesat-antenna-systems/>`__                                               | |ISIS-AntS|                                                                                  | Yes |
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
 | `ISIS <isispace.nl>`__                        | `iMTQ <https://www.isispace.nl/product/isis-magnetorquer-board/>`__                                                          | No                                                                                           | Yes |
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
 | `ISIS <isispace.nl>`__                        | `TRXVU <https://www.isispace.nl/product/isis-uhf-downlink-vhf-uplink-full-duplex-transceiver/>`__                            | No                                                                                           | Yes |
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
-| `ISIS <isispace.nl>`__                        | `OBC Supervisor <https://www.isispace.nl/product/on-board-computer/>`__                                                      | :doc:`Yes <rust-docs/iobc_supervisor_service/index.html>'                                    | Yes |
+| `ISIS <isispace.nl>`__                        | `OBC Supervisor <https://www.isispace.nl/product/on-board-computer/>`__                                                      | |iOBC-Supervisor|                                                                            | Yes |
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
-| `NovAtel <novatel.com>`__                     | `OEM6 High Precision GNSS Receivers <https://www.novatel.com/products/gnss-receivers/oem-receiver-boards/oem6-receivers/>`__ | :doc:`Yes <rust-docs/novatel_oem6_service/index.html>'                                       | Yes |
+| `NovAtel <novatel.com>`__                     | `OEM6 High Precision GNSS Receivers <https://www.novatel.com/products/gnss-receivers/oem-receiver-boards/oem6-receivers/>`__ | |NovAtel-OEM6|                                                                               | Yes |
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
-| `Nearspace Launch <nearspacelaunch.com>`__    | `EyeStar-D2 Duplex Radio <https://www.nearspacelaunch.com/collections/eyestar-radiosolutions>`__                             | :doc:`Yes <rust-docs/nsl_duplex_d2_comms_service/index.html?'                                | Yes |
+| `Nearspace Launch <nearspacelaunch.com>`__    | `EyeStar-D2 Duplex Radio <https://www.nearspacelaunch.com/collections/eyestar-radiosolutions>`__                             | |NSL-Duplex-D2|                                                                              | Yes |
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
-| `Pumpkin <pumpkinspace.com>`__                | `All Pumpkin MCUs <https://www.pumpkinspace.com/store/c1/Featured_Products.html>`__                                          | `Yes <https://github.com/kubos/kubos/blob/master/services/pumpkin-mcu-service/README.rst>'__ | Yes |
+| `Pumpkin <pumpkinspace.com>`__                | `All Pumpkin MCUs <https://www.pumpkinspace.com/store/c1/Featured_Products.html>`__                                          | `Yes <https://github.com/kubos/kubos/blob/master/services/pumpkin-mcu-service/README.rst>`__ | Yes |
 +-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
 
 Contributing to KubOS
@@ -118,3 +118,27 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`search`
+
+.. |MAI-400| raw:: html
+
+    <a href="rust-docs/mai400_service/index.html" target="_blank">Yes</a>
+
+.. |Clydespace-EPS| raw:: html
+
+    <a href="rust-docs/clyde_3g_eps_service/index.html" target="_blank">Yes</a>
+
+.. |ISIS-AntS| raw:: html
+
+    <a href="rust-docs/isis_ants_service/index.html" target="_blank">Yes</a>
+
+.. |iOBC-Supervisor| raw:: html
+
+    <a href="rust-docs/iobc_supervisor_service/index.html" target="_blank">Yes</a>
+
+.. |NovAtel-OEM6| raw:: html
+
+    <a href="rust-docs/novatel_oem6_service/index.html" target="_blank">Yes</a>
+
+.. |NSL-Duplex-D2| raw:: html
+
+    <a href="rust-docs/nsl_duplex_d2_comms_service/index.html" target="_blank">Yes</a>
