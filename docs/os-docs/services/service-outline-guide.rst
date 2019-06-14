@@ -1,5 +1,5 @@
 KubOS Service Outline
-======================
+=====================
 
 This guide covers an outline for the base schema that should be implemented in all hardware services.
 Your service can and should implement more mutations and queries beyond those specified in the required base.
