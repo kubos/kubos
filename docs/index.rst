@@ -11,26 +11,32 @@ Overview
 
 
 
-The KubOS platform provides satellite developers the tools and libraries necessary to quickly bring up space-ready software. We leverage multiple existing open source projects, along with our own custom framework and SDK.
+The KubOS platform provides satellite developers the tools and libraries necessary to quickly bring up space-ready software.
+We leverage multiple existing open source projects, along with our own custom framework and SDK.
 
-TODO: Maybe tweak which things we're highlighting here
-New to KubOS? Want to know what it is? Check out our architecture guide for an overview of how KubOS works and what it provides:
+Just looking for an explanation of what KubOS is?
+Check out our architecture guide for an overview of how KubOS works and what it provides,
+and check out our system docs for a deeper explanation of each component:
 
  - :doc:`KubOS Architecture Overview <architecture-overview>`
+ - :doc:`KubOS Ecosystem <os-docs/index>`
+
+Want to get started with development?
+Check out our tutorials and try your own project:
+
  - :doc:`Getting Started <getting-started/index>`
-
-Getting started with development? Check out our tutorials and try your own project:
-
  - :doc:`New User Tutorials <tutorials/index>`
 
-Trying to integrate a payload or create your mission code? Check out our mission-specific code documentation:
+Trying to start developing your mission with KubOS?
+Check out our mission development overview:
 
- - :doc:`Payload Services <os-docs/services/payload-services>`
- - :doc:`Mission Applications <mission-dev/index>`
+ - :doc:`Mission Development <mission-dev/index>`
 
-Having issues? Want a new feature? Just want to say hello? `Come talk to us! <https://slack.kubos.co/>`__
+Having issues? :doc:`Check out our FAQs <faq-troubleshooting>` for your issue, or `create a new issue <https://github.com/kubos/kubos/issues/new/choose>`__ on the repo to let us know!
 
-If for some reason Slack won't work for you, feel free to email us at info@kubos.co.
+Want a new feature? Create a `feature request <https://github.com/kubos/kubos/issues/new/choose>`__!
+
+Just want to say hello? `Come talk to us! <https://slack.kubos.co/>`__ If for some reason Slack won't work for you, feel free to email us at info@kubos.com.
 
 .. _supported-boards:
 
@@ -47,15 +53,41 @@ Supported OBCs
 | Beaglebone | :doc:`Beaglebone Black, Rev. C <obc-docs/bbb/index>`      |
 +------------+-----------------------------------------------------------+
 
+.. _supported-hardware:
+
 Supported Hardware Devices
 --------------------------
 
 KubOS supports a selection of hardware devices in varying capacities.
 
-All supported devices have a :doc:`device API <deep-dive/apis/device-api/index>` which may be used.
-
 Some devices have an additional :doc:`hardware service <os-docs/services/hardware-services>` which can be built into
 KubOS and provides a long-running process which allows easy, streamlined communication with the device.
+
+All supported devices have a :doc:`device API <deep-dive/apis/device-api/index>` which may be used.
+
++-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
+| Vendor                                        | Device                                                                                                                       | Service                                                                                      | API |
++===============================================+==============================================================================================================================+==============================================================================================+=====+
+| `Adcole Maryland Aerospace <adcolemai.com>`__ | `MAI 400 <https://www.adcolemai.com/wp-content/uploads/2019/02/AMA-MAI-400-Datasheet.pdf>`__                                 | :doc:`Yes <rust-docs/mai400_service/index.html>'                                             | Yes |
++-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
+| `Clyde Space <clyde.space>`__                 | `3rd Generation 1U EPS <https://www.clyde.space/products/18-3rd-generation-1u-eps>`__                                        | :doc:`Yes <rust-docs/clyde_3g_eps_service/index.html>'                                       | Yes |
++-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
+| `GOMspace <gomspace.com>`__                   | `NanoPower P31u power supply <https://gomspace.com/shop/subsystems/power-supplies/nanopower-p31u.aspx>`__                    | No                                                                                           | Yes |
++-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
+| `ISIS <isispace.nl>`__                        | `Antenna System <https://www.isispace.nl/products/cubesat-antenna-systems/>`__                                               | :doc:`Yes <rust-docs/isis_ants_service/index.html>'                                          | Yes |
++-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
+| `ISIS <isispace.nl>`__                        | `iMTQ <https://www.isispace.nl/product/isis-magnetorquer-board/>`__                                                          | No                                                                                           | Yes |
++-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
+| `ISIS <isispace.nl>`__                        | `TRXVU <https://www.isispace.nl/product/isis-uhf-downlink-vhf-uplink-full-duplex-transceiver/>`__                            | No                                                                                           | Yes |
++-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
+| `ISIS <isispace.nl>`__                        | `OBC Supervisor <https://www.isispace.nl/product/on-board-computer/>`__                                                      | :doc:`Yes <rust-docs/iobc_supervisor_service/index.html>'                                    | Yes |
++-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
+| `NovAtel <novatel.com>`__                     | `OEM6 High Precision GNSS Receivers <https://www.novatel.com/products/gnss-receivers/oem-receiver-boards/oem6-receivers/>`__ | :doc:`Yes <rust-docs/novatel_oem6_service/index.html>'                                       | Yes |
++-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
+| `Nearspace Launch <nearspacelaunch.com>`__    | `EyeStar-D2 Duplex Radio <https://www.nearspacelaunch.com/collections/eyestar-radiosolutions>`__                             | :doc:`Yes <rust-docs/nsl_duplex_d2_comms_service/index.html?'                                | Yes |
++-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
+| `Pumpkin <pumpkinspace.com>`__                | `All Pumpkin MCUs <https://www.pumpkinspace.com/store/c1/Featured_Products.html>`__                                          | `Yes <https://github.com/kubos/kubos/blob/master/services/pumpkin-mcu-service/README.rst>'__ | Yes |
++-----------------------------------------------+------------------------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+-----+
 
 Contributing to KubOS
 ---------------------
@@ -68,7 +100,7 @@ or bugs, see what you can work on, and to give feedback.
 
 .. toctree::
     :hidden:
-    
+
     KubOS Architecture <architecture-overview>
     Getting Started <getting-started/index>
     Tutorials <tutorials/index>
@@ -79,6 +111,7 @@ or bugs, see what you can work on, and to give feedback.
     Kubos SDK <sdk-docs/index>
     Contributing to KubOS <contributing/index>
     Changelog <changelog>
+    FAQs <faq-troubleshooting>
 
 Indices and tables
 ------------------
