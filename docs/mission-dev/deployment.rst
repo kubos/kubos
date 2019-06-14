@@ -34,13 +34,14 @@ Hold Time Tracking
         the system time. These are currently present on all supported OBCs.
 
 Tracking hold time through reboots is best achieved by using the most reliable
-persistent storage location on the OBC, the U-boot environment variables. These
+persistent storage location on the OBC: the U-boot environment variables. These
 variables are always stored in the most reliable storage environment possible,
 due to the high degree of impact they have on the system. The variables used
 for deployment are:
 
-  - ``deployed``: boolean
+  - ``deployed``: boolean, indicates if deployment has been completed
   - ``deploy_start``: string seconds since unix epoch
+  - ``remove_before_flight``: boolean, indicates if deployment should be attempted
 
 The hold time itself should be configured within the application.
 
