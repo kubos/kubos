@@ -118,5 +118,5 @@ As a result, we have added the FormatEnum type, which can be used to specify how
 The ``HEX`` format indicates that the input string is already in hexadecimal format.
 EG: passing a hex string: ``74657374636f6d6d616e64``, causes the byte array: ``[116,101,115,116,99,111,109,109,97,110,100]`` to be passed to the hardware.
 
-The ``STR`` format indicateds the input string requires no decoding.
+The ``STR`` format indicates the input string requires no decoding.
 EG: the string ``testcommand`` gets passed to the hardware as the byte array: ``[116,101,115,116,99,111,109,109,97,110,100]``.
