@@ -460,6 +460,7 @@ name = "db-test"
 version = "0.1.0"
 dependencies = [
  "diesel 1.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "getopts 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
  "kubos-system 0.1.0",
  "kubos-telemetry-db 0.1.0",
  "prettytable-rs 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
