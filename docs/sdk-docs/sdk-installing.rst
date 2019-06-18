@@ -1,33 +1,6 @@
 Installing the Kubos SDK
 ========================
 
-What is the Kubos SDK?
-----------------------
-
-The Kubos SDK is a term used to describe all of the components used
-to build and run a Kubos project on a target device:
-
--  Kubos source modules - The individual components of the APIs, services,
-   and mission applications
--  Vagrant box - A command-line based VM that contains a "ready to run"
-   Kubos development environment
-
-How Does The SDK Work?
-----------------------
-
-The Kubos SDK is distributed through a Vagrant box. A Vagrant box
-(referred to simply as a "box") is a command-line based virtual machine.
-
-The box, when started, is already pre-configured with all of the
-required tools for the Kubos CLI you will need. This minimizes the set-up
-process so you can work on your project rather than setting up tooling.
-
-`Vagrant <https://www.vagrantup.com/>`__ is a command-line based
-tool that abstracts the virtualization provider into a simple-to-use
-interface. Vagrant supports a variety of providers (VirtualBox, VmWare,
-Parallels, etc.) but right now the Kubos SDK only supports VirtualBox, a
-free cross-platform virtualization provider.
-
 Prerequisites
 -------------
 
@@ -112,8 +85,8 @@ command should print something similar to the following output:
 Setup
 -----
 
-Create your Kubos SDK Vagrant Box:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Create your Kubos SDK Instance:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To create an instance of the SDK box follow these steps:
 
@@ -216,7 +189,7 @@ all of the required dependencies installed.
 
 That's it! From here see more on:
 
-  - :doc:`Creating your first Kubos Linux project <../tutorials/first-project>`
+  - :doc:`Creating your first KubOS project <../tutorials/first-project>`
 
 After a little bit of usage you may want to look at :doc:`how to upgrade the
 Kubos SDK <../sdk-docs/sdk-upgrading>`

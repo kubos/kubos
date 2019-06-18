@@ -2,9 +2,9 @@ Upgrading Your Kubos Development Environment
 ============================================
 
 New updates will be announced to the Kubos community and the new releases will
-be published through GitHub. There will may instructions depending
-on the specific release details of all the steps needed to upgrade for
-the newest release.
+be published through GitHub.
+If there are any special steps required to upgrade to the newest releast, they will be listed in the
+release details.
 
 Upgrading the Vagrant Box
 -------------------------

@@ -1,23 +1,24 @@
 Using Python with the Kubos SDK
 ===============================
 
-The Kubos SDK Vagrant box comes with a Python interperter and all the modules
-needed to develop a basic hardware service. Services can be tested locally
-in the Vagrant box up until the point that they need hardware interaction.
+The Kubos SDK Vagrant box comes with a Python interperter and all the modules needed to develop a
+basic hardware service or mission application.
+Services can be tested locally in the Vagrant box up until the point that they need hardware
+interaction.
 
 .. note::
 
-    The SDK comes with support for both Python2.7 and Python3.5.
-    However, only Python3.5 is available on OBCs running Kubos Linux.
+    The SDK comes with support for both Python2.7 and Python3.7.
+    However, only Python3.7 is available on OBCs running Kubos Linux.
 
-Flashing
---------
+Transferring to Target
+----------------------
 
 .. note::
 
    Python is currently only supported on the BeagleboneBlack and MBM2
 
-There are currently two ways to add Python programs to a system running Kubos Linux:
+There are currently two ways to add Python scripts and libraries to a system running Kubos Linux:
 
 - Add a new Python package to a custom Kubos Linux build
 
@@ -39,10 +40,10 @@ to `/home/system/usr/bin` if you would like them to be automatically accessible 
 Running on Target
 -----------------
 
-The following steps will allow you to run Python3.5 files which have been flashed
+The following steps will allow you to run Python3.7 files which have been flashed
 to a Linux target:
 
-0. Make sure you can :ref:`communicate with your obc <obc-communication>`.
+0. Make sure you can :doc:`communicate with your OBC <../obc-docs/comms-setup>`.
 1. Transfer your python script using a supported :ref:`file transfer method <file-transfer>`.
 2. Navigate to the destination folder of the transfer.
 3. Your Python files should be here. You can now run them with ``python file.py``.
