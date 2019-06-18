@@ -11,6 +11,9 @@ ground.
 This framework is meant to be an extension of a hardware service, such that the hardware service GraphQL interface is used for commanding and telemetry to/from the radio hardware itself.
 For example, powering on/off, configuring downlink frequencies, getting health and status, etc. would be accomplished through the hardware service GraphQL interface.
 
+This framework is meant to be an extension of a hardware service, such that the hardware service GraphQL interface is used for commanding and telemetry to/from the radio hardware itself.
+For example, powering on/off, configuring downlink frequencies, getting health and status, etc. would be accomplished through the hardware service GraphQL interface.
+
 .. note::
 
     The communications service framework is currently only available in Rust. As a result, services
