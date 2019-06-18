@@ -23,14 +23,14 @@ To expose their downlink and uplink capability to the rest of the system, we pro
 -----------------------
 
 In KubOS, services are used primarily to expose functionality of underlying hardware.
-They should be expected to only perform a minimal amount of decision-making (for example, kicking a watchdog at a pre-defined interval)
+They should be expected to only perform a minimal amount of decision-making (for example, kicking a watchdog at a pre-defined interval).
 Instead, we rely on :ref:`mission applications <app-docs>` to handle the decision making for the mission.
 Kubos has some mission applications that are open sourced in the repo, and others that we can offer to aid in mission development.
 We've listed the typical necessary applications in the :doc:`mission needs doc. <mission-needs>`
 
 .. toctree::
     :hidden:
-    
+
     mission-needs
     deployment
 
@@ -70,5 +70,5 @@ Please note that this is only a recommended list of steps, and will definitely c
 
 .. toctree::
     :hidden:
-    
+
     flight-ready

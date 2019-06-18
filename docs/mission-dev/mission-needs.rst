@@ -55,7 +55,8 @@ Some examples of triggers and actions:
 - Cancelling operations and going into power generation state
 - Battery temperature monitoring
 
-Kubos offers housekeeping apps for it's supported power systems, you can reach out to us on `Slack <https://slack.kubos.co>`__ or through the `website <https://www.kubos.com/kubos/>`__ for more information about these.
+Kubos offers housekeeping apps for its supported power systems.
+You can reach out to us on `Slack <https://slack.kubos.co>`__ or through the `website <https://www.kubos.com/kubos/>`__ for more information about these.
 
 Deployment
 ----------
@@ -72,7 +73,8 @@ Beacon
 The beacon application should regularly downlink a subset of critical telemetry data via the communication service.
 This telemetry should be the absolute minimum required to assess overall system health.
 
-Kubos offers configurable beacon applications for customer missions, you can reach out to us on `Slack <https://slack.kubos.co>`__ or through the `website <https://www.kubos.com/kubos/>`__ for more information about these.
+Kubos offers configurable beacon applications for customer missions.
+You can reach out to us on `Slack <https://slack.kubos.co>`__ or through the `website <https://www.kubos.com/kubos/>`__ for more information about these.
 
 Operations
 ----------
