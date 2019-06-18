@@ -10,8 +10,7 @@ Prepare Linux
 
 1. Build the flight linux image, including any core and/or hardware services you need for your mission.
 2. Load the flight image onto the spacecraft.
-3. Build the recovery and upgrade rootfs images.
-4. Load them into the recovery and upgrade partitions.
+3. Verify that the recovery and upgrade processes work as expected.
 
 Prepare Services
 ----------------
@@ -21,7 +20,12 @@ Prepare Services
 3. Ensure any payload services you're including are properly communicating with their respective payload (hopefully by running the ``noop`` mutation you dutifully included).
 4. Ensure your ``config.toml`` is appropriate for your bus configuration.
 5. Configure your :doc:`logging and log retention <../os-docs/linux-docs/logging>` for your system memory requirements.
-  a. We recommend that you limit logging to ``info`` and higher if you are using a file location that is prone to wearing out, as ``debug`` logs can cause significant amounts of logs to be generated.
+
+.. note::
+  We recommend that you limit logging to ``info`` and higher if you are using a file location that is prone to wearing out, as ``debug`` logs can cause significant amounts of logs to be generated.
+  This can be done by removing the two lines containing ``debug`` from the
+  `app <https://github.com/kubos/kubos-linux-build/blob/master/common/overlay/etc/rsyslog.d/kubos-apps.conf>`__ and
+  `service <https://github.com/kubos/kubos-linux-build/blob/master/common/overlay/etc/rsyslog.d/kubos-services.conf>`__ rsyslog config files.
 
 
 Prepare Applications
@@ -33,3 +37,5 @@ Prepare Applications
   a. Ensure the ``deployed`` U-boot environment variable is set to ``False``.
   b. Ensure the ``remove_before_flight`` U-boot environment variable is set to ``False``.
   c. Ensure the ``deploy_start`` U-boot environment variable is unset.
+
+.. note:: The ``fw_setenv`` command can be used to set U-Boot environment variables from the Kubos Linux command line. Similarly, the ``fw_printenv`` command can be used to print the current value of a U-Boot environment variable.
