@@ -28,6 +28,12 @@ Instead, we rely on :ref:`mission applications <app-docs>` to handle the decisio
 Kubos has some mission applications that are open sourced in the repo, and others that we can offer to aid in mission development.
 We've listed the typical necessary applications in the :doc:`mission needs doc. <mission-needs>`
 
+.. toctree::
+    :hidden:
+    
+    mission-needs
+    deployment
+
 3. Update and Recovery
 ----------------------
 
