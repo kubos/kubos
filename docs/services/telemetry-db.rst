@@ -41,27 +41,33 @@ the test project on your OBC to obtain the most accurate results.
 When run on a Beaglebone Black, we gathered the following benchmark statistics::
 
    /home/kubos # ./db-test -c tlmdb-config.toml -i 1000
-   NAME                           | Avg (us)   | Total (us)
-   --------------------------------------------------------
-   local_db_api_insert            | 50460      | 50460353
-   local_db_api_insert_bulk       | 213        | 213957
-   remote_gql_insert              | 64356      | 64356103
-   remote_gql_insert_bulk         | 9608       | 9608876
-   remote_udp_insert              | 87         | 87930
-   Cleaned up 4423 test entries
+
++---------------------------------+------------+------------+
+|  NAME                           | Avg (us)   | Total (us) |
++=================================+============+============+
+|  local_db_api_insert            | 50460      | 50460353   |
++---------------------------------+------------+------------+
+|  local_db_api_insert_bulk       | 213        | 213957     |
++---------------------------------+------------+------------+
+|  remote_gql_insert              | 64356      | 64356103   |
++---------------------------------+------------+------------+
+|  remote_gql_insert_bulk         | 9608       | 9608876    |
++---------------------------------+------------+------------+
+|  remote_udp_insert              | 87         | 87930      |
++---------------------------------+------------+------------+
 
 In summary:
 
 - Sending UDP request takes ~87 microseconds
 
     - This means that a client can send UDP requests up to a rate of 11,494 requests per second, if
-      they don't wait for a response. Note: This is far faster than rate at which the service
+      they don't wait for a response. Note: This is far faster than the rate at which the service
       processes requests, meaning that packets will be dropped if this maximum speed is used.
 
 - Individual telemetry database inserts take ~50 milliseconds per entry, while bulk telemetry
   database insertions take 213 microseconds per entry on average.
-- Individual GraphQL inserts (including GQL receive request, database insert, and
-  GQL send response) take ~64 milliseconds per entry, while bulk inserts (many entries at once)
+- Individual GraphQL inserts (including GraphQL receive request, database insert, and
+  GraphQL send response) take ~64 milliseconds per entry, while bulk inserts (many entries at once)
   take 9.6 milliseconds per entry.
 
     - This means that the GraphQL service can process roughly 104 database insert requests per
