@@ -1,7 +1,7 @@
 KubOS Architecture Overview
 ===========================
 
-This document is designed to give you an high level understanding of the philosophy behind KubOS, and how that philosophy is reflected in KubOS.
+This document is designed to give you a high level understanding of the philosophy behind KubOS, and how that philosophy is reflected in KubOS.
 If you want an in depth description of each of these components and their capability, check out the :doc:`KubOS Ecosystem <os-docs/index>` document, and the numerous pages it links to.
 
 What is KubOS?
@@ -32,11 +32,12 @@ Operating System
 KubOS uses a combination of Linux and U-boot to make up its operating system.
 
 Linux is a far more abstract OS than is typically used for satellite software, which does mean it is more resource intensive.
-But, as satellite on board computers have become substantially more capable, the benefits of Linux start to become more important:
+But, as satellite on board computers have become substantially more capable, the some (of the many) benefits of Linux start to become more important:
 
 - Services are completely portable between any KubOS supported OBC, requiring no code changes
-- Enables the ability to leverage the microservice architecture mentioned above, as it has to tools we need for process boundaries and controls
-- A user friendly development environment that can protect developers from mistakenly bringing down the whole system
+- Enables the ability to leverage the microservice architecture mentioned above, as it has the tools we need for process boundaries and controls
+- Leverage Linux's massive ecosystem of software, tooling, and experienced developers
+- Mature software already running on billions of systems
 
 Since Linux is far more complex, it does come with inherent risks, which KubOS combats by pairing it with U-boot.
 U-boot is a widely used bootloader that manages the Linux kernel and the core of our system, making sure there are backups stored on board for failover in the event of a catastrophic event.
