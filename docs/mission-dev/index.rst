@@ -61,3 +61,8 @@ Kubos offers `SLAs <https://www.kubos.com/kubos/>`__ to aid in the augmentation 
 You have all the hardware integrated, you have all the required mission applications, and you've tested everything to your heart's content...you're ready for launch.
 We've created a checklist for the :doc:`likely steps <flight-ready>` to the prepare the software to be launch-ready.
 Please note that this is only a recommended list of steps, and will definitely change depending on your launch provider, mission requirements, and hardware configuration.
+
+.. toctree::
+    :hidden:
+    
+    flight-ready
