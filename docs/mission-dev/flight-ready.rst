@@ -8,7 +8,7 @@ Also, it is important to add steps to account for your mission specific apps and
 Prepare Linux
 -------------
 
-1. Build the flight linux image, including any core and/or hardware services you need for your mission.
+1. Build the flight KubOS image, including any core and/or hardware services you need for your mission.
 2. Load the flight image onto the spacecraft.
 3. Verify that the recovery and upgrade processes work as expected.
 
