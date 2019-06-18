@@ -1,8 +1,6 @@
 Kubos FAQs and Troubleshooting Tips
 ===================================
 
-TODO: Figure out what to do with this. Do we want to keep it? Is it useful?
-
 .. contents:: :local:
 
 FAQs
