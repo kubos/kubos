@@ -6,7 +6,8 @@ for mission payload hardware. They share the same architecture as the hardware
 services, exposing low-level device APIs through a GraphQL interface.
 
 They primarily differ from hardware services in how they are integrated into the final system.
-Hardware services each have an accompanying Buildroot package for including them at build time, so they are part of the rootfs and it's associated recovery process.
+Hardware services each have an accompanying Buildroot package, allowing them to be built into the base operating system image.
+This allows them to be covered by the operating system's recovery process.
 Payload services are generally intended to have the ability to be easily updated on orbit, so they should be run as processes in the user partition that are started on boot.
 
 The `examples folder of the Kubos repo <https://github.com/kubos/kubos/tree/master/examples>`__ includes

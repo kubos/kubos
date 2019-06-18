@@ -8,7 +8,7 @@ Telemetry Collection
 
 Since all :ref:`services are passive <service-docs>`, it falls to an application to collect and store telemetry in the telemetry database service.
 Generally, this should poll all hardware services on a regular basis and pull all available telemetry.
-A 1 minute polling cycle is generally sufficient for most telemetry items.
+A one minute polling cycle is generally sufficient for most telemetry items.
 
 .. TODO: merge the example app and update to say this: "Kubos provides an `example of this application, <#####>`__ and augmenting it for your mission should be simple given that all hardware services follow the service outline."
 
@@ -16,7 +16,8 @@ Housekeeping
 ------------
 
 For each critical piece of the avionics hardware or critical mission aspect, there should be an accompanying housekeeping mission application.
-It is essential to separate these out as much as possible to reduce the complexity of a given application as much as possible, and to reduce possibility of global failure due to an edge case in a single app.
+It is essential to separate these out as much as possible to reduce the complexity of a given application,
+and to reduce possibility of global failure due to an edge case in a single app.
 Some typical housekeeping applications you will most likely include are:
 
 - OBC
@@ -29,7 +30,7 @@ OBC
 ~~~
 
 The OBC housekeeping application should ensure the OBC itself and the critical processes are running smoothly.
-Kubos provides an `example of this application <######>`__, which cleans the telemetry database, checks file system and memory usage, and does a test query to running services.
+Kubos provides an `example of this application <######>`__, which cleans the telemetry database, checks file system and memory usage, and issues a test query against all known services.
 See the :doc:`example application documentation <#####>` to understand more of what it does, and what you might want to do with it or another similar application.
 
 .. TODO: Update with links once the app is merged
@@ -38,13 +39,15 @@ ADCS/GPS
 ~~~~~~~~
 
 The ADCS/GPS housekeeping app will ensure the hardware itself is behaving normally, checking critical telemetry items to ensure nothing is outside the bounds of normal operation, taking action as appropriate.
+Example action would be regularly updating the ADCS system with the latest time, position, and velocity data from the GPS.
 
-Kubos offers housekeeping apps for it's supported ADCS and GPS systems, you can reach out to us on `Slack <https://slack.kubos.co>`__ or through the `website <https://www.kubos.com/kubos/>`__ for more information about these.
+Kubos offers housekeeping apps for its supported ADCS and GPS systems.
+You can reach out to us on `Slack <https://slack.kubos.co>`__ or through the `website <https://www.kubos.com/kubos/>`__ for more information about these.
 
 Power
 ~~~~~
 
-The power management housekeeping application would monitor the Battery and EPS systems, taking critical autonomous recovery action where appropriate.
+The power management housekeeping application should monitor the Battery and EPS systems, taking critical autonomous recovery action where appropriate.
 Some examples of triggers and actions:
 
 - Shutting off non-essential hardware when battery reaches critically low status
@@ -66,7 +69,7 @@ You can reach out to us on `Slack <https://slack.kubos.co>`__ or through the `we
 Beacon
 ------
 
-A beacon application is recommended to generate a compressed subset of telemetry to regularly downlink.
+The beacon application should regularly downlink a subset of critical telemetry data via the communication service.
 This telemetry should be the absolute minimum required to assess overall system health.
 
 Kubos offers configurable beacon applications for customer missions, you can reach out to us on `Slack <https://slack.kubos.co>`__ or through the `website <https://www.kubos.com/kubos/>`__ for more information about these.
@@ -77,11 +80,11 @@ Operations
 All of the above applications are scoped to the core functionality of a spacecraft.
 They ensure that the spacecraft is functioning properly within operational bounds.
 But, they don't actually *complete* your mission.
-Operations applications should be the functionality that is the objective of the mission itself.
-As a result, they can vary greatly in their functionality, but here are some examples:
+Operations applications should deliver the functionality that is the objective of the mission itself.
+For example:
 
-- Command the adcs to the appropriate attitude and take a photo of a commanded location
-- Collect, store in the telemetry database, and downlink over the communication service specialized sensor data
+- Command the ADCS to the appropriate attitude and take a photo of a commanded location
+- Collect, store, and downlink specialized sensor data
 - Process onboard sensor data to generate actionable beacons
 
 An app can really do anything you want it to, but we suggest you keep them as simple as possible to reduce complexity.

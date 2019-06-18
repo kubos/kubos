@@ -22,7 +22,8 @@ To expose their downlink and uplink capability to the rest of the system, we pro
 2. Mission Applications
 -----------------------
 
-In KubOS, services only implement the minimal amount of decision making necessary to accomplish their given task.
+In KubOS, services are used primarily to expose functionality of underlying hardware.
+They should be expected to only perform a minimal amount of decision-making (for example, kicking a watchdog at a pre-defined interval)
 Instead, we rely on :ref:`mission applications <app-docs>` to handle the decision making for the mission.
 Kubos has some mission applications that are open sourced in the repo, and others that we can offer to aid in mission development.
 We've listed the typical necessary applications in the :doc:`mission needs doc. <mission-needs>`
@@ -30,13 +31,13 @@ We've listed the typical necessary applications in the :doc:`mission needs doc. 
 3. Update and Recovery
 ----------------------
 
-KubOS uses similar procedures for both updating and recovering of the rootfs.
+KubOS uses similar procedures for both updating and recovering the operating system.
 We *highly* recommend familiarizing yourself with both procedures during development, well before launch.
 
 Updating KubOS
 ______________
 
-The process for updating the rootfs in KubOS can be reviewed here: :doc:`KubOS update process. <../os-docs/linux-docs/kubos-linux-upgrade>`
+The process for updating the operating system can be reviewed here: :doc:`KubOS update process. <../os-docs/linux-docs/kubos-linux-upgrade>`
 The process for updating mission applications can be reviewed here: :doc:`application service guide. <../os-docs/services/app-service>`
 Both should be reviewed and tested on your hardware prior to launch.
 
@@ -47,6 +48,8 @@ _________________
 
 The :doc:`KubOS recovery process <../os-docs/linux-docs/kubos-linux-recovery>` is defaulted to be configured for a development environment, where you have access to the hardware and are actively developing on it.
 As a result, it **requires** augmentation before being flight ready, as it is not initially configured for desired on-orbit behavior.
+The augmentation will likely be limited to changing the alternate boot behavior in the event of multiple failed boots.
+
 Before you finish development, we recommend studying the recovery process and augmenting it as necessary to cover any possible edge cases that your hardware or software might encounter.
 In addition, we also recommend doing several test cycles forcing the recovery to take place under various conditions, verifying that your mission specific code is effectively integrated into the recovery process.
 
