@@ -1,7 +1,10 @@
 Developing a KubOS Service
 ==========================
 
-This document assumes you already have a good base understanding of the KubOS ecosystem.
+This document goes over the basic components of creating a new service for KubOS.
+
+It assumes you already have a good base understanding of the KubOS ecosystem and is intended as more
+of a reference document, rather than a detailed tutorial.
 
 If you are unfamiliar with the system, we recommend first going through our
 :doc:`new user tutorials <../../tutorials/index>`.
@@ -11,12 +14,17 @@ Resources
 
 - :doc:`graphql`
 - :doc:`service-outline-guide`
-- :doc:`service-config`
-- :doc:`../../contributing/testing`
-- :doc:`../../contributing/documentation`
+- :doc:`Service Configuration <service-config>`
+- :doc:`Testing Guide <../../contributing/testing>`
+- :doc:`Documentation Guide <../../contributing/documentation>`
 
 Example Services
 ----------------
+
+The underlying framework tends to be quite common between services.
+As a result, it will likely be useful to refer to an existing service when creating a new one.
+
+The following are recommended example services:
 
 Rust
 ~~~~
@@ -32,19 +40,31 @@ Python
 Recommended Libraries
 ---------------------
 
-There is existing tooling which we recommended you use when bringing up a new service.
-
-TODO
+There is existing tooling which we use internally and recommend you use when bringing up a new
+service.
 
 Python
 ~~~~~~
 
-The `kubos-service <https://github.com/kubos/kubos/tree/master/libs/kubos-service>`__ library has
-been created to abstract the process needed to create and start a GraphQL server over HTTP.
-It is built on top of Flask and automatically creates the the GraphQL and GraphiQL endpoints
+- `kubos-service <https://github.com/kubos/kubos/tree/master/libs/kubos-service>`__  - Abstracts the
+  process needed to create and start a GraphQL server over HTTP.
+  It is built on top of `Flask <https://github.com/graphql-python/flask-graphql>`__ and
+  automatically creates the the GraphQL and :ref:`GraphiQL <graphiql>` endpoints.
+- `Graphene <https://graphene-python.org/>`__ - Library for constructing the GraphQL schema
 
 Rust
 ~~~~
+
+- `kubos-service <https://github.com/kubos/kubos/tree/master/services/kubos-service>`__
+
+    - Abstracts the process of starting a service. Automatically fetches the IP information from
+      the config file and presents the GraphQL and :ref:`GraphiQL <graphiql>` endpoints
+    - Provides helper macros which can automatically collect and process errors when running
+      operations against hardware
+
+- `Juniper <https://graphql-rust.github.io/juniper/current/>`__ - Library for constructing the
+  GraphQL schema
+- `Failure <https://github.com/rust-lang-nursery/failure>`__ - Library used for error handling
 
 Creating the Schema
 -------------------
@@ -52,8 +72,10 @@ Creating the Schema
 All services should implement the base service schema, as documented in the
 :doc:`service outline <service-outline-guide>` doc.
 
-- Queries allow users to fetch information about the state of the system and other telemetry items.
-- Mutations are operations which may affect the state of the system.
+At a high level, the service should present operations which can be broken into two categories:
+
+- Queries allow users to fetch information about the state of the system and other telemetry items
+- Mutations are operations which may affect the state of the system
 
 We recommend implementing the most basic operations first (ping, no-op, reset) to establish the
 initial service framework before moving on to the more complex (or unique) features.
@@ -61,7 +83,7 @@ initial service framework before moving on to the more complex (or unique) featu
 In general, we don't bother to expose all possible functionality of a particular hardware device.
 Instead, we focus on the most common functionality as well as the specific operations we know we'll
 need.
-This allows us to reduce the amount of development time required in order to create a new service.
+This allows us to reduce the amount of development time required to create a new service.
 
 As a result, we make sure to include a ``commandRaw`` mutation in all hardware services.
 This allows the service to still be able to execute any functionality which wasn't explicitly
@@ -86,7 +108,12 @@ and behavior of log messages.
 Service Configuration
 ---------------------
 
-It may be useful for your service to have certain configurable settings.
+By default, all services require that the IP address and port of their GraphQL endpoint be defined
+in the system's `config.toml` file.
+It is generally assumed that any port which is not already listed in the config file is available
+for use.
+
+It may be useful for your service to have certain additional configurable settings.
 For instance, you might want to be able to adjust certain timeout values, or change which device
 bus your hardware is connected to.
 In this case, your service should read the needed configuration values from the system's
@@ -98,11 +125,13 @@ More information about setting and fetching configuration values can be found in
 Testing Your Service
 --------------------
 
-TODO
+The :ref:`GraphiQL <graphiql>` interface provides a good way to dynamically test each of your
+service's operations.
 
-Unit tests
-Integration tests...
-End-to-end tests
+Unit and integration tests are a good way to ensure that your service remains functional and
+compatible with the KubOS ecosystem over time.
+More information about setting up testing can be found in our :doc:`testing <../../contributing/testing>`
+doc.
 
 Creating an Init Script
 -----------------------
@@ -123,7 +152,13 @@ The lower the value, the earlier it will be run in the system boot process.
 Installing Your Service
 -----------------------
 
+Once you have finished service development, you should install the service in its final location in
+your OBC.
+
 Custom services may either live in the user data partition or in the root file system.
+
+Either way, you will need to update your system's `config.toml` file in order to define the
+IP address and port for your service's GraphQL endpoint.
 
 User Data Partition
 ~~~~~~~~~~~~~~~~~~~
