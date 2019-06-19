@@ -17,8 +17,9 @@ Internally, we use this SDK in order to build KubOS releases and to host our CI 
 Externally, the SDK is most useful for:
 
 - Windows users
-- Users who do not want to muddle their host systems with all of the dependecies required to build
+- Users who do not want to muddle their host systems with all of the dependencies required to build
   and execute KubOS projects
+- Users who want to build a :ref:`custom KubOS image <sysadmin>`
 
 .. uml::
 

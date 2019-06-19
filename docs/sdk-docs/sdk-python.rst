@@ -16,7 +16,7 @@ Transferring to Target
 
 .. note::
 
-   Python is currently only supported on the BeagleboneBlack and MBM2
+   The ISIS-OBC does not currently support Python due to size constraints
 
 There are currently two ways to add Python scripts and libraries to a system running Kubos Linux:
 
