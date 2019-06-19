@@ -1,8 +1,6 @@
 Kubos FAQs and Troubleshooting Tips
 ===================================
 
-TODO: Figure out what to do with this. Do we want to keep it? Is it useful?
-
 .. contents:: :local:
 
 FAQs
@@ -18,7 +16,7 @@ Our email: info@kubos.co
 How do I set up the Kubos SDK?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-See :doc:`installation-docs/sdk-installing`
+See :doc:`sdk-docs/sdk-installing`
 
 How do I check if I'm using the latest version of the Kubos Vagrant image?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,9 +42,9 @@ How do I check what version of Kubos Linux I'm running?
 Issue the ``uname -r`` command on the target board to display the kernel information.
 The Kubos Linux version will be the *n.n.n* number after "KubOS".
 
-:: 
+::
 
-    uname -r    
+    uname -r
     4.4.23-KubOS-1.0.0
 
 What's the default Kubos Linux login?
@@ -77,8 +75,8 @@ I can't build my project. I keep getting "Permission denied" errors
 If you copied your project from another location, it's possible that the files are set up with root permissions
 only. Change the project file permissions to allow the local ``vagrant`` user to have access.
 
-:: 
-    
+::
+
     sudo chown vagrant:vagrant . -R
 
 Interacting with an OBC
@@ -114,7 +112,7 @@ For more information, check out our documentation about :ref:`ethernet connectio
 System Won't Boot into Linux
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If the system goes through the :doc:`full recovery process <os-docs/kubos-linux-recovery>` and the bootcount is still exceeded,
+If the system goes through the :doc:`full recovery process <os-docs/linux-docs/kubos-linux-recovery>` and the bootcount is still exceeded,
 it will present the U-Boot CLI instead of attempting to boot into Kubos Linux again.
 
 If this occurs, follow the :ref:`instructions for resetting the boot environment <env-reset>`.
