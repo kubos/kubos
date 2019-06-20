@@ -40,8 +40,11 @@ Other hardware components are given services that are more generalized.
 Creating a Service
 ------------------
 
-The :doc:`service outline guide.<../dev-docs/service-outline-guide>` documents the preferred schema for all hardware services.
+The :doc:`service outline guide <service-outline-guide>` documents the preferred schema for all hardware services.
 Commonizing the queries available from each service allows greater code re-use and reduces the number of new queries users must learn when swapping between different hardware devices.
+
+The :doc:`service development guide <service-dev>` goes into a bit more detail about the components
+needed to create and install a new hardware service.
 
 .. _pre-built-services:
 
