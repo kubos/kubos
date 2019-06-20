@@ -99,6 +99,12 @@ redudancy is important for maintaining overall system health.
 All log messages issued by the service should be routed to the system logs.
 You may also choose to echo the messages to ``stdout``, however that is not a required behavior.
 
+.. note::
+
+    If you choose to route messages to ``stdout``, they will only appear in the console of the user
+    who started the process. As a result, services which are started automatically at boot will not
+    issue messages to ``stdout`` if you log into the OBC at a later time.
+
 Services should use the daemon logging facility (rather than the user facility).
 This will cause all service log messages to be routed to the `/var/log/kubos-*.log` files.
 
@@ -138,16 +144,23 @@ Creating an Init Script
 
 If you would like your service to be automatically started at system boot, you will need to create
 an init script.
+KubOS uses BusyBox's init system, so the init scripts will need to use the following naming
+convention: ``S{run-level}{application-name}``. The run-level value should be between 1 and 99.
+The lower the value, the earlier it will be run in the system boot process.
+
+.. note::
+
+    The BusyBox init system does *not* require compliance with the `LSB init script <https://wiki.debian.org/LSBInitScripts>`__
+    standard.
 
 For Rust-based services, the `monitor service's <https://github.com/kubos/kubos-linux-build/blob/master/package/kubos/kubos-monitor/kubos-monitor>`__
 init script provides a good example.
+Rust services (and other executables) should be started using `start-stop-daemon <http://man7.org/linux/man-pages/man8/start-stop-daemon.8.html>`__.
 
 For Python-based services, please refer to the `Pumpkin MCU service <https://github.com/kubos/kubos-linux-build/blob/master/package/kubos/kubos-pumpkin-mcu/kubos-pumpkin-mcu>`__
 init script for reference.
-
-In order to be successfully picked up by the init system, the init script's name must use the
-following format: ``S{run-level}{application-name}``. The run-level value should be between 1 and 99.
-The lower the value, the earlier it will be run in the system boot process.
+Python services should be started by using the `python` command to start the service as a
+background process.
 
 Installing Your Service
 -----------------------
@@ -156,8 +169,14 @@ Once you have finished service development, you should install the service in it
 your OBC.
 
 Custom services may either live in the user data partition or in the root file system.
+If the service interacts with core avionics or communications hardware, and is not expected to
+change after launch, we recommend including it in the root file system for recovery purposes.
+Only services included in the root file system are recovered automatically by the OS recovery
+process.
+Please refer to our :doc:`recovery architecture doc <../linux-docs/kubos-linux-recovery>` for
+more information about our OS recovery system.
 
-Either way, you will need to update your system's `config.toml` file in order to define the
+In either case, you will need to update your system's `config.toml` file in order to define the
 IP address and port for your service's GraphQL endpoint.
 
 User Data Partition
