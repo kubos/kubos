@@ -121,13 +121,17 @@ general, the physical "main" computer is referred to as the "host". The
 virtual machine inside of the host is referred to as the "guest".
 
 It is strongly recommended that you create your project in a directory
-on your host that is shared with your box when using a Linux or Mac OS
-host. By keeping your project on your host it will protect them in the
-event your box is destroyed or re-built.
+on your host that is shared with your box.
+By keeping your project on your host it will protect them in the event
+your box is destroyed or re-built.
 
-.. Note:: There is not a supported method of this for Windows hosts at
-  this time, as Windows does not support Linux symlinks. There is an
-  alternate method for editing files on the SDK listed :doc:`here. <../sdk-docs/windows-dev-environment>`
+.. note::
+    
+    Windows does not support Linux symlinks. If, for some reason, you need to create symlinks in
+    your project, you will need to do so in a directory which lives entirely within the VM.
+    
+    KubOS does not currently leverage any symlinks, so this should not be an issue for the average
+    developer's workflow.
 
 To mount a specific directory from your host, open the Vagrantfile
 located in the directory from the previous step and look for the

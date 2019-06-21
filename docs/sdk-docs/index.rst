@@ -61,7 +61,6 @@ Externally, the SDK is most useful for:
 This documentation section contains the various guides related to using the Kubos SDK:
 
     - :doc:`sdk-installing` - How to install the SDK onto your host machine
-    - :doc:`windows-dev-environment` - How to develop Kubos projects from a Windows-based host computer
     - :doc:`sdk-c` - A guide to using C with the Kubos SDK
     - :doc:`sdk-rust` - How to develop and run Kubos projects using Rust
     - :doc:`sdk-python` - How to develop and run Kubos projects using Python
@@ -71,7 +70,6 @@ This documentation section contains the various guides related to using the Kubo
     :hidden:
 
     sdk-installing
-    windows-dev-environment
     sdk-rust
     sdk-python
     sdk-c
