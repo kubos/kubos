@@ -1,8 +1,9 @@
 KubOS Architecture Overview
 ===========================
 
-This document is designed to give you a high level understanding of the philosophy behind KubOS, and how that philosophy is reflected in KubOS.
-If you want an in depth description of each of these components and their capability, check out the :doc:`KubOS Ecosystem <os-docs/index>` document, and the numerous pages it links to.
+This document is designed to give an introduction to the philosophy behind KubOS, and how that philosophy is reflected in KubOS.
+If you're looking to dive into things immediately, check out our :doc:`Getting Started <getting-started/index>` section!
+If you want an in depth description of each of the components in KubOS and their capability, check out the :doc:`KubOS Ecosystem <os-docs/index>` document, and the numerous pages it links to.
 
 What is KubOS?
 --------------
@@ -43,9 +44,63 @@ Since Linux is far more complex, it does come with inherent risks, which KubOS c
 U-boot is a widely used bootloader that manages the Linux kernel and the core of our system, making sure there are backups stored on board for failover in the event of a catastrophic event.
 This bootloader also gives us the capability to update the *entire operating system*, if a single process update is insufficient.
 
+Real Time and KubOS
+^^^^^^^^^^^^^^^^^^^
+
+Linux, inherently, is not a real time operating system (RTOS), and there are often strict timing requirements for spacecraft missions.
+Why then, did we still pursue Linux rather than an RTOS environment?
+How do we expect to tackle these requirements?
+
+How to go about addressing real time requirements on a spacecraft running KubOS depends on the actual requirement itself.
+A very brief summary of what a *hard* real time requirement is:
+
+- I need **X** thing to happen within **Y** amount of time after receiving **Z** signal.
+- I need to *guarantee* the response time will always be less than **Y**.
+
+A hard real time requirement is where both of these must be satisfied.
+
+Do you need *hard* real time performance?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Not all satellites have hard real time requirements, but rather they have general timing expectations.
+If you generally want a response within tens of milliseconds, all that requires is being a good citizen of Linux, limiting your complexity, and testing.
+
+You need hard real time. What's possible in Linux?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Real Time requirements are very possible to achieve directly within a Linux environment.
+In fact, millions of servers around the world with strict real time requirements are currently running Linux.
+But there are limits to what is achievable for hard real time within a Linux environment.
+Worst-case response time guarantees varies greatly depending on how much you've optimized Linux,
+but can be as low as **30 microseconds**.
+This is likely enough to satisfy most hard real time constraints.
+
+Still not enough. What can you do?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In the event your mission needs lower than Linux can achieve,
+or you don't want to introduce the complexity associate with the real time optimization,
+it's possible to pair your primary OBC with an FPGA or microprocessor.
+The dedicated device will satisfy the real time functionality for your specific task.
+This is already frequently implemented in microsat and nanosat missions with standalone ADCS modules containing commandable microprocessors running ADCS algorithms.
+There are several benefits for adopting this architecture:
+
+- Developing the rest of your mission software in a much easier development environment.
+- Leveraging existing KubOS (and Linux) tooling and functionality for the rest of your mission software.
+- Limiting the risk impact this highly complex task has on the rest of your system, effectively making a *hardware* microservice.
+- Verifying the hard real time performance is much simpler, as it has substantially less functionality to test.
+
 Development Environment
 -----------------------
 
-TODO: describe the general idea behind the development environment and it's benefits, but don't repeat the getting started.
+Writing flight software is not an easy task.
+The satellite software industry has arrived at the point where developer hours and development timelines are becoming more of a constraint than OBC capability.
+As a result, KubOS strives to enable developers to *quickly* produce *reliable* mission software, as *efficiently* as possible.
+These are the core priorities of our system, and we optimize our architecture for providing that experience, sacrificing some performance to make massive gains in reliability and developer productivity.
 
-TL;DR - If you use our super duper tools, we generally protect you from yourself, but you can do whatever you want if you need to.
+KubOS Ecosystem
+---------------
+
+Now that you understand what we've set out to do and why,
+you can check out our :doc:`KubOS Ecosystem <os-docs/index>` docs to dive into what we've built,
+or :doc:`get started developing <getting-started/index>`!
