@@ -24,9 +24,9 @@ Beaglebone Documentation
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../installation-docs/installing-linux-bbb` - Steps to install Kubos Linux
+-  :doc:`../../obc-docs/bbb/installing-linux-bbb` - Steps to install Kubos Linux
 -  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
--  :doc:`working-with-the-bbb` - Guide for interacting with BBB-specific features
+-  :doc:`../../obc-docs/bbb/working-with-the-bbb` - Guide for interacting with BBB-specific features
 
 Software Components
 -------------------
@@ -59,6 +59,11 @@ Kubos Linux Build Process
 If for some reason you want or need to modify and rebuild the Kubos Linux components, follow
 the steps in this section.
 
+.. note::
+
+    Kubos Linux should be built from within an instance of the Kubos SDK or some other native Linux
+    environment.
+
 .. _build-os-bbb:
 
 Build the OS Files
@@ -70,7 +75,7 @@ Build the OS Files
     VirtualBox does not support hard links in shared folders, which are crucial in order to complete
     the build.
     
-:doc:`SSH into a Kubos SDK box <../installation-docs/sdk-installing>`
+:doc:`SSH into a Kubos SDK box <../../sdk-docs/sdk-installing>`
 
 In order to build Kubos Linux, two components are needed:
 
@@ -158,6 +163,9 @@ The relevant files are:
    contains the upgrade partition and the ``kpack-base.itb`` file which is used for
    OS recovery. It has a disk signature of 0x41555820 ("AUX ").
 
+The `kubos-linux.tar.gz` and `aux-sd.tar.gz` files are the two final files which will be used to
+install Kubos Linux onto your target board.
+
 Changing the Output Toolchain Directory (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -173,4 +181,4 @@ Using Kubos Linux
 -----------------
 
 For information on how to create and run applications on your new Kubos Linux system, see the
-:doc:`working-with-the-bbb` guide.
+:doc:`../../obc-docs/bbb/working-with-the-bbb` guide.

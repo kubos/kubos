@@ -1,30 +1,45 @@
 Kubos Linux Recovery Architecture
 =================================
 
-Ideally, a space mission using Kubos Linux will run successfully until the end of its natural lifespan. However, space is unpredictable and systems can become corrupted. As a result, we've implemented a basic mechanism to help detect and recover from these random errors.
+Ideally, a space mission using Kubos Linux will run successfully until the end of its natural
+lifespan.
+However, space is unpredictable and systems can become corrupted. As a result, we've implemented a
+basic mechanism to help detect and recover from these random errors.
 
 Overview
 --------
 
-Each time the system attempts to boot, an internal counter is increased. On successful boot, a custom init script will reset this internal counter.
+Each time the system attempts to boot, an internal counter is increased. On successful boot, a
+custom init script will reset this internal counter.
 
-If the system has failed to boot twice already, then the custom Kubos recovery code is attempted. If the Kubos recovery steps fail, then the system attempts to boot into an alternate operating system instead. If that fails, then the system will stop attempting to load an OS and will instead just present the U-Boot CLI.
+If the system has failed to boot twice already, then the custom Kubos recovery code is attempted.
+If the Kubos recovery steps fail, then the system attempts to boot into an alternate operating
+system instead.
+If that fails, then the system will stop attempting to load an OS and will instead just present the
+U-Boot CLI.
 
 Environment Variables
 ---------------------
 
-There are several U-Boot environment variables that are used to track the state of a Kubos Linux system:
+There are several U-Boot environment variables that are used to track the state of a Kubos Linux
+system:
 
 * `bootcmd` - The usual set of commands that are used to boot into Kubos Linux.
-* `altbootcmd` - The alternate set of commands that are used if the system cannot successfully boot into Kubos Linux. They will be set up to attempt to boot into an alternate OS.
-* `recovery_available` - Indicates that recovery actions are available and should be taken, if necessary.
-* `bootlimit` - The number of bad boots allowed before the system attempts to use altbootcmd instead of bootcmd to boot.
+* `altbootcmd` - The alternate set of commands that are used if the system cannot successfully boot
+  into Kubos Linux. They will be set up to attempt to boot into an alternate OS.
+* `recovery_available` - Indicates that recovery actions are available and should be taken, if
+  necessary.
+* `bootlimit` - The number of bad boots allowed before the system attempts to use altbootcmd instead
+  of bootcmd to boot.
 * `bootcount` - The number of boots that have been attempted.
-* `kubos_curr_version` - The name of the kpack \*.itb file that the current Kubos Linux kernel and rootfs were loaded from.
-* `kubos_prev_version` - The name of the kpack \*.itb file that was previously used to load the Kubos Linux kernel and rootfs.
+* `kubos_curr_version` - The name of the kpack \*.itb file that the current Kubos Linux kernel and
+  rootfs were loaded from.
+* `kubos_prev_version` - The name of the kpack \*.itb file that was previously used to load the
+  Kubos Linux kernel and rootfs.
 * `kubos_curr_tried` - Indicates that reloading the current version has been attempted.
 
-The default values for these variables can be found in the configuration header file for each board located in the `U-Boot repo <https://github.com/kubos/uboot>`__ under the 'include/configs' directory.
+The default values for these variables can be found in the configuration header file for each board
+located in the `U-Boot repo <https://github.com/kubos/uboot>`__ under the 'include/configs' directory.
 
 Boot Processing Diagram
 -----------------------
@@ -43,9 +58,13 @@ The Kubos recovery process has three main components:
 * Attempt to load the previous version of Kubos Linux
 * Attempt to load the base version of Kubos Linux
 
-The boot count will not be increased again until this full recovery process is determined to have failed.
+The boot count will not be increased again until this full recovery process is determined to have
+failed.
 
-All of the files required for this process live in the board's 'upgrade' partition. The base version of Kubos Linux (kpack-base.itb) should be pre-loaded into the partition. The current and previous versions are loaded into the partition as part of the system upgrade process. These versions follow a natural process.
+All of the files required for this process live in the board's 'upgrade' partition.
+The base version of Kubos Linux (kpack-base.itb) should be pre-loaded into the partition.
+The current and previous versions are loaded into the partition as part of the system upgrade process.
+These versions follow a natural process.
 
 Brand new Kubos Linux system:
 
@@ -68,7 +87,9 @@ After the second system upgrade:
     kubos_curr_version = kpack-upgrade2.itb
     kubos_prev_version = kpack-upgrade1.itb
 
-Rolling back to a previous version of Kubos Linux uses the same mechanism as :doc:`upgrading to a new version <kubos-linux-upgrade>`. A kpack\*.itb file is broken into its components and then the kernel image is written to the boot partition and the rootfs image is written to the rootfs partition.
+Rolling back to a previous version of Kubos Linux uses the same mechanism as :doc:`upgrading to a new version <kubos-linux-upgrade>`.
+A kpack\*.itb file is broken into its components and then the kernel image is written to the boot
+partition and the rootfs image is written to the rootfs partition.
 
 .. warning::
 
@@ -79,7 +100,13 @@ Rolling back to a previous version of Kubos Linux uses the same mechanism as :do
 Manual Recovery
 ~~~~~~~~~~~~~~~
 
-If for some reason your Kubos Linux system boots after an upgrade but has introduced some non-critical issue (like an incompatibility with a user application), you can manually rollback to a previously installed version. Previous packages are not deleted once they have been loaded. As a result, you can simply specify which package you would like to boot into and then restart your system. List the contents of the '/upgrade' directory to see what files are available.
+If for some reason your Kubos Linux system boots after an upgrade but has introduced some
+non-critical issue (like an incompatibility with a user application), you can manually rollback to a
+previously installed version.
+Previous packages are not deleted once they have been loaded.
+As a result, you can simply specify which package you would like to boot into and then restart your
+system.
+List the contents of the '/upgrade' directory to see what files are available.
 
 From the Kubos Linux shell:
 
@@ -93,13 +120,21 @@ From the Kubos Linux shell:
 Alternate Boot
 --------------
 
-If the system has failed to boot more times than the 'bootlimit' value allows, the system will attempt to boot using the 'altbootcmd' environment variable.
-This variable contains all of the commands required to sanitize the current boot environment and then, if it has been set up, boot into an alternate operating system.
-Due to the low-portability of any commands that deal with memory, the exact format will change between boards (and potentially between customers), but should follow this rough format:
+If the system has failed to boot more times than the 'bootlimit' value allows, the system will
+attempt to boot using the 'altbootcmd' environment variable.
+This variable contains all of the commands required to sanitize the current boot environment and
+then, if it has been set up, boot into an alternate operating system.
+Due to the low-portability of any commands that deal with memory, the exact format will change
+between boards (and potentially between customers), but should follow this rough format:
 
--  Set the 'recovery\_available' variable to 0 (if we succesfully boot into an alternate OS, it should reset this back to 1. If we fail to boot into the alternate OS, then we should not keep attempting.)
--  Clear the 'bootcmd' variable. If 'recovery\_available' is 0 and 'bootcmd' is NULL, then the system won't attempt to boot into anything and will instead just go to the U-Boot CLI. The hope is that from here some manual troubleshooting and recovery can occur.
--  Save the U-Boot envars. The ``saveenv`` command saves any local environment variables changes to persistent storage.
+-  Set the 'recovery\_available' variable to 0 (if we succesfully boot into an alternate OS, it
+   should reset this back to 1. If we fail to boot into the alternate OS, then we should not keep
+   attempting.)
+-  Clear the 'bootcmd' variable. If 'recovery\_available' is 0 and 'bootcmd' is NULL, then the
+   system won't attempt to boot into anything and will instead just go to the U-Boot CLI. The hope
+   is that from here some manual troubleshooting and recovery can occur.
+-  Save the U-Boot envars. The ``saveenv`` command saves any local environment variables changes to
+   persistent storage.
 -  If an alternate OS has been setup on the board:
 
   -  Copy the alternate OS from persistent storage into SDRAM.
@@ -113,16 +148,31 @@ This is the default alternate boot value:
 
     altbootcmd=setenv recovery_available 0; setenv bootcmd; saveenv
 
+.. warning::
+
+    The system enters the alternate boot behavior when it cannot successfully boot into Linux.
+    The default behavior is to then stop attempting to boot. This means that there will be no chance
+    of your flight software running once this logic has been entered. If you think that your FSW may
+    spontaneously recover at some later point and do not have an alternate environment to boot into,
+    we recommend that you update this default behavior to simply keep attempting to boot like so::
+    
+        altbootcmd=setenv recovery_available 0; saveenv
+        
+
 Generic Alternate OS Setup
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The basic process for creating an alternate OS and loading it onto a board
 should be:
 
-* Build an application that is capable of running on the board. Pay attention to the SDRAM address that the application is configured to run from. Frequently, this is a static address (likely the very beginning of SDRAM), so the application must end up running from this location.
+* Build an application that is capable of running on the board. Pay attention to the SDRAM address
+  that the application is configured to run from. Frequently, this is a static address (likely the
+  very beginning of SDRAM), so the application must end up running from this location.
 * Load it into the appropriate persistent storage (NOR/NAND flash, SD card, etc)
-* Update the altbootcmd variable with the address to copy the application from, the address to copy the application to, and the length of the application.
-  Then add a command to trigger the boot process. This can be done from the U-Boot CLI with the ``setenv`` and ``saveenv`` commands, or from Kubos Linux with the ``fw_setenv`` command.
+* Update the altbootcmd variable with the address to copy the application from, the address to copy
+  the application to, and the length of the application.
+  Then add a command to trigger the boot process. This can be done from the U-Boot CLI with the
+  ``setenv`` and ``saveenv`` commands, or from Kubos Linux with the ``fw_setenv`` command.
 
 The updated altbootcmd might look something like this:
 
@@ -132,14 +182,21 @@ The updated altbootcmd might look something like this:
 
 This command will go through the default alternate boot commands and then:
 
-  - Copy 0x7000 bytes from address 0x10080000 (a permanent storage location) to address 0x20000000 (the beginning of SDRAM)
-  - Use the ``go`` command to attempt to boot from address 0x20000000 (``go`` is used for generic executables)
+  - Copy 0x7000 bytes from address 0x10080000 (a permanent storage location) to address 0x20000000
+    (the beginning of SDRAM)
+  - Use the ``go`` command to attempt to boot from address 0x20000000 (``go`` is used for generic
+    executables)
 
 U-Boot CLI
 ----------
 
 `U-Boot CLI Documentation <http://www.denx.de/wiki/DULG/UBootCommandLineInterface>`__
 
-The U-Boot CLI provides a few commands which may be helpful for manually diagnosing and recovering from system problems. It has a very limited functionality, but should be better than nothing.
+The U-Boot CLI provides a few commands which may be helpful for manually diagnosing and recovering
+from system problems.
+It has a very limited functionality, but should be better than nothing.
 
-If you want to avoid booting into an operating system for any reason and instead want to interact with the U-Boot CLI, you can abort the boot by creating a serial connection and then holding down any key while powering the board. This action will not increase the boot count.
+If you want to avoid booting into an operating system for any reason and instead want to interact
+with the U-Boot CLI, you can abort the boot by creating a serial connection and then holding down
+any key while powering the board.
+This action will not increase the boot count.
