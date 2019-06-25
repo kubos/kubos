@@ -3,7 +3,7 @@ Setting up a Dev Environment in Windows
 
 Developing for a Linux-based target system from within a Windows-based host machine is difficult.
 The way Windows has architected its file systems and behaviors is fundamentally different from
-Linux, making it impossible to run KubOS services and applications locally.
+Linux, making it extremely difficult to run KubOS services and applications locally.
 
 As a result, we recommend that Windows users develop from within a Linux VM.
 We provide the Kubos SDK as a pre-built VM which comes with all the tooling needed to create, build,
@@ -105,3 +105,15 @@ In this case, Windows Firewall may need to be updated to allow this traffic.
     Then click "Finish" to finalize and activate the new rule.
 
 .. image:: ../images/inbound_rule_name.png
+
+Next Steps
+----------
+
+Now that your environment is set up, you can get started developing your first KubOS project.
+
+We recommend that you look at the following documents next:
+
+- :doc:`using-python`
+- :doc:`using-rust`
+- :doc:`local-services`
+- :doc:`../tutorials/index`
