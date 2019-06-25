@@ -3,7 +3,7 @@ KubOS Architecture Overview
 
 This document is designed to give an introduction to the philosophy behind KubOS, and how that philosophy is reflected in KubOS.
 If you're looking to dive into things immediately, check out our :doc:`Getting Started <getting-started/index>` section!
-If you want an in depth description of each of the components in KubOS and their capability, check out the :doc:`KubOS Ecosystem <os-docs/index>` document, and the numerous pages it links to.
+If you want a description of each of the components in KubOS and their capability, check out the :doc:`KubOS Ecosystem <os-docs/index>` document, and the numerous pages it links to.
 
 What is KubOS?
 --------------
@@ -56,7 +56,7 @@ How to go about addressing real-time requirements on a spacecraft running KubOS 
 A very brief summary of what a *hard* real-time requirement is:
 
 - I need **X** thing to happen within **Y** amount of time after receiving **Z** signal.
-- I need to *guarantee* the response time will always be less than **Y**.
+- I need to *guarantee* the response time will *always* be less than **Y**.
 
 A hard real-time requirement is where both of these must be satisfied.
 
@@ -64,7 +64,8 @@ Do you need *hard* real-time performance?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Not all satellites have hard real-time requirements, but rather they have general timing expectations.
-If you want a response within tens of milliseconds, this is already accomplished with normal Linux usage. Limiting code complexity can help further reduce this latency.
+If you want a response within tens of milliseconds, this is already accomplished with normal Linux usage.
+Limiting code complexity can help further reduce this latency.
 
 You need hard real-time. What's possible in Linux?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,6 +76,7 @@ But there are limits to what is achievable for hard real-time within a Linux env
 Worst-case response time guarantees varies greatly depending on how much you've optimized Linux,
 but can be as low as **30 microseconds**.
 This is likely enough to satisfy most hard real-time constraints.
+`Come talk to us <slack.kubos.com>`__ about how to achieve your hard real-time requirement in KubOS!
 
 Still not enough. What can you do?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -101,5 +103,5 @@ As a result, KubOS strives to enable developers to *quickly* produce *reliable* 
 To uphold these core priorities, KubOS focuses on enabling mission developers to write small, standalone applications that leverage the microservices and operating system we provide.
 This allows applications to be understood, revised, updated, and tested much more easily, as the total "code change" per mission ends up being only these small applications.
 
-There is obviously much, much more to what applications and services can do and how they interact, and we suggest diving into the :doc:`KubOS Ecosystem <os-docs/index>` documentation for more information! 
+There is obviously much, much more to what applications and services can do and how they interact, and we suggest diving into the :doc:`KubOS Ecosystem <os-docs/index>` documentation for more information!
 Or, now that you understand what we've set out to do and why, you can :doc:`get started developing <getting-started/index>`!
