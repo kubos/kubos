@@ -111,7 +111,7 @@ or bugs, see what you can work on, and to give feedback.
     Kubos SDK <sdk-docs/index>
     Contributing to KubOS <contributing/index>
     Changelog <changelog>
-    FAQs <faq-troubleshooting>
+    FAQs <faq-troubleshooting>        
 
 Indices and tables
 ------------------
