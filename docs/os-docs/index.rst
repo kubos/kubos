@@ -1,35 +1,45 @@
 KubOS Ecosystem
 ===============
 
-TODO: Title
+The KubOS system is designed to take care of every aspect of a satellite’s flight software.
 
-TODO: TOC formatting
+Rather than operating as a single, monolithic entity, KubOS is comprised of a series of independent,
+yet interoperating components.
 
 .. figure:: ../images/architecture_stack.png
     :align: center
+    
+- Mission applications control and execute the logic necessary to accomplish mission goals
+- Services expose hardware and system functionality with a controlled and uniform interface
+- Kubos Linux provides the base operating system and the drivers needed to communicate with connected
+  hardware devices
+
+Information about how to develop and tie all of these components together for a particular mission
+can be found in the :doc:`mission development <../mission-dev/index>` section.
 
 .. _app-docs:
 
-Applications
-------------
-
-TODO: Expand?
-
-- What do apps do?
-- What apps do I need?
-- First time user example app walkthrough
-- App API walkthroughs
-- How to write apps in other languages
-
+Mission Applications
+--------------------
 
 Applications are user-level programs which can either be run as one-off executions or continuous
 processes.
 
-Mission applications include anything that makes decisions or governs autonomy on the satellite,
-as well as any other applications designed to address mission-specific concerns.
+*Mission* applications are anything that governs the behavior of the satellite.
+They govern state management, accomplish scripted tasks, monitor on-board behavior, and are
+generally the brains of the system.
 
-More details about developing applications and how they can be used can be found in the
-:doc:`mission development <../mission-dev/index>` section.
+Each application is typically dedicated to a certain mode or isolated task the satellite is supposed
+to accomplish to keep them lightweight and portable.
+They can be simple, such as a telemetry beacon app, or complex, such as a payload operations app.
+
+Details about how to get started developing applications can be found in the
+:doc:`mission app dev guide <apps/app-guide>`.
+
+If you prefer to learn by doing, check out our :doc:`tutorials <../tutorials/index>` section.
+
+For more information about what applications will need to be developed in order to accomplish all
+the required mission logic, check out our :doc:`../mission-dev/mission-needs` doc.
 
 .. toctree::
     :maxdepth: 1
@@ -47,8 +57,24 @@ Kubos services are defined as any persistent process that is used to interact wi
 Services rarely make decisions, but will allow the user to accomplish typical flight software tasks
 such as telemetry storage, file management, shell access, and hardware interaction.
 
+All services expose their functionality via HTTP endpoints which accept :doc:`GraphQL <services/graphql>`
+requests and return JSON responses.
+This behavior allows client programs which wish to communicate with a service to be written in any
+language.
+
+There are three distinct kinds of services:
+
+- Core services, as the name implies, provide the core functionality of the system. They are
+  OBC-independent and are automatically included in KubOS. These services include things like
+  telemetry management, OBC monitoring, and space-ground communication.
+- Hardware services expose the functionality of a connected hardware device (ADCS, GPS, etc) to the
+  rest of the bus. They should be re-usable between missions. KubOS comes with support for a certain
+  selection of pre-built hardware services.
+- Payload services are hardware services which have been custom designed for a specific mission's
+  payload hardware. They are not intended to be re-used between missions.
+
 .. toctree::
-    :maxdepth: 1
+    :hidden:
 
     Core Services <services/core-services>
     Hardware Services <services/hardware-services>
@@ -69,18 +95,13 @@ It focuses on including only drivers that are useful for space applications (eg.
 I2C and SPI, rather than display drivers) and multi-layer system validation and
 recovery logic.
 
-Kubos Linux projects are built into binaries which will run as Linux user space
-applications.
-
-Installation Docs
-~~~~~~~~~~~~~~~~~
-
-- :doc:`Installing Kubos Linux on Beaglebone Black <../obc-docs/bbb/installing-linux-bbb>`
-- :doc:`Installing Kubos Linux on ISIS-OBC <../obc-docs/iobc/installing-linux-iobc>`
-- :doc:`Installing Kubos Linux on Pumpkin MBM2 <../obc-docs/mbm2/installing-linux-mbm2>`
+Guides for installing and interacting with Kubos Linux on a target OBC can be found in the
+:doc:`../obc-docs/index` section.
 
 General Guides
 ~~~~~~~~~~~~~~
+
+These guides will walk you through the general system behaviors.
 
 .. toctree::
     :maxdepth: 1
@@ -88,15 +109,6 @@ General Guides
     Using Kubos Linux <linux-docs/using-kubos-linux>
     Logging <linux-docs/logging>
     Process Monitoring <linux-docs/monitoring>
-
-.. _system-guides:
-
-System Guides
-~~~~~~~~~~~~~
-
-- :doc:`Working with the Beaglebone Black <../obc-docs/bbb/working-with-the-bbb>`
-- :doc:`Working with the iOBC <../obc-docs/iobc/working-with-the-iobc>`
-- :doc:`Working with the Pumpkin MBM2 <../obc-docs/mbm2/working-with-the-mbm2>`
 
 .. _sysadmin:
 
@@ -113,3 +125,11 @@ SysAdmin Docs
     Building Kubos Linux for the ISIS-OBC <linux-docs/kubos-linux-on-iobc>
     Building Kubos Linux for Pumpkin MBM2 <linux-docs/kubos-linux-on-mbm2>
     Configuring KubOS <linux-docs/configuring-kubos>
+    
+U-Boot
+------
+
+U-Boot is the bootloader which is used to load Kubos Linux from permanent storage into RAM at boot
+time.
+It is also responsible for processing operating system :doc:`upgrades <linux-docs/kubos-linux-upgrade>`
+and :doc:`recovery <linux-docs/kubos-linux-recovery>`, when necessary.
