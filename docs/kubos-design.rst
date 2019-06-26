@@ -35,7 +35,7 @@ KubOS uses a combination of Linux and U-boot to make up its operating system.
 Linux is a far more abstract OS than is typically used for satellite software,
 which does mean it is more resource intensive.
 But, as satellite on-board computers have become substantially more capable,
-the some (of the many) benefits of Linux start to become more important:
+some (of the many) benefits of Linux start to become more important:
 
 - Services are completely portable between any KubOS supported OBC, requiring no code changes.
 - Enables the ability to leverage the microservice architecture mentioned above, as it has the tools we need for process boundaries and controls.
@@ -45,13 +45,13 @@ the some (of the many) benefits of Linux start to become more important:
 Since Linux is far more complex, it does come with inherent risks, which KubOS combats by pairing it with U-boot.
 U-boot is a widely-used bootloader that manages the Linux kernel and the core of our system,
 capable of automatically failing over to stored backups should a catastrophic event occur.
-This bootloader also gives us the capability to update the *entire operating system*, if a single process update is insufficient.
+This bootloader also gives us the capability to update the entire operating system *during flight*, if a single process update is insufficient.
 
 Real-Time and KubOS
 ^^^^^^^^^^^^^^^^^^^
 
 Linux, inherently, is not a real-time operating system (RTOS), and there are often strict timing requirements for spacecraft missions.
-Why then, did we still pursue Linux rather than an RTOS environment?
+Why then did we still pursue Linux rather than an RTOS environment?
 How do we expect to tackle these requirements?
 
 How to go about addressing real-time requirements on a spacecraft running KubOS depends on the actual requirement itself.
@@ -75,7 +75,7 @@ You need hard real-time. What's possible in Linux?
 Real-time requirements are very possible to achieve directly within a Linux environment.
 In fact, millions of servers around the world with strict real-time requirements are currently running Linux.
 But there are limits to what is achievable for hard real-time within a Linux environment.
-Worst-case response time guarantees varies greatly depending on how much you've optimized Linux,
+Worst-case response time guarantees vary greatly depending on how much you've optimized Linux,
 but can be as low as **30 microseconds**.
 This is likely enough to satisfy most hard real-time constraints.
 `Come talk to us <slack.kubos.com>`__ about how to achieve your hard real-time requirement in KubOS!
