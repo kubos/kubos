@@ -1,11 +1,7 @@
 Under the Hood of KubOS
 =======================
 
-TODO: Flesh this out. There are more things to dive into than just the APIs
-
 These docs give a more detailed examination of the inner workings of KubOS
-
-TODO: The shell and file protocol are buried within the API docs. Maybe pull them up to this top level
 
 APIs
 ----
@@ -15,7 +11,7 @@ Kubos provides a variety of APIs to help with the development of mission softwar
   - :doc:`Device Interfaces <apis/device-api/index>` - APIs for external devices (ex. radio), built on top of the Kubos HAL
   - :doc:`OBC APIs <apis/obc-api/index>` - APIs for features which are internal to a particular OBC
   - :doc:`Kubos HAL <apis/kubos-hal/index>` - Hardware interface abstractions (I2C, SPI, etc)
-  - :doc:`Kubos Libraries <apis/kubos-libs/index>` - Non-hardware libraries
+  - :doc:`Kubos Libraries <apis/kubos-libs>` - Non-hardware libraries
 
 .. toctree::
     :caption: APIs
@@ -26,6 +22,22 @@ Kubos provides a variety of APIs to help with the development of mission softwar
     OBC APIs <apis/obc-api/index>
     Kubos HAL <apis/kubos-hal/index>
     Kubos Libraries <apis/kubos-libs/index>
+    
+Protocols
+---------
+
+Intra-satellite communication is generally handled using HTTP over TCP/IP, with the packet payloads
+being structured as :doc:`GraphQL <../os-docs/service/graphql>` requests or JSON responses.
+
+For procedures which require space-ground communication, special care has been taken to craft
+protocols which can handle higher rates of packet loss and function well in the more asynchronous
+comms environment.
+
+.. toctree::
+    :maxdepth: 1
+
+    File Protocol Overview <protocols/file-protocol>
+    Shell Protocol Overview <protocols/shell-protocol>
 
 .. _sysadmin:
 
@@ -46,3 +58,16 @@ should be included in the OS' root file system.
     klb/kubos-linux-on-bbb
     klb/kubos-linux-on-iobc
     klb/kubos-linux-on-mbm2
+    
+Design Decisions
+----------------
+
+When developing new features for KubOS, we frequently have to make a choice between two or more
+tools/libraries/frameworks which will most closely give us our desired characteristics.
+
+The design decisions doc give a quick summary of how we have decided on our particular toolset.
+
+.. toctree::
+    :maxdepth: 2
+    
+    design-decisions
