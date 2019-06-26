@@ -26,3 +26,23 @@ Kubos provides a variety of APIs to help with the development of mission softwar
     OBC APIs <apis/obc-api/index>
     Kubos HAL <apis/kubos-hal/index>
     Kubos Libraries <apis/kubos-libs/index>
+
+.. _sysadmin:
+
+Kubos Linux
+-----------
+
+While Kubos does create and distribute official releases of Kubos Linux, users are free to create
+their own builds.
+This allows KubOS to be easily customized on a per-mission basis.
+
+Users will most likely want to create their own builds when they create new hardware services which
+should be included the OS' root file system.
+
+.. toctree::
+    :maxdepth: 1
+    
+    klb/configuring-kubos
+    klb/kubos-linux-on-bbb
+    klb/kubos-linux-on-iobc
+    klb/kubos-linux-on-mbm2

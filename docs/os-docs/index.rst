@@ -74,7 +74,7 @@ There are three distinct kinds of services:
   payload hardware. They are not intended to be re-used between missions.
 
 .. toctree::
-    :hidden:
+    :maxdepth: 1
 
     Core Services <services/core-services>
     Hardware Services <services/hardware-services>
@@ -95,41 +95,27 @@ It focuses on including only drivers that are useful for space applications (eg.
 I2C and SPI, rather than display drivers) and multi-layer system validation and
 recovery logic.
 
+Official Kubos Linux installation files can be found in the
+`kubos-linux-build releases <https://github.com/kubos/kubos-linux-build/releases>`__ page.
+
 Guides for installing and interacting with Kubos Linux on a target OBC can be found in the
 :doc:`../obc-docs/index` section.
 
-General Guides
-~~~~~~~~~~~~~~
+Information about creating a custom Kubos Linux build can be found in our :ref:`Under the Hood <sysadmin>`
+section.
 
-These guides will walk you through the general system behaviors.
-
-.. toctree::
-    :maxdepth: 1
-
-    Using Kubos Linux <linux-docs/using-kubos-linux>
-    Logging <linux-docs/logging>
-    Process Monitoring <linux-docs/monitoring>
-
-.. _sysadmin:
-
-SysAdmin Docs
-~~~~~~~~~~~~~
+Tightly coupled with Kubos Linux is U-Boot, our bootloader of choice.
+U-Boot is responsible for loading Kubos Linux from permanent storage into RAM at boot
+time.
+It is also responsible for processing operating system :doc:`upgrades <linux-docs/kubos-linux-upgrade>`
+and :doc:`recovery <linux-docs/kubos-linux-recovery>`, when necessary.
 
 .. toctree::
     :maxdepth: 1
 
     Kubos Linux Overview <linux-docs/kubos-linux-overview>
+    Using Kubos Linux <linux-docs/using-kubos-linux>
+    Logging <linux-docs/logging>
+    Process Monitoring <linux-docs/monitoring>
     Kubos Linux Upgrades <linux-docs/kubos-linux-upgrade>
     Kubos Linux Recovery <linux-docs/kubos-linux-recovery>
-    Building Kubos Linux for the Beaglebone Black <linux-docs/kubos-linux-on-bbb>
-    Building Kubos Linux for the ISIS-OBC <linux-docs/kubos-linux-on-iobc>
-    Building Kubos Linux for Pumpkin MBM2 <linux-docs/kubos-linux-on-mbm2>
-    Configuring KubOS <linux-docs/configuring-kubos>
-    
-U-Boot
-------
-
-U-Boot is the bootloader which is used to load Kubos Linux from permanent storage into RAM at boot
-time.
-It is also responsible for processing operating system :doc:`upgrades <linux-docs/kubos-linux-upgrade>`
-and :doc:`recovery <linux-docs/kubos-linux-recovery>`, when necessary.
