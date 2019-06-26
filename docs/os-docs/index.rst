@@ -66,10 +66,11 @@ There are three distinct kinds of services:
 
 - Core services, as the name implies, provide the core functionality of the system. They are
   OBC-independent and are automatically included in KubOS. These services include things like
-  telemetry management, OBC monitoring, and space-ground communication.
-- Hardware services expose the functionality of a connected hardware device (ADCS, GPS, etc) to the
-  rest of the bus. They should be re-usable between missions. KubOS comes with support for a certain
-  selection of pre-built hardware services.
+  OBC monitoring, telemetry management, delay-tolerant file transfer and shell access, and
+  application management.
+- Hardware services expose the functionality of a connected hardware device (ADCS, GPS, radio, etc)
+  to the rest of the bus. They should be re-usable between missions. KubOS comes with support for a
+  certain selection of pre-built hardware services.
 - Payload services are hardware services which have been custom designed for a specific mission's
   payload hardware. They are not intended to be re-used between missions.
 

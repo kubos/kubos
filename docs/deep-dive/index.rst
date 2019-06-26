@@ -37,7 +37,7 @@ their own builds.
 This allows KubOS to be easily customized on a per-mission basis.
 
 Users will most likely want to create their own builds when they create new hardware services which
-should be included the OS' root file system.
+should be included in the OS' root file system.
 
 .. toctree::
     :maxdepth: 1
