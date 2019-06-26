@@ -1,7 +1,7 @@
-KubOS Architecture Overview
-===========================
+KubOS Design
+============
 
-This document is designed to give an introduction to the philosophy behind KubOS, and how that philosophy is reflected in KubOS.
+This document gives an introduction to the philosophy behind KubOS, and how that philosophy is reflected in the design of KubOS.
 If you're looking to dive into things immediately, check out our :doc:`Getting Started <getting-started/index>` section!
 If you want a description of each of the components in KubOS and their capability, check out the :doc:`KubOS Ecosystem <os-docs/index>` document, and the numerous pages it links to.
 
