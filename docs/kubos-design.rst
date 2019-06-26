@@ -90,7 +90,7 @@ The dedicated device will satisfy the real-time functionality for your specific 
 This is already frequently implemented in microsat and nanosat missions with standalone ADCS modules containing commandable microprocessors running ADCS algorithms.
 There are several benefits for adopting this architecture:
 
-- Developing the rest of your mission software in a much easier development environment.
+- Developing the non real-time components of your mission software in a much easier development environment.
 - Leveraging existing KubOS (and Linux) tooling and functionality for the rest of your mission software.
 - Limiting the risk impact this highly complex task has on the rest of your system, effectively making a *hardware* microservice.
 - Verifying the hard real-time performance is much simpler, as it has substantially less functionality to test.
