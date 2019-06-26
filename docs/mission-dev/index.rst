@@ -26,7 +26,9 @@ In KubOS, services are used primarily to expose functionality of underlying hard
 They should be expected to only perform a minimal amount of decision-making (for example, kicking a watchdog at a pre-defined interval).
 Instead, we rely on :ref:`mission applications <app-docs>` to handle the decision making for the mission.
 Kubos has some mission applications that are open sourced in the repo, and others that we can offer to aid in mission development.
-We've listed the typical necessary applications in the :doc:`mission needs doc. <mission-needs>`
+We've listed the typical necessary applications:
+
+- :doc:`Mission Needs <mission-needs>`
 
 .. toctree::
     :hidden:
@@ -65,7 +67,10 @@ Kubos offers `SLAs <https://www.kubos.com/kubos/>`__ to aid in the augmentation 
 -------------------
 
 You have all the hardware integrated, you have all the required mission applications, and you've tested everything to your heart's content...you're ready for launch.
-We've created a checklist for the :doc:`likely steps <flight-ready>` to the prepare the software to be launch-ready.
+We've created a checklist for the likely steps to the prepare the software to be launch-ready:
+
+- :doc:`Flight Ready <flight-ready>`
+
 Please note that this is only a recommended list of steps, and will definitely change depending on your launch provider, mission requirements, and hardware configuration.
 
 .. toctree::

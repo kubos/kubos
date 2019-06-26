@@ -62,7 +62,9 @@ Deployment
 ----------
 
 The deployment application should handle the required sequence during the initial deployment from the launch vehicle.
-We have a :doc:`dedicated guide <deployment>` for the recommended behavior of this application.
+We've provided a guide to the recommended behavior of this application:
+
+- :doc:`dedicated guide <deployment>`
 
 Kubos offers configurable deployment applications for customer missions, as well as SLAs for helping develop and/or reviewing your mission's deployment application.
 You can reach out to us on `Slack <https://slack.kubos.co>`__ or through the `website <https://www.kubos.com/kubos/>`__ for more information about these.

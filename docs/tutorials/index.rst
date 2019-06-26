@@ -13,33 +13,33 @@ mission logic.
 
     @startuml
     left to right direction
-    
+
     actor User
-    
+
     folder "Host Machine" {
         [kubos-proj1] as proj1
         [kubos-proj2] as proj2
     }
-    
+
     node "OBC - KubOS" {
         frame "App Registry" {
             cloud "kubos-proj2" as application
             cloud "App1"
             cloud "App2"
         }
-        
+
         rectangle "Process Monitor Service" as monitor
         rectangle "Telemetry Database Service" as telemdb
         rectangle "Hardware Service #1" as hw1
-    } 
-    
+    }
+
     User -> proj1
     proj2 -> application
     User -> proj2
     application ..> monitor
     application ..> telemdb
     application ..> hw1
-    
+
     @enduml
 
 
@@ -55,10 +55,10 @@ data and then storing that data into the telemetry database.
 
 .. toctree::
     :maxdepth: 1
-    
+
     Creating Your First KubOS Project <first-project>
     Creating Your First Mission Application <first-mission-app>
-    
+
 System Interaction Tutorials
 ----------------------------
 
@@ -68,7 +68,7 @@ There is no coding required for these actions, however some scripting may used f
 
 .. toctree::
     :maxdepth: 1
-    
+
     Registering an Application <app-register>
     Transferring Files <file-transfer>
     Querying the System <querying-telemetry>
@@ -81,7 +81,7 @@ Important system tutorials which should be approached after mastering basic syst
 
 .. toctree::
     :maxdepth: 1
-    
+
     Creating Your Communications Service <comms-service>
 
 Other Resources
@@ -90,7 +90,7 @@ Other Resources
 TODO: Re-work
 These other docs give more information about various components of KubOS and the Kubos ecosystem:
 
-    - :doc:`KubOS Architecture Overview <../architecture-overview>`
+    - :doc:`KubOS Design <../kubos-design>`
     - :doc:`Using Rust with the Kubos SDK <../sdk-docs/sdk-rust>`
     - :doc:`Kubos Services <../services/index>`
     - :doc:`Mission Application Development Guide <../app-docs/app-guide>`

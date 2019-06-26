@@ -32,13 +32,15 @@ Operating System
 
 KubOS uses a combination of Linux and U-boot to make up its operating system.
 
-Linux is a far more abstract OS than is typically used for satellite software, which does mean it is more resource intensive.
-But, as satellite on-board computers have become substantially more capable, the some (of the many) benefits of Linux start to become more important:
+Linux is a far more abstract OS than is typically used for satellite software,
+which does mean it is more resource intensive.
+But, as satellite on-board computers have become substantially more capable,
+the some (of the many) benefits of Linux start to become more important:
 
-- Services are completely portable between any KubOS supported OBC, requiring no code changes
-- Enables the ability to leverage the microservice architecture mentioned above, as it has the tools we need for process boundaries and controls
-- Leverage Linux's massive ecosystem of software, tooling, and experienced developers
-- Mature software already running on billions of systems
+- Services are completely portable between any KubOS supported OBC, requiring no code changes.
+- Enables the ability to leverage the microservice architecture mentioned above, as it has the tools we need for process boundaries and controls.
+- Leverage Linux's massive ecosystem of software, tooling, and experienced developers.
+- Mature software already running on billions of systems.
 
 Since Linux is far more complex, it does come with inherent risks, which KubOS combats by pairing it with U-boot.
 U-boot is a widely-used bootloader that manages the Linux kernel and the core of our system,
@@ -61,7 +63,7 @@ A very brief summary of what a *hard* real-time requirement is:
 A hard real-time requirement is where both of these must be satisfied.
 
 Do you need *hard* real-time performance?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Not all satellites have hard real-time requirements, but rather they have general timing expectations.
 If you want a response within tens of milliseconds, this is already accomplished with normal Linux usage.
