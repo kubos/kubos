@@ -18,6 +18,12 @@ system instead.
 If that fails, then the system will stop attempting to load an OS and will instead just present the
 U-Boot CLI.
 
+If, for some reason, the internal counter cannot be increased, the recovery system simply fails to
+take any action.
+
+The recovery system will also be triggered if U-Boot detects that the Kubos Linux kernel file has
+become corrupted, no matter what state the boot counter is in.
+
 Environment Variables
 ---------------------
 
@@ -125,7 +131,7 @@ attempt to boot using the 'altbootcmd' environment variable.
 This variable contains all of the commands required to sanitize the current boot environment and
 then, if it has been set up, boot into an alternate operating system.
 Due to the low-portability of any commands that deal with memory, the exact format will change
-between boards (and potentially between customers), but should follow this rough format:
+between boards (and potentially between missions), but should follow this rough format:
 
 -  Set the 'recovery\_available' variable to 0 (if we succesfully boot into an alternate OS, it
    should reset this back to 1. If we fail to boot into the alternate OS, then we should not keep

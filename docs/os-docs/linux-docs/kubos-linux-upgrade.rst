@@ -164,9 +164,11 @@ For example:
 ::
 
     $ ./kubos-package.sh -t beaglebone-black -i /home/test/custom.its -v 2.0
+    
+.. todo::
 
-Distribute the Package
-~~~~~~~~~~~~~~~~~~~~~~
-
-There isn't currently a central storage location or procedure for upgrade packages.
-This section should be upgraded once something has been implemented.
+    Distribute the Package
+    ~~~~~~~~~~~~~~~~~~~~~~
+    
+    There isn't currently a central storage location or procedure for upgrade packages.
+    This section should be upgraded once something has been implemented.
