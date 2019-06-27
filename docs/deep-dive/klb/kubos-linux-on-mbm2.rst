@@ -7,7 +7,7 @@ Overview
 This supplementary document covers specific features and components of Kubos Linux for the
 Pumpkin Motherboard Module 2.
 
-The :doc:`kubos-linux-overview` doc covers the major components of Kubos Linux.
+The :doc:`../../os-docs/linux-docs/kubos-linux-overview` doc covers the major components of Kubos Linux.
 
 Additionally, this document covers the steps required in order to build Kubos Linux.
 
@@ -24,9 +24,9 @@ each of the hardware components are and how they are connected.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../installation-docs/installing-linux-mbm2` - Steps to install Kubos Linux
--  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
--  :doc:`working-with-the-mbm2` - Guide for interacting with MBM2-specific features
+-  :doc:`../../obc-docs/mbm2/installing-linux-mbm2` - Steps to install Kubos Linux
+-  :doc:`../../os-docs/linux-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`../../obc-docs/mbm2/working-with-the-mbm2` - Guide for interacting with MBM2-specific features
 
 Software Components
 -------------------
@@ -70,7 +70,7 @@ Build the OS Files
     VirtualBox does not support hard links in shared folders, which are crucial in order to complete
     the build.
 
-:doc:`SSH into a Kubos SDK box <../installation-docs/sdk-installing>`
+:doc:`SSH into a Kubos SDK box <../../sdk-docs/sdk-installing>`
 
 In order to build Kubos Linux, two components are needed:
 

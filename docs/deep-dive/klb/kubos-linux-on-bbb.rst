@@ -6,7 +6,7 @@ Overview
 
 This supplementary document covers specific features and components of Kubos Linux for the Beaglebone Black.
 
-The :doc:`kubos-linux-overview` doc covers the major components of Kubos Linux.
+The :doc:`../../os-docs/linux-docs/kubos-linux-overview` doc covers the major components of Kubos Linux.
 
 Additionally, this document covers the steps required in order to build Kubos Linux.
 
@@ -24,9 +24,9 @@ Beaglebone Documentation
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../installation-docs/installing-linux-bbb` - Steps to install Kubos Linux
--  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
--  :doc:`working-with-the-bbb` - Guide for interacting with BBB-specific features
+-  :doc:`../../obc-docs/bbb/installing-linux-bbb` - Steps to install Kubos Linux
+-  :doc:`../../os-docs/linux-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`../../obc-docs/bbb/working-with-the-bbb` - Guide for interacting with BBB-specific features
 
 Software Components
 -------------------
@@ -70,7 +70,7 @@ Build the OS Files
     VirtualBox does not support hard links in shared folders, which are crucial in order to complete
     the build.
     
-:doc:`SSH into a Kubos SDK box <../installation-docs/sdk-installing>`
+:doc:`SSH into a Kubos SDK box <../../sdk-docs/sdk-installing>`
 
 In order to build Kubos Linux, two components are needed:
 
@@ -173,4 +173,4 @@ Using Kubos Linux
 -----------------
 
 For information on how to create and run applications on your new Kubos Linux system, see the
-:doc:`working-with-the-bbb` guide.
+:doc:`../../obc-docs/bbb/working-with-the-bbb` guide.

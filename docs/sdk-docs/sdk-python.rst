@@ -26,7 +26,7 @@ There are currently two ways to add Python scripts and libraries to a system run
       and add additional Python packages to the `package/python` directory
     - You can see our current system packages and how they are structured
       `here <https://github.com/kubos/kubos-linux-build/tree/master/package/python>`__.
-    - See the :ref:`SysAdmin docs <sysadmin>` for more information on
+    - See the :ref:`custom Kubos Linux docs <custom-klb>` for more information on
       building Kubos Linux.
 
 - Add individual Python files on the fly by transferring them to an attached hardware target

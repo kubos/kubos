@@ -6,7 +6,7 @@ Overview
 
 This supplementary document covers specific features and components of Kubos Linux for the ISIS-OBC.
 
-The :doc:`kubos-linux-overview` doc covers the major components of Kubos Linux.
+The :doc:`../../os-docs/linux-docs/kubos-linux-overview` doc covers the major components of Kubos Linux.
 
 Additionally, this document covers the steps required in order to build Kubos Linux.
 
@@ -24,9 +24,9 @@ installed to support them.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../installation-docs/installing-linux-iobc` - Steps to install Kubos Linux on an iOBC
--  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
--  :doc:`working-with-the-iobc` - Guide for interacting with iOBC-specific features
+-  :doc:`../../obc-docs/iobc/installing-linux-iobc` - Steps to install Kubos Linux on an iOBC
+-  :doc:`../../os-docs/linux-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`../../obc-docs/iobc/working-with-the-iobc` - Guide for interacting with iOBC-specific features
 
 Software Components
 -------------------
@@ -71,7 +71,7 @@ Build the OS Files
     VirtualBox does not support hard links in shared folders, which are crucial in order to complete
     the build.
     
-:doc:`SSH into a Kubos SDK box <../installation-docs/sdk-installing>`
+:doc:`SSH into a Kubos SDK box <../../sdk-docs/sdk-installing>`
 
 In order to build Kubos Linux, two components are needed:
 

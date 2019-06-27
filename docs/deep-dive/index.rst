@@ -27,7 +27,7 @@ Kubos provides a variety of APIs to help with the development of mission softwar
     Kubos HAL <apis/kubos-hal/index>
     Kubos Libraries <apis/kubos-libs/index>
 
-.. _sysadmin:
+.. _custom-klb:
 
 Kubos Linux
 -----------

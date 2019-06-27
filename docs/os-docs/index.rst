@@ -70,7 +70,7 @@ There are three distinct kinds of services:
   application management.
 - Hardware services expose the functionality of a connected hardware device (ADCS, GPS, radio, etc)
   to the rest of the bus. They should be re-usable between missions. KubOS comes with support for a
-  certain selection of pre-built hardware services.
+  certain selection of :ref:`pre-built hardware services <supported-hardware>`.
 - Payload services are hardware services which have been custom designed for a specific mission's
   payload hardware. They are not intended to be re-used between missions.
 
@@ -102,7 +102,7 @@ Official Kubos Linux installation files can be found in the
 Guides for installing and interacting with Kubos Linux on a target OBC can be found in the
 :doc:`../obc-docs/index` section.
 
-Information about creating a custom Kubos Linux build can be found in our :ref:`Under the Hood <sysadmin>`
+Information about creating a custom Kubos Linux build can be found in our :ref:`Under the Hood <custom-klb>`
 section.
 
 Tightly coupled with Kubos Linux is U-Boot, our bootloader of choice.
