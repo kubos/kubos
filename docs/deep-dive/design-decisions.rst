@@ -19,20 +19,31 @@ We decided on Buildroot for a few reasons:
 GraphQL
 -------
 
-It's light-weight
+We appreciated having the ability to cherry-pick the data points which should be returned in a
+particular request.
+This methodology shrinks the amount of bandwidth required to send and receive desired data.
+
+Additionally, you can request multiple different data points to be returned in a single request
+(unlike with REST), reducing the overall number of HTTP messages which need to be sent.
 
 Rust
 ----
 
-It's statically typed and fast.
+Rust is a statically-typed language, so it is able to catch many common mistakes at compile time.
+The sooner you can catch a mistake, the sooner you can fix it, and the less likely it is to cause
+other problems with your system.
+Additionally, memory safety, the root of some of the most difficult-to-solve software issues, is a
+first-class citizen.
 
-(why not ada?)
+With these protections, Rust still maintains a C-like flexibility and speed.
+This allows us to be confident that we can implement any feature we need in the future.
 
 Python
 ------
 
 We anticipate that many of the people who will be developing a mission won't have a programming
 background.
+While we use Rust internally, we acknowledge that it is more suitable for experience programmers.
 
 Python is one of the most common beginning programming languages.
 It has an easy learning curve and has a plethora of tutorials available.
@@ -59,7 +70,9 @@ The telemetry database service will always be that one entity.
 SQLite
 ------
 
-It's small
+We use a SQLite for our telemetry storage.
+We decided SQLite was the best choice because it's light-weight, yet fully-featured, and has
+extensive heritage within the embedded device world.
 
 Busybox
 -------
