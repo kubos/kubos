@@ -21,13 +21,13 @@ Kubos provides a variety of APIs to help with the development of mission softwar
     Device Interfaces <apis/device-api/index>
     OBC APIs <apis/obc-api/index>
     Kubos HAL <apis/kubos-hal/index>
-    Kubos Libraries <apis/kubos-libs/index>
+    Kubos Libraries <apis/kubos-libs>
     
 Protocols
 ---------
 
 Intra-satellite communication is generally handled using HTTP over TCP/IP, with the packet payloads
-being structured as :doc:`GraphQL <../os-docs/service/graphql>` requests or JSON responses.
+being structured as :doc:`GraphQL <../os-docs/services/graphql>` requests or JSON responses.
 
 For procedures which require space-ground communication, special care has been taken to craft
 protocols which can handle higher rates of packet loss and function well in the more asynchronous
