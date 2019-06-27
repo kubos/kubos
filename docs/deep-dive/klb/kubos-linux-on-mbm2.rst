@@ -59,6 +59,11 @@ Kubos Linux Build Process
 If for some reason you want or need to modify and rebuild the Kubos Linux components, follow
 the steps in this section.
 
+.. note::
+
+    Kubos Linux should be built from within an instance of the Kubos SDK or some other native Linux
+    environment.
+
 .. _build-os-mbm2:
 
 Build the OS Files
@@ -158,6 +163,9 @@ The relevant files are:
    contains the upgrade partition and the ``kpack-base.itb`` file which is used for
    OS recovery. It has a disk signature of 0x41555820 ("AUX ").
 
+The `kubos-linux.tar.gz` and `aux-sd.tar.gz` files are the two final files which will be used to
+install Kubos Linux onto your target board.
+
 Changing the Output Toolchain Directory (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -168,3 +176,9 @@ If you would like to build your toolchain in somewhere other than the
 If you would like BuildRoot to just build the toolchain locally, you may remove
 the ``BR2_HOST_DIR`` variable entirely. The toolchain will then be built under the
 main "buildroot-2019.02.2" directory in a new "output/host" folder.
+
+Using Kubos Linux
+-----------------
+
+For information on how to create and run applications on your new Kubos Linux system, see the
+:doc:`../../obc-docs/mbm2/working-with-the-mbm2` guide.

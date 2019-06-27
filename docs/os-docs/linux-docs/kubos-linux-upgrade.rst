@@ -12,9 +12,9 @@ Within each file will be a new version of the kernel image and root
 filesystem.
 
 To upgrade a board currently running Kubos Linux, an upgrade package
-will be loaded into the upgrade partition of the board. For now, this
-can be done through the Kubos SDK or by manually copying the package
-into the upgrade partition.
+should be loaded into the upgrade partition of the board.
+For now, this is done by manually copying the package into the upgrade
+partition and then setting the ``kubos_updatefile`` environment variable.
 
 Once the board is rebooted, U-Boot will take the package and then
 install each component into the appropriate partition (kernel/rootfs).
@@ -43,11 +43,8 @@ The overall flow looks like this:
 Upgrade Installation
 --------------------
 
-Pre-requisites
+Pre-Requisites
 ~~~~~~~~~~~~~~
-
-The SD card should have been formatted with the correct partitions. If
-not, refer to the :ref:`install-sd` instructions.
 
 The host computer should be connected to the target board, which should
 be on and running Kubos Linux.
@@ -55,7 +52,9 @@ be on and running Kubos Linux.
 Installation
 ~~~~~~~~~~~~
 
-Acquire an upgrade package from https://github.com/kubos/kubos-linux-build/releases.
+Contact a Kubos team member for an upgrade file for your desired Kubos Linux version.
+Alternatively, create one yourself following the directions in the :ref:`upgrade creation <upgrade-creation>`
+section.
 
 .. note::
 
@@ -64,14 +63,17 @@ Acquire an upgrade package from https://github.com/kubos/kubos-linux-build/relea
     required instead.
 
 
-Transfer the package to the target system using ``scp``::
+Transfer the package to the target system using ``scp`` or other :ref:`file transfer <file-transfer>`
+method of choice::
 
    $ scp kpack-{version}.itb kubos@{target_ip}:/upgrade/
 
-Once the transfer has completed successfully, trigger a reboot of the
-board. This can be done with the Linux ``reboot`` command. Once job
-scheduling has been implemented, you will be able to schedule the
-desired reboot time.
+Once the transfer has completed successfully, log into the board and set the ``kubos_updatefile``
+variable with the name of the upgrade file like so::
+
+    $ fw_setenv kubos_updatefile kpack-{version}.itb
+
+Now, trigger a reboot of the board. This can be done with the Linux ``reboot`` command.
 
 When the board boots into U-Boot, the new package will be detected and
 loaded. If the loading is successful, the board will reboot into the
@@ -119,43 +121,41 @@ Upgrade Creation
 This section is for developers who have made changes to Kubos Linux and
 want to generate an upgrade package.
 
-Pre-requisite
+Pre-Requisite
 ~~~~~~~~~~~~~
 
-TODO: New SDK instructions
-Build the new OS. Refer to the :ref:`build-os` instructions.
+Build the new OS.
+Refer to the appropriate :ref:`Building Kubos Linux for the {OBC} <custom-klb>` instructions.
 
 Run the Packaging Script
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 From the 'kubos-linux-build/tools' folder, run the ``kubos-package.sh``
-script. This will create the `rootfs.img` and `kubos-kernel.itb` files and
-then use the `kpack.its` file to bundle them into an `\*.itb` file. This is
-the file that will be distributed to customers when an upgrade is
-needed.
+script.
+This takes the `rootfs.img` and `kubos-kernel.itb` files which were created during the build
+process and uses the `kpack.its` file to bundle them into an `\*.itb` file.
+This is the file that will be distributed to customers when an upgrade is needed.
 
 The automatically generated naming convention for the package is
 kpack-*yyyy*-*mm*-*dd*.itb
 
-Custom Packages
-^^^^^^^^^^^^^^^
+Custom Files
+^^^^^^^^^^^^
 
-If you'd like to customize the package, there are a few different
+If you'd like to customize the upgrade file, there are a few different
 options available through the script:
 
 -  -t {target} : **Required** Specifies the name of the target board,
    as named in the corresponding `kubos-linux-build/board/kubos/{target}`
    directory.
--  -s : Sets the size of the rootfs.img file, specified in KB. The
-   default is 13000 (13MB).
 -  -i : Sets the name and location of the input `\*.its` file. Use if you
    want to create a custom package. The default is *kpack.its*.
 -  -o {folder} : Specifies the name of the buildroot output folder. The
    default is 'output'
 -  -v : Sets the version information for the package. The output file
    will be `kpack-{version}.itb`.
--  -b {branch} : Specifies the branch name of U-Boot that has been
-   built. The default is 'master'. This option should not need to be
+-  -b {branch} : Specifies the branch/version name of U-Boot that has been
+   built. The default is '1.1'. This option should not need to be
    used outside of development. U-Boot contains files which are used in
    the package generation process.
 
@@ -163,11 +163,12 @@ For example:
 
 ::
 
-    $ ./kubos-package.sh -s 15000 -i /home/test/custom.its -v 2.0
+    $ ./kubos-package.sh -t beaglebone-black -i /home/test/custom.its -v 2.0
+    
+.. todo::
 
-Distribute the Package
-~~~~~~~~~~~~~~~~~~~~~~
-
-There isn't currently a central storage location or procedure for
-non-release upgrade packages.
-This section should be upgraded once something has been implemented.
+    Distribute the Package
+    #~~~~~~~~~~~~~~~~~~~~~~
+    
+    There isn't currently a central storage location or procedure for upgrade packages.
+    This section should be upgraded once something has been implemented.

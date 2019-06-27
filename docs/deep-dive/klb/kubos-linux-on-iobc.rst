@@ -60,6 +60,11 @@ Kubos Linux Build Process
 If for some reason you want or need to modify and rebuild the Kubos Linux components, follow
 the steps in this section.
 
+.. note::
+
+    Kubos Linux should be built from within an instance of the Kubos SDK or some other native Linux
+    environment.
+
 .. _build-os:
 
 Build the OS Files
@@ -212,3 +217,9 @@ Create an Upgrade Package
 If you would like to distribute your changes as a Kubos upgrade package instead,
 please refer to the :ref:`upgrade-creation` instructions.
 
+
+Using Kubos Linux
+-----------------
+
+For information on how to create and run applications on your new Kubos Linux system, see the
+:doc:`../../obc-docs/iobc/working-with-the-iobc` guide.

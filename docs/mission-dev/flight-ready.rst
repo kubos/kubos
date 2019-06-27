@@ -34,6 +34,7 @@ Prepare Applications
 1. Register stable versions of all applications (if you include multiple versions, make sure the correct one is active)
 2. Reboot the bus, and ensure all apps that should start on boot are properly started.
 3. If you followed the :doc:`Deployment doc <deployment>` for your deployment app, or you are using the KubOS deployment app, you will need to:
+
   a. Ensure the ``deployed`` U-boot environment variable is set to ``False``.
   b. Ensure the ``remove_before_flight`` U-boot environment variable is set to ``False``.
   c. Ensure the ``deploy_start`` U-boot environment variable is unset.

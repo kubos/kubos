@@ -2,7 +2,7 @@ Process Monitoring
 ==================
 
 KubOS uses `Monit <https://mmonit.com/monit/documentation/monit.html>`__ in order to monitor its
-:doc:`services <../services/index>` and other continuous processes.
+:ref:`services <service-docs>` and other continuous processes.
 
 Monit makes periodic checks to ensure that all defined processes are still running.
 If it finds that a process is no longer running, it issues a log message and then attempts to
@@ -69,13 +69,16 @@ This will create a graphical display of the same information returned by ``monit
 
 .. image:: ../../images/monit.png
 
-
 Configuration
 -------------
 
 The items Monit keeps track of are defined in control files.
 We have found it easiest to create one file per process which should be monitored.
 This keeps configuration more modular and makes it easy to add or remove monitoring for a process.
+
+The files for Kubos-created services are generated automatically during the build process.
+For example, `you can see here <https://github.com/kubos/kubos-linux-build/blob/master/package/kubos/kubos-monitor/kubos-monitor.mk>`__
+how the monitoring file will be generated for the Kubos monitor service.
 
 Please see the `Monit documentation <https://mmonit.com/monit/documentation/monit.html#THE-MONIT-CONTROL-FILE>`__
 for information regarding the syntax of these files.

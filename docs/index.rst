@@ -18,7 +18,7 @@ Just looking for an explanation of what KubOS is?
 Check out our architecture guide for an overview of how KubOS works and what it provides,
 and check out our system docs for a deeper explanation of each component:
 
- - :doc:`KubOS Architecture Overview <architecture-overview>`
+ - :doc:`KubOS Design <kubos-design>`
  - :doc:`KubOS Ecosystem <os-docs/index>`
 
 Want to get started with development?
@@ -101,7 +101,7 @@ or bugs, see what you can work on, and to give feedback.
 .. toctree::
     :hidden:
 
-    KubOS Architecture <architecture-overview>
+    KubOS Design <kubos-design>
     Getting Started <getting-started/index>
     Tutorials <tutorials/index>
     Working with an OBC <obc-docs/index>
@@ -111,7 +111,7 @@ or bugs, see what you can work on, and to give feedback.
     Kubos SDK <sdk-docs/index>
     Contributing to KubOS <contributing/index>
     Changelog <changelog>
-    FAQs <faq-troubleshooting>        
+    FAQs <faq-troubleshooting>
 
 Indices and tables
 ------------------

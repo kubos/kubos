@@ -64,15 +64,15 @@ U-Boot, at the most basic level, is responsible for loading the kernel from the
 SD card into the SDRAM. However, it also provides a basic OS and CLI which can
 be used to configure and debug the kernel before it's loaded.
 
-Additionally, we've made some changes to allow us to use it as a kernel upgrade
+Additionally, we've made some changes to allow us to use it as an operating system upgrade
 and recovery system. At boot time it will check for available upgrade packages
 or a corrupted Linux kernel and will then upgrade or rollback the kernel and
-rootfs as necessary.
+root file system as necessary.
 
 Kubos Linux Kernel
 ~~~~~~~~~~~~~~~~~~
 
-The kernel is actually composed of multiple components: the main linux
+The kernel is actually composed of multiple components: the main Linux
 kernel, the libc library, and the command/utility library.
 
 Using BuildRoot allows us to include tools like BusyBox and glibc with
