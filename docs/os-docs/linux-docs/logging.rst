@@ -36,11 +36,11 @@ This way log files reside in permanent storage and will be preserved through OS 
 
 Messages written using the `daemon` facility will be routed to files with the naming scheme
 ``kubos-*.log``.
-This facility is used by all :doc:`Kubos services <../services/index>`.
+This facility is used by all :ref:`Kubos services <service-docs>`.
 
 Messages written using the `user` facility will be routed to files with the naming scheme
 ``app-*.log``.
-This facility should be used by all :doc:`mission applications <../mission-dev/index>`.
+This facility should be used by all :doc:`mission applications <../../mission-dev/index>`.
 
 For each of these naming schemes, the following files may be created:
 
@@ -110,8 +110,8 @@ For example, using `syslog <https://docs.rs/syslog/4.0.1/syslog/>`__:
 Python
 ~~~~~~
 
-Python programs will import two things: the main `logging library <https://docs.python.org/2/library/logging.html>`__
-and the `SysLogHandler log handler <https://docs.python.org/2/library/logging.handlers.html#sysloghandler>`__.
+Python programs will import two things: the main `logging library <https://docs.python.org/3/library/logging.html>`__
+and the `SysLogHandler log handler <https://docs.python.org/3/library/logging.handlers.html#sysloghandler>`__.
 
 .. code-block:: python
 

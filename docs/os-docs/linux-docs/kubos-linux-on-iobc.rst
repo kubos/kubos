@@ -24,9 +24,9 @@ installed to support them.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../installation-docs/installing-linux-iobc` - Steps to install Kubos Linux on an iOBC
+-  :doc:`../../obc-docs/iobc/installing-linux-iobc` - Steps to install Kubos Linux on an iOBC
 -  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
--  :doc:`working-with-the-iobc` - Guide for interacting with iOBC-specific features
+-  :doc:`../../obc-docs/iobc/working-with-the-iobc` - Guide for interacting with iOBC-specific features
 
 Software Components
 -------------------
@@ -60,6 +60,11 @@ Kubos Linux Build Process
 If for some reason you want or need to modify and rebuild the Kubos Linux components, follow
 the steps in this section.
 
+.. note::
+
+    Kubos Linux should be built from within an instance of the Kubos SDK or some other native Linux
+    environment.
+
 .. _build-os:
 
 Build the OS Files
@@ -71,7 +76,7 @@ Build the OS Files
     VirtualBox does not support hard links in shared folders, which are crucial in order to complete
     the build.
     
-:doc:`SSH into a Kubos SDK box <../installation-docs/sdk-installing>`
+:doc:`SSH into a Kubos SDK box <../../sdk-docs/sdk-installing>`
 
 In order to build Kubos Linux, two components are needed:
 
@@ -212,3 +217,9 @@ Create an Upgrade Package
 If you would like to distribute your changes as a Kubos upgrade package instead,
 please refer to the :ref:`upgrade-creation` instructions.
 
+
+Using Kubos Linux
+-----------------
+
+For information on how to create and run applications on your new Kubos Linux system, see the
+:doc:`../../obc-docs/iobc/working-with-the-iobc` guide.
