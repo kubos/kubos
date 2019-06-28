@@ -15,14 +15,14 @@ General Documentation
 ~~~~~~~~~~~~~~~~~~~~~
 
 -  :doc:`../../sdk-docs/sdk-installing`
--  :doc:`../tutorials/first-project`
+-  :doc:`../../tutorials/first-project`
 
 Board-Specific Documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../obc-docs/bbb/index`
--  :doc:`../obc-docs/iobc/index`
--  :doc:`../obc-docs/mbm2/index`
+-  :doc:`../../obc-docs/bbb/index`
+-  :doc:`../../obc-docs/iobc/index`
+-  :doc:`../../obc-docs/mbm2/index`
 
 
 Using Peripherals
@@ -33,7 +33,7 @@ peripheral devices. Currently, users should interact with these devices
 using the standard Linux functions. A Kubos HAL will be added in the
 future.
 
-Please refer to the appropriate :ref:`Working with {board} <system-guides>` document for more
+Please refer to the appropriate :doc:`Working with {board} <../../obc-docs/index>` document for more
 information about the specific peripheral availability.
 
 .. _user-accounts:
@@ -77,7 +77,7 @@ under this directory.
 /home/system/logs
 ^^^^^^^^^^^^^^^^^
 
-All log files generated with :ref:`rsyslog <logging>` reside in this directory.
+All log files generated with :doc:`rsyslog <logging>` reside in this directory.
 A symlink has been set up to have `/var/log` route to this location.
 
 /home/system/usr/bin

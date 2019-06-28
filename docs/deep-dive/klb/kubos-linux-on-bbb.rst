@@ -1,32 +1,32 @@
-Building Kubos Linux for the Pumpkin MBM2
-=========================================
+Building Kubos Linux for the Beaglebone Black
+=============================================
 
 Overview
 --------
 
-This supplementary document covers specific features and components of Kubos Linux for the
-Pumpkin Motherboard Module 2.
+This supplementary document covers specific features and components of Kubos Linux for the Beaglebone Black.
 
-The :doc:`kubos-linux-overview` doc covers the major components of Kubos Linux.
+The :doc:`../../os-docs/linux-docs/kubos-linux-overview` doc covers the major components of Kubos Linux.
 
 Additionally, this document covers the steps required in order to build Kubos Linux.
 
 Reference Documents
 -------------------
 
-Pumpkin Documentation
-~~~~~~~~~~~~~~~~~~~~~
+Beaglebone Documentation
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :title:`CubeSat Kit Motherboard Module (MBM) 2` reference document
-is available from Pumpkin and is a useful document for learning what
-each of the hardware components are and how they are connected.
+- `Beaglebone Black Web Page <https://beagleboard.org/black>`__
+- `Beaglebone Black Wiki <http://elinux.org/Beagleboard:BeagleBoneBlack>`__
+- `Beaglebone Black Hardware Diagrams <http://beagleboard.org/Support/bone101/#hardware>`__
+- `Beaglebone Black System Reference Manual Rev C <http://static6.arrow.com/aropdfconversion/8fff89aa85f5c451318cbdee2facd9c9fac36872/bbb_srm.pdf>`__
 
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../../obc-docs/mbm2/installing-linux-mbm2` - Steps to install Kubos Linux
--  :doc:`using-kubos-linux` - General guide for interacting with Kubos Linux
--  :doc:`../../obc-docs/mbm2/working-with-the-mbm2` - Guide for interacting with MBM2-specific features
+-  :doc:`../../obc-docs/bbb/installing-linux-bbb` - Steps to install Kubos Linux
+-  :doc:`../../os-docs/linux-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`../../obc-docs/bbb/working-with-the-bbb` - Guide for interacting with BBB-specific features
 
 Software Components
 -------------------
@@ -64,7 +64,7 @@ the steps in this section.
     Kubos Linux should be built from within an instance of the Kubos SDK or some other native Linux
     environment.
 
-.. _build-os-mbm2:
+.. _build-os-bbb:
 
 Build the OS Files
 ~~~~~~~~~~~~~~~~~~
@@ -74,7 +74,7 @@ Build the OS Files
     The OS files cannot be built using a `synced folder <https://www.vagrantup.com/docs/synced-folders/>`__ in a Vagrant box (or regular VM).
     VirtualBox does not support hard links in shared folders, which are crucial in order to complete
     the build.
-
+    
 :doc:`SSH into a Kubos SDK box <../../sdk-docs/sdk-installing>`
 
 In order to build Kubos Linux, two components are needed:
@@ -123,7 +123,7 @@ Move into the buildroot directory
     $ cd buildroot-2019.02.2
 
 Point BuildRoot to the external kubos-linux-build folder and tell it to build
-for the Pumpkin MBM2.
+for the Beaglebone Black.
 
 .. note::
 
@@ -133,7 +133,7 @@ for the Pumpkin MBM2.
 
 ::
 
-    $ sudo make BR2_EXTERNAL=../kubos-linux-build pumpkin-mbm2_defconfig
+    $ sudo make BR2_EXTERNAL=../kubos-linux-build beaglebone-black_defconfig
 
 Build everything
 
@@ -154,8 +154,8 @@ The relevant files are:
 
 -  uboot.bin - The U-Boot binary
 -  kernel - The compressed Linux kernel file
--  pumpkin-mbm2.dtb - The Device Tree Binary that Linux uses to configure itself
-   for the Pumpkin MBM2 board
+-  beaglebone-black.dtb - The Device Tree Binary that Linux uses to configure itself
+   for the Beaglebone Black board
 -  rootfs.tar - The root file system. Contains BusyBox and other libraries
 -  kubos-linux.tar.gz - A compressed file containing the complete Kubos Linux SD card
    image, ``kubos-linux.img``. It has a disk signature of 0x4B4C4E58 ("KLNX").
@@ -171,7 +171,7 @@ Changing the Output Toolchain Directory (optional)
 
 If you would like to build your toolchain in somewhere other than the
 "/usr/bin/bbb_toolchain" directory, update the ``BR2_HOST_DIR`` variable in the
-"configs/pumpkin-mbm2_defconfig" file.
+"configs/bbb_defconfig" file.
 
 If you would like BuildRoot to just build the toolchain locally, you may remove
 the ``BR2_HOST_DIR`` variable entirely. The toolchain will then be built under the
@@ -181,4 +181,4 @@ Using Kubos Linux
 -----------------
 
 For information on how to create and run applications on your new Kubos Linux system, see the
-:doc:`../../obc-docs/mbm2/working-with-the-mbm2` guide.
+:doc:`../../obc-docs/bbb/working-with-the-bbb` guide.

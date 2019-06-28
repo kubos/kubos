@@ -19,7 +19,7 @@ Externally, the SDK is most useful for:
 - Windows users
 - Users who do not want to muddle their host systems with all of the dependencies required to build
   and execute KubOS projects
-- Users who want to build a :ref:`custom KubOS image <sysadmin>`
+- Users who want to build a :ref:`custom KubOS image <custom-klb>`
 
 .. uml::
 

@@ -125,7 +125,7 @@ Pre-Requisite
 ~~~~~~~~~~~~~
 
 Build the new OS.
-Refer to the appropriate :ref:`Building Kubos Linux for the {OBC} <sysadmin>` instructions.
+Refer to the appropriate :ref:`Building Kubos Linux for the {OBC} <custom-klb>` instructions.
 
 Run the Packaging Script
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -168,7 +168,7 @@ For example:
 .. todo::
 
     Distribute the Package
-    ~~~~~~~~~~~~~~~~~~~~~~
+    #~~~~~~~~~~~~~~~~~~~~~~
     
     There isn't currently a central storage location or procedure for upgrade packages.
     This section should be upgraded once something has been implemented.
