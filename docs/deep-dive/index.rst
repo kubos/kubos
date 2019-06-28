@@ -33,6 +33,11 @@ For procedures which require space-ground communication, special care has been t
 protocols which can handle higher rates of packet loss and function well in the more asynchronous
 comms environment.
 
+.. note::
+
+    We are currently working on a dedicated Space Ground Interface Control Document to highlight
+    this expected link behavior.
+
 .. toctree::
     :maxdepth: 1
 

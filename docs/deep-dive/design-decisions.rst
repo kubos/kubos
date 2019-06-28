@@ -22,7 +22,11 @@ We decided on Buildroot for a few reasons:
 GraphQL
 -------
 
-We appreciated having the ability to cherry-pick the data points which should be returned in a
+We wanted a command format that was human readable, to make integration and testing easier.
+We analyzed a few different types, but settled on GraphQL because it also gave us a communication
+layer and library support that other human readable command formats didn't.
+
+We also appreciated having the ability to cherry-pick the data points which should be returned in a
 particular request.
 This methodology shrinks the amount of bandwidth required to send and receive desired data.
 
@@ -46,10 +50,12 @@ Python
 
 We anticipate that many of the people who will be developing a mission won't have a programming
 background.
-While we use Rust internally, we acknowledge that it is more suitable for experience programmers.
+While we use Rust internally, we acknowledge that it is more suitable for experienced programmers.
 
 Python is one of the most common beginning programming languages.
 It has an easy learning curve and has a plethora of tutorials available.
+
+Additionally, Python is already widely used within the aerospace community.
 
 Microservices
 -------------
