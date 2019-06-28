@@ -1,6 +1,9 @@
 KubOS Design Decisions
 ======================
 
+This doc records the high-level reasoning for some of our major design decisions made while
+architecting KubOS.
+
 Buildroot
 ---------
 
@@ -48,9 +51,6 @@ While we use Rust internally, we acknowledge that it is more suitable for experi
 Python is one of the most common beginning programming languages.
 It has an easy learning curve and has a plethora of tutorials available.
 
-CCSDS
------
-
 Microservices
 -------------
 
@@ -77,9 +77,6 @@ extensive heritage within the embedded device world.
 Busybox
 -------
 
-It's small
-
-Custom File Transfer
---------------------
-
-Need to handle dropped packets and super asynch communication
+Busybox provides an alternative to most of the common Linux command utilities.
+We chose to use it because it allows us to reduce the amount of space required for the root file
+system.
