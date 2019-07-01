@@ -1,15 +1,16 @@
 Transferring Files to an OBC
 ============================
 
-Once a satellite is in orbit, the :doc:`file transfer service <../services/file>` can be used to
+Once a satellite is in orbit, the :doc:`file transfer service <../os-docs/services/file>` can be used to
 transfer files both to and from the ground.
 
 Pre-Requisites
 --------------
 
-- :doc:`Install the Kubos SDK <../installation-docs/sdk-installing>`
+- :doc:`Install the Kubos SDK <../sdk-docs/sdk-installing>` or set up the dependencies
+  required for a :doc:`local dev environment <../getting-started/setup>`
 - Have an OBC available with ethernet capabilities
-  (preferably with an :doc:`installation of Kubos Linux <../installation-docs/index>`)
+  (preferably with an :doc:`installation of Kubos Linux <../obc-docs/index>`)
 
     - :ref:`Configuring Ethernet <ethernet>`
 
@@ -19,7 +20,10 @@ Pre-Requisites
 We'll be using the `file transfer client <https://github.com/kubos/kubos/tree/master/clients/kubos-file-client>`__
 in order to communicate with the file transfer service on our OBC, which is automatically included
 with the Kubos SDK (as of v1.8.0).
-As a result, this tutorial assumes that all commands will be run from within an instance of the SDK.
+
+If you are using a local development environment, instead of an instance of the SDK, you'll need to
+clone the repo and navigate to the `clients/kubos-file-client` folder.
+You'll then run the program with ``cargo run -- {command args}``.
 
 Syntax
 ------
@@ -55,7 +59,6 @@ Optional arguments:
     - ``-t {hold_count}`` - Default: `6`. The number of times the client should fail to receive data
       from the endpoint service before giving up and exiting.
 
-
 Sending a File to an OBC
 ------------------------
 
@@ -70,6 +73,10 @@ on. By default, this is port 8008.
 Our transfer command should look like this::
 
     $ kubos-file-client -r 10.0.2.20 -p 8008 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
+    
+Or, from your local dev environment::
+
+    $ cargo run -- -r 10.0.2.20 -p 8008 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
     
 The output from the client should look like this:
 

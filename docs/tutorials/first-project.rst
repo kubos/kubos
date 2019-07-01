@@ -1,13 +1,13 @@
-Getting Started with KubOS and the Kubos SDK
-============================================
+Creating Your First KubOS Project
+=================================
 
-This tutorial guides the user through the process of creating a new Kubos project using Python3.5
+This tutorial guides the user through the process of creating a new Kubos project using Python3
 and installing and running it on a target OBC.
 
 .. note:: 
 
     The iOBC does not support Python. If this is the board which you are using,
-    please refer to the :doc:`Using Rust with the Kubos SDK <../sdk-docs/sdk-rust>`
+    please refer to the :doc:`../getting-started/using-rust`
     doc to get your first project built and running on the OBC.
 
     After going through that document, please refer to the :doc:`mission application tutorial <first-mission-app>`
@@ -16,9 +16,10 @@ and installing and running it on a target OBC.
 Prerequisites
 -------------
 
-- :doc:`Install the Kubos SDK <../installation-docs/sdk-installing>`
+- :doc:`Install the Kubos SDK <../sdk-docs/sdk-installing>` or set up the dependencies
+  required for a :doc:`local dev environment <../getting-started/setup>`
 - Have an OBC available with both Python and SSH capabilities
-  (preferably with an :doc:`installation of Kubos Linux <../installation-docs/index>`)
+  (preferably with an :doc:`installation of Kubos Linux <../obc-docs/index>`)
 
     - :ref:`Configuring Ethernet <ethernet>`
 
@@ -27,7 +28,7 @@ Creating your Project
 
 Like all good programming tutorials, we'll start with a basic "Hello, World" program.
 
-Log into your SDK VM and then create a new folder for your project.
+Navigate to your development environment of choice and then create a new folder for your project.
 
 Within that folder, create a new file, ``hello_world.py``, which will print "Hello, World!"
 and then exit.
@@ -39,9 +40,7 @@ and then exit.
 Running the Project Locally
 ---------------------------
 
-The Kubos SDK should have all resources required to run the project locally.
-
-Our example project can be run like so::
+Our example project can be run on the host machine like so::
 
     $ python hello_world.py
     Hello, World!

@@ -5,19 +5,21 @@ At some point, users will want to fetch data which was written to the telemetry 
 (for an example of this, see the :doc:`mission application <first-mission-app>` tutorial).
 
 This tutorial will walk the user through the process of communicating with the
-:doc:`telemetry database service <../services/telemetry-db>` in order to retrieve a desired set of
+:doc:`telemetry database service <../os-docs/services/telemetry-db>` in order to retrieve a desired set of
 telemetry information.
 
 Pre-Requisites
 --------------
 
-- :doc:`Install the Kubos SDK <../installation-docs/sdk-installing>`
+- :doc:`Install the Kubos SDK <../sdk-docs/sdk-installing>` or set up the dependencies
+  required for a :doc:`local dev environment <../getting-started/setup>`
 - Have an OBC available with ethernet capabilities
-  (preferably with an :doc:`installation of Kubos Linux <../installation-docs/index>`)
+  (preferably with an :doc:`installation of Kubos Linux <../obc-docs/index>`)
 
     - :ref:`Configuring Ethernet <ethernet>`
 
 - Have the telemetry database service running on a target OBC (this happens by default when running KubOS)
+- Windows users: :ref:`Make sure Windows is setup to allow UDP packets from the OBC <windows-udp>`
 
 Setup
 -----
@@ -31,7 +33,7 @@ database.
     For all commands, replace the ``10.0.2.20`` value with the IP address of your OBC.
     The example commands will also be referencing the telemetry database service's default port, 8006
 
-From your instance of the SDK, run the following::
+From your development environment, run the following::
 
     $ curl 10.0.2.20:8006 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"voltage\\\",value:\\\"5.0\\\"){success}}\"}"
     $ curl 10.0.2.20:8006 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"voltage\\\",value:\\\"5.0\\\"){success}}\"}"

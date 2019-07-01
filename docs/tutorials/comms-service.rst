@@ -7,7 +7,7 @@ As a result, a communications service which facilitates passing messages between
 rest of the satellite must be constructed on an individual basis.
 
 This tutorial walks the user through the process of using the
-:doc:`communications service framework <../services/comms-framework>` in order to create a basic
+:doc:`communications service framework <../os-docs/services/comms-framework>` in order to create a basic
 hardware service for a radio.
 To allow testing, the radio connection will be simulated by a UART connection.
 
@@ -37,7 +37,7 @@ can be found in the Kubos repo.
 Configuration
 -------------
 
-Before we write any actual code, we want to update our system's :doc:`config.toml <../services/service-config>`
+Before we write any actual code, we want to update our system's :doc:`config.toml <../os-docs/services/service-config>`
 file.
 
 We'll name our service `radio-service`.
@@ -700,6 +700,12 @@ The SDK is packaged with a client to help test our new UART comms service,
 This client program will take the input data, wrap it in a UDP packet, and then send it over the
 requested serial device.
 
+.. note::
+
+    If you are using a local development environment, instead of an instance of the SDK, you'll need
+    to clone the repo and navigate to the uart-comms-client folder.
+    You'll then run the program with ``cargo run -- {command args}``.
+
 The program has the following syntax::
 
     UART Comms Client
@@ -731,7 +737,7 @@ Build the comms service, being careful to cross-compile for the target OBC, then
 to the OBC.
 
 Information about building and transferring Rust projects can be found in the
-:doc:`Rust SDK <../sdk-docs/sdk-rust>` doc.
+:doc:`../getting-started/using-rust` doc.
 
 Once transferred, log into the board and start the service.
 Leave this connection to the OBC open so that you can view the service's output
@@ -742,12 +748,16 @@ Hardware
 Connect an FTDI cable between the OBC's UART port and your PC.
 At a minimum, the FTDI's ground (black), TX (orange), and RX (yellow) lines should be connected.
 
-The cable should automatically be detected by the SDK and given an alias of ``/dev/FTDI``.
+If you are using an instance of the SDK, the cable should automatically be detected by the SDK and
+given an alias of ``/dev/FTDI``.
 
 .. note::
 
     If you have more than one FTDI cable connected, you will have to identify and use the correct
     ``/dev/ttyUSB*`` device instead.
+
+If you are using a local development environment, refer to the :doc:`comms setup <../obc-docs/comms-setup>` doc
+instead in order to set up communication.
 
 Execution
 ~~~~~~~~~
@@ -758,6 +768,10 @@ By default, the telemetry service uses port 8006 for GraphQL requests.
 From the SDK, run the following command::
 
     $ uart-comms-client "{telemetry(latest: 10){subsystem, parameter, value}" -b /dev/FTDI -p 8006
+    
+Or, from your local dev environment::
+
+    $ cargo run -- "{telemetry(latest: 10){subsystem, parameter, value}" -b /dev/FTDI -p 8006
 
 You should see the following output::
 
