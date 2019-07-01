@@ -7,7 +7,7 @@ Overview
 This document covers the Kubos Linux features which are specific to the
 Pumpkin MBM2 target.
 
-Please refer to :doc:`../../os-docs/using-kubos-linux` for a general guide to using Kubos Linux.
+Please refer to :doc:`../../ecosystem/using-kubos-linux` for a general guide to using Kubos Linux.
 
 Reference Documents
 -------------------
@@ -23,8 +23,8 @@ Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
 -  :doc:`../../tutorials/first-project` - Basic tutorial for creating your first KubOS project
--  :doc:`../../os-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
--  :doc:`../../os-docs/kubos-linux-on-mbm2` - Steps to build Kubos Linux for the Pumpkin MBM2
+-  :doc:`../../ecosystem/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`../../ecosystem/kubos-linux-on-mbm2` - Steps to build Kubos Linux for the Pumpkin MBM2
 -  :doc:`installing-linux-mbm2` - Steps to install Kubos Linux
 
 Status LEDs

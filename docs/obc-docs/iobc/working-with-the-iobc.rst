@@ -7,7 +7,7 @@ Overview
 This document covers the Kubos Linux features which are specific to the
 ISIS-OBC target, also known as the iOBC.
 
-Please refer to :doc:`../../os-docs/using-kubos-linux` for a general guide to using Kubos Linux.
+Please refer to :doc:`../../ecosystem/using-kubos-linux` for a general guide to using Kubos Linux.
 
 Reference Documents
 -------------------
@@ -24,8 +24,8 @@ Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
 -  :doc:`../../tutorials/first-project` - Basic tutorial for creating your first KubOS project
--  :doc:`../../os-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
--  :doc:`../../os-docs/kubos-linux-on-iobc` - Steps to build Kubos Linux for the iOBC
+-  :doc:`../../ecosystem/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`../../ecosystem/kubos-linux-on-iobc` - Steps to build Kubos Linux for the iOBC
 -  :doc:`installing-linux-iobc` - Steps to install Kubos Linux
 
 Status LEDs

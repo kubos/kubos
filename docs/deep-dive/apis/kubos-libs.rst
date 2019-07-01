@@ -3,13 +3,13 @@ Kubos Libraries
 
 Kubos provides the following libraries to assist with core functionality:
 
-- :doc:`Applications API <../../os-docs/apps/app-guide>` - Simplifies the process of setting up a
+- :doc:`Applications API <../../ecosystem/apps/app-guide>` - Simplifies the process of setting up a
   mission application
 
-    - :doc:`Python <../../os-docs/apps/python-app-api>`
+    - :doc:`Python <../../ecosystem/apps/python-app-api>`
     - |rust-app-api|
 
-- :doc:`Kubos Service Library <../../os-docs/services/service-dev>` - Provides a base framework for
+- :doc:`Kubos Service Library <../../ecosystem/services/service-dev>` - Provides a base framework for
   KubOS services
 
     - `Python <https://github.com/kubos/kubos/tree/master/libs/kubos-service>`__

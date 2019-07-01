@@ -27,7 +27,7 @@ Protocols
 ---------
 
 Intra-satellite communication is generally handled using HTTP over TCP/IP, with the packet payloads
-being structured as :doc:`GraphQL <../os-docs/services/graphql>` requests or JSON responses.
+being structured as :doc:`GraphQL <../ecosystem/services/graphql>` requests or JSON responses.
 
 For procedures which require space-ground communication, special care has been taken to craft
 protocols which can handle higher rates of packet loss and function well in the more asynchronous

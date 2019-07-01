@@ -7,7 +7,7 @@ Overview
 This supplementary document covers specific features and components of Kubos Linux for the
 Pumpkin Motherboard Module 2.
 
-The :doc:`../../os-docs/linux-docs/kubos-linux-overview` doc covers the major components of Kubos Linux.
+The :doc:`../../ecosystem/linux-docs/kubos-linux-overview` doc covers the major components of Kubos Linux.
 
 Additionally, this document covers the steps required in order to build Kubos Linux.
 
@@ -25,7 +25,7 @@ Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
 -  :doc:`../../obc-docs/mbm2/installing-linux-mbm2` - Steps to install Kubos Linux
--  :doc:`../../os-docs/linux-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`../../ecosystem/linux-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`../../obc-docs/mbm2/working-with-the-mbm2` - Guide for interacting with MBM2-specific features
 
 Software Components

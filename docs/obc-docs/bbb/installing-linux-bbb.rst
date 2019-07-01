@@ -21,9 +21,9 @@ Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
 -  :doc:`../../tutorials/first-project` - Basic tutorial for creating your first KubOS project
--  :doc:`../../os-docs/linux-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`../../ecosystem/linux-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`working-with-the-bbb` - Guide for interacting with BBB-specific features
--  :doc:`../../os-docs/linux-docs/kubos-linux-on-bbb` - Steps to build Kubos Linux
+-  :doc:`../../ecosystem/linux-docs/kubos-linux-on-bbb` - Steps to build Kubos Linux
 
 Components
 ----------
@@ -214,4 +214,4 @@ Using Kubos Linux
 -----------------
 
 For information on how to create and run applications on your new Kubos Linux system, see the
-:doc:`../../os-docs/linux-docs/using-kubos-linux` and :doc:`working-with-the-bbb` guides.
+:doc:`../../ecosystem/linux-docs/using-kubos-linux` and :doc:`working-with-the-bbb` guides.
