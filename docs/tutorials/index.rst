@@ -47,6 +47,8 @@ mission logic.
 This series of tutorials will walk a new user through the major steps required to program a mission and then communicate with
 a system once it is in-flight.
 
+.. _mission-development-tutorials:
+
 Mission Development Tutorials
 -----------------------------
 
@@ -58,6 +60,8 @@ data and then storing that data into the telemetry database.
 
     Creating Your First KubOS Project <first-project>
     Creating Your First Mission Application <first-mission-app>
+
+.. _system-interaction-tutorials:
 
 System Interaction Tutorials
 ----------------------------
@@ -73,6 +77,8 @@ There is no coding required for these actions, however some scripting may used f
     Transferring Files <file-transfer>
     Querying the System <querying-telemetry>
     Creating a Shell Connection <shell>
+
+.. _advanced-tutorials:
 
 Advanced Tutorials
 ------------------

@@ -102,7 +102,16 @@ or bugs, see what you can work on, and to give feedback.
     :hidden:
 
     KubOS Design <kubos-design>
-    Getting Started <getting-started/index>
+    
+.. toctree::
+   :hidden:
+   :titlesonly:
+
+   Getting Started <getting-started/index>
+
+.. toctree::
+    :hidden:
+    
     Tutorials <tutorials/index>
     Working with an OBC <obc-docs/index>
     Mission Development <mission-dev/index>
