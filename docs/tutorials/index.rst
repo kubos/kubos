@@ -47,7 +47,7 @@ a system once it is in-flight.
 
 .. note::
 
-    You should be able to go through these tutorials from either a :doc:`local dev environment <../getting-started/setup>`
+    You should be able to go through these tutorials from either a :doc:`local dev environment <../getting-started/local-setup>`
     or an instance of the :doc:`Kubos SDK <../sdk-docs/sdk-installing>`
 
 Mission Development Tutorials

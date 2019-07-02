@@ -12,7 +12,7 @@ Pre-Requisites
 --------------
 
 - :doc:`Install the Kubos SDK <../sdk-docs/sdk-installing>` or set up the dependencies
-  required for a :doc:`local dev environment <../getting-started/setup>`
+  required for a :doc:`local dev environment <../getting-started/local-setup>`
 - Have an OBC available with ethernet capabilities
   (preferably with an :doc:`installation of Kubos Linux <../obc-docs/index>`)
 
