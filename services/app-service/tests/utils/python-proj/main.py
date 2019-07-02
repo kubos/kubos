@@ -10,6 +10,8 @@ import logging
 from sub import sub
 import sys
 
+SERVICES = app_api.Services()
+
 def on_boot():
     
     sub.test_func()
@@ -52,9 +54,18 @@ def main():
         nargs=1,
         help='Determines run behavior. Either "OnBoot" or "OnCommand"',
         required=True)
+    parser.add_argument(
+        '-c',
+        '--config',
+        nargs=1,
+        help='Specifies the location of a non-default configuration file')
     parser.add_argument('cmd_args', nargs='*')
     
     args = parser.parse_args()
+    
+    if args.config is not None:
+        global SERVICES
+        SERVICES = app_api.Services(args.config[0])
     
     if args.run[0] == 'OnBoot':
         on_boot()

@@ -149,6 +149,13 @@ pub fn app_start(
         "Run level which should be executed",
         "RUN_LEVEL",
     );
+    // This option will be processed by the system-api crate when a service query is run
+    opts.optflagopt(
+        "c",
+        "config",
+        "System config file which should be used",
+        "CONFIG",
+    );
     opts.optflag("h", "help", "Print this help menu");
 
     let matches = match opts.parse(&args[1..]) {

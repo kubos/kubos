@@ -105,7 +105,7 @@ def on_command(logger, cmd_args):
             sys.exit(1)
                     
     else:
-        query = '{ apps { active, app { uuid, name, version, author } } }'
+        query = '{ apps { active, app { name, version, author } } }'
         try:
             logger.info("Querying for active applications")
             logger.info("Query: {}".format(query))
@@ -130,10 +130,21 @@ def main():
         nargs=1,
         help='Determines run behavior. Either "OnBoot" or "OnCommand"',
         required=True)
+    # The -c argument should be present if you would like to be able to specify a non-default
+    # configuration file
+    parser.add_argument(
+        '-c',
+        '--config',
+        nargs=1,
+        help='Specifies the location of a non-default configuration file')
     # Other optional arguments which will be passed through to the underlying logic
     parser.add_argument('cmd_args', nargs='*')
 
     args = parser.parse_args()
+    
+    if args.config is not None:
+        global SERVICES
+        SERVICES = app_api.Services(args.config[0])
 
     if args.run[0] == 'OnBoot':
         on_boot(logger)
