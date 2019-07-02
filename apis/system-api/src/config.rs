@@ -164,10 +164,16 @@ fn get_config_path() -> String {
     opts.optopt("c", "config", "Path to config file", "CONFIG");
     // This library can be used by applications, which have this additional run level arg which
     // can be specified
-    opts.optopt("r", "run", "Run level which should be executed", "RUN_LEVEL");
+    opts.optopt(
+        "r",
+        "run",
+        "Run level which should be executed",
+        "RUN_LEVEL",
+    );
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
         Err(_) => {
+            eprintln!("Using default config values");
             // suppress errors so applications using Config can have their own Options
             return DEFAULT_PATH.to_string();
         }

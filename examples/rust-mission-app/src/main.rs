@@ -73,12 +73,12 @@ impl AppHandler for MyApp {
 
         opts.optflagopt("s", "cmd_string", "Subcommand", "CMD_STR");
         opts.optflagopt("t", "cmd_sleep", "Safe-mode sleep time", "CMD_INT");
-        
+
         info!("OnCommand logic called");
-        
+
         if args.len() == 0 {
             // No subcommand options were given, so we're done here
-            return Ok(())
+            return Ok(());
         }
 
         // Parse the command args (skip the first arg with the application name)
