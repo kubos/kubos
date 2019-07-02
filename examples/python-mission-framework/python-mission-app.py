@@ -4,6 +4,8 @@ import app_api
 import argparse
 import sys
 
+SERVICES = app_api.Services()
+
 def on_boot(logger):
     
     logger.info("OnBoot logic")
@@ -18,14 +20,19 @@ def main():
     
     parser = argparse.ArgumentParser()
     
-    parser.add_argument('--run', '-r')
+    parser.add_argument('--run', '-r', nargs=1)
+    parser.add_argument('--config', '-c', nargs=1)
     parser.add_argument('cmd_args', nargs='*')
     
     args = parser.parse_args()
     
-    if args.run == 'OnBoot':
+    if args.config is not None:
+        global SERVICES
+        SERVICES = app_api.Services(args.config[0])
+    
+    if args.run[0] == 'OnBoot':
         on_boot(logger)
-    elif args.run == 'OnCommand':
+    elif args.run[0] == 'OnCommand':
         on_command(logger)
     else:
         logger.error("Unknown run level specified")

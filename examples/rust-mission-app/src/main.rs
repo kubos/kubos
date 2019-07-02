@@ -111,7 +111,6 @@ impl AppHandler for MyApp {
                     apps {
                         active,
                         app {
-                            uuid,
                             name,
                             version,
                             author
