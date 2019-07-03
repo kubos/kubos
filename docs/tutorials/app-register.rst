@@ -1,7 +1,7 @@
 Registering a Mission Application
 =================================
 
-The Kubos :doc:`applications service <../app-docs/app-service>` is responsible for monitoring and
+The Kubos :doc:`applications service <../ecosystem/services/app-service>` is responsible for monitoring and
 managing all mission applications for a system.
 
 This tutorial walks the user through:

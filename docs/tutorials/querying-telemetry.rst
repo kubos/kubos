@@ -5,7 +5,7 @@ At some point, users will want to fetch data which was written to the telemetry 
 (for an example of this, see the :doc:`mission application <first-mission-app>` tutorial).
 
 This tutorial will walk the user through the process of communicating with the
-:doc:`telemetry database service <../os-docs/services/telemetry-db>` in order to retrieve a desired set of
+:doc:`telemetry database service <../ecosystem/services/telemetry-db>` in order to retrieve a desired set of
 telemetry information.
 
 Pre-Requisites

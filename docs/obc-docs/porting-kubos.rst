@@ -17,8 +17,8 @@ Internal
 ~~~~~~~~
 
 - :doc:`../ecosystem/linux-docs/kubos-linux-overview`
-- :doc:`../ecosystem/linux-docs/configuring-kubos`
-- :doc:`Building KubOS <../ecosystem/linux-docs/kubos-linux-on-bbb>`
+- :doc:`../deep-dive/klb/configuring-kubos`
+- :doc:`Building KubOS <../deep-dive/klb/kubos-linux-on-bbb>`
 
 External
 ~~~~~~~~
