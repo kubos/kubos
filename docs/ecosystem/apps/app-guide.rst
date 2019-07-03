@@ -117,7 +117,7 @@ include the ``-c path/to/config.toml`` argument when starting your application.
 
 For example::
 
-    $ ./app.py -c ../tools/config.toml
+    $ ./app.py -c ../tools/default_config.toml
 
 
 Additional Resources

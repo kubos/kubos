@@ -192,7 +192,8 @@ The mutation has two required arguments: the name of the application to start an
 app should execute with.
 
 The optional ``config`` input argument allows a custom ``config.toml`` file to be passed to the
-application.
+application. If the file is in the app's directory when it is registered, then it may be specified
+with a relative path. Otherwise, we recommend that you use an absolute file path.
 
 The optional ``args`` input argument allows additional arguments to be passed through to the
 underlying application. These arguments will be passed behind a ``--`` separator.
