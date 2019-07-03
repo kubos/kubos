@@ -2,7 +2,7 @@ Configuring Kubos Linux
 =======================
 
 The default build configurations included in the `kubos-linux-build <https://github.com/kubos/kubos-linux-build/tree/master/configs>`__ repo
-will include the :doc:`Kubos core services <../../os-docs/services/core-services>`, but not any of the available :doc:`hardware services <../../os-docs/services/hardware-services>`.
+will include the :doc:`Kubos core services <../../ecosystem/services/core-services>`, but not any of the available :doc:`hardware services <../../ecosystem/services/hardware-services>`.
 
 As a result, customers will need to manually enable the services and packages corresponding to the devices present in their system.
 
@@ -76,7 +76,7 @@ Going forward, this new file can be fed into any new builds, removing the need t
 Adding Custom Packages
 ----------------------
 
-While some work has been done by Kubos in order to support :doc:`hardware devices <../../os-docs/services/hardware-services>`,
+While some work has been done by Kubos in order to support :doc:`hardware devices <../../ecosystem/services/hardware-services>`,
 it is entirely possible that a customer might want to use a device which is not currently supported.
 In this case the customer should write their own support package, and then include it in their Kubos Linux build
 using the previous instructions.
@@ -107,4 +107,4 @@ This file is included in Kubos Linux from `kubos-linux-build/common/overlay/home
 
 Users may edit it prior to building their Linux image in order to add/remove/update service configurations.
 
-More information about this configuration may be found in the :doc:`service config doc <../../os-docs/services/service-config>`
+More information about this configuration may be found in the :doc:`service config doc <../../ecosystem/services/service-config>`

@@ -22,7 +22,7 @@ Kubos
 ~~~~~
 
     - :doc:`Creating a Kubos Project <../../../../tutorials/first-project>`
-    - :doc:`Using Kubos Linux <../../../../os-docs/linux-docs/using-kubos-linux>`
+    - :doc:`Using Kubos Linux <../../../../ecosystem/linux-docs/using-kubos-linux>`
     - :doc:`Working with the iOBC <../../../../obc-docs/iobc/working-with-the-iobc>`
 
 Run-Time Configuration

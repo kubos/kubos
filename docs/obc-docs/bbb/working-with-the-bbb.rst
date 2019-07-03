@@ -24,8 +24,8 @@ Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
 -  :doc:`../../tutorials/first-project` - Basic tutorial for creating your first KubOS project
--  :doc:`../os-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
--  :doc:`../os-docs/kubos-linux-on-bbb` - Steps to build Kubos Linux for the Beaglebone Black
+-  :doc:`../ecosystem/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`../ecosystem/kubos-linux-on-bbb` - Steps to build Kubos Linux for the Beaglebone Black
 -  :doc:`installing-linux-bbb` - Steps to install Kubos Linux
 
 Debug Console Connection

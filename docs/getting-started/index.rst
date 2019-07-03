@@ -84,9 +84,9 @@ Want to dig even deeper into KubOS? Take a look at our :ref:`advanced-tutorials`
 Services
 ~~~~~~~~
 
-Interested in learning more about the services which make KubOS go? Check out the :doc:`core services guide <../os-docs/services/core-services>`.
+Interested in learning more about the services which make KubOS go? Check out the :doc:`core services guide <../ecosystem/services/core-services>`.
 
-Ready to begin developing your own service? Check out the :doc:`service development guide <../os-docs/services/service-dev>`.
+Ready to begin developing your own service? Check out the :doc:`service development guide <../ecosystem/services/service-dev>`.
 
 Something Missing?
 ------------------

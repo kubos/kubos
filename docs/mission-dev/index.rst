@@ -9,15 +9,15 @@ The following steps don't have to be done precisely in this order, but this is g
 ------------------------
 
 Although there is already quite a bit of :doc:`supported hardware <../index>` in KubOS, your mission might have some hardware that is not yet supported, or unique to your mission (such as a payload).
-:doc:`Hardware services <../os-docs/services/hardware-services>` must be developed for any hardware that is not already supported.
-It is also suggested that you create a :doc:`payload service <../os-docs/services/payload-services>` for your mission's payload.
+:doc:`Hardware services <../ecosystem/services/hardware-services>` must be developed for any hardware that is not already supported.
+It is also suggested that you create a :doc:`payload service <../ecosystem/services/payload-services>` for your mission's payload.
 
 Radio Integrations
 __________________
 
 Radios have an additional step that's required to finish integrating them into the system.
 The hardware service only exposes the commands and telemetry for the radio hardware, but does not expose the uplink or downlink interface(s).
-To expose their downlink and uplink capability to the rest of the system, we provide a :doc:`communication service framework. <../os-docs/services/comms-framework>`
+To expose their downlink and uplink capability to the rest of the system, we provide a :doc:`communication service framework. <../ecosystem/services/comms-framework>`
 
 2. Mission Applications
 -----------------------
@@ -45,8 +45,8 @@ We *highly* recommend familiarizing yourself with both procedures during develop
 Updating KubOS
 ______________
 
-The process for updating the operating system can be reviewed here: :doc:`KubOS update process. <../os-docs/linux-docs/kubos-linux-upgrade>`
-The process for updating mission applications can be reviewed here: :doc:`application service guide. <../os-docs/services/app-service>`
+The process for updating the operating system can be reviewed here: :doc:`KubOS update process. <../ecosystem/linux-docs/kubos-linux-upgrade>`
+The process for updating mission applications can be reviewed here: :doc:`application service guide. <../ecosystem/services/app-service>`
 Both should be reviewed and tested on your hardware prior to launch.
 
 Kubos offers `SLAs <https://www.kubos.com/kubos/>`__ to aid in this process.
@@ -54,7 +54,7 @@ Kubos offers `SLAs <https://www.kubos.com/kubos/>`__ to aid in this process.
 Recovery in KubOS
 _________________
 
-The :doc:`KubOS recovery process <../os-docs/linux-docs/kubos-linux-recovery>` is defaulted to be configured for a development environment, where you have access to the hardware and are actively developing on it.
+The :doc:`KubOS recovery process <../ecosystem/linux-docs/kubos-linux-recovery>` is defaulted to be configured for a development environment, where you have access to the hardware and are actively developing on it.
 As a result, it **requires** augmentation before being flight ready, as it is not initially configured for desired on-orbit behavior.
 The augmentation will likely be limited to changing the alternate boot behavior in the event of multiple failed boots.
 

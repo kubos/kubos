@@ -16,9 +16,9 @@ Resources
 Internal
 ~~~~~~~~
 
-- :doc:`../os-docs/linux-docs/kubos-linux-overview`
-- :doc:`../os-docs/linux-docs/configuring-kubos`
-- :doc:`Building KubOS <../os-docs/linux-docs/kubos-linux-on-bbb>`
+- :doc:`../ecosystem/linux-docs/kubos-linux-overview`
+- :doc:`../ecosystem/linux-docs/configuring-kubos`
+- :doc:`Building KubOS <../ecosystem/linux-docs/kubos-linux-on-bbb>`
 
 External
 ~~~~~~~~
@@ -41,7 +41,7 @@ The system should be composed of at least the following partitions:
   Kubos Linux. We recommend that this be placed in its own partition in order to help prevent
   corruption.
 - Root FS - The Kubos Linux root file system
-- Upgrade partition - This will hold the Kubos :doc:`upgrade/rollback <../os-docs/linux-docs/kubos-linux-upgrade>`
+- Upgrade partition - This will hold the Kubos :doc:`upgrade/rollback <../ecosystem/linux-docs/kubos-linux-upgrade>`
   files
 - User data partition - This will hold all of the user data. It is placed in its own partition to
   prevent it from being affected by a system upgrade or rollback.
@@ -73,7 +73,7 @@ and should have a name which ends in "\*_defconfig".
 The `kubos-linux-build/configs/generic-kubos_defconfig` file gives a good starting place for your
 configuration. The "{target}" string should be replaced with your OBC's name.
 
-The Kubos :doc:`core services <../os-docs/services/core-services>` are included by default, so do
+The Kubos :doc:`core services <../ecosystem/services/core-services>` are included by default, so do
 not need to be manually specified in this file.
 
 Board Directory
@@ -136,7 +136,7 @@ etc/monitrc
 ^^^^^^^^^^^
 
 This file controls the settings of `Monit <https://mmonit.com/monit/documentation/monit.html>`__,
-the system's :doc:`process monitoring <../os-docs/linux-docs/monitoring>` tool.
+the system's :doc:`process monitoring <../ecosystem/linux-docs/monitoring>` tool.
 
 This file is customized for each board primarily due to the ``SET HTTPD`` command, which varies
 depending on whether or not the system has an ethernet connection available.

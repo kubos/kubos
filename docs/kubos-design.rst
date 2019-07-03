@@ -3,7 +3,7 @@ KubOS Design
 
 This document gives an introduction to the philosophy behind KubOS, and how that philosophy is reflected in the design of KubOS.
 If you're looking to dive into things immediately, check out our :doc:`Getting Started <getting-started/index>` section!
-If you want a description of each of the components in KubOS and their capability, check out the :doc:`KubOS Ecosystem <os-docs/index>` document, and the numerous pages it links to.
+If you want a description of each of the components in KubOS and their capability, check out the :doc:`KubOS Ecosystem <ecosystem/index>` document, and the numerous pages it links to.
 
 What is KubOS?
 --------------
@@ -105,5 +105,5 @@ As a result, KubOS strives to enable developers to *quickly* produce *reliable* 
 To uphold these core priorities, KubOS focuses on enabling mission developers to write small, standalone applications that leverage the microservices and operating system we provide.
 This allows applications to be understood, revised, updated, and tested much more easily, as the total "code change" per mission ends up being only these small applications.
 
-There is obviously much, much more to what applications and services can do and how they interact, and we suggest diving into the :doc:`KubOS Ecosystem <os-docs/index>` documentation for more information!
+There is obviously much, much more to what applications and services can do and how they interact, and we suggest diving into the :doc:`KubOS Ecosystem <ecosystem/index>` documentation for more information!
 Or, now that you understand what we've set out to do and why, you can :doc:`get started developing <getting-started/index>`!

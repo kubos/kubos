@@ -6,7 +6,7 @@ Overview
 
 This supplementary document covers specific features and components of Kubos Linux for the ISIS-OBC.
 
-The :doc:`../../os-docs/linux-docs/kubos-linux-overview` doc covers the major components of Kubos Linux.
+The :doc:`../../ecosystem/linux-docs/kubos-linux-overview` doc covers the major components of Kubos Linux.
 
 Additionally, this document covers the steps required in order to build Kubos Linux.
 
@@ -25,7 +25,7 @@ Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
 -  :doc:`../../obc-docs/iobc/installing-linux-iobc` - Steps to install Kubos Linux on an iOBC
--  :doc:`../../os-docs/linux-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`../../ecosystem/linux-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`../../obc-docs/iobc/working-with-the-iobc` - Guide for interacting with iOBC-specific features
 
 Software Components

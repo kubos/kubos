@@ -19,7 +19,7 @@ Prepare Services
 2. Ensure any included hardware services are properly communicating with hardware by issuing a ``noop`` mutation to each.
 3. Ensure any payload services you're including are properly communicating with their respective payload (hopefully by running the ``noop`` mutation you dutifully included).
 4. Ensure your ``config.toml`` is appropriate for your bus configuration.
-5. Configure your :doc:`logging and log retention <../os-docs/linux-docs/logging>` for your system memory requirements.
+5. Configure your :doc:`logging and log retention <../ecosystem/linux-docs/logging>` for your system memory requirements.
 
 .. note::
   We recommend that you limit logging to ``info`` and higher if you are using a file location that is prone to wearing out, as ``debug`` logs can cause significant amounts of logs to be generated.

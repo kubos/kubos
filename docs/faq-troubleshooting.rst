@@ -112,7 +112,7 @@ For more information, check out our documentation about :ref:`ethernet connectio
 System Won't Boot into Linux
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If the system goes through the :doc:`full recovery process <os-docs/linux-docs/kubos-linux-recovery>` and the bootcount is still exceeded,
+If the system goes through the :doc:`full recovery process <ecosystem/linux-docs/kubos-linux-recovery>` and the bootcount is still exceeded,
 it will present the U-Boot CLI instead of attempting to boot into Kubos Linux again.
 
 If this occurs, follow the :ref:`instructions for resetting the boot environment <env-reset>`.

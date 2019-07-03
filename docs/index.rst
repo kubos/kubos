@@ -19,7 +19,7 @@ Check out our architecture guide for an overview of how KubOS works and what it 
 and check out our system docs for a deeper explanation of each component:
 
  - :doc:`KubOS Design <kubos-design>`
- - :doc:`KubOS Ecosystem <os-docs/index>`
+ - :doc:`KubOS Ecosystem <ecosystem/index>`
 
 Want to get started with development?
 Check out our tutorials and try your own project:
@@ -60,7 +60,7 @@ Supported Hardware Devices
 
 KubOS supports a selection of hardware devices in varying capacities.
 
-Some devices have an additional :doc:`hardware service <os-docs/services/hardware-services>` which can be built into
+Some devices have an additional :doc:`hardware service <ecosystem/services/hardware-services>` which can be built into
 KubOS and provides a long-running process which allows easy, streamlined communication with the device.
 
 All supported devices have a :doc:`device API <deep-dive/apis/device-api/index>` which may be used.
@@ -115,7 +115,7 @@ or bugs, see what you can work on, and to give feedback.
     Tutorials <tutorials/index>
     Working with an OBC <obc-docs/index>
     Mission Development <mission-dev/index>
-    KubOS Ecosystem <os-docs/index>
+    KubOS Ecosystem <ecosystem/index>
     Under the Hood <deep-dive/index>
     Kubos SDK <sdk-docs/index>
     Contributing to KubOS <contributing/index>

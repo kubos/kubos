@@ -2,7 +2,7 @@ Shell Protocol
 ==============
 
 The shell protocol is implemented by both the
-:doc:`shell service <../../../os-docs/services/shell>` and any clients interfacing
+:doc:`shell service <../../../ecosystem/services/shell>` and any clients interfacing
 with the service.
 
 All messages in the shell protocol are encoded as `CBOR` arrays

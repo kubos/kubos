@@ -188,7 +188,7 @@ By default, nine archive files of each log type will be retained.
 If a new archive file is created and there are already nine files, the oldest will be deleted.
 
 More information about the logging infrastructure can be found in the
-:doc:`Kubos Linux logging doc <../os-docs/linux-docs/logging>`.
+:doc:`Kubos Linux logging doc <../ecosystem/logging>`.
 
 For ease-of-use, the Python applications API contains a helper function, ``logging_setup``,
 which will make all of the system calls required in order to set up the logger for the application.
