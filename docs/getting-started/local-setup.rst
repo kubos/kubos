@@ -34,7 +34,7 @@ After installing these dependencies, we suggest fetching the latest copy of the 
 
 After fetching the KubOS source repo, we suggest installing the Python ``app-api``, which is used in developing Python-based applications::
 
-    $ cd kubos/apis/app-api/python && pip3 install . --user
+    $ pushd kubos/apis/app-api/python && pip3 install . --user && popd
 
 After installing all of these dependencies, we suggest running the following script
 from the base of the kubos repo to verify everything is installed correctly and working::
