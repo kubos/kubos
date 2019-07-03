@@ -62,29 +62,34 @@ The following list gives links to each service's documentation:
     - |ISIS-AntS|
     - |iOBC-Supervisor|
     - |NovAtel-OEM6|
+    - |NSL Duplex|
     - `Pumpkin Supervisor MCUs <https://github.com/kubos/kubos/blob/master/services/pumpkin-mcu-service/README.rst>`__
 
 .. |MAI-400| raw:: html
- 
+
     <a href="../rust-docs/mai400_service/index.html" target="_blank">Adcole Maryland Aerospace MAI-400 ADACS</a>
-    
+
 .. |Clydespace-EPS| raw:: html
- 
+
     <a href="../rust-docs/clyde_3g_eps_service/index.html" target="_blank">Clyde Space 3rd Generation EPS</a>
 
 .. |ISIS-AntS| raw:: html
- 
+
     <a href="../rust-docs/isis_ants_service/index.html" target="_blank">ISIS Antenna Systems</a>
 
 .. |iOBC-Supervisor| raw:: html
- 
+
     <a href="../rust-docs/iobc_supervisor_service/index.html" target="_blank">ISIS-OBC Supervisor</a>
 
 .. |NovAtel-OEM6| raw:: html
- 
+
     <a href="../rust-docs/novatel_oem6_service/index.html" target="_blank">NovAtel OEM6 High Precision GNSS Receivers</a>
 
-.. note:: 
+.. |NSL Duplex| raw:: html
+
+    <a href="../rust-docs/nsl_duplex_d2_comms_service/index.html" target="_blank">NSL Duplex D2 Radio</a>
+
+.. note::
 
     In order to be included in the OBC and automatically started at boottime, the package for each hardware service
     must be enabled when building Kubos Linux

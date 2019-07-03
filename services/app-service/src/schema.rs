@@ -123,6 +123,16 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
             }
         };
 
+        let args = if let Some(mut params) = args {
+            // Add '--' to our list of args so that the app framework passes them successfully to
+            // the underlying app
+            let mut temp = vec!["--".to_owned()];
+            temp.append(&mut params);
+            Some(temp)
+        } else {
+            None
+        };
+
         Ok(match executor.context().subsystem().start_app(&name, &run_level_o, args) {
             Ok(num) => StartResponse { success: true, errors: "".to_owned(), pid: Some(num as i32)},
             Err(error) => StartResponse { success: false, errors: error.to_string(), pid: None },

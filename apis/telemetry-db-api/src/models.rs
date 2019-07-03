@@ -17,19 +17,11 @@
 use super::telemetry;
 use serde_derive::{Deserialize, Serialize};
 
-#[derive(Debug, Queryable, Serialize, Deserialize)]
+#[derive(Debug, Queryable, Serialize, Deserialize, Insertable)]
+#[table_name = "telemetry"]
 pub struct Entry {
     pub timestamp: f64,
     pub subsystem: String,
     pub parameter: String,
     pub value: String,
-}
-
-#[derive(Insertable)]
-#[table_name = "telemetry"]
-pub struct NewEntry<'a> {
-    pub timestamp: f64,
-    pub subsystem: &'a str,
-    pub parameter: &'a str,
-    pub value: &'a str,
 }

@@ -104,7 +104,7 @@ impl Protocol {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```no_run
     /// use cbor_protocol::*;
     ///
     /// let cbor_connection = Protocol::new(&"0.0.0.0:8000".to_owned(), 4096);
@@ -316,7 +316,7 @@ impl Protocol {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```no_run
     /// use cbor_protocol::*;
     /// use std::time::Duration;
     ///

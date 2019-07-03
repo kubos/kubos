@@ -38,18 +38,40 @@ which we have used to measure various behaviors of the telemetry database servic
 Because each OBC has its own unique system resources, we recommend :doc:`compiling and running <../sdk-docs/sdk-rust>`
 the test project on your OBC to obtain the most accurate results.
 
-When run on a Beaglebone Black, we gathered the following benchmark statistics:
+When run on a Beaglebone Black, we gathered the following benchmark statistics::
 
-- Sending UDP requests takes ~45 microseconds
+   /home/kubos # ./db-test -c tlmdb-config.toml -i 1000
 
-    - This means that a client can send UDP requests at a rate of 22,000 requests per second, if they don't wait for
-      a response. Note: This is far faster than rate at which the service processes requests, meaning that packets
-      will be dropped if this maximum speed is used.
++---------------------------------+------------+------------+
+|  NAME                           | Avg (us)   | Total (us) |
++=================================+============+============+
+|  local_db_api_insert            | 50460      | 50460353   |
++---------------------------------+------------+------------+
+|  local_db_api_insert_bulk       | 213        | 213957     |
++---------------------------------+------------+------------+
+|  remote_gql_insert              | 64356      | 64356103   |
++---------------------------------+------------+------------+
+|  remote_gql_insert_bulk         | 9608       | 9608876    |
++---------------------------------+------------+------------+
+|  remote_udp_insert              | 87         | 87930      |
++---------------------------------+------------+------------+
 
-- Telemetry database inserts take ~16 milliseconds
-- Round-trip service transactions (including UDP receive request, database insert, and UDP send response) take ~17 milliseconds
+In summary:
 
-    - This means that the service can process roughly 58 database insert requests per second
+- Sending UDP request takes ~87 microseconds
+
+    - This means that a client can send UDP requests up to a rate of 11,494 requests per second, if
+      they don't wait for a response. Note: This is far faster than the rate at which the service
+      processes requests, meaning that packets will be dropped if this maximum speed is used.
+
+- Individual telemetry database inserts take ~50 milliseconds per entry, while bulk telemetry
+  database insertions take 213 microseconds per entry on average.
+- Individual GraphQL inserts (including GraphQL receive request, database insert, and
+  GraphQL send response) take ~64 milliseconds per entry, while bulk inserts (many entries at once)
+  take 9.6 milliseconds per entry.
+
+    - This means that the GraphQL service can process roughly 104 database insert requests per
+      second, while providing acknowledgement and transaction status.
 
 Querying the Service
 --------------------
@@ -128,6 +150,52 @@ It has the following schema::
 
 The ``timestamp`` argument is optional. If it is not specified, one will be generated based on the current system time,
 in fractional seconds.
+
+Adding Multiple Entries to the Database
+---------------------------------------
+
+The ``insertBulk`` mutation can be used to add multiple entries to the telemetry database at the
+same time. It has the following schema::
+
+   type InsertEntry {
+      timestamp: Float,
+      subsystem: String!,
+      parameter: String!,
+      value: String!
+   }
+
+   mutation {
+      insertBulk(timestamp: Float, entries: [InsertEntry!]!): {
+         success: Boolean!,
+         errors: String!
+      }
+   }
+
+Each individual telemetry entry has an optional ``timestamp`` field. If it is not specified, the optional
+``timestamp`` argument to this function will be used if it is specified, otherwise one will be
+generated based on the current system time in fractional seconds.
+
+For example, to insert multiple telemetry data points all with the same current system time::
+
+   mutation {
+      insertBulk(entries: [
+          { subsystem: "adcs", parameter: "voltage", value: "3.3" },
+          { subsystem: "eps", parameter: "voltage", value: "5.0" },
+          { subsystem: "obc", parameter: "cpu", value: "45.1" }
+      ])
+   }
+
+Or to insert multiple entries with a single pre-generated timestamp::
+
+   mutation {
+      insertBulk(
+         timestamp: 1559594402.0,
+         entries: [
+             { subsystem: "adcs", parameter: "voltage", value: "3.3" },
+             { subsystem: "eps", parameter: "voltage", value: "5.0" },
+             { subsystem: "obc", parameter: "cpu", value: "45.1" }
+         ])
+   }
 
 Limitations
 ~~~~~~~~~~~

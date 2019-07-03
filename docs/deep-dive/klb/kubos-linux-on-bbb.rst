@@ -101,8 +101,8 @@ Enter the new folder
 
     $ cd kubos-linux
 
-Download BuildRoot-2017.02 (more current versions of BuildRoot may work as well,
-but all testing has been done against 2017.02)
+Download BuildRoot-2019.02.2 (more current versions of BuildRoot may work as well,
+but all testing has been done against 2019.02.2)
 
 .. note:: All Kubos documentation will refer to v2019.02.2, which is the latest version of the LTS release at the time of this writing.
 

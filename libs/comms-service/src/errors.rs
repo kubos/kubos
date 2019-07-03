@@ -41,6 +41,18 @@ pub enum CommsServiceError {
     /// All of the ports allocated for handling packets are binded and unable to be used.
     #[fail(display = "All of the ports allocated for handling packets are binded.")]
     NoAvailablePorts,
+    /// No data available for reading
+    #[fail(display = "No data available for reading")]
+    NoReadData,
+    /// An error was encountered when parsing a packet
+    #[fail(display = "Parsing error {}", _0)]
+    ParsingError(String),
+    /// Generic error encountered
+    #[fail(display = "Error encountered {}", _0)]
+    GenericError(String),
+    /// Unknown payload type encountered
+    #[fail(display = "Unknown payload type encountered: {}", _0)]
+    UnknownPayloadType(u16),
 }
 
 /// Result returned by the `comms-service`.

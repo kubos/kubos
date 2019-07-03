@@ -55,7 +55,7 @@
 //! let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 //!
 //! // Start communication service.
-//! CommsService::start(controls, &telem);
+//! CommsService::start::<Arc<UdpSocket>, SpacePacket>(controls, &telem);
 //! # Ok(())
 //! # }
 //! ```
@@ -66,10 +66,8 @@
 //! [service-name.comms]
 //! max_num_handlers = 50
 //! downlink_ports = [13011]
-//! ground_port = 9001
-//! timeout = 1500
-//! ground_ip = "192.168.8.1"
-//! satellite_ip = "192.168.8.2"
+//! timeout = 1500"
+//! ip = "192.168.8.2"
 //! ```
 
 #[macro_use]
@@ -78,9 +76,14 @@ extern crate juniper;
 #[macro_use]
 extern crate log;
 
+extern crate byteorder;
+extern crate failure;
+
 mod config;
 mod errors;
+mod packet;
 mod service;
+mod spacepacket;
 mod telemetry;
 
 #[cfg(test)]
@@ -97,3 +100,7 @@ pub use crate::telemetry::CommsTelemetry;
 
 /// Communication Service configuration parsing.
 pub use crate::config::*;
+
+pub use packet::LinkPacket;
+pub use packet::PayloadType;
+pub use spacepacket::SpacePacket;
