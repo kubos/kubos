@@ -223,7 +223,7 @@ Rust Service
 This is a quick overview of the payload service written in Rust.
 
 The current guide for working with Rust within the Kubos SDK can be
-found :doc:`here <../sdk-docs/sdk-rust>`.
+found :doc:`here <../../sdk-docs/sdk-rust>`.
 
 Libraries
 ~~~~~~~~~

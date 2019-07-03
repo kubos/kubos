@@ -42,7 +42,7 @@ All of the KubOS core services require an ``.addr`` section in the configuration
 
 A local configuration file will only need config data for the services which you
 intend to run locally. If you would like to run a hardware service, each existing
-:doc:`hardware service <../os-docs/services/hardware-services>`
+:doc:`hardware service <../ecosystem/services/hardware-services>`
 provided by Kubos documents their configuration options within their respective pages.
 
 Running Services

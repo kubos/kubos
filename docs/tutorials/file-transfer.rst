@@ -1,7 +1,7 @@
 Transferring Files to an OBC
 ============================
 
-Once a satellite is in orbit, the :doc:`file transfer service <../os-docs/services/file>` can be used to
+Once a satellite is in orbit, the :doc:`file transfer service <../ecosystem/services/file>` can be used to
 transfer files both to and from the ground.
 
 Pre-Requisites

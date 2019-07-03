@@ -35,7 +35,7 @@ Benchmark
 The Kubos repo contains a `database benchmark project <https://github.com/kubos/kubos/tree/master/test/benchmark/db-test>`__
 which we have used to measure various behaviors of the telemetry database service.
 
-Because each OBC has its own unique system resources, we recommend :doc:`compiling and running <../sdk-docs/sdk-rust>`
+Because each OBC has its own unique system resources, we recommend :doc:`compiling and running <../../sdk-docs/sdk-rust>`
 the test project on your OBC to obtain the most accurate results.
 
 When run on a Beaglebone Black, we gathered the following benchmark statistics::
