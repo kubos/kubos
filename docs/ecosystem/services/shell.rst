@@ -6,7 +6,7 @@ mission operations to the OBC. It may also be used between a developer's
 system and the OBC when in a development or testing environment.
 
 The shell service provides shell functionality by implementing the
-:doc:`shell protocol <../../apis/kubos-libs/shell-protocol>`. The shell protocol is UDP-based
+:doc:`shell protocol <../../deep-dive/protocols/shell-protocol>`. The shell protocol is UDP-based
 which means a connection is required between the OBC and ground segment
 capable of transferring UDP packets. This should be established using
 a standard network connection.
@@ -15,7 +15,7 @@ Configuration
 -------------
 
 The shell service has a couple configuration options which may be
-defined in the system's :doc:`config.toml <../services/service-config>` file:
+defined in the system's :doc:`config.toml <service-config>` file:
 
     - ``[shell-service.addr]``
 

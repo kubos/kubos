@@ -7,7 +7,7 @@ Overview
 This document covers the Kubos Linux features which are specific to the
 Pumpkin MBM2 target.
 
-Please refer to :doc:`../../ecosystem/using-kubos-linux` for a general guide to using Kubos Linux.
+Please refer to :doc:`../../ecosystem/linux-docs/using-kubos-linux` for a general guide to using Kubos Linux.
 
 Reference Documents
 -------------------
@@ -23,8 +23,8 @@ Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
 -  :doc:`../../tutorials/first-project` - Basic tutorial for creating your first KubOS project
--  :doc:`../../ecosystem/using-kubos-linux` - General guide for interacting with Kubos Linux
--  :doc:`../../ecosystem/kubos-linux-on-mbm2` - Steps to build Kubos Linux for the Pumpkin MBM2
+-  :doc:`../../ecosystem/linux-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
+-  :doc:`../../deep-dive/klb/kubos-linux-on-mbm2` - Steps to build Kubos Linux for the Pumpkin MBM2
 -  :doc:`installing-linux-mbm2` - Steps to install Kubos Linux
 
 Status LEDs
@@ -270,7 +270,7 @@ Doc <http://www.nxp.com/documents/user_manual/UM10204.pdf>`__
 Kubos Linux is currently configured to support the I2C standard-mode
 speed of 100kHz.
 
-For examples and instructions, see the :doc:`I2C HAL documentation <../../apis/kubos-hal/i2c-hal/index>`.
+For examples and instructions, see the :doc:`I2C HAL documentation <../../deep-dive/apis/kubos-hal/i2c-hal/index>`.
 
 .. note:: The I2C bus is available through the Kubos C HAL as ``K_I2C1``.
 

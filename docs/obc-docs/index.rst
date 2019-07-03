@@ -1,7 +1,7 @@
 Working with KubOS and an OBC
 =============================
 
-After getting your :doc:`development environment <../getting-started/setup>` set up and playing
+After getting your :doc:`development environment <../getting-started/local-setup>` set up and playing
 around with the :doc:`basics of KubOS <../tutorials/index>`, you can move on to interacting with
 hardware.
 

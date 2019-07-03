@@ -140,6 +140,42 @@ SDK's Vagrant box and compliance is a required part of our CI checks.
 linting our Rust code. It comes included in our SDK's Vagrant box and compliance
 is a required part of our CI checks.
 
+Formatting
+~~~~~~~~~~
+
+To format your Rust code:
+
+- Install ``rustfmt``::
+
+    $ rustup component add rustfmt-preview
+    
+- Navigate to your project folder
+- Run the formatting tool via Cargo::
+
+    $ cargo fmt
+
+.. note::
+
+    Kubos is currently using the ``1.0.0-stable`` version of ``rustfmt``
+
+Linting
+~~~~~~~
+
+To run the ``clippy`` linter on your Rust code:
+
+- Install ``clippy``::
+
+    $ rustup component add clippy
+
+- Navigate to your project folder
+- Start with a clean build::
+
+    $ cargo clean
+    
+- Run the linter via Cargo::
+
+    $ cargo clippy
+
 Python Standards
 ----------------
 

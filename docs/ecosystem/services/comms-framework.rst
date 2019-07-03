@@ -247,7 +247,7 @@ It is recommended that the service also follow the guidelines for
 :doc:`normal hardware services <hardware-services>`.
 
 Some support for communicating with specific hardware devices has been provided in various
-:doc:`hardware APIs <../apis/device-api/index>`.
+:doc:`hardware APIs <../../deep-dive/apis/device-api-guide>`.
 
 For more information about how to implement a communications service, please refer to the following
 resources:
