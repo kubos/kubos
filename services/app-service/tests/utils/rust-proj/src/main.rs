@@ -33,8 +33,16 @@ impl AppHandler for MyApp {
     }
 
     fn on_command(&self, args: Vec<String>) -> Result<(), Error> {
+        let mut success = false;
+        
         if args.is_empty() {
-            bail!("No args given");
+            // Test using a custom config file
+            let service = ServiceConfig::new("test-service");
+            if service.hosturl() == "123.4.5.6:7890" {
+                success = true;
+            } else {
+                bail!("Service URL mismatch: {}", service.hosturl());
+            }
         }
 
         // Test passing through args to this underlying app logic
@@ -48,7 +56,9 @@ impl AppHandler for MyApp {
             Err(f) => panic!(f.to_string()),
         };
 
-        let mut success = matches.opt_present("f");
+        if matches.opt_present("f") {
+            success = true;
+        }
 
         if matches.opt_str("t") == Some("test".to_owned()) {
             success = true;

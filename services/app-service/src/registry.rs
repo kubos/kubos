@@ -238,7 +238,7 @@ impl AppRegistry {
         // Make sure the file which should be called for execution is present in the directory
         if !app_path.join(app_exec.clone()).exists() {
             return Err(AppError::RegisterError {
-                err: format!("Application file {} not found in given path", app_name),
+                err: format!("Application file {} not found in given path", app_exec),
             });
         }
 
@@ -538,6 +538,7 @@ impl AppRegistry {
         &self,
         app_name: &str,
         run_level: &RunLevel,
+        config: Option<String>,
         args: Option<Vec<String>>,
     ) -> Result<u32, AppError> {
         // Look up the active version of the requested application
@@ -588,6 +589,10 @@ impl AppRegistry {
         let mut cmd = Command::new(app_path);
 
         cmd.arg("-r").arg(format!("{}", run_level));
+
+        if let Some(path) = config {
+            cmd.arg("-c").arg(path);
+        }
 
         if let Some(add_args) = args {
             cmd.args(&add_args);
@@ -644,7 +649,7 @@ impl AppRegistry {
             match entry {
                 Ok(file) => {
                     let name = file.file_name();
-                    match self.start_app(&name.to_string_lossy(), &RunLevel::OnBoot, None) {
+                    match self.start_app(&name.to_string_lossy(), &RunLevel::OnBoot, None, None) {
                         Ok(_) => apps_started += 1,
                         Err(error) => {
                             error!("Failed to start {}: {}", name.to_string_lossy(), error);
