@@ -50,6 +50,8 @@ a system once it is in-flight.
     You should be able to go through these tutorials from either a :doc:`local dev environment <../getting-started/local-setup>`
     or an instance of the :doc:`Kubos SDK <../sdk-docs/sdk-installing>`
 
+.. _mission-development-tutorials:
+
 Mission Development Tutorials
 -----------------------------
 
@@ -61,6 +63,8 @@ data and then storing that data into the telemetry database.
 
     Creating Your First KubOS Project <first-project>
     Creating Your First Mission Application <first-mission-app>
+
+.. _system-interaction-tutorials:
 
 System Interaction Tutorials
 ----------------------------
@@ -76,6 +80,8 @@ There is no coding required for these actions, however some scripting may used f
     Transferring Files <file-transfer>
     Querying the System <querying-telemetry>
     Creating a Shell Connection <shell>
+
+.. _advanced-tutorials:
 
 Advanced Tutorials
 ------------------
