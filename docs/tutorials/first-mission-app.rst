@@ -41,7 +41,7 @@ Mission Application Overview
 Mission applications are user-created programs which are used to control satellite behavior and
 execute mission logic.
 
-These applications are registered with the :doc:`applications service <../os-docs/services/app-service>`,
+These applications are registered with the :doc:`applications service <../ecosystem/services/app-service>`,
 which is responsible for tracking versioning, kicking off applications at boot time, and controlling
 application upgrades and rollbacks.
 
@@ -165,7 +165,7 @@ Kubos Services and GraphQL
 --------------------------
 
 A major component of most mission applications will be interacting with
-:doc:`Kubos services <../os-docs/services/index>`.
+:ref:`Kubos services <service-docs>`.
 
 These services provided interfaces to underlying hardware and other system resources.
 
@@ -270,7 +270,7 @@ Each service has a schema which defines all of its queries and mutations.
 Users should refer to these to determine what actions are available for each service and how their
 requests should be structured.
 
-Documentation for Kubos services can be found within the :doc:`services <../os-docs/services/index>`
+Documentation for Kubos services can be found within the :ref:`services <service-docs>`
 section.
 
 For example, links to the schemas for all of the pre-built hardware services can be found
@@ -294,7 +294,7 @@ locally.
 Querying a Service
 ------------------
 
-For this tutorial, we'll be querying the :doc:`monitor service <../os-docs/services/monitor-service>` for
+For this tutorial, we'll be querying the :doc:`monitor service <../ecosystem/services/monitor-service>` for
 the current amount of available memory.
 
 The monitor service is a unique hardware service which communicates with the OBC itself in order to
@@ -323,13 +323,13 @@ This indicates that there are four possible return fields, however, the lack of 
 means if any of them are not available on the system (for example, ``lowFree`` isn't available on
 all systems), it will be omitted.
 
-To make the communication process simpler, we'll be using the :doc:`Python app API <../os-docs/apps/python-app-api>`
+To make the communication process simpler, we'll be using the :doc:`Python app API <../ecosystem/apps/python-app-api>`
 to send our GraphQL requests.
 
 For each request, it:
 
     - Looks up the HTTP address of the service name which is given from the system's
-      :doc:`config.toml <../os-docs/services/service-config>` file
+      :doc:`config.toml <../ecosystem/services/service-config>` file
     - Wraps the given request into a proper HTTP packet and sends it to the target service
     - Parses the response message and checks for errors
     - Returns the message payload if the request was successful
@@ -430,7 +430,7 @@ Writing Data to the Telemetry Database
 
 Now that we have a data point, we need to save it somewhere useful.
 The telemetry database is the main storage location for all telemetry data.
-The :doc:`telemetry database service <../os-docs/services/telemetry-db>` is the preferred interface point
+The :doc:`telemetry database service <../ecosystem/services/telemetry-db>` is the preferred interface point
 for storing and retrieving that data.
 
 We'll be using the service's ``insert`` mutation in order to add a new telemetry entry.
@@ -591,7 +591,7 @@ This file has the following key values:
 Our file should look like this::
 
     name = "my-mission-app"
-    executable = "my-misison-app.py"
+    executable = "my-mission-app.py"
     version = "1.0"
     author = "Me"
 

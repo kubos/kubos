@@ -1,7 +1,7 @@
 Establishing a Shell Connection with an OBC
 ===========================================
 
-The :doc:`shell service <../os-docs/services/shell>` is used to provide shell access and commanding from
+The :doc:`shell service <../ecosystem/services/shell>` is used to provide shell access and commanding from
 mission operations or a development environment to the OBC.
 
 Pre-Requisites

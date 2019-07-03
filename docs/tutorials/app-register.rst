@@ -163,7 +163,7 @@ The response should like this::
           "entry": {
             "app": {
               "name": "my-mission-app",
-              "executable": "/home/system/kubos/apps/my-mission-app/1.0/my-mission-app.py"
+              "executable": "/home/user/app-registry/my-mission-app/1.0/my-mission-app.py"
             }
           }
         }
@@ -172,8 +172,8 @@ The response should like this::
 
 We can break down the resulting executable path like so:
 
-    - ``/home/system/kubos/apps`` - This is the default directory that the applications service uses to
-      save all registered applications
+    - ``/home/user/app-registry`` - This is the directory that the applications service uses to
+      save all registered applications. We previously specified it in our ``config.toml`` file
     - ``my-mission-app`` - The name of our application
     - ``1.0`` - Our manifest file specified that this was version 1.0 of our application
     - ``my-mission-app.py`` - Our application file
@@ -185,7 +185,7 @@ We'll go ahead and start our app now to verify it works using the ``startApp`` m
 It has the following schema::
 
     mutation {
-        startApp(name: String!, runLevel: String!, args: [String]): {
+        startApp(name: String!, runLevel: String!, config: String, args: [String]): {
             success: Bool!
             errors: String,
             pid: Int
@@ -195,6 +195,7 @@ It has the following schema::
 The ``name`` input parameter specifies the name of the application which should be started.
 The ``runLevel`` input parameter specifies which run case should be called; it must be either
 "OnBoot" or "OnCommand".
+The ``config`` input parameter specifies a non-default configuration file which should be used.
 The ``args`` input parameter allows the user to pass additional arguments through to the underlying
 application.
 
@@ -207,7 +208,7 @@ The mutation returns three fields:
 Our request should look like this::
 
     mutation {
-      startApp(name: "my-mission-app", runLevel: "OnCommand") {
+      startApp(name: "my-mission-app", runLevel: "OnCommand", config:"/home/user/kubos/tools/default_config.toml") {
         success,
         pid
       }
@@ -224,24 +225,22 @@ And the response should look like this::
       }
     }
 
-To verify that the app ran successfully, we'll check the contents of our log file::
+The console where you started the app service should show the app's exection messages::
 
-    $ ssh kubos@127.0.0.1
-    kubos@127.0.0.1's password: ********
-    /home/user # cat oncommand-output
-    Current available memory: 496768 kB
+    Current available memory: 4390792 kB
+    Telemetry insert completed successfully
 
 Updating
 --------
 
-After looking at our log output, it would be nice if our log message included the timestamp of
+After looking at our output, it would be nice if our memory message included the timestamp of
 when the system memory was checked.
 
 Let's add the ``datetime`` module to our file with ``import datetime`` and then update the log line like so:
 
 .. code-block:: python
 
-    file.write("%s: Current available memory: %s kB \r\n" % (str(datetime.datetime.now()), available))
+    print("%s: Current available memory: %s kB" % (str(datetime.datetime.now()), available))
 
 Since this is a new version of our application, we'll then need to update our ``manifest.toml``
 file to change the ``version`` key from ``"1.0"`` to ``"2.0"``.
@@ -273,20 +272,19 @@ The response should look almost identical::
                 "entry": {
                     "app": {
                         "name":"my-mission-app",
-                        "executable":"/home/system/kubos/apps/my-mission-app/2.0/my-mission-app.py",
+                        "executable":"/home/user/app-registry/my-mission-app/2.0/my-mission-app.py"
                     }
                 }
             }
         }
     }
     
-After running our app again with the ``startApp`` mutation, our log file should now look like this:
+After running our app again with the ``startApp`` mutation, our output should now look like this:
 
 .. code-block:: none
 
-    /home/user # cat oncommand-output
-    Current available memory: 496768 kB
-    1970-01-01 01:11:23.947890: Current available memory: 496952 kB
+    2019-07-03 16:15:29.452626: Current available memory: 4390664 kB
+    Telemetry insert completed successfully
 
 Verifying
 ---------

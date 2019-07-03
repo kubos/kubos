@@ -7,7 +7,7 @@ As a result, a communications service which facilitates passing messages between
 rest of the satellite must be constructed on an individual basis.
 
 This tutorial walks the user through the process of using the
-:doc:`communications service framework <../os-docs/services/comms-framework>` in order to create a basic
+:doc:`communications service framework <../ecosystem/services/comms-framework>` in order to create a basic
 hardware service for a radio.
 To allow testing, the radio connection will be simulated by a UART connection.
 
@@ -66,7 +66,7 @@ can be found in the Kubos repo.
 Configuration
 -------------
 
-Before we write any actual code, we want to update our system's :doc:`config.toml <../os-docs/services/service-config>`
+Before we write any actual code, we want to update our system's :doc:`config.toml <../ecosystem/services/service-config>`
 file.
 
 We'll name our service `radio-service`.

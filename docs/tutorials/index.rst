@@ -3,8 +3,8 @@ Tutorials
 
 Kubos users develop custom flight software for their OBCs using the KubOS libraries.
 
-This custom software is then used to communicate with the various :doc:`core <../os-docs/services/core-services>` and
-:doc:`hardware <../os-docs/services/hardware-services>` services in order to interact with the system and execute
+This custom software is then used to communicate with the various :doc:`core <../ecosystem/services/core-services>` and
+:doc:`hardware <../ecosystem/services/hardware-services>` services in order to interact with the system and execute
 mission logic.
 
 .. uml::
@@ -61,8 +61,9 @@ data and then storing that data into the telemetry database.
 .. toctree::
     :maxdepth: 1
 
-    Creating Your First KubOS Project <first-project>
+
     Creating Your First Mission Application <first-mission-app>
+    Running a KubOS Project on an OBC <first-obc-project>
 
 .. _system-interaction-tutorials:
 
@@ -73,12 +74,15 @@ These tutorials cover all of the ways a user might directly interact with a syst
 
 There is no coding required for these actions, however some scripting may used for example purposes.
 
+The first two tutorials may be run entirely locally.
+The file and shell service tutorials are written to be used with an OBC.
+
 .. toctree::
     :maxdepth: 1
 
     Registering an Application <app-register>
-    Transferring Files <file-transfer>
     Querying the System <querying-telemetry>
+    Transferring Files <file-transfer>
     Creating a Shell Connection <shell>
 
 .. _advanced-tutorials:
@@ -100,7 +104,7 @@ These docs give more information about various components of KubOS:
 
     - :doc:`KubOS Design <../kubos-design>` - The high-level design of KubOS
     - :doc:`../getting-started/using-rust` - Instructions for using Rust with KubOS
-    - :doc:`Application Dev Guides <../os-docs/apps/app-guide>` - More in-depth instructions about
+    - :doc:`Application Dev Guides <../ecosystem/apps/app-guide>` - More in-depth instructions about
       creating mission applications
     - :ref:`Kubos Services <service-docs>` - Docs covering what services are,
       which services are availabe, and how to create your own services
