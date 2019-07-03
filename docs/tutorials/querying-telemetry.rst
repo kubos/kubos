@@ -1,5 +1,5 @@
-Querying an OBC for Telemetry Data
-==================================
+Fetching Telemetry Data
+=======================
 
 At some point, users will want to fetch data which was written to the telemetry database
 (for an example of this, see the :doc:`mission application <first-mission-app>` tutorial).
@@ -8,21 +8,21 @@ This tutorial will walk the user through the process of communicating with the
 :doc:`telemetry database service <../ecosystem/services/telemetry-db>` in order to retrieve a desired set of
 telemetry information.
 
-Pre-Requisites
---------------
-
-- :doc:`Install the Kubos SDK <../sdk-docs/sdk-installing>` or set up the dependencies
-  required for a :doc:`local dev environment <../getting-started/local-setup>`
-- Have an OBC available with ethernet capabilities
-  (preferably with an :doc:`installation of Kubos Linux <../obc-docs/index>`)
-
-    - :ref:`Configuring Ethernet <ethernet>`
-
-- Have the telemetry database service running on a target OBC (this happens by default when running KubOS)
-- Windows users: :ref:`Make sure Windows is setup to allow UDP packets from the OBC <windows-udp>`
-
 Setup
 -----
+
+:doc:`Install the Kubos SDK <../sdk-docs/sdk-installing>` or set up the dependencies required for a
+:doc:`local dev environment <../getting-started/local-setup>`
+
+If you have not done so already, create a clone of the `KubOS source repo <https://github.com/kubos/kubos>`__::
+
+    $ git clone https://github.com/kubos/kubos
+    
+Navigate to the kubos source directory and run the following commands to start the telemetry
+database service in the background (the services may need to be built first, which will take several
+minutes to complete)::
+  
+    $ cargo run --bin telemetry-service -- -c tools/default_config.toml &
 
 In order to have something to query, we'll need to seed the database.
 We'll use ``curl`` to create some HTTP requests which will add data points to the telemetry
@@ -30,16 +30,16 @@ database.
 
 .. note::
 
-    For all commands, replace the ``10.0.2.20`` value with the IP address of your OBC.
-    The example commands will also be referencing the telemetry database service's default port, 8006
+    The example commands will be referencing the telemetry database service port which is defined
+    in the `kubos/tools/default_config.toml` file, 8002
 
 From your development environment, run the following::
 
-    $ curl 10.0.2.20:8006 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"voltage\\\",value:\\\"5.0\\\"){success}}\"}"
-    $ curl 10.0.2.20:8006 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"voltage\\\",value:\\\"5.0\\\"){success}}\"}"
-    $ curl 10.0.2.20:8006 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"current\\\",value:\\\"0.1\\\"){success}}\"}"
-    $ curl 10.0.2.20:8006 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"current\\\",value:\\\"0.1\\\"){success}}\"}"
-    $ curl 10.0.2.20:8006 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"gps\\\",parameter:\\\"voltage\\\",value:\\\"3.3\\\"){success}}\"}"
+    $ curl 0.0.0.0:8002 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"voltage\\\",value:\\\"5.0\\\"){success}}\"}"
+    $ curl 0.0.0.0:8002 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"voltage\\\",value:\\\"5.0\\\"){success}}\"}"
+    $ curl 0.0.0.0:8002 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"current\\\",value:\\\"0.1\\\"){success}}\"}"
+    $ curl 0.0.0.0:8002 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"current\\\",value:\\\"0.1\\\"){success}}\"}"
+    $ curl 0.0.0.0:8002 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"gps\\\",parameter:\\\"voltage\\\",value:\\\"3.3\\\"){success}}\"}"
     
 Each of these commands should return the following::
 
@@ -48,7 +48,7 @@ Each of these commands should return the following::
 GraphiQL
 --------
 
-Please navigate to ``http://{ip}:8006/graphiql`` in order to communicate with the telemetry service
+Please navigate to ``http://0.0.0.0:8002/graphiql`` in order to communicate with the telemetry service
 for this tutorial.
 
 More information about the GraphiQL interface can be found :ref:`here <graphiql>`.

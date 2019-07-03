@@ -64,7 +64,7 @@ Sending a File to an OBC
 
 We'll start by transferring a file to our OBC.
 For this tutorial, we'll be transferring the application file that was created as part of the
-:doc:`mission application <first-mission-app>` tutorial to the ``kubos`` user's home directory on the
+:doc:`mission application on an OBC <first-obc-project>` tutorial to the ``kubos`` user's home directory on the
 OBC.
 
 We'll need to specify the OBC's IP address and the port that the file transfer service is listening
@@ -108,21 +108,20 @@ As a result, if you run the upload command again, you should see a slightly trun
 Receiving a File from an OBC
 ----------------------------
 
-Next, we'll request that the OBC send us the log file that was created by running the on-command
-logic in our mission application::
+Next, we'll request that the OBC send us the application debug log file::
 
-    $ kubos-file-client -r 10.0.2.20 -p 8008 download /home/system/log/apps/info.log
+    $ kubos-file-client -r 10.0.2.20 -p 8008 download /var/log/app-debug.log
     
 We're not specifying a destination file, which will result in the transferred file being saved as
-`oncommand-output` in our current directory.
+`app-debug.log` in our current directory.
 
 The output from the client should look like this:
 
 .. code-block:: none
 
     17:56:27 [INFO] Starting file transfer client
-    17:56:27 [INFO] Downloading remote: /home/system/log/apps/info.log to local: info.log
-    17:56:27 [INFO] -> { import, /home/system/log/apps/info.log }
+    17:56:27 [INFO] Downloading remote: /var/log/app-debug.log to local: app-debug.log
+    17:56:27 [INFO] -> { import, /var/log/app-debug.log }
     17:56:27 [INFO] <- { 796611, true, 1a564e8da7b83c2d6a2a44d447855f6d, 1, 33188 }
     17:56:27 [INFO] -> { 796611, 1a564e8da7b83c2d6a2a44d447855f6d, false, [0, 1] }
     17:56:27 [INFO] <- { 796611, 1a564e8da7b83c2d6a2a44d447855f6d, 0, chunk_data }
@@ -132,12 +131,6 @@ The output from the client should look like this:
 
 We can then check the contents of the transferred file::
 
-    $ cat info.log
-    /home/system/log/apps # cat info.log
-    Jan  1 00:07:18 Kubos my-mission-app: OnBoot logic
-    Jan  1 00:07:21 Kubos my-mission-app: OnBoot logic
-    Jan  1 00:07:24 Kubos my-mission-app: OnCommand logic
-    Jan  1 00:18:55 Kubos my-mission-app: Current available memory: 496768 kB
-    Jan  1 00:23:21 Kubos my-mission-app: Current available memory: 497060 kB
-    Jan  1 00:25:43 Kubos my-mission-app: Current available memory: 496952 kB
-    
+    $ cat /var/log/app-debug.log
+    1970-01-01T03:23:13.246358+00:00 Kubos my-mission-app:<info> Current available memory: 497060 kB
+    1970-01-01T03:23:13.867534+00:00 Kubos my-mission-app:<info> Telemetry insert completed successfully

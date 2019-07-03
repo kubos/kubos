@@ -107,6 +107,18 @@ For example::
     executable = "app.py"
     version = "1.1"
     author = "Me"
+    
+Local Execution
+---------------
+
+If you would like to test your application locally and it will communicate with any
+:doc`locally running services <../../getting-started/local-services>`, then you will need to
+include the ``-c path/to/config.toml`` argument when starting your application.
+
+For example::
+
+    $ ./app.py -c ../tools/default_config.toml
+
 
 Additional Resources
 --------------------

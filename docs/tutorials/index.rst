@@ -61,8 +61,9 @@ data and then storing that data into the telemetry database.
 .. toctree::
     :maxdepth: 1
 
-    Creating Your First KubOS Project <first-project>
+
     Creating Your First Mission Application <first-mission-app>
+    Running a KubOS Project on an OBC <first-obc-project>
 
 .. _system-interaction-tutorials:
 
@@ -73,12 +74,15 @@ These tutorials cover all of the ways a user might directly interact with a syst
 
 There is no coding required for these actions, however some scripting may used for example purposes.
 
+The first two tutorials may be run entirely locally.
+The file and shell service tutorials are written to be used with an OBC.
+
 .. toctree::
     :maxdepth: 1
 
     Registering an Application <app-register>
-    Transferring Files <file-transfer>
     Querying the System <querying-telemetry>
+    Transferring Files <file-transfer>
     Creating a Shell Connection <shell>
 
 .. _advanced-tutorials:
