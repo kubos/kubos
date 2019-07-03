@@ -85,8 +85,6 @@ Our resulting project code should look like this::
     import app_api
     import sys
     
-    SERVICES = app_api.Services()
-    
     def on_boot(logger):
         
         logger.info("OnBoot logic")
@@ -144,7 +142,9 @@ Our resulting project code should look like this::
         if args.config is not None:
             global SERVICES
             SERVICES = app_api.Services(args.config)
-            
+        else:
+            SERVICES = app_api.Services()
+
         args = parser.parse_args()
         
         if args.run == 'OnBoot':
