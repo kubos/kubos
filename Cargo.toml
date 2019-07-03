@@ -33,12 +33,13 @@ members = [
 "services/app-service",
 "services/clyde-3g-eps-service",
 "services/monitor-service",
-"services/ethernet-service",
 "services/file-service",
 "services/kubos-service",
+"services/local-comms-service",
 "services/iobc-supervisor-service",
 "services/isis-ants-service",
 "services/mai400-service",
+"services/nsl-duplex-d2-comms-service",
 "services/novatel-oem6-service",
 "services/shell-service",
 "services/telemetry-service",
@@ -52,5 +53,12 @@ members = [
 
 [profile.release]
 lto = true
-opt-level = 3
+opt-level = "z"
 panic = "abort"
+codegen-units = 1
+
+[profile.bench]
+lto = true
+opt-level = "z"
+panic = "abort"
+codegen-units = 1

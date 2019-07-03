@@ -125,7 +125,7 @@ fn main() -> SerialServiceResult<()> {
 
     // Start communication service.
     info!("Serial Communications Service starting on {}", bus);
-    CommsService::start(controls, &telem.clone())?;
+    CommsService::start::<Arc<Mutex<SerialComms>>, SpacePacket>(controls, &telem.clone())?;
 
     let subsystem = Subsystem::new(telem);
     Service::new(service_config, subsystem, QueryRoot, MutationRoot).start();

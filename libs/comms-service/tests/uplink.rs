@@ -20,11 +20,7 @@ extern crate failure;
 mod util;
 
 use comms_service::*;
-use pnet::packet::udp::UdpPacket;
-use pnet::packet::Packet;
-use std::net::Ipv4Addr;
 use std::net::UdpSocket;
-use std::str::FromStr;
 use std::sync::{Arc, Barrier, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -35,11 +31,9 @@ use util::*;
 #[test]
 fn uplink_to_service_no_response() {
     let sat_ip = "127.0.0.3";
-    let ground_ip = "127.0.0.2";
-    let ground_port = 15001;
     let downlink_port = 15002;
     let service_port = 15005;
-    let config = comms_config(sat_ip, ground_ip, ground_port, downlink_port);
+    let config = comms_config(sat_ip, downlink_port);
     let mock_comms = Arc::new(Mutex::new(MockComms::new()));
     let payload = vec![0, 1, 4, 5];
 
@@ -56,19 +50,15 @@ fn uplink_to_service_no_response() {
     // Initialize new `CommsTelemetry` object.
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 
-    let ground_packet = build_packet(
-        &payload,
-        ground_port,
-        service_port,
-        12,
-        Ipv4Addr::from_str(sat_ip).unwrap(),
-        Ipv4Addr::from_str(ground_ip).unwrap(),
-    )
-    .unwrap();
+    let ground_packet =
+        SpacePacket::build(1, PayloadType::GraphQL, service_port, &payload).unwrap();
 
     // Pretend to be the ground and provide a packet
     // for the comms service to read from the radio
-    mock_comms.lock().unwrap().push_read(&ground_packet);
+    mock_comms
+        .lock()
+        .unwrap()
+        .push_read(&ground_packet.to_bytes().unwrap());
 
     // Setup & start HTTP server
     let barrier = Arc::new(Barrier::new(2));
@@ -82,7 +72,7 @@ fn uplink_to_service_no_response() {
     );
 
     // Start communication service.
-    CommsService::start(controls, &telem).unwrap();
+    CommsService::start::<Arc<Mutex<MockComms>>, SpacePacket>(controls, &telem).unwrap();
 
     // Let the wheels turn
     barrier.wait();
@@ -98,11 +88,9 @@ fn uplink_to_service_no_response() {
 #[test]
 fn uplink_to_service_with_handler_response() {
     let sat_ip = "127.0.0.5";
-    let ground_ip = "127.0.0.6";
-    let ground_port = 16001;
     let downlink_port = 16002;
     let service_port = 16005;
-    let config = comms_config(sat_ip, ground_ip, ground_port, downlink_port);
+    let config = comms_config(sat_ip, downlink_port);
     let mock_comms = Arc::new(Mutex::new(MockComms::new()));
     let payload = vec![0, 1, 4, 5];
     let resp_payload = vec![9, 8, 7, 6];
@@ -120,19 +108,15 @@ fn uplink_to_service_with_handler_response() {
     // Initialize new `CommsTelemetry` object.
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 
-    let ground_packet = build_packet(
-        &payload,
-        ground_port,
-        service_port,
-        12,
-        Ipv4Addr::from_str(sat_ip).unwrap(),
-        Ipv4Addr::from_str(ground_ip).unwrap(),
-    )
-    .unwrap();
+    let ground_packet =
+        SpacePacket::build(1, PayloadType::GraphQL, service_port, &payload).unwrap();
 
     // Pretend to be the ground and provide a packet
     // for the comms service to read from the radio
-    mock_comms.lock().unwrap().push_read(&ground_packet);
+    mock_comms
+        .lock()
+        .unwrap()
+        .push_read(&ground_packet.to_bytes().unwrap());
 
     // Setup & start HTTP server
     let barrier = Arc::new(Barrier::new(2));
@@ -147,7 +131,7 @@ fn uplink_to_service_with_handler_response() {
     );
 
     // Start communication service.
-    CommsService::start(controls, &telem).unwrap();
+    CommsService::start::<Arc<Mutex<MockComms>>, SpacePacket>(controls, &telem).unwrap();
 
     // Let the wheels turn
     barrier.wait();
@@ -163,10 +147,11 @@ fn uplink_to_service_with_handler_response() {
     // Pretend to be the ground and read the
     // packet which was written to the radio
     let data = mock_comms.lock().unwrap().pop_write().unwrap();
-    let packet = UdpPacket::new(&data).unwrap();
+    let packet = SpacePacket::parse(&data).unwrap();
 
     assert_eq!(packet.payload().to_vec(), resp_payload);
-    assert_eq!(packet.get_destination(), ground_port);
+    // We currently don't set the destination port on SpacePackets headed back down
+    assert_eq!(packet.destination(), 0);
 }
 
 // Tests sending a packet from the ground to a service through a handler
@@ -174,11 +159,9 @@ fn uplink_to_service_with_handler_response() {
 #[test]
 fn uplink_to_service_with_downlink_response() {
     let sat_ip = "127.0.0.7";
-    let ground_ip = "127.0.0.8";
-    let ground_port = 17001;
     let downlink_port = 17002;
     let service_port = 17005;
-    let config = comms_config(sat_ip, ground_ip, ground_port, downlink_port);
+    let config = comms_config(sat_ip, downlink_port);
     let mock_comms = Arc::new(Mutex::new(MockComms::new()));
     let payload = vec![0, 1, 4, 5];
     let resp_payload = vec![9, 8, 7, 6];
@@ -196,19 +179,15 @@ fn uplink_to_service_with_downlink_response() {
     // Initialize new `CommsTelemetry` object.
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 
-    let ground_packet = build_packet(
-        &payload,
-        ground_port,
-        service_port,
-        12,
-        Ipv4Addr::from_str(sat_ip).unwrap(),
-        Ipv4Addr::from_str(ground_ip).unwrap(),
-    )
-    .unwrap();
+    let ground_packet =
+        SpacePacket::build(1, PayloadType::GraphQL, service_port, &payload).unwrap();
 
     // Pretend to be the ground and provide a packet
     // for the comms service to read from the radio
-    mock_comms.lock().unwrap().push_read(&ground_packet);
+    mock_comms
+        .lock()
+        .unwrap()
+        .push_read(&ground_packet.to_bytes().unwrap());
 
     // Setup & start HTTP server
     let barrier = Arc::new(Barrier::new(2));
@@ -221,7 +200,7 @@ fn uplink_to_service_with_downlink_response() {
     );
 
     // Start communication service.
-    CommsService::start(controls, &telem).unwrap();
+    CommsService::start::<Arc<Mutex<MockComms>>, SpacePacket>(controls, &telem).unwrap();
 
     // Let the wheels turn
     barrier.wait();
@@ -247,8 +226,56 @@ fn uplink_to_service_with_downlink_response() {
     // Pretend to be the ground and read the
     // packet which was written to the radio
     let data = mock_comms.lock().unwrap().pop_write().unwrap();
-    let packet = UdpPacket::new(&data).unwrap();
+    let packet = SpacePacket::parse(&data).unwrap();
 
     assert_eq!(packet.payload().to_vec(), resp_payload);
-    assert_eq!(packet.get_destination(), ground_port);
+    assert_eq!(packet.destination(), 0);
+}
+
+// Tests sending a udp packet from the ground
+#[test]
+fn uplink_udp_passthrough() {
+    let sat_ip = "127.0.0.8";
+    let downlink_port = 17002;
+    let service_port = 17006;
+    let config = comms_config(sat_ip, downlink_port);
+    let mock_comms = Arc::new(Mutex::new(MockComms::new()));
+    let payload = vec![0, 1, 4, 5];
+
+    // Control block to configure communication service.
+    let controls = CommsControlBlock::new(
+        Some(Arc::new(read)),
+        vec![Arc::new(write)],
+        mock_comms.clone(),
+        mock_comms.clone(),
+        config,
+    )
+    .unwrap();
+
+    // Initialize new `CommsTelemetry` object.
+    let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
+
+    let ground_packet = SpacePacket::build(1, PayloadType::UDP, service_port, &payload).unwrap();
+
+    let downlink_reader = UdpSocket::bind((sat_ip, service_port)).unwrap();
+
+    // Start communication service.
+    CommsService::start::<Arc<Mutex<MockComms>>, SpacePacket>(controls, &telem).unwrap();
+
+    // Pretend to be the ground and provide a packet
+    // for the comms service to read from the radio
+    mock_comms
+        .lock()
+        .unwrap()
+        .push_read(&ground_packet.to_bytes().unwrap());
+
+    // Let the wheels turn
+    thread::sleep(Duration::from_millis(200));
+
+    let mut recv_buffer = vec![0; 4];
+
+    // Send packet to comm service's downlink port
+    downlink_reader.recv(&mut recv_buffer).unwrap();
+
+    assert_eq!(recv_buffer, payload);
 }

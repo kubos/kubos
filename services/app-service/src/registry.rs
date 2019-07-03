@@ -16,6 +16,7 @@
 
 use crate::app_entry::*;
 use crate::error::*;
+use failure::format_err;
 use fs_extra;
 use kubos_app::RunLevel;
 use log::*;
@@ -568,6 +569,20 @@ impl AppRegistry {
             };
 
             return Err(AppError::StartError { err: msg });
+        }
+
+        // Change our current directory to the app's directory so that it can access any
+        // auxiliary files with relative file paths
+        if let Err(err) = app_path
+            .parent()
+            .ok_or_else(|| format_err!("Failed to get parent dir"))
+            .and_then(|parent_dir| {
+                ::std::env::set_current_dir(parent_dir).map_err(|err| err.into())
+            })
+        {
+            // If we can't change the current directory, we'll log an error and then just
+            // continue trying to execute the application
+            warn!("Failed to set cwd before executing {}: {:?}", app_name, err);
         }
 
         let mut cmd = Command::new(app_path);

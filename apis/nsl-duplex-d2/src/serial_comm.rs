@@ -16,32 +16,41 @@
 
 use radio_api::{Connection, RadioResult, Stream};
 use serial;
+use serial::prelude::*;
 use std::io;
+use std::io::prelude::*;
 use std::time::Duration;
 
 /// Connection for communicating with actual
 /// Duplex-D2 hardware
-pub fn serial_connection() -> Connection {
-    Connection::new(Box::new(SerialStream {}))
+pub fn serial_connection(bus: &str) -> Connection {
+    Connection::new(Box::new(SerialStream::new(bus)))
 }
 
-struct SerialStream {}
+struct SerialStream {
+    bus: String,
+}
+
+impl SerialStream {
+    pub fn new(bus: &str) -> SerialStream {
+        SerialStream {
+            bus: bus.to_owned(),
+        }
+    }
+}
 
 impl Stream for SerialStream {
     fn write(&self, data: &[u8]) -> RadioResult<()> {
-        serial_send(data)?;
+        serial_send(&self.bus, data)?;
         Ok(())
     }
     fn read(&self) -> RadioResult<Vec<u8>> {
-        Ok(serial_receive()?)
+        Ok(serial_receive(&self.bus)?)
     }
 }
 
-fn serial_send(data: &[u8]) -> io::Result<()> {
-    use serial::prelude::*;
-    use std::io::prelude::*;
-
-    let mut port = serial::open("/dev/ttyUSB0")?;
+fn serial_send(bus: &str, data: &[u8]) -> io::Result<()> {
+    let mut port = serial::open(bus)?;
     let settings: serial::PortSettings = serial::PortSettings {
         baud_rate: serial::Baud38400,
         char_size: serial::Bits8,
@@ -51,7 +60,7 @@ fn serial_send(data: &[u8]) -> io::Result<()> {
     };
     port.configure(&settings)?;
 
-    port.set_timeout(Duration::from_secs(1))?;
+    port.set_timeout(Duration::from_millis(100))?;
 
     let be_data = {
         let mut v = Vec::<u8>::new();
@@ -67,12 +76,9 @@ fn serial_send(data: &[u8]) -> io::Result<()> {
     Ok(())
 }
 
-fn serial_receive() -> io::Result<Vec<u8>> {
-    use serial::prelude::*;
-    use std::io::prelude::*;
-
+fn serial_receive(bus: &str) -> io::Result<Vec<u8>> {
     let mut ret_msg: Vec<u8> = Vec::new();
-    let mut port = serial::open("/dev/ttyUSB0")?;
+    let mut port = serial::open(bus)?;
 
     let settings: serial::PortSettings = serial::PortSettings {
         baud_rate: serial::Baud38400,
@@ -98,7 +104,9 @@ fn serial_receive() -> io::Result<Vec<u8>> {
                     tries += 1;
                 }
             }
-            Err(_) => break,
+            Err(_e) => {
+                tries += 1;
+            }
         };
         if tries > 5 {
             break;

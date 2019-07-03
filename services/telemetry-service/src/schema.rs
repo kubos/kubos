@@ -83,7 +83,6 @@ fn query_db(
     parameters: Option<Vec<String>>,
     limit: Option<i32>,
 ) -> FieldResult<Vec<Entry>> {
-    use diesel::sqlite::SqliteConnection;
     use kubos_telemetry_db::telemetry;
     use kubos_telemetry_db::telemetry::dsl;
 
@@ -243,6 +242,14 @@ struct DeleteResponse {
     entries_deleted: Option<i32>,
 }
 
+#[derive(GraphQLInputObject)]
+struct InsertEntry {
+    timestamp: Option<f64>,
+    subsystem: String,
+    parameter: String,
+    value: String,
+}
+
 graphql_object!(MutationRoot: Context | &self | {
     field insert(&executor, timestamp: Option<f64>, subsystem: String, parameter: String, value: String) -> FieldResult<InsertResponse> {
         let result = match timestamp {
@@ -257,6 +264,41 @@ graphql_object!(MutationRoot: Context | &self | {
                 })?
             .insert_systime(&subsystem, &parameter, &value),
         };
+
+        Ok(InsertResponse {
+            success: result.is_ok(),
+            errors: match result {
+                Ok(_) => "".to_owned(),
+                Err(err) => format!("{}", err),
+            },
+        })
+    }
+
+    field insert_bulk(
+        &executor,
+        timestamp: Option<f64>,
+        entries: Vec<InsertEntry>
+    ) -> FieldResult<InsertResponse>
+    {
+        let time = time::now_utc().to_timespec();
+        let systime = time.sec as f64 + (f64::from(time.nsec) / 1_000_000_000.0);
+
+        let mut new_entries: Vec<kubos_telemetry_db::Entry> = Vec::new();
+        for entry in entries {
+            let ts = entry.timestamp.or(timestamp).unwrap_or(systime);
+
+            new_entries.push(kubos_telemetry_db::Entry {
+                timestamp: ts,
+                subsystem: entry.subsystem,
+                parameter: entry.parameter,
+                value: entry.value,
+            });
+        }
+
+        let result = executor.context().subsystem().database.lock().or_else(|err| {
+            log::error!("insert_bulk - Failed to get lock on database: {:?}", err);
+            Err(err)
+        })?.insert_bulk(new_entries);
 
         Ok(InsertResponse {
             success: result.is_ok(),

@@ -29,6 +29,7 @@ mod kiss;
 
 use byteorder::{BigEndian, ByteOrder};
 use clap::{App, Arg};
+use comms_service::{LinkPacket, PayloadType, SpacePacket};
 use failure::{bail, Error};
 use pnet::packet::udp::{ipv4_checksum, UdpPacket};
 use std::fs::File;
@@ -164,6 +165,9 @@ fn main() -> ClientResult<()> {
         dest_ip,
         dest_port,
     );
+
+    let packet = SpacePacket::build(0, PayloadType::GraphQL, dest_port, query.as_bytes())
+        .and_then(|packet| packet.to_bytes())?;
 
     let packet = if args.is_present("kiss") {
         // Add KISS framing

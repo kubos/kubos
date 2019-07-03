@@ -8,7 +8,7 @@ KISS framing is implemented to preserve message integrity over the serial link.
 A more detailed tutorial on how to create a new communications service can be found
 [here](https://docs.kubos.com/latest/tutorials/comms-service.html)
 
-## Running 
+## Running
 
 This service expects a service configuration file in either the default location
 or to be passed in at runtime like so `cargo run -- -c config.toml`.
@@ -25,9 +25,7 @@ port = 8012 -- Port to listen on for GraphQL queries
 max_num_handlers = 10 -- Maximum number of concurrent message handlers
 downlink_ports = [14011] -- Ports to listen for local traffic on
 timeout = 1 -- Timeout when listening for packet response
-ground_port = 14020 -- Port to send ground communications on
-ground_ip = "192.168.0.1" -- IP to expect ground communications from
-satellite_ip = "0.0.0.0" -- IP to bind Communications service listener to
+ip = "0.0.0.0" -- IP to bind Communications service listener to
 ```
 
 When the service has started correctly it will display output like so:
