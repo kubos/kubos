@@ -16,29 +16,32 @@ Setup
 
 We'll be using the example application from the :doc:`mission application tutorial <first-mission-app>`.
 
-However, we'll need to update the log files to use an absolute path.
-Decide on an appropriate log location and then update the paths in your code.
-The OnCommand log file should be changed from "oncommand-output" to "/path/to/oncommand-output".
-The OnBoot log file should be changed from "onboot-output" to "/path/to/onboot-output".
+This tutorial will use the following example directories:
 
-In order to register it, we'll first need to log in to the OBC to set up a folder for the
-application files::
+    - ``/home/user/my-app`` - Project directory
+    - ``/home/user/kubos`` - Cloned copy of the kubos repo
+    - ``/home/user/app-registry`` - Directory used by the applications service to store registered
+      applications
 
-    $ ssh kubos@10.0.2.20
-    kubos@10.0.2.20's password: ********
-    /home/kubos # mkdir my-app
+- Create a directory which will by used by the applications service for registry storage
+- Navigate to the kubos source directory and edit the ``tools/default_config.toml`` file to specify
+  that new directory like so::
+  
+    [app-service]
+    registry-dir = "/home/user/app-registry"
 
-We can then transfer our application file, ``my-mission-app.py``, and our manifest file,
-``manifest.toml``, to the new folder::
-
-    $ scp my-mission-app.py kubos@10.0.2.20:/home/kubos/my-app
-    kubos@10.0.2.20's password: ********
-    my-mission-app.py                                     100% 1814     1.8KB/s   00:00
-    $ scp manifest.toml kubos@10.0.2.20:/home/kubos/my-app
-    kubos@10.0.2.20's password:
-    manifest.toml                                         100%   56     0.1KB/s   00:00
+- Run the following command to start the applications service in the background (the service may
+  need to be built first, which will take several minutes to complete)::
+  
+    $ cargo run --bin kubos-app-service -- -c tools/default_config.toml &
     
-Our application is now ready to be registered.
+- If you have stopped the monitor and telemetry services since going through the previous tutorial,
+  you will need to start those as well::
+  
+    $ cargo run --bin monitor-service -- -c tools/default_config.toml &
+    $ cargo run --bin telemetry-service -- -c tools/default_config.toml &
+  
+- Navigate back out to the development directory of your choosing.
 
 .. _graphiql:
 
@@ -50,10 +53,10 @@ send and receive GraphQL data via an in-browser graphical interface, GraphiQL.
 
 This graphical interface makes it easier to create and consume more lengthy GraphQL requests.
 
-To access this endpoint, make sure that your OBC is available from your host computer via an IP
-address, then open a web browser and navigate to ``http://{ip}:{port}/grapiql``.
-The ``ip`` and ``port`` parameters should match the IP address of the OBC and the port belonging to
-the service you wish to query.
+To access this endpoint, make sure that your desired service is running, then open a web browser and
+navigate to ``http://{ip}:{port}/grapiql``.
+The ``ip`` and ``port`` parameters should match the values specified for the service in its
+``config.toml`` file.
 
 The resulting interface should look like this:
 
@@ -65,7 +68,7 @@ The resulting JSON response will be displayed on the right-hand side:
 
 .. figure:: ../images/graphiql_ping.png
 
-Please navigate to ``http://{ip}:8000/graphiql`` in order to communicate with the applications
+Please navigate to ``http://127.0.0.1:8000/graphiql`` in order to communicate with the applications
 service for this tutorial.
 
 .. note::
@@ -77,7 +80,7 @@ service for this tutorial.
     
     For example::
     
-        $ curl 10.0.2.20:8008 -H "Content-Type: application/json" --data "{\"query\":\"{ping}\"}"
+        $ curl 127.0.0.1:8004 -H "Content-Type: application/json" --data "{\"query\":\"{ping}\"}"
 
 Registering
 -----------
@@ -101,8 +104,13 @@ It has the following schema::
         }
      }
      
-The ``path`` input parameter specifies the directory *on the OBC* where the application and manifest
-files reside.
+The ``path`` input parameter specifies the directory where the application and manifest filesreside.
+
+.. note::
+
+    When interacting with the applications service on an OBC, this ``path`` parameter refers to a
+    location *on the OBC*, not in your local development environment
+
 The registration process will copy all of the contents at that path, so care should be taken to
 ensure that only the desired application files are present.
 
@@ -127,13 +135,13 @@ The mutation can return the following fields:
           of the application which will be used when the service attempts to run it. This value should
           always be ``true`` when returned by this mutation
 
-We'll be interacting with the OBC from our SDK instance using the service's GraphiQL interface.
-By default, the applications service uses port 8000.
+We'll be interacting with our local applications service's GraphiQL interface.
+Our service is using port 8000.
 
 Our registration mutation should look like this::
 
     mutation {
-      register(path: "/home/kubos/my-app") {
+      register(path: "/home/user/my-app") {
         success,
         errors,
         entry {
@@ -218,9 +226,9 @@ And the response should look like this::
 
 To verify that the app ran successfully, we'll check the contents of our log file::
 
-    $ ssh kubos@10.0.2.20
-    kubos@10.0.2.20's password: ********
-    /home/kubos # cat oncommand-output
+    $ ssh kubos@127.0.0.1
+    kubos@127.0.0.1's password: ********
+    /home/user # cat oncommand-output
     Current available memory: 496768 kB
 
 Updating
@@ -238,11 +246,11 @@ Let's add the ``datetime`` module to our file with ``import datetime`` and then 
 Since this is a new version of our application, we'll then need to update our ``manifest.toml``
 file to change the ``version`` key from ``"1.0"`` to ``"2.0"``.
 
-After transferring both of the files into our remote folder, ``/home/kubos/my-app``,
+After transferring both of the files into our remote folder, ``/home/user/my-app``,
 we can register the updated application using the same ``register`` mutation as before::
 
     mutation {
-      register(path: "/home/kubos/my-app") {
+      register(path: "/home/user/my-app") {
         success,
         errors,
         entry {
@@ -276,7 +284,7 @@ After running our app again with the ``startApp`` mutation, our log file should 
 
 .. code-block:: none
 
-    /home/kubos # cat oncommand-output
+    /home/user # cat oncommand-output
     Current available memory: 496768 kB
     1970-01-01 01:11:23.947890: Current available memory: 496952 kB
 

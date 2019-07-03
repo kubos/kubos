@@ -1,6 +1,8 @@
 Creating Your First KubOS Project
 =================================
 
+TODO: Probably get rid of this or rework to be a "first time interacting with an OBC" project
+
 This tutorial guides the user through the process of creating a new Kubos project using Python3
 and installing and running it on a target OBC.
 
@@ -47,6 +49,10 @@ Our example project can be run on the host machine like so::
     
 Logging in to KubOS
 -------------------
+
+.. note::
+
+    If you do not have an OBC yet, you can proceed to the :doc:`next tutorial <first-mission-app>`
 
 By default, KubOS comes with a user account, ``kubos``, with the default password ``Kubos123``.
 
