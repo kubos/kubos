@@ -6,37 +6,6 @@ The Kubos SDK comes with pre-built support for `Rust <https://www.rust-lang.org/
 Additionally, it includes tooling to assist with cross-compiling for a target OBC and to build
 projects which use both Rust and C.
 
-New Project
------------
-
-A new Rust project can be created by running either of the following commands:
-
-`Executable project`::
-
-  cargo new --bin bin_name
-
-
-`Library project`::
-
-  cargo new lib_name
-
-Cargo will create the project folder and a basic folder structure.
-
-Compiling and Running
----------------------
-
-To compile the project use the normal Cargo build command::
-
-    $ cargo build
-    
-The resulting binary will be located in `{project directory}/target/debug/{project name}`.
-
-The binary can be run locally using the ``cargo run`` command.
-Any desired arguments can be passed to the underlying executable by placing them behind ``--`` like
-so::
-
-    $ cargo run -- -c config.toml
-
 .. _rust-targets:
 
 Cross-compilation
@@ -97,28 +66,3 @@ Running on Target
 
 Once transferred, the binary can be started with ``/path/to/binary-name``, or by simply specifying
 the binary name if the file was transferred to a system PATH directory.
-
-Formatting
-----------
-
-The ``rustfmt`` tool can be used to automatically edit your source code to match the
-current Rust standards.
-
-To format your code:
-
-- Install ``rustfmt``::
-
-    $ rustup component add rustfmt-preview
-    
-- Navigate to your project folder
-- Run the formatting tool via Cargo::
-
-    $ cargo fmt
-    
-Important Notes
-~~~~~~~~~~~~~~~
-
-- Kubos is currently using the ``1.0.0-stable`` version of ``rustfmt``.
-- Using ``cargo install rustfmt`` to install ``rustfmt`` will result in the deprecated version being installed,
-  which has slightly different formatting rules. Please use the ``rustup`` installation method instead.
-
