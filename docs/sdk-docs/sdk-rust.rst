@@ -48,15 +48,15 @@ The Kubos SDK provides Rust cross-compilation targets for each of the supported 
 
 The target name varies depending which command is used to compile the project.
 
-+------------------+-------------------------------+
-| OBC              | ``cargo build``               |
-+------------------+-------------------------------+
-| Beaglebone Black | arm-unknown-linux-gnueabihf   |
-+------------------+-------------------------------+
-| ISIS-OBC         | armv5te-unknown-linux-gnueabi |
-+------------------+-------------------------------+
-| Pumpkin MBM2     | arm-unknown-linux-gnueabihf   |
-+------------------+-------------------------------+
++------------------+-------------------------------+------------------------------+
+| OBC              | ``cargo build`` target        | ``cargo kubos`` target       |
++------------------+-------------------------------+------------------------------+
+| Beaglebone Black | arm-unknown-linux-gnueabihf   | kubos-linux-beaglebone-gcc   |
++------------------+-------------------------------+------------------------------+
+| ISIS-OBC         | armv5te-unknown-linux-gnueabi | kubos-linux-isis-gcc         |
++------------------+-------------------------------+------------------------------+
+| Pumpkin MBM2     | arm-unknown-linux-gnueabihf   | kubos-linux-pumpkin-mbm2-gcc |
++------------------+-------------------------------+------------------------------+
 
 Some Rust crates require that the C compiler be explicitly declared when cross-compiling.
 
@@ -70,16 +70,23 @@ Some Rust crates require that the C compiler be explicitly declared when cross-c
 | Pumpkin MBM2     | /usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc  |
 +------------------+-----------------------------------------------+
 
-This can be done by specifying the C compiler path in the ``CC`` envar like so::
+To simplify development when cross-compiling, use the ``cargo kubos`` command to automatically setup
+the build environment. The ``cargo kubos`` command takes a required cargo sub-command (i.e. ``build``,
+``test``), and a target. For example, to build a project for the ISIS iOBC::
+
+    $ cargo kubos -c build -t kubos-linux-isis-gcc
+    
+Cross compiling can also be done manually by specifying the C compiler path in the ``CC``
+environment variable like so::
 
     $ CC={path} cargo build --target {target}
     
-For example::
+For example, the equivalent command as above using ``cargo build``::
 
     $ CC=/usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc cargo build --target armv5te-unknown-linux-gnueabi
     
-Some crates depend on pkg-config, which requires that an additional flag, ``PKG_CONFIG_ALLOW_CROSS``,
-be set in order to enable cross-compiling::
+Some crates also depend on pkg-config, which requires that an additional environment variable,
+``PKG_CONFIG_ALLOW_CROSS``, be set in order to enable cross-compiling::
 
     $ PKG_CONFIG_ALLOW_CROSS=1 CC=/usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc cargo build --target armv5te-unknown-linux-gnueabi
 
