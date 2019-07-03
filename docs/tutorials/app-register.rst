@@ -17,8 +17,9 @@ Setup
 We'll be using the example application from the :doc:`mission application tutorial <first-mission-app>`.
 
 However, we'll need to update the log files to use an absolute path.
-The OnCommand log file should be changed from "oncommand-output" to "/home/kubos/oncommand-output".
-The OnBoot log file should be changed from "onboot-output" to "/home/kubos/onboot-output".
+Decide on an appropriate log location and then update the paths in your code.
+The OnCommand log file should be changed from "oncommand-output" to "/path/to/oncommand-output".
+The OnBoot log file should be changed from "onboot-output" to "/path/to/onboot-output".
 
 In order to register it, we'll first need to log in to the OBC to set up a folder for the
 application files::

@@ -2,7 +2,7 @@ Creating Your First Mission Application
 =======================================
 
 This tutorial guides the user through the process of creating a basic mission application using
-Python3.5.
+Python3.
 
 At the end of the tutorial, the user will have a mission application which is capable of querying
 the monitor service for current system memory usage and then storing that data into the telemetry
@@ -18,9 +18,10 @@ database.
 Pre-Requisites
 --------------
 
-- :doc:`Install the Kubos SDK <../installation-docs/sdk-installing>`
+- :doc:`Install the Kubos SDK <../sdk-docs/sdk-installing>` or set up the dependencies
+  required for a :doc:`local dev environment <../getting-started/local-setup>`
 - Have an OBC available with both Python and SSH capabilities
-  (preferably with an :doc:`installation of Kubos Linux <../installation-docs/index>`)
+  (preferably with an :doc:`installation of Kubos Linux <../obc-docs/index>`)
 
     - :ref:`Configuring Ethernet <ethernet>`
 
@@ -33,7 +34,7 @@ Mission Application Overview
 Mission applications are user-created programs which are used to control satellite behavior and
 execute mission logic.
 
-These applications are registered with the :doc:`applications service <../app-docs/app-service>`,
+These applications are registered with the :doc:`applications service <../os-docs/services/app-service>`,
 which is responsible for tracking versioning, kicking off applications at boot time, and controlling
 application upgrades and rollbacks.
 
@@ -187,7 +188,7 @@ By default, nine archive files of each log type will be retained.
 If a new archive file is created and there are already nine files, the oldest will be deleted.
 
 More information about the logging infrastructure can be found in the
-:doc:`Kubos Linux logging doc <../os-docs/logging>`.
+:doc:`Kubos Linux logging doc <../os-docs/linux-docs/logging>`.
 
 For ease-of-use, the Python applications API contains a helper function, ``logging_setup``,
 which will make all of the system calls required in order to set up the logger for the application.
@@ -271,7 +272,7 @@ Kubos Services and GraphQL
 --------------------------
 
 A major component of most mission applications will be interacting with
-:doc:`Kubos services <../services/index>`.
+:doc:`Kubos services <../os-docs/services/index>`.
 
 These services provided interfaces to underlying hardware and other system resources.
 
@@ -376,7 +377,8 @@ Each service has a schema which defines all of its queries and mutations.
 Users should refer to these to determine what actions are available for each service and how their
 requests should be structured.
 
-Documentation for Kubos services can be found within the :doc:`services <../services/index>` section.
+Documentation for Kubos services can be found within the :doc:`services <../os-docs/services/index>`
+section.
 
 For example, links to the schemas for all of the pre-built hardware services can be found
 :ref:`here <pre-built-services>`.
@@ -384,7 +386,7 @@ For example, links to the schemas for all of the pre-built hardware services can
 Querying a Service
 ------------------
 
-For this tutorial, we'll be querying the :doc:`monitor service <../services/monitor-service>` for
+For this tutorial, we'll be querying the :doc:`monitor service <../os-docs/services/monitor-service>` for
 the current amount of available memory.
 
 The monitor service is a unique hardware service which communicates with the OBC itself in order to
@@ -413,13 +415,13 @@ This indicates that there are four possible return fields, however, the lack of 
 means if any of them are not available on the system (for example, ``lowFree`` isn't available on
 all systems), it will be omitted.
 
-To make the communication process simpler, we'll be using the :doc:`Python app API <../app-docs/python-app-api>`
+To make the communication process simpler, we'll be using the :doc:`Python app API <../os-docs/apps/python-app-api>`
 to send our GraphQL requests.
 
 For each request, it:
 
     - Looks up the HTTP address of the service name which is given from the system's
-      :doc:`config.toml <../services/service-config>` file
+      :doc:`config.toml <../os-docs/services/service-config>` file
     - Wraps the given request into a proper HTTP packet and sends it to the target service
     - Parses the response message and checks for errors
     - Returns the message payload if the request was successful
@@ -512,7 +514,7 @@ Writing Data to the Telemetry Database
 
 Now that we have a data point, we need to save it somewhere useful.
 The telemetry database is the main storage location for all telemetry data.
-The :doc:`telemetry database service <../services/telemetry-db>` is the preferred interface point
+The :doc:`telemetry database service <../os-docs/services/telemetry-db>` is the preferred interface point
 for storing and retrieving that data.
 
 We'll be using the service's ``insert`` mutation in order to add a new telemetry entry.
