@@ -568,7 +568,7 @@ With some additional error handling, our final application looks like this:
 
 If we run our program, the output should look like this::
 
-    $ ./my-mission-app.py -r OnCommand -c ../tools/default_config.toml
+    $ ./my-mission-app.py -r OnCommand -c ../kubos/tools/default_config.toml
     Current available memory: 497060 kB
     Telemetry insert completed successfully
     
