@@ -211,3 +211,8 @@ Once the project has been transferred, we can log in to the OBC and run it::
     /home/kubos # cat /var/log/app-debug.log
     1970-01-01T03:23:13.246358+00:00 Kubos my-mission-app:<info> Current available memory: 497060 kB
     1970-01-01T03:23:13.867534+00:00 Kubos my-mission-app:<info> Telemetry insert completed successfully
+    
+Next Steps
+----------
+
+:doc:`Registering a mission application with the applications service <app-register>`

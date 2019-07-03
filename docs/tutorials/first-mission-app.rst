@@ -8,6 +8,9 @@ At the end of the tutorial, the user will have a mission application which is ca
 the monitor service for current system memory usage and then storing that data into the telemetry
 database.
 
+You should be able to go through this tutorial entirely within your development environment.
+You do not need to have an OBC available.
+
 .. note:: 
 
     The iOBC does not support Python. If this is the board which you are using,
@@ -288,8 +291,7 @@ By default, this file is located in ``/home/system/etc/config.toml``.
 Since we're running these tutorials locally, that file location likely doesn't exist, so instead we
 are using the ``tools/default_config.toml`` file in our cloned copy of the kubos repo.
 
-We'll need to pass the path to this alternative config file when we go to run our application
-locally.
+We'll need to pass our application this path when we go to run it locally.
 
 Querying a Service
 ------------------
@@ -569,11 +571,6 @@ If we run our program, the output should look like this::
     $ ./my-mission-app.py -r OnCommand -c ../tools/default_config.toml
     Current available memory: 497060 kB
     Telemetry insert completed successfully
-
-.. note::
-
-    If you'd like to double-check the results, you could add an additional action which sends a
-    ``telemetry`` query to the telemetry database service to fetch the entries which were just added.
     
 Creating the Manifest File
 --------------------------
@@ -598,5 +595,6 @@ Our file should look like this::
 Next Steps
 ----------
 
-- Registering a mission application with the applications service
-- Writing a deployment application
+- :doc:`Running an application on an OBC <first-obc-project>`
+- :doc:`Registering a mission application with the applications service <app-register>`
+- :doc:`Fetching telemetry data from the database <querying-telemetry>`

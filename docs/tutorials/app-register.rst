@@ -1,7 +1,7 @@
 Registering a Mission Application
 =================================
 
-The Kubos :doc:`applications service <../app-docs/app-service>` is responsible for monitoring and
+The Kubos :doc:`applications service <../ecosystem/services/app-service>` is responsible for monitoring and
 managing all mission applications for a system.
 
 This tutorial walks the user through:
@@ -11,10 +11,14 @@ This tutorial walks the user through:
     - Updating the application to a newer version
     - Verifying what versions of the application have been registered
 
+This tutorial is written to be run entirely within your local development environment, however, you
+may also interact with the applications service on your OBC by setting up its :ref:`ethernet connection <ethernet>`.
+
 Setup
 -----
 
 We'll be using the example application from the :doc:`mission application tutorial <first-mission-app>`.
+Make sure that the `manifest.toml` file is present in the same project directory.
 
 This tutorial will use the following example directories:
 
