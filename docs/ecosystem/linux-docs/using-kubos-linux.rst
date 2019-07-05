@@ -15,7 +15,7 @@ General Documentation
 ~~~~~~~~~~~~~~~~~~~~~
 
 -  :doc:`../../sdk-docs/sdk-installing`
--  :doc:`../../tutorials/first-project`
+-  :doc:`../../tutorials/first-mission-app`
 
 Board-Specific Documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

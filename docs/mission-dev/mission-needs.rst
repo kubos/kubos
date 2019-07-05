@@ -30,10 +30,10 @@ OBC
 ~~~
 
 The OBC housekeeping application should ensure the OBC itself and the critical processes are running smoothly.
-Kubos provides an `example of this application <######>`__, which cleans the telemetry database, checks file system and memory usage, and issues a test query against all known services.
-See the :doc:`example application documentation <#####>` to understand more of what it does, and what you might want to do with it or another similar application.
-
-.. TODO: Update with links once the app is merged
+Some suggested tasks for this application would be:  
+- Clean the telemetry database 
+- Check file system and memory usage 
+- Issue a test query against services
 
 ADCS/GPS
 ~~~~~~~~

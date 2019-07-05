@@ -20,7 +20,7 @@ Beaglebone Documentation
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../../tutorials/first-project` - Basic tutorial for creating your first KubOS project
+-  :doc:`../../tutorials/first-obc-project` - Basic tutorial for creating your first KubOS project
 -  :doc:`../../ecosystem/linux-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`working-with-the-bbb` - Guide for interacting with BBB-specific features
 -  :doc:`../../deep-dive/klb/kubos-linux-on-bbb` - Steps to build Kubos Linux

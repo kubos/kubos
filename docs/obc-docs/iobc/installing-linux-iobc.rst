@@ -20,7 +20,7 @@ installed to support them.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../../tutorials/first-project` - Basic tutorial for creating your first KubOS project
+-  :doc:`../../tutorials/first-obc-project` - Basic tutorial for creating your first KubOS project
 -  :doc:`../../ecosystem/linux-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`working-with-the-iobc` - Guide for interacting with iOBC-specific features
 -  :doc:`../../deep-dive/klb/kubos-linux-on-iobc` - Steps to build Kubos Linux

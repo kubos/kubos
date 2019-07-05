@@ -193,7 +193,7 @@ all of the required dependencies installed.
 
 That's it! From here see more on:
 
-  - :doc:`Creating your first KubOS project <../tutorials/first-project>`
+  - :doc:`Creating your first KubOS project <../tutorials/first-mission-app>`
 
 After a little bit of usage you may want to look at :doc:`how to upgrade the
 Kubos SDK <../sdk-docs/sdk-upgrading>`

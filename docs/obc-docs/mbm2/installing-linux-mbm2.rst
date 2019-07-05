@@ -19,7 +19,7 @@ each of the hardware components are and how they are connected.
 Kubos Documentation
 ~~~~~~~~~~~~~~~~~~~
 
--  :doc:`../../tutorials/first-project` - Basic tutorial for creating your first KubOS project
+-  :doc:`../../tutorials/first-obc-project` - Basic tutorial for creating your first KubOS project
 -  :doc:`../../ecosystem/linux-docs/using-kubos-linux` - General guide for interacting with Kubos Linux
 -  :doc:`working-with-the-mbm2` - Guide for interacting with MBM2-specific features
 -  :doc:`../../deep-dive/klb/kubos-linux-on-mbm2` - Steps to build Kubos Linux

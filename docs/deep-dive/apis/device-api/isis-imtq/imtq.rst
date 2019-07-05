@@ -28,7 +28,7 @@ ISIS
 Kubos
 ~~~~~
 
-    - :doc:`Creating a Kubos Project <../../../../tutorials/first-project>`
+    - :doc:`Creating a Kubos Project <../../../../tutorials/first-obc-project>`
     - :doc:`Using Kubos Linux <../../../../ecosystem/linux-docs/using-kubos-linux>`
     - :doc:`Working with the iOBC <../../../../obc-docs/iobc/working-with-the-iobc>`
 
