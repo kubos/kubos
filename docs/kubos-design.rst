@@ -37,9 +37,9 @@ which does mean it is more resource intensive.
 But, as satellite on-board computers have become substantially more capable,
 some (of the many) benefits of Linux start to become more important:
 
-- Services are completely portable between any KubOS supported OBC, requiring no code changes.
-- Enables the ability to leverage the microservice architecture mentioned above, as it has the tools we need for process boundaries and controls.
-- Leverage Linux's massive ecosystem of software, tooling, and experienced developers.
+- Services are completely portable between any KubOS-supported OBC, requiring no code changes.
+- Tooling is available to easily control process boundaries and resource allocation.
+- Massive ecosystem of software, tooling, and experienced developers.
 - Mature software already running on billions of systems.
 
 Since Linux is far more complex, it does come with inherent risks, which KubOS combats by pairing it with U-boot.
@@ -90,9 +90,9 @@ The dedicated device will satisfy the real-time functionality for your specific 
 This is already frequently implemented in microsat and nanosat missions with standalone ADCS modules containing commandable microprocessors running ADCS algorithms.
 There are several benefits for adopting this architecture:
 
-- Developing the non real-time components of your mission software in a much easier development environment.
+- Developing the non-real-time components of your mission software in a much easier development environment.
 - Leveraging existing KubOS (and Linux) tooling and functionality for the rest of your mission software.
-- Limiting the risk impact this highly complex task has on the rest of your system, effectively making a *hardware* microservice.
+- Limiting the risk and severity of impact this highly complex task has on the rest of your system.
 - Verifying the hard real-time performance is much simpler, as it has substantially less functionality to test.
 
 Developing in KubOS
@@ -105,5 +105,5 @@ As a result, KubOS strives to enable developers to *quickly* produce *reliable* 
 To uphold these core priorities, KubOS focuses on enabling mission developers to write small, standalone applications that leverage the microservices and operating system we provide.
 This allows applications to be understood, revised, updated, and tested much more easily, as the total "code change" per mission ends up being only these small applications.
 
-There is obviously much, much more to what applications and services can do and how they interact, and we suggest diving into the :doc:`KubOS Ecosystem <ecosystem/index>` documentation for more information!
+There is obviously much, much more to what applications and services can do and how they interact, and we suggest diving into the :doc:`KubOS Ecosystem <ecosystem/index>` documentation for more information.
 Or, now that you understand what we've set out to do and why, you can :doc:`get started developing <getting-started/index>`!

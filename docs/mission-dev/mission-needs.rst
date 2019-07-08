@@ -6,16 +6,16 @@ Every mission is unique, but with this doc, we've attempted to highlight what ap
 Telemetry Collection
 --------------------
 
-Since all :ref:`services are passive <service-docs>`, it falls to an application to collect and store telemetry in the telemetry database service.
+Since all :ref:`services are passive <service-docs>`, it falls to an application to collect and store telemetry in the telemetry database.
 Generally, this should poll all hardware services on a regular basis and pull all available telemetry.
-A one minute polling cycle is generally sufficient for most telemetry items.
+A one-minute polling cycle is generally sufficient for most telemetry items.
 
 .. TODO: merge the example app and update to say this: "Kubos provides an `example of this application, <#####>`__ and augmenting it for your mission should be simple given that all hardware services follow the service outline."
 
 Housekeeping
 ------------
 
-For each critical piece of the avionics hardware or critical mission aspect, there should be an accompanying housekeeping mission application.
+For each critical piece of avionics hardware or critical mission aspect, there should be an accompanying housekeeping mission application.
 It is essential to separate these out as much as possible to reduce the complexity of a given application,
 and to reduce possibility of global failure due to an edge case in a single app.
 Some typical housekeeping applications you will most likely include are:
@@ -30,9 +30,10 @@ OBC
 ~~~
 
 The OBC housekeeping application should ensure the OBC itself and the critical processes are running smoothly.
-Some suggested tasks for this application would be:  
-- Clean the telemetry database 
-- Check file system and memory usage 
+Some suggested tasks for this application would be:
+
+- Clean the telemetry database
+- Check file system and memory usage
 - Issue a test query against services
 
 ADCS/GPS
@@ -64,7 +65,7 @@ Deployment
 The deployment application should handle the required sequence during the initial deployment from the launch vehicle.
 We've provided a guide to the recommended behavior of this application:
 
-- :doc:`dedicated guide <deployment>`
+- :doc:`deployment`
 
 Kubos offers configurable deployment applications for customer missions, as well as SLAs for helping develop and/or reviewing your mission's deployment application.
 You can reach out to us on `Slack <https://slack.kubos.co>`__ or through the `website <https://www.kubos.com/kubos/>`__ for more information about these.

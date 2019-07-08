@@ -83,8 +83,8 @@ tutorial satellite's services all use different ports on the same IP address.
 We'll set our request timeout to one second.
 
 The other options will be omitted, so the default values will be used.
-This means that the service will use ports 13100 through 13149 to process incoming messages and no
-downlink endpoints will be created.
+This means that the service will be allowed to process up to 50 simultaneous incoming messages and
+no downlink endpoints will be created.
 
 The final ``config.toml`` section should look like this::
 

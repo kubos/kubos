@@ -58,7 +58,7 @@ send and receive GraphQL data via an in-browser graphical interface, GraphiQL.
 This graphical interface makes it easier to create and consume more lengthy GraphQL requests.
 
 To access this endpoint, make sure that your desired service is running, then open a web browser and
-navigate to ``http://{ip}:{port}/grapiql``.
+navigate to ``http://{ip}:{port}/graphiql``.
 The ``ip`` and ``port`` parameters should match the values specified for the service in its
 ``config.toml`` file.
 
@@ -108,7 +108,7 @@ It has the following schema::
         }
      }
      
-The ``path`` input parameter specifies the directory where the application and manifest filesreside.
+The ``path`` input parameter specifies the directory where the application and manifest files reside.
 
 .. note::
 

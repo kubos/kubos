@@ -1,7 +1,7 @@
 Preparing for Flight Readiness
 ==============================
 
-This checklist is a **framework** for when you are preparing KubOS to integrate your spacecraft into the launch vehicle.
+This checklist is a **framework** for when you are preparing KubOS before integrating your spacecraft into the launch vehicle.
 This is *only* valid for the software, although it might reference hardware to give context.
 Also, it is important to add steps to account for your mission specific apps and services (or whatever else you add to the system).
 

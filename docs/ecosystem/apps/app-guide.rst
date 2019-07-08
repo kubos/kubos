@@ -112,7 +112,7 @@ Local Execution
 ---------------
 
 If you would like to test your application locally and it will communicate with any
-:doc`locally running services <../../getting-started/local-services>`, then you will need to
+:doc:`locally running services <../../getting-started/local-services>`, then you will need to
 include the ``-c path/to/config.toml`` argument when starting your application.
 
 For example::
@@ -142,7 +142,7 @@ Example applications:
 
     - `Basic application written in Rust <https://github.com/kubos/kubos/tree/master/examples/rust-mission-app>`__ -
       Demonstrates the basic application framework and how passthrough arguments can be used
-    - `Framework application written in Python <https://github.com/kubos/kubos/blob/master/examples/python-mission-app/python-mission-app.py>`__ -
+    - `Framework application written in Python <https://github.com/kubos/kubos/blob/master/examples/python-mission-framework/python-mission-app.py>`__ -
       Can be used as a starting template when creating Python applications
     - `Basic application wrtting in Python <https://github.com/kubos/kubos/tree/master/examples/python-mission-application>`__ -
       Demonstrates the basic application framework and how to communicate with Kubos services
