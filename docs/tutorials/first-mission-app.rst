@@ -336,11 +336,9 @@ For each request, it:
     - Parses the response message and checks for errors
     - Returns the message payload if the request was successful
 
-To start, we'll import the API and create a constant for readability::
+To start, we'll import the API::
 
     import app_api
-    
-    SERVICES = app_api.services()
 
 Then, we'll add a new command line option ``-c`` to allow us to pass a non-default config file for
 testing purposes::
@@ -352,6 +350,8 @@ testing purposes::
     if args.config is not None:
         global SERVICES
         SERVICES = app_api.Services(args.config)
+    else:
+        SERVICES = app_api.services()
     
 Then, we'll create the query we want to send, specifying only the item that we are interested in::
 
@@ -376,8 +376,6 @@ After adding error handling, our program should look like this:
     import argparse
     import app_api
     import sys
-    
-    SERVICES = app_api.Services()
     
     def on_boot():
         
@@ -410,6 +408,8 @@ After adding error handling, our program should look like this:
         if args.config is not None:
             global SERVICES
             SERVICES = app_api.Services(args.config)
+        else:
+            SERVICES = app_api.services()
         
         if args.run == 'OnBoot':
             on_boot()
@@ -496,8 +496,6 @@ With some additional error handling, our final application looks like this:
     import app_api
     import sys
     
-    SERVICES = app_api.Services()
-    
     def on_boot():
         
         print("OnBoot logic")
@@ -554,6 +552,8 @@ With some additional error handling, our final application looks like this:
         if args.config is not None:
             global SERVICES
             SERVICES = app_api.Services(args.config)
+        else:
+            SERVICES = app_api.Services()
         
         if args.run == 'OnBoot':
             on_boot()
@@ -568,7 +568,7 @@ With some additional error handling, our final application looks like this:
 
 If we run our program, the output should look like this::
 
-    $ ./my-mission-app.py -r OnCommand -c ../tools/default_config.toml
+    $ ./my-mission-app.py -r OnCommand -c ../kubos/tools/default_config.toml
     Current available memory: 497060 kB
     Telemetry insert completed successfully
     
