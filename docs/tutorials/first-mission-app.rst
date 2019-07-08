@@ -296,8 +296,8 @@ We'll need to pass our application this path when we go to run it locally.
 Querying a Service
 ------------------
 
-For this tutorial, we'll be querying the :doc:`monitor service <../ecosystem/services/monitor-service>` for
-the current amount of available memory.
+For this tutorial, we'll be querying the :doc:`monitor service <../ecosystem/services/monitor-service>`
+to make sure it is successfully up and running.
 
 The monitor service is a unique hardware service which communicates with the OBC itself in order to
 obtain information about current processes running and the amount of memory both available and
@@ -310,20 +310,21 @@ other core or hardware service.
 We intend for this to be an ad-hoc action, so we'll be adding code to the on-command section of
 our program.
 
-The service's ``memInfo`` query has the following schema::
+The all KubOS core services provide a ``ping`` query which can be used to verify that the service
+is currently running on the expected port.
+The request has the following format::
 
     {
-        MemInfo {
-            total: Int,
-            free: Int,
-            available: Int,
-            lowFree: Int,
-        }
+        ping
     }
+    
+The response should return a single ``"pong"`` result::
 
-This indicates that there are four possible return fields, however, the lack of an exclamation mark
-means if any of them are not available on the system (for example, ``lowFree`` isn't available on
-all systems), it will be omitted.
+    {
+      "data": {
+        "ping": "pong"
+      }
+    }
 
 To make the communication process simpler, we'll be using the :doc:`Python app API <../ecosystem/apps/python-app-api>`
 to send our GraphQL requests.
@@ -334,7 +335,7 @@ For each request, it:
       :doc:`config.toml <../ecosystem/services/service-config>` file
     - Wraps the given request into a proper HTTP packet and sends it to the target service
     - Parses the response message and checks for errors
-    - Returns the message payload if the request was successful
+    - Returns the message payload in the ``"data"`` field if the request was successful
 
 To start, we'll import the API::
 
@@ -353,19 +354,21 @@ testing purposes::
     else:
         SERVICES = app_api.services()
     
-Then, we'll create the query we want to send, specifying only the item that we are interested in::
+Then, we'll create the query we want to send::
 
-    request = '{ memInfo { available } }'
+    request = '{ ping }'
 
 Next, we'll send the request to the monitor service::
 
     response = SERVICES.query(service="monitor-service", query=request)
     
-And finally, we'll parse the result to get our current available memory quantity::
+And finally, we'll parse the result to get our response string::
 
-    data = response["memInfo"]
-    available = data["available"]
-    print("Current available memory: %d kB" % (available))
+    data = response["ping"]
+    if data == "pong":
+        print("Successfully pinged monitor service")
+    else:
+        print("Unexpected monitor service response: %s" % data)
 
 After adding error handling, our program should look like this:
 
@@ -383,7 +386,7 @@ After adding error handling, our program should look like this:
         
     def on_command():
 
-        request = '{ memInfo { available } }'
+        request = '{ ping }'
         
         try:
             response = SERVICES.query(service="monitor-service", query=request)
@@ -391,10 +394,12 @@ After adding error handling, our program should look like this:
             print("Something went wrong: " + str(e))
             sys.exit(1)
         
-        data = response["memInfo"]
-        available = data["available"]
+        data = response["ping"]
         
-        print("Current available memory: %d kB" % (available))
+        if data == "pong":
+            print("Successfully pinged monitor service")
+        else:
+            print("Unexpected monitor service response: %s" % data)
     
     def main():
     
@@ -425,7 +430,7 @@ After adding error handling, our program should look like this:
 If we run our program, the output should look like this::
 
     $ ./my-mission-app.py -r OnCommand -c ../kubos/tools/default_config.toml
-    Current available memory: 496768 kB
+    Successfully pinged monitor service
 
 Writing Data to the Telemetry Database
 --------------------------------------
@@ -463,12 +468,12 @@ All together, our request should look like this::
 
     request = '''
         mutation {
-            insert(subsystem: "OBC", parameter: "available_mem", value: "%s") {
+            insert(subsystem: "OBC", parameter: "status", value: "%s") {
                 success,
                 errors
             }
         }
-        ''' % (available)
+        ''' % (status)
 
 Like before, we'll now use the app API to send our request, but this time we'll be sending to
 the telemetry database service rather than the monitor service::
@@ -502,27 +507,32 @@ With some additional error handling, our final application looks like this:
         
     def on_command():
         
-        request = '{memInfo{available}}'
+        request = '{ ping }'
         
         try:
             response = SERVICES.query(service="monitor-service", query=request)
+            
+            data = response["ping"]
+        
+            if data == "pong":
+                print("Successfully pinged monitor service")
+                status = "Okay"
+            else:
+                print("Unexpected monitor service response: %s" % data)
+                status = "Unexpected"
+                
         except Exception as e: 
             print("Something went wrong: " + str(e))
-            sys.exit(1)
-        
-        data = response["memInfo"]
-        available = data["available"]
-        
-        print("Current available memory: %s kB" % (available))
+            status = "Error"
         
         request = '''
             mutation {
-                insert(subsystem: "OBC", parameter: "available_mem", value: "%s") {
+                insert(subsystem: "OBC", parameter: "status", value: "%s") {
                     success,
                     errors
                 }
             }
-            ''' % (available)
+            ''' % (status)
         
         try:
             response = SERVICES.query(service="telemetry-service", query=request)
@@ -569,7 +579,7 @@ With some additional error handling, our final application looks like this:
 If we run our program, the output should look like this::
 
     $ ./my-mission-app.py -r OnCommand -c ../kubos/tools/default_config.toml
-    Current available memory: 497060 kB
+    Successfully pinged monitor service
     Telemetry insert completed successfully
     
 Creating the Manifest File

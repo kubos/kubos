@@ -22,8 +22,6 @@ import sys
 import time
 import toml
 
-SERVICES = app_api.Services()
-
 # On-boot logic which will be called at boottime if this app is registered with
 # the applications service
 def on_boot(logger):
@@ -145,6 +143,8 @@ def main():
     if args.config is not None:
         global SERVICES
         SERVICES = app_api.Services(args.config[0])
+    else:
+        SERVICES = app_api.Services()
 
     if args.run[0] == 'OnBoot':
         on_boot(logger)

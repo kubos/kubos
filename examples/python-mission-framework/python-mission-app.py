@@ -4,8 +4,6 @@ import app_api
 import argparse
 import sys
 
-SERVICES = app_api.Services()
-
 def on_boot(logger):
     
     logger.info("OnBoot logic")
@@ -29,6 +27,8 @@ def main():
     if args.config is not None:
         global SERVICES
         SERVICES = app_api.Services(args.config[0])
+    else:
+        SERVICES = app_api.Services()
     
     if args.run[0] == 'OnBoot':
         on_boot(logger)
