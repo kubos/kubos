@@ -2,7 +2,7 @@ Using an ISIS Anntenna System in a Kubos Project
 ================================================
 
 This document covers the particular capabilities and requirements of the Kubos API for the
-`ISIS Antenna Systems <https://www.isispace.nl/product-category/products/antenna-systems/>`__.
+`ISIS Antenna Systems <https://www.isispace.nl/product-category/cubesat-products/cubesat-antenna-systems/>`__.
 
 .. toctree::
     :maxdepth: 1

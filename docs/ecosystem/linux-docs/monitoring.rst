@@ -63,7 +63,7 @@ The output will look something like this::
 
 Alternatively, the status info can be viewed by opening a web browser on a *host machine*
 (not the OBC) and opening up a connection to port 7000 on the OBC.
-A login dialog will be presented; the login credentials are kubos/Kubos123.
+A login dialog will be presented; the login credentials are **kubos/Kubos123**.
 
 This will create a graphical display of the same information returned by ``monit status``:
 

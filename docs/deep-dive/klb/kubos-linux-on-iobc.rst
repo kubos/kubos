@@ -44,7 +44,7 @@ instructions can be found in section 8.1 of the *ISIS-OBC Quickstart Guide*.
 SAM-BA
 ~~~~~~
 
-`Product Page <http://www.atmel.com/tools/atmelsam-bain-systemprogrammer.aspx>`__
+`Product Page <https://www.microchip.com/DevelopmentTools/ProductDetails/PartNO/Atmel%20SAM-BA%20In-system%20Programmer>`__
 
 The software tool used to program the iOBC's NOR flash storage area.
 

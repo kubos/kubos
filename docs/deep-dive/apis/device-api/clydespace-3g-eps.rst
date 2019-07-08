@@ -6,5 +6,5 @@ This Rust crate provides an API for interacting with the `Clyde Space 3rd Genera
 Please refer to the |api| crate documentation for implementation details
 
  .. |api| raw:: html
- 
-    <a href="../../rust-docs/clyde_3g_eps/index.html" target="_blank">3G EPS API</a>
+
+    <a href="../../../rust-docs/clyde_3g_eps/index.html" target="_blank">3G EPS API</a>

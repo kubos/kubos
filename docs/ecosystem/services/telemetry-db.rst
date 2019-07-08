@@ -16,7 +16,7 @@ The service has the following available configuration parameters which may be sp
     - ``database`` - (Default: "/home/system/kubos/telemetry.db") The path to the telemetry database
       file. The file will be created if it does not already exist.
     - ``[telemetry-service.addr]``
-    
+
         - ``ip`` - The IP address of the service
         - ``port`` - The port the service will listen on for GraphQL requests over HTTP
 
@@ -27,7 +27,7 @@ Specific details about the available GraphQL queries can be found in the |telem-
 
  .. |telem-db| raw:: html
 
-    <a href="../rust-docs/telemetry_service/index.html" target="_blank">telemetry database service</a>
+    <a href="../../rust-docs/telemetry_service/index.html" target="_blank">telemetry database service</a>
 
 Benchmark
 ~~~~~~~~~
@@ -42,19 +42,19 @@ When run on a Beaglebone Black, we gathered the following benchmark statistics::
 
    /home/kubos # ./db-test -c tlmdb-config.toml -i 1000
 
-+---------------------------------+------------+------------+
-|  NAME                           | Avg (us)   | Total (us) |
-+=================================+============+============+
-|  local_db_api_insert            | 50460      | 50460353   |
-+---------------------------------+------------+------------+
-|  local_db_api_insert_bulk       | 213        | 213957     |
-+---------------------------------+------------+------------+
-|  remote_gql_insert              | 64356      | 64356103   |
-+---------------------------------+------------+------------+
-|  remote_gql_insert_bulk         | 9608       | 9608876    |
-+---------------------------------+------------+------------+
-|  remote_udp_insert              | 87         | 87930      |
-+---------------------------------+------------+------------+
++--------------------------+----------+------------+
+| NAME                     | Avg (us) | Total (us) |
++==========================+==========+============+
+| local_db_api_insert      | 50460    | 50460353   |
++--------------------------+----------+------------+
+| local_db_api_insert_bulk | 213      | 213957     |
++--------------------------+----------+------------+
+| remote_gql_insert        | 64356    | 64356103   |
++--------------------------+----------+------------+
+| remote_gql_insert_bulk   | 9608     | 9608876    |
++--------------------------+----------+------------+
+| remote_udp_insert        | 87       | 87930      |
++--------------------------+----------+------------+
 
 In summary:
 

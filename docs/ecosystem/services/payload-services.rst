@@ -192,11 +192,11 @@ Running the example
 Getting the example service up and running is fairly simple.
 First, you must make sure you have the necessary Python dependencies installed.
 If you are using the Kubos SDK Vagrant box then these will already be installed.
-Otherwise, you will need to run ``pip install -r requirements.txt``.
+Otherwise, you will need to run ``pip3 install -r requirements.txt``.
 
-Once the dependencies are in place, you can run ``python service.py config.yml`` and the example service should begin.
-You will know that it is running if the command line output says ``* Running on http://0.0.0.1:5000/ (Press CTRL+C to quit)``.
-You can now point a web browser to http://127.0.0.1:5000/graphiql to access a `graphical GraphQL interface <https://github.com/graphql/graphiql>`_.
+Once the dependencies are in place, you can run ``python3 service.py config.yml`` and the example service should begin.
+You will know that it is running if the command line output says ``* Running on http://127.0.0.1:8001/ (Press CTRL+C to quit)``.
+You can now point a web browser to http://127.0.0.1:8001/graphiql to access a `graphical GraphQL interface <https://github.com/graphql/graphiql>`_.
 Here you can run queries and mutations against the GraphQL endpoints and see the results.
 
 .. note::
@@ -209,11 +209,11 @@ interface of the service running inside of the Vagrant box we need to forward
 the port it is using. To do so you will need to add the following line to
 your ```Vagrantfile``` (after ``Vagrant.configure("2") do |config|``)::
 
-  config.vm.network "forwarded_port", guest: 5000, host: 5000
+  config.vm.network "forwarded_port", guest: 8001, host: 8001
 
 Now restart the Vagrant box with ``vagrant reload``. You should now have the ability
 to run the python service inside the Vagrant box and access it from the outside
-at http://127.0.0.1:5000.
+at http://127.0.0.1:8001.
 
 .. _rust-service-ref:
 
@@ -235,7 +235,7 @@ the following external crate:
 
 And one internal helper crate:
 
-- `Kubos Service <../rust-docs/kubos_service/index.html>`__ - HTTP service interface
+- `Kubos Service <../../rust-docs/kubos_service/index.html>`__ - HTTP service interface
 
 The ``Cargo.toml`` in the example payload service gives a good list of crate
 dependencies to start with.
@@ -344,7 +344,7 @@ schema.rs
 ~~~~~~~~~
 
 Now we will take a look inside of ``schema.rs``.  This file contains the query
-and mutation models used by `Juniper <http://juniper.graphql.rs/>`__ to create
+and mutation models used by `Juniper <https://graphql-rust.github.io/juniper/current/>`__ to create
 our GraphQL endpoints.
 
 Queries
@@ -367,7 +367,7 @@ struct needed in the ``schema.rs`` file.
     });
 
 
-Inside of the `graphql_object macro <http://juniper.graphql.rs/types/objects/complex_fields.html>`__
+Inside of the `graphql_object macro <https://graphql-rust.github.io/juniper/current/types/objects/complex_fields.html>`__
 we define each top-level query field. In this case there is just the one ``subsystem`` field.
 In order to allow GraphQL access to the member functions (or variables) of the ``Subsystem``
 struct we also apply the ``graphql_object`` macro to it:
@@ -453,13 +453,13 @@ Issue ``cargo build`` in order to build the service.
 
 In order to run the service locally:
 
-    - Verify that port 8000 is being forwarded out of your Vagrant box
+    - Verify that port 8080 is being forwarded out of your Vagrant box
     - Issue ``cargo run``
 
 Once it is up and running you can use the GraphiQL endpoint to issue queries or mutations against
 the service.
 
-On your host machine, open a web browser and navigate to `http://0.0.0.0:8000/graphiql`.
+On your host machine, open a web browser and navigate to `http://127.0.0.1:8080/graphiql`.
 
 Note: If your service is using something other than the default IP address and/or port, you'll need
 to update the address in the URL.
