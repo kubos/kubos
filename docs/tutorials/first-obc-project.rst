@@ -20,7 +20,9 @@ Setup
 
     - :ref:`Configuring Ethernet <ethernet>`
 
-- We'll start with the base project from the :doc:`first mission app <first-mission-app>` tutorial
+- We'll start with the base project from the :doc:`first mission app <first-mission-app>` tutorial,
+  except we'll tweak our monitor service query to instead fetch the current amount of available
+  memory
 
 Setting Up Logging
 ------------------
