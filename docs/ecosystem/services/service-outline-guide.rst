@@ -116,7 +116,7 @@ _______________________
 Direct hardware commands are often issued in binary format, which GraphQL does not directly support.
 As a result, we have added the FormatEnum type, which can be used to specify how the input string should be decoded before being passed to the hardware.
 The ``HEX`` format indicates that the input string is already in hexadecimal format.
-EG: passing a hex string: ``74657374636f6d6d616e64``, causes the byte array: ``[116,101,115,116,99,111,109,109,97,110,100]`` to be passed to the hardware.
+EG: passing a hex string: ``74657374636f6d6d616e64``, causes the byte array: ``[0x74, 0x65, 0x73, 0x74, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64]`` to be passed to the hardware.
 
 The ``STR`` format indicates the input string requires no decoding.
-EG: the string ``testcommand`` gets passed to the hardware as the byte array: ``[116,101,115,116,99,111,109,109,97,110,100]``.
+EG: the string ``testcommand`` gets passed to the hardware as the byte array: ``[0x74, 0x65, 0x73, 0x74, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64]``.

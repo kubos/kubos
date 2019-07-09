@@ -6,35 +6,35 @@ The Kubos SDK provides a selection of device APIs to make interfacing with exter
 Supported devices:
 
   - Adcole Maryland Aerospace
-  
+
     - `Adcole Maryland Aerospace MAI-400 ADACS <https://www.cubesatshop.com/product/mai-400-adacs/>`__
 
   - Clyde Space
-    
+
     - `Clyde Space 3rd Generation 1U EPS <https://www.clyde.space/products/18-3rd-generation-1u-eps>`__
 
   - GOMspace
 
     - `GOMspace NanoPower P31u power supply <https://gomspace.com/Shop/subsystems/power-supplies/nanopower-p31u.aspx>`__
-  
+
   - ISIS
-  
+
     - `ISIS Antenna Systems <https://www.isispace.nl/product-category/cubesat-products/cubesat-antenna-systems/>`__
     - `ISIS iMTQ <https://www.isispace.nl/product/isis-magnetorquer-board/>`__
     - `ISIS TRXVU <https://www.isispace.nl/product/isis-uhf-downlink-vhf-uplink-full-duplex-transceiver/>`__
-    
+
   - NovAtel
-  
+
     - `NovAtel OEM6 High Precision GNSS Receivers <https://www.novatel.com/products/gnss-receivers/oem-receiver-boards/oem6-receivers/>`__
 
   - NSL
-  
-    - `NSL EyeStar-D2 Duplex Radio <https://nearspacelaunch.com/product/eyestar-d2/>`__
-    
+
+    - `NSL EyeStar-D2 Duplex Radio <https://www.nearspacelaunch.com/collections/eyestar-radiosolutions/products/radio>`__
+
   - Pumpkin
-  
+
     - Pumpkin Supervisor MCUs
-    
+
 .. toctree::
     :hidden:
     

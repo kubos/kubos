@@ -15,14 +15,16 @@ The KubOS platform provides satellite developers the tools and libraries necessa
 We leverage multiple existing open source projects, along with our own custom framework and SDK.
 
 Just looking for an explanation of what KubOS is?
-Check out our KubOS design doc for an overview of how KubOS works and what it provides,
-and check out our system docs for a deeper explanation of each component:
+
+Check out our design guide for an overview of how KubOS works and what it provides,
+and check out our ecosystem docs for a deeper explanation of each component:
 
  - :doc:`KubOS Design <kubos-design>`
  - :doc:`KubOS Ecosystem <ecosystem/index>`
 
 Want to get started with development?
-Check out our tutorials and try your own project:
+Follow our Getting Started guide to get your development environment set up and then check out our
+tutorials or try your own project:
 
  - :doc:`Getting Started <getting-started/index>`
  - :doc:`New User Tutorials <tutorials/index>`
@@ -32,7 +34,7 @@ Check out our mission development overview:
 
  - :doc:`Mission Development <mission-dev/index>`
 
-Having issues? :doc:`Check out our FAQs <faq-troubleshooting>` for your issue, or `create a new issue <https://github.com/kubos/kubos/issues/new/choose>`__ on the repo to let us know!
+Having issues? :doc:`Check out our FAQs <faq-troubleshooting>` for your issue, or `create a new issue <https://github.com/kubos/kubos/issues/new/choose>`__ on the repo to let us know.
 
 Want a new feature? Create a `feature request <https://github.com/kubos/kubos/issues/new/choose>`__!
 

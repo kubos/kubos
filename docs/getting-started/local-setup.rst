@@ -16,7 +16,9 @@ and using Homebrew on macOS.
 - git
 - curl
 - Rust + Cargo (We suggest using `rustup <https://rustup.rs/>`__ to install)
-- You will probably want ``~/.cargo/bin`` is in your system's ``PATH``
+
+    - You will probably want to add ``~/.cargo/bin`` to your system's ``PATH``
+
 - Rust v1.32.0 (``rustup default 1.32.0``)
 - Clippy (``rustup component add clippy``)
 - Rustfmt (``rustup component add rustfmt``)

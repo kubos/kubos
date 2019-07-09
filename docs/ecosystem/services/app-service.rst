@@ -236,8 +236,12 @@ For example::
     
 Under the covers, the application would be called like so::
 
-    mission-app -r OnCommand --verbose --release
+    mission-app -r OnCommand -- --verbose --release
     
+The additional arguments are passed behind the ``--`` characters in order to indicate that they
+should be passed to the underlaying application logic, rather than being processed as high-level
+args like the run level.
+
 Automatically Starting on Boot
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

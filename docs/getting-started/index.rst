@@ -34,7 +34,7 @@ SDK Environment
 ~~~~~~~~~~~~~~~
 
 Prefer to use a VM rather than install our development dependencies locally?
-You can also take advantage of our :doc:`VM-based SDK <../sdk-docs/index>` for an easy-to-setup, self-contained development environment. 
+You can also take advantage of our :doc:`VM-based SDK <../sdk-docs/index>` for an easy-to-setup, self-contained development environment.
 
 .. _interacting-with-kubos:
 
@@ -42,6 +42,8 @@ Interacting with KubOS
 ----------------------
 
 After getting the appropriate local environment setup, it is time to begin running and interacting with the KubOS system.
+
+KubOS can support many different languages, however our preferred languages are Python and Rust.
 
 Using Python
 ~~~~~~~~~~~~
@@ -52,6 +54,12 @@ Using Rust
 ~~~~~~~~~~
 
 More interested in using Rust for development? Take a look at the :doc:`Rust guide <using-rust>`.
+
+Using C
+~~~~~~~
+
+If you would like to develop in C, we highly recommend you :doc:`install the SDK <../sdk-docs/sdk-installing>`
+and then refer to :doc:`../sdk-docs/sdk-c`.
 
 Running Services
 ~~~~~~~~~~~~~~~~

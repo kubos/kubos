@@ -100,7 +100,7 @@ Headers
 
 Headers should be considered the same as section titles. As a result,
 they should follow the same capitalization rules as titles. When in
-doubt, `use this tool <http://titlecapitalization.com/>`__ to check what
+doubt, `use this tool <https://capitalizemytitle.com/>`__ to check what
 should be capitalized.
 
 Content

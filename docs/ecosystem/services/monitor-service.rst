@@ -14,7 +14,7 @@ Specific details about the available GraphQL queries can be found in the |monito
 
  .. |monitor| raw:: html
 
-    <a href="../rust-docs/monitor_service/index.html" target="_blank">monitor service</a>
+    <a href="../../rust-docs/monitor_service/index.html" target="_blank">monitor service</a>
 
 PS Query
 --------

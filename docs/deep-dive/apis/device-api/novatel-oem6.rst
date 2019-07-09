@@ -6,5 +6,5 @@ This Rust crate provides an API for interacting with `NovAtel OEM6 High Precisio
 Please refer to the |api| crate documentation for implementation details
 
  .. |api| raw:: html
- 
-    <a href="../../rust-docs/novatel_oem6_api/index.html" target="_blank">OEM6 API</a>
+
+    <a href="../../../rust-docs/novatel_oem6_api/index.html" target="_blank">OEM6 API</a>

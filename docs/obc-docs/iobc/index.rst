@@ -23,8 +23,8 @@ The iOBC should be shipped with an FTDI cable.
 This cable should be connected to the programming adapter, which should then be connected to the
 iOBC, to create the debug UART connection. User file transfer will take place using this connection.
 
-Additionally, a SAM-ICE JTAG may also need to be connected in order to successfully connect with
-an iOBC.
+Additionally, a `SAM-ICE JTAG <https://www.microchip.com/DevelopmentTools/ProductDetails/AT91SAM-ICE>`__
+may also need to be connected in order to successfully connect with an iOBC.
 
 Peripherals
 -----------

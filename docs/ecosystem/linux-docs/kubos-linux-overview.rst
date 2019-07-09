@@ -11,8 +11,8 @@ embedded systems.
 The high level components of every system will be:
 
 - Low-level bootloader/s
-- U-Boot (mid-level bootloader. Loads Kubos Linux)
-- KubOS Linux
+- U-Boot (mid-level bootloader. Loads the Kubos Linux kernel)
+- KubOS
 
 Ideally, all the files will be delivered to the customer as a pre-baked
 OBC. They'll just need to upload their user app files onto the board.
@@ -106,14 +106,14 @@ Glibc
 `Overview <https://www.gnu.org/software/libc/>`__
 
 We use the standard GNU C library to build our toolchains. We are
-currently building using v2.23.
+currently building using v2.28.
 
 BusyBox
 ^^^^^^^
 
 `Overview <https://busybox.net/about.html>`__
 
-We're currently using v1.25.0.
+We're currently using v1.29.3.
 
 BusyBox provides many of the common Linux console and shell commands,
 but in a smaller package. If there are any commands or tools that need
