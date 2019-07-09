@@ -185,7 +185,7 @@ We recommend that you set up a `private network <https://www.vagrantup.com/docs/
 connection, since you may want to interact with multiple different network ports while developing
 with KubOS.
 
-To do so, enable the following line in your Vagrant file::
+To do so, enable the following line in your Vagrantfile::
 
     config.vm.network "private_network", ip: "192.168.33.10"
 
