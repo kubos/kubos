@@ -86,13 +86,18 @@ fn main() -> ClientResult<()> {
     } else {
         args.value_of("data").unwrap().to_string()
     };
-    
+
     let mut map = ::std::collections::HashMap::new();
     map.insert("query", query);
 
     // Build SpacePacket around payload message
-    let packet = SpacePacket::build(0, PayloadType::GraphQL, dest_port, &serde_json::to_vec(&map)?)
-        .and_then(|packet| packet.to_bytes())?;
+    let packet = SpacePacket::build(
+        0,
+        PayloadType::GraphQL,
+        dest_port,
+        &serde_json::to_vec(&map)?,
+    )
+    .and_then(|packet| packet.to_bytes())?;
 
     let packet = if args.is_present("kiss") {
         // Add KISS framing
@@ -116,7 +121,7 @@ fn main() -> ClientResult<()> {
     } else {
         msg
     };
-    
+
     // Parse the returned SpacePacket
     let response = String::from_utf8(SpacePacket::parse(&msg)?.payload())?;
 
