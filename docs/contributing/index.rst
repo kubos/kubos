@@ -12,6 +12,6 @@ simple as possible.
     Reporting Bugs <reporting-bugs>
     Requesting New Features <feature-request>
     Contributor Guidelines <contribution-process>
-    Style Guides <kubos-standards>
+    Coding and Documentation Standards <kubos-standards>
     Documentation Guides <documentation>
     Testing Guides <testing>
