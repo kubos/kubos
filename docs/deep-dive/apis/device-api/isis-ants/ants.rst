@@ -3,11 +3,13 @@ Using an ISIS Anntenna System in a Kubos Project
 
 This document covers the particular capabilities and requirements of the Kubos API for the
 `ISIS Antenna Systems <https://www.isispace.nl/product-category/cubesat-products/cubesat-antenna-systems/>`__.
+This doc focuses on the C API, however the Rust API interface is very similar.
 
 .. toctree::
     :maxdepth: 1
     
-    ISIS AntS API <ants_api>
+    ISIS AntS API - C <ants_api_c>
+    ISIS AntS API - Rust <ants_api_rust>
 
 Reference Documents
 -------------------

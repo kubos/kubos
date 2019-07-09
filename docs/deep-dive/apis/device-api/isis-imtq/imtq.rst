@@ -3,6 +3,7 @@ Using the ISIS iMTQ in a Kubos Project
 
 This document covers the particular capabilities and requirements of the Kubos API for the
 `ISIS iMTQ magnetorquer <https://www.isispace.nl/product/isis-magnetorquer-board/>`__.
+This doc focuses on the C API, however the Rust API interface is very similar.
 
 The API is split into four distinct categories:
 
@@ -14,7 +15,9 @@ The API is split into four distinct categories:
 .. toctree::
     :maxdepth: 1
     
-    ISIS iMTQ API <imtq_api>
+    ISIS iMTQ API - C <imtq_api_c>
+    ISIS iMTQ API - Rust <imtq_api_rust>
+     
 
 Reference Documents
 -------------------
@@ -35,39 +38,13 @@ Kubos
 Project Configuration
 ---------------------
 
-There are several options which may be specified within a project's ``config.json`` file under the ``adcs.imtq`` structure.
+There are several options which may be specified when initializing an iMTQ connection.
 These option values should match what was specified in your iMTQ options sheet.
-If they are not specified, the default value will be used.
 
-For example::
+- bus - The I2C bus the iMTQ is connected to
+- addr - The I2C address of the iMTQ device
+- timeout - The watchdog timeout value, in seconds
 
-    {
-      "adcs": {
-        "imtq": {
-          "watchdog": {
-            "timeout": 3600
-          },
-          "address": "0x55"
-        }
-      }
-    }
-    
-.. json:object :: adcs.imtq
-
-    iMTQ Configuration
-    
-    :property watchdog: Watchdog configuration
-    :proptype watchdog: :json:object:`watchdog <adcs.imtq.watchdog>`
-    :property string address: `(Default: "0x10")` I2C address
-    
-.. json:object:: adcs.imtq.watchdog
-
-    Watchdog properties
-    
-    :property integer timeout: `(Default: 60)` iMTQ's watchdog timeout period (in seconds). 
-        If the iMTQ does not receive any I2C commands in this time period, it will restart itself. 
-        Specify a value of ``0`` to indicate that the watchdog has been disabled.
-    
 Command Responses
 -----------------
 
