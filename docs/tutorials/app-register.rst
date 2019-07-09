@@ -33,6 +33,9 @@ This tutorial will use the following example directories:
   
     [app-service]
     registry-dir = "/home/user/app-registry"
+    
+- **If you are using the SDK**, update all IP addresses in the ``tools/default_config.toml`` file,
+  changing them from ``127.0.0.1`` to ``0.0.0.0``, so that they are available :ref:`to your host machine <sdk-port-forward>`.
 
 - Run the following command to start the applications service in the background (the service may
   need to be built first, which will take several minutes to complete)::
@@ -74,6 +77,9 @@ The resulting JSON response will be displayed on the right-hand side:
 
 Please navigate to ``http://127.0.0.1:8000/graphiql`` in order to communicate with the applications
 service for this tutorial.
+
+If you are using the SDK, replace ``127.0.0.1`` with the :ref:`IP address you defined <sdk-port-forward>`
+for your VM.
 
 .. note::
 

@@ -42,6 +42,14 @@ SDK's command line.
 See the instructions on how to :ref:`mount a host directory <mount-directory>` in your VM for more
 information.
 
+Create a Network IP for Your SDK
+--------------------------------
+
+We recommend exposing your SDK to your host machine with a private IP address.
+
+See the instructions on how to :ref:`set up a private network address <sdk-port-forward>` in your VM for more
+information.
+
 .. _windows-udp:
 
 Allowing UDP Communication
