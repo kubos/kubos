@@ -194,7 +194,7 @@ First, you must make sure you have the necessary Python dependencies installed.
 If you are using the Kubos SDK Vagrant box then these will already be installed.
 Otherwise, you will need to run ``pip3 install -r requirements.txt``.
 
-Once the dependencies are in place, you can run ``python3 service.py config.yml`` and the example service should begin.
+Once the dependencies are in place, you can run ``python3 service.py`` and the example service should begin.
 You will know that it is running if the command line output says ``* Running on http://127.0.0.1:8001/ (Press CTRL+C to quit)``.
 You can now point a web browser to http://127.0.0.1:8001/graphiql to access a `graphical GraphQL interface <https://github.com/graphql/graphiql>`_.
 Here you can run queries and mutations against the GraphQL endpoints and see the results.
