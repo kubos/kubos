@@ -238,13 +238,13 @@ Updating
 --------
 
 After looking at our output, it would be nice if our memory message included the timestamp of
-when the system memory was checked.
+when the system was checked.
 
 Let's add the ``datetime`` module to our file with ``import datetime`` and then update the log line like so:
 
 .. code-block:: python
 
-    print("%s: Current available memory: %s kB" % (str(datetime.datetime.now()), available))
+    print("%s: Successfully pinged monitor service" % (str(datetime.datetime.now())))
 
 Since this is a new version of our application, we'll then need to update our ``manifest.toml``
 file to change the ``version`` key from ``"1.0"`` to ``"2.0"``.
@@ -287,7 +287,7 @@ After running our app again with the ``startApp`` mutation, our output should no
 
 .. code-block:: none
 
-    2019-07-03 16:15:29.452626: Current available memory: 4390664 kB
+    2019-07-03 16:15:29.452626: Successfully pinged monitor service
     Telemetry insert completed successfully
 
 Verifying

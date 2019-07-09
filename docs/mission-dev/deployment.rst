@@ -40,7 +40,7 @@ due to the high degree of impact they have on the system. The variables used
 for deployment are:
 
   - ``deployed``: boolean, indicates if deployment has been completed
-  - ``deploy_start``: string seconds since unix epoch
+  - ``deploy_start``: string, seconds since unix epoch
   - ``remove_before_flight``: boolean, indicates if deployment should be attempted
 
 The hold time itself should be configured within the application.

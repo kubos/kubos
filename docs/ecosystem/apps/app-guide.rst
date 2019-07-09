@@ -111,8 +111,8 @@ For example::
 Local Execution
 ---------------
 
-If you would like to test your application locally and it will communicate with any
-:doc:`locally running services <../../getting-started/local-services>`, then you will need to
+If you would like to test your application locally and if it will communicate with any
+:doc`locally running services <../../getting-started/local-services>`, then you will need to
 include the ``-c path/to/config.toml`` argument when starting your application.
 
 For example::

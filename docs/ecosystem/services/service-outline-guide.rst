@@ -57,7 +57,7 @@ Mutations
 ---------
 
 Mutations are harder to standardize across all hardware, but make your best attempt to fully implement the short list of mutations below.
-As noted before, any that cannot be implement must return a response: ``{"errors": ["Not Implemented"], "data": null}``.
+As noted before, any that cannot be implemented must return a response: ``{"errors": ["Not Implemented"], "data": null}``.
 The only exception to this rule is the ``noop()`` mutation, as it is essential for diagnosing hardware state and **must** be implemented.
 
 .. code-block:: none
