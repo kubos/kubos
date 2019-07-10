@@ -2,7 +2,7 @@ KubOS
 [![CircleCI](https://circleci.com/gh/kubos/kubos.svg?style=svg)](https://circleci.com/gh/kubos/kubos)
 =========
 
-KubOS is an open-source software stack for small satellites.
+KubOS is an open-source software stack for satellites.
 
 The KubOS system is designed to take care of every aspect of a satellite’s flight
 software.
