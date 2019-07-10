@@ -1,43 +1,10 @@
 Using Rust with the Kubos SDK
 =============================
 
-The Kubos SDK Vagrant box comes with support for Rust, Cargo, and several
-helper tools to integrate C-based Kubos libraries with Rust projects.
-
-.. note::
-
-   All of the following instructions are assumed to be run inside of the
-   Kubos SDK Vagrant environment.
-
-New Project
------------
-
-A new Rust project can be created by running either of the following commands:
-
-`Executable project`::
-
-  cargo new --bin bin_name
-
-
-`Library project`::
-
-  cargo new lib_name
-
-Cargo will create the project folder and a basic folder structure.
-
-Compiling
----------
-
-To compile the project use the normal Cargo build command::
-
-    $ cargo build --target [target]
-    
-The resulting binary will be located in `{project directory}/target/{target}/debug/{project name}`.
-
-This binary can then be transferred to the target OBC for execution.
-
-You may also omit the ``--target`` parameter in order to build the project to run directly in your
-Vagrant image. Use ``cargo run`` to trigger execution in this case.
+The Kubos SDK comes with pre-built support for `Rust <https://www.rust-lang.org/>`__ and
+`Cargo <https://doc.rust-lang.org/cargo/>`__.
+Additionally, it includes tooling to assist with cross-compiling for a target OBC and to build
+projects which use both Rust and C.
 
 .. _rust-targets:
 
@@ -92,13 +59,8 @@ Some crates also depend on pkg-config, which requires that an additional environ
 
 .. _rust-transfer:
 
-Flashing
---------
-
-.. note::
-
-   The addition of Rust to the Kubos SDK is pretty recent and SDK tooling is
-   currently undergoing revision to make the flashing process smoother!
+Transferring to Target
+----------------------
 
 Rust binaries can be transferred to the target OBC :ref:`via a supported file transfer
 method <file-transfer>`.
@@ -109,31 +71,5 @@ to `/home/system/usr/bin` if you would like them to be automatically accessible 
 Running on Target
 -----------------
 
-Once transferred, the binary can be started with ``./binary-name`` if you log in to the board
-and navigate to the specific directory in which the file is located, or without the ``./`` characters
-from any location if the file was transferred to a system PATH directory.
-
-Formatting
-----------
-
-The ``rustfmt`` tool can be used to automatically edit your source code to match the
-current Rust standards.
-
-To format your code:
-
-- Install ``rustfmt``::
-
-    $ rustup component add rustfmt-preview
-    
-- Navigate to your project folder
-- Run the formatting tool via Cargo::
-
-    $ cargo fmt
-    
-Important Notes
-~~~~~~~~~~~~~~~
-
-- Kubos is currently using the ``0.4.2-stable`` version of ``rustfmt``.
-- Using ``cargo install rustfmt`` to install ``rustfmt`` will result in the deprecated version being installed,
-  which has slightly different formatting rules. Please use the ``rustup`` installation method instead.
-
+Once transferred, the binary can be started with ``/path/to/binary-name``, or by simply specifying
+the binary name if the file was transferred to a system PATH directory.
