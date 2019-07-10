@@ -1,6 +1,32 @@
 Kubos Changelog
 ===============
 
+v1.16.0 - Jul 10 2019
+---------------------
+
+- The Great Docs Re-Org of 2019
+
+    - `Added instructions for setting up a development environment without using the SDK <https://docs.kubos.com/1.16.0/getting-started/local-setup.html>`__
+    - `Added instructions for running KubOS core services within a local development environment <https://docs.kubos.com/1.16.0/getting-started/local-services.html>`__
+    - Reworked tutorials for local execution
+    - `Added a high-level KubOS porting guide <https://docs.kubos.com/1.16.0/obc-docs/porting-kubos.html>`__
+    - `Added a more in-depth communications setup guide <https://docs.kubos.com/1.16.0/obc-docs/comms-setup.html>`__
+    - `Added mission development guides <https://docs.kubos.com/1.16.0/mission-dev/index.html>`__
+    - `Added a service development guide <https://docs.kubos.com/1.16.0/ecosystem/services/service-dev.html>`__
+    - `Expanded community contribution guides <https://docs.kubos.com/1.16.0/contributing/index.html>`__
+    - Re-organized most docs in order to create a more accessible and intuitive user experience
+
+- `Updated the comms service framework to use SpacketPacket instead of UDP <https://docs.kubos.com/1.16.0/ecosystem/services/comms-framework.html#data-packets>`__
+- Added UDP passthrough to the comms service framework for non-GraphQL messages
+- `Added ability to perform bulk inserts with the telemetry database service <https://docs.kubos.com/1.16.0/ecosystem/services/telemetry-db.html#adding-multiple-entries-to-the-database>`__
+- `Improved size optimization for Rust executables when doing release builds <https://github.com/kubos/kubos/blob/master/Cargo.toml>`__
+
+Bug Fixes:
+~~~~~~~~~~
+
+- Fixed ability to pass a custom config file to Rust applications
+- Fixed assorted timing issues with CI tests
+
 v1.15.0 - May 23 2019
 ---------------------
 
