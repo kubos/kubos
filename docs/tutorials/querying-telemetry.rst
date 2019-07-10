@@ -18,6 +18,9 @@ If you have not done so already, create a clone of the `KubOS source repo <https
 
     $ git clone https://github.com/kubos/kubos
     
+**If you are using the SDK**, update all IP addresses in the ``tools/default_config.toml`` file,
+changing them from ``127.0.0.1`` to ``0.0.0.0``, so that they are available :ref:`to your host machine <sdk-port-forward>`.
+
 Navigate to the kubos source directory and run the following commands to start the telemetry
 database service in the background (the services may need to be built first, which will take several
 minutes to complete)::
@@ -50,6 +53,8 @@ GraphiQL
 
 Please navigate to ``http://0.0.0.0:8002/graphiql`` in order to communicate with the telemetry service
 for this tutorial.
+If you are using the SDK, replace ``0.0.0.0`` with the :ref:`IP address you defined <sdk-port-forward>`
+for your VM.
 
 More information about the GraphiQL interface can be found :ref:`here <graphiql>`.
 

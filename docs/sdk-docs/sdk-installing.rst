@@ -172,6 +172,23 @@ For more information on mounting volumes see the following `guide <https://www.v
 
 --------------
 
+.. _sdk-port-forward:
+
+Exposing Network Ports
+~~~~~~~~~~~~~~~~~~~~~~
+
+If you would like to interact with Kubos services running inside an SDK instance from your host
+environment, you will need to update your Vagrantfile to expose either a single port, or your
+entire SDK as with a private network address.
+
+We recommend that you set up a `private network <https://www.vagrantup.com/docs/networking/private_network.html>`__
+connection, since you may want to interact with multiple different network ports while developing
+with KubOS.
+
+To do so, enable the following line in your Vagrantfile::
+
+    config.vm.network "private_network", ip: "192.168.33.10"
+
 Start the Vagrant Box
 ~~~~~~~~~~~~~~~~~~~~~
 

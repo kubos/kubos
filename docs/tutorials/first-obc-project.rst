@@ -1,8 +1,10 @@
 Running a KubOS Project on an OBC
 =================================
 
-This tutorial guides the user through the process of setting up logging in a KubOS project
-and installing and running it on a target OBC.
+Once you have a KubOS project set up, you'll eventually want to test it on actual hardware.
+
+This tutorial guides the user through the process of adding logging to a KubOS project
+(a crucial component when running in-flight) and then installing and running it on a target OBC.
 
 .. note:: 
 
