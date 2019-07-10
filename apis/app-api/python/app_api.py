@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Copyright 2018 Kubos Corporation
 # Licensed under the Apache License, Version 2.0
 # See LICENSE file for details.
