@@ -8,4 +8,4 @@ Please refer to the |api| crate documentation for implementation details
 
  .. |api| raw:: html
 
-    <a href="../../../rust-docs/isis_ants_api/index.html" target="_blank">AntS API</a>
+    <a href="../../../../rust-docs/isis_ants_api/index.html" target="_blank">AntS API</a>

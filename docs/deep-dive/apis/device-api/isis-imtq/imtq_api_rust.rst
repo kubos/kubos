@@ -7,4 +7,4 @@ Please refer to the |api| crate documentation for implementation details
 
  .. |api| raw:: html
 
-    <a href="../../../rust-docs/isis_imtq_api/index.html" target="_blank">iMTQ API</a>
+    <a href="../../../../rust-docs/isis_imtq_api/index.html" target="_blank">iMTQ API</a>
