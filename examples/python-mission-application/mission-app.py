@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright 2018 Kubos Corporation
 # Licensed under the Apache License, Version 2.0
@@ -13,7 +13,7 @@ service, but can be run directly from the command line as well.
 
 NOTE: Mission application service will NOT run Python mission apps
 without the environment indicator at the top of the file:
-"#!/usr/bin/env python"
+"#!/usr/bin/env python3"
 """
 
 import argparse
