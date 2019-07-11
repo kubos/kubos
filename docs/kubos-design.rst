@@ -47,6 +47,8 @@ U-boot is a widely-used bootloader that manages the Linux kernel and the core of
 capable of automatically failing over to stored backups should a catastrophic event occur.
 This bootloader also gives us the capability to update the entire operating system *during flight*, if a single process update is insufficient.
 
+.. _real-time:
+
 Real-Time and KubOS
 ^^^^^^^^^^^^^^^^^^^
 
