@@ -20,14 +20,10 @@ Configuration
 
 All configuration options are defined as constant values at the top of the `src/main.rs` file.
 
-Before this application can be run on your particular stack, a few configuration options should be
+Before this application can be run on your particular stack, a couple configuration options should be
 set:
 
-- ``USER_PARTITION`` - (Default: ``"/dev/mmcblk1p4"``) The device name of the user data partition.
-  The default value is valid for BBB and MBM2 target OBCs.
-- ``MEM_TOTAL`` - (Default: ``515,340``) The amount of RAM (in bytes) present in the OBC.
-  The default value is valid for BBB and MBM2 target OBCs.
-- ``COMMS_SERVICE`` - (Default: ``"ethernet-service"``) The name of the comms service which should
+- ``COMMS_SERVICE`` - (Default: ``"local-comms-service"``) The name of the comms service which should
   be used to send an emergency beacon if the OBC's filesystem becomes unrecoverably corrupted.
   This beacon may be disabled by making this value an empty string (``""``).
 - ``DOWNLINK_PORT`` - (Default: ``14011``) The specific comms service port which the emergency

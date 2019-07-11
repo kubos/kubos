@@ -25,7 +25,8 @@ use std::process::Command;
 
 const OBC_TELEMETRY: &str = r#"{
     memInfo {
-        available
+        available,
+        total
     }
 }"#;
 
@@ -40,8 +41,13 @@ pub fn check_mem() -> Result<(), Error> {
         0
     });
 
+    let mem_total = result["memInfo"]["total"].as_u64().unwrap_or_else(|| {
+        error!("Failed to fetch available memory");
+        mem * 100
+    });
+
     // Convert to percentage in use, since that's an easier number to work with
-    let ram_in_use = (100 - mem * 100 / MEM_TOTAL) as u8;
+    let ram_in_use = (100 - mem * 100 / mem_total) as u8;
 
     // Check RAM usage with respect to thresholds
     if ram_in_use < RAM_NOMINAL {
@@ -59,7 +65,7 @@ pub fn check_mem() -> Result<(), Error> {
 
     // Check disk space usage
     // Get the % of the user data partition that's free
-    let disk_in_use = if let Ok(output) = Command::new("df").arg(USER_PARTITION).output() {
+    let disk_in_use = if let Ok(output) = Command::new("df").arg("/home").output() {
         let stdout = if output.stderr.is_empty() {
             output.stdout
         } else {

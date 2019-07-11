@@ -36,6 +36,9 @@ Some suggested tasks for this application would be:
 - Check file system and memory usage
 - Issue a test query against services
 
+Kubos provides an `example of this application <https://github.com/kubos/kubos/blob/master/apps/obc-hs/README.rst>`__,
+which executes all of the above tasks on an hourly interval.
+
 ADCS/GPS
 ~~~~~~~~
 

@@ -39,20 +39,12 @@ use std::time::Duration;
 
 /************** App Configuration Values **********************/
 
-// OBC-specific options:
-
-// Default value taken from BBB/MBM2
-pub const USER_PARTITION: &str = "/dev/mmcblk1p4";
-// Amount of RAM present in the OBC. Used for calculating percent RAM in use.
-// Default value taken from /proc/meminfo on a BBB
-pub const MEM_TOTAL: u64 = 515_340;
-
 // Radio-specific options:
 
 // Communications service which should be used for sending distress beacon if the filesystem
 // becomes corrupted.
 // If no beacon is desired, make this value an empty string ("")
-pub const COMMS_SERVICE: &str = "ethernet-service";
+pub const COMMS_SERVICE: &str = "local-comms-service";
 // Comms service downlink port
 pub const DOWNLINK_PORT: u16 = 14011;
 
