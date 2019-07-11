@@ -43,6 +43,7 @@ Required arguments:
         - ``cleanup`` - Cleanup the endpoint service's temporary storage directory
 
     - ``source-file`` - The file to be transferred. May be a relative or absolute path.
+    - ``-P {host_port}`` - The UDP port that the file transfer service will send responses to.
 
 Optional arguments:
 
@@ -50,7 +51,6 @@ Optional arguments:
       If not specified, the root file name from ``source-file`` will be used and the file will be
       placed in the current directory of the destination.
     - ``-h {host IP}`` - Default: `0.0.0.0`. IP address of the local host to use.
-    - ``-P {host port}`` - Default: `8000`. UDP port of the local host to listen on.
     - ``-r {remote IP}`` - Default: `0.0.0.0`. IP address of the file transfer service to connect to.
     - ``-p {remote port}`` - Default: `7000`. UDP port of the file transfer service to connect to.
     - ``-s {storage_prefix}`` - Default: `file-storage`. Name of the directory which should be used
@@ -71,13 +71,25 @@ OBC.
 We'll need to specify the OBC's IP address and the port that the file transfer service is listening
 on. By default, this is port 8008.
 
+We will also need to specify the port that the file transfer service will be sending data
+back on. There is no default value, so in this tutorial we will use port 8028. You will need
+to modify the file ``/home/system/etc/config.toml`` on-board the OBC and add the 
+following line under the ``[file-transfer-service]`` section::
+
+    downlink_port = 8028
+
+After modifying the ``config.toml`` it will be necessary to restart the file transfer service
+by running the following command on the OBC::
+
+    $ ./etc/init.d/S99kubos-core-file-transfer restart
+
 Our transfer command should look like this::
 
-    $ kubos-file-client -r 10.0.2.20 -p 8008 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
+    $ kubos-file-client -r 10.0.2.20 -p 8008 -P 8028 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
     
 Or, from your local dev environment::
 
-    $ cargo run -- -r 10.0.2.20 -p 8008 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
+    $ cargo run -- -r 10.0.2.20 -p 8008 -P 8028 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
     
 The output from the client should look like this:
 
@@ -111,7 +123,7 @@ Receiving a File from an OBC
 
 Next, we'll request that the OBC send us the application debug log file::
 
-    $ kubos-file-client -r 10.0.2.20 -p 8008 download /var/log/app-debug.log
+    $ kubos-file-client -r 10.0.2.20 -p 8008 -P 8028 download /var/log/app-debug.log
     
 We're not specifying a destination file, which will result in the transferred file being saved as
 `app-debug.log` in our current directory.

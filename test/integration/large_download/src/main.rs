@@ -118,7 +118,8 @@ pub fn download(
 ) -> Result<(), ProtocolError> {
     let hold_count = 5;
     let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, host_port, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     let channel = f_protocol.generate_channel()?;
 

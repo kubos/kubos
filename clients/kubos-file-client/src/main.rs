@@ -33,7 +33,8 @@ fn upload(
     hold_count: u16,
 ) -> Result<(), failure::Error> {
     let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, host_port, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     info!(
         "Uploading local:{} to remote:{}",
@@ -72,7 +73,8 @@ fn download(
     hold_count: u16,
 ) -> Result<(), failure::Error> {
     let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, host_port, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     info!(
         "Downloading remote: {} to local: {}",
@@ -121,7 +123,8 @@ fn cleanup(
     }
 
     let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, host_port, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     // Generate channel ID for transaction
     let channel = f_protocol.generate_channel()?;
@@ -184,24 +187,27 @@ fn main() {
         .arg(
             Arg::with_name("host_ip")
                 .short("-h")
+                .help("IP address of the local host to use")
                 .takes_value(true)
                 .default_value("0.0.0.0"),
         )
         .arg(
             Arg::with_name("host_port")
                 .short("-P")
-                .takes_value(true)
-                .default_value("8000"),
+                .help("UDP port that the file transfer service will send responses to")
+                .takes_value(true),
         )
         .arg(
             Arg::with_name("remote_ip")
                 .short("-r")
+                .help("IP address of the file transfer service to connect to")
                 .takes_value(true)
                 .default_value("0.0.0.0"),
         )
         .arg(
             Arg::with_name("remote_port")
                 .short("-p")
+                .help("UDP port of the file transfer service to connect to")
                 .takes_value(true)
                 .default_value("7000"),
         )

@@ -63,7 +63,8 @@ pub fn download(
 ) -> Result<(), ProtocolError> {
     let hold_count = 5;
     let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, host_port, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     let channel = f_protocol.generate_channel()?;
 
@@ -101,7 +102,8 @@ pub fn download_partial(
 ) -> Result<(), ProtocolError> {
     let hold_count = 5;
     let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, host_port, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     let channel = f_protocol.generate_channel()?;
 
@@ -155,7 +157,8 @@ pub fn upload(
 ) -> Result<String, ProtocolError> {
     let hold_count = 5;
     let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, host_port, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     // copy file to upload to temp storage. calculate the hash and chunk info
     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
@@ -191,7 +194,8 @@ pub fn upload_partial(
 ) -> Result<String, ProtocolError> {
     let hold_count = 5;
     let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, host_port, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     // Copy file to upload to temp storage. calculate the hash and chunk info
     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
@@ -226,7 +230,8 @@ pub fn cleanup(
 ) -> Result<(), ProtocolError> {
     let hold_count = 5;
     let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, host_port, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     let channel = f_protocol.generate_channel()?;
 
