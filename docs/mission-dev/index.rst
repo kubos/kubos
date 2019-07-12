@@ -26,13 +26,11 @@ KubOS provides a payload service guide for integrating payloads into KubOS in th
 
 - :doc:`Payload Services <../ecosystem/services/payload-services>`
 
-Following this service guide will align it with how all other hardware services communicate in KubOS, but it is not *required*.
-To save development time, reduce complexity, or whatever reasoning you have, payloads can be integrated in whatever way your mission needs, as long as Linux supports it.
-Some examples:
-
-- Interact with your payload directly from a mission application using hardware interfaces (I2C, UART, etc.)
-- Create a UDP abstraction and access it directly from ground
-- Ethernet payload that accessible directly already using just the comm service
+We recommend all payload services follow this guide in order to keep system component interoperability simple and organized.
+However, there is no hard requirement forcing payloads to conform to our specifications.
+We want users to retain complete control over their systems and understand there may be cases where following our architecture isn't the best option.
+For example, there might be a payload device which requires a lower latency than our communication flow provides.
+In this case, it would be better for the appropriate mission application to be able to directly communicate with the device, rather than via a payload service.
 
 3. Mission Applications
 -----------------------
