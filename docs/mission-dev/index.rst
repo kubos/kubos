@@ -20,6 +20,7 @@ To expose their downlink and uplink capability to the rest of the system, we pro
 
 2. Payload Integration(s)
 -------------------------
+
 Besides avionics hardware, you likely have a payload you want to integrate for your mission.
 KubOS provides a payload service guide for integrating payloads into KubOS in the *recommended* way:
 
