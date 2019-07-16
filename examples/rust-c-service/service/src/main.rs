@@ -26,7 +26,7 @@ use kubos_service::{Config, Service};
 
 fn main() {
     Service::new(
-        Config::new("example-service"),
+        Config::new("example-service").unwrap(),
         Subsystem::new(),
         QueryRoot,
         MutationRoot,

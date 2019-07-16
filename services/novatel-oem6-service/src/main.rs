@@ -340,7 +340,7 @@ fn main() -> OEMResult<()> {
     )
     .unwrap();
 
-    let config = Config::new("novatel-oem6-service");
+    let config = Config::new("novatel-oem6-service").unwrap();
     let bus = config
         .get("bus")
         .expect("No 'bus' value found in 'novatel-oem6-service' section of config");

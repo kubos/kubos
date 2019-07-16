@@ -221,7 +221,7 @@ fn main() {
     )
     .unwrap();
 
-    let config = Config::new("telemetry-service");
+    let config = Config::new("telemetry-service").unwrap();
 
     let db_path = config
         .get("database")

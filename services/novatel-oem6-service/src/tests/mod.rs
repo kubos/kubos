@@ -60,8 +60,13 @@ macro_rules! service_new {
         // run on CircleCI, it needs to be 500ms
         thread::sleep(Duration::from_millis(500));
 
+        let config = r#"
+            [novatel-oem6-service.addr]
+            ip = "127.0.0.1"
+            port = 9999"#;
+
         Service::new(
-            Config::new("novatel-oem6-service"),
+            Config::new_from_str("novatel-oem6-service", &config).unwrap(),
             Subsystem {
                 oem,
                 last_cmd: Arc::new(RwLock::new(AckCommand::None)),

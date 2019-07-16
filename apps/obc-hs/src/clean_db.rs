@@ -28,7 +28,7 @@ pub fn clean_db(age: f64) -> Result<(), Error> {
     let timestamp = time.sec as f64 + (f64::from(time.nsec) / 1_000_000_000.0) - age;
 
     // Request that the telemetry service remove everything older than a week
-    let telem_service = ServiceConfig::new("telemetry-service");
+    let telem_service = ServiceConfig::new("telemetry-service")?;
 
     let request = format!(
         r#"mutation {{

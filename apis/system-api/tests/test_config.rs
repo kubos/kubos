@@ -49,7 +49,8 @@ fn new_from_str() {
     a = 1
     b = 2
     "#,
-    );
+    )
+    .unwrap();
 
     assert_eq!(config.get("a"), Some(Value::Integer(1)));
     assert_eq!(config.get("b"), Some(Value::Integer(2)));
@@ -87,7 +88,8 @@ fn new_from_file() {
     let config = kubos_system::Config::new_from_path(
         "category-1",
         file.path().to_string_lossy().to_string(),
-    );
+    )
+    .unwrap();
 
     assert_eq!(config.get("a"), Some(Value::Integer(1)));
     assert_eq!(config.get("b"), Some(Value::Integer(2)));
@@ -103,7 +105,8 @@ fn override_ip() {
     [category-1.addr]
     ip = "10.0.1.1"
     "#,
-    );
+    )
+    .unwrap();
     assert_eq!(
         config.hosturl(),
         format!("10.0.1.1:{}", kubos_system::DEFAULT_PORT)
@@ -118,7 +121,8 @@ fn override_port() {
     [category-1.addr]
     port = 9876
     "#,
-    );
+    )
+    .unwrap();
     assert_eq!(
         config.hosturl(),
         format!("{}:9876", kubos_system::DEFAULT_IP)
@@ -134,7 +138,8 @@ fn override_ip_port() {
     ip = "10.0.1.1"
     port = 9876
     "#,
-    );
+    )
+    .unwrap();
     assert_eq!(config.hosturl(), "10.0.1.1:9876");
 }
 
@@ -154,7 +159,8 @@ fn only_category_config() {
     c = 5
     d = 6
     "#,
-    );
+    )
+    .unwrap();
 
     assert_eq!(config.get("root-a"), None);
     assert_eq!(config.get("root-b"), None);

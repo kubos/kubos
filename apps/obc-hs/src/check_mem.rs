@@ -32,7 +32,7 @@ const OBC_TELEMETRY: &str = r#"{
 
 pub fn check_mem() -> Result<(), Error> {
     // Check RAM usage as reported by the monitor service
-    let service = ServiceConfig::new("monitor-service");
+    let service = ServiceConfig::new("monitor-service")?;
 
     let result = query(&service, OBC_TELEMETRY, Some(QUERY_TIMEOUT))?;
 

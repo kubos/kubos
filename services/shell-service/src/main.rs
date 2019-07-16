@@ -29,7 +29,7 @@ fn main() {
     )
     .unwrap();
 
-    let config = ServiceConfig::new("shell-service");
+    let config = ServiceConfig::new("shell-service").unwrap();
 
     info!("Starting shell service at {}", config.hosturl());
 

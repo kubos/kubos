@@ -55,8 +55,8 @@ fn main() -> Result<(), Error> {
     };
 
     let config = match matches.opt_str("c") {
-        Some(file) => Config::new_from_path("app-service", file),
-        None => Config::new("app-service"),
+        Some(file) => Config::new_from_path("app-service", file)?,
+        None => Config::new("app-service")?,
     };
 
     let registry = {

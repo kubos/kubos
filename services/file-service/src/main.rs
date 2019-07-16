@@ -29,7 +29,7 @@ fn main() {
     )
     .unwrap();
 
-    let config = ServiceConfig::new("file-transfer-service");
+    let config = ServiceConfig::new("file-transfer-service").unwrap();
 
     info!("Starting file transfer service at {}", config.hosturl());
 

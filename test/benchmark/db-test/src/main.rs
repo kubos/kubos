@@ -80,7 +80,7 @@ impl DbTest {
     fn new(iterations: i64, config_path: String) -> DbTest {
         DbTest {
             iterations,
-            config: Config::new_from_path("telemetry-service", config_path),
+            config: Config::new_from_path("telemetry-service", config_path).unwrap(),
         }
     }
 

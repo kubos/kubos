@@ -37,7 +37,7 @@ impl AppHandler for MyApp {
         
         if args.is_empty() {
             // Test using a custom config file
-            let service = ServiceConfig::new("test-service");
+            let service = ServiceConfig::new("test-service")?;
             if service.hosturl() == "123.4.5.6:7890" {
                 success = true;
             } else {

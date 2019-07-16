@@ -86,7 +86,7 @@ fn main() -> LocalCommsServiceResult<()> {
     log_init().unwrap();
 
     // Get the main service configuration from the system's config.toml file
-    let service_config = kubos_system::Config::new("local-comms-service");
+    let service_config = kubos_system::Config::new("local-comms-service")?;
 
     let gateway_ip = service_config
         .get("gateway_ip")

@@ -424,7 +424,7 @@ fn main() {
     )
     .unwrap();
 
-    let config = Config::new("clyde-3g-eps-service");
+    let config = Config::new("clyde-3g-eps-service").unwrap();
     let bus = config
         .get("bus")
         .expect("No EPS bus device path found in config");

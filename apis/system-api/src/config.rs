@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+use failure::{bail, Error};
 use getopts::Options;
 use serde_derive::Deserialize;
 use std::env;
@@ -99,7 +100,7 @@ impl Config {
     ///
     /// # Arguments
     /// `name` - Category name used as a key in the config file
-    pub fn new(name: &str) -> Self {
+    pub fn new(name: &str) -> Result<Self, Error> {
         Self::new_from_path(name, get_config_path())
     }
 
@@ -108,8 +109,8 @@ impl Config {
     /// # Arguments
     /// `name` - Category name used as a key in the config file
     /// `path` - Path to configuration file
-    pub fn new_from_path(name: &str, path: String) -> Self {
-        parse_config_file(name, path).unwrap_or_default()
+    pub fn new_from_path(name: &str, path: String) -> Result<Self, Error> {
+        parse_config_file(name, path)
     }
 
     /// Creates and parses configuration data from the passed in configuration
@@ -117,8 +118,8 @@ impl Config {
     /// # Arguments
     /// `name` - Category name used as a key in the config
     /// `config` - Config data as a string
-    pub fn new_from_str(name: &str, config: &str) -> Self {
-        parse_config_str(name, config).unwrap_or_default()
+    pub fn new_from_str(name: &str, config: &str) -> Result<Self, Error> {
+        parse_config_str(name, config)
     }
 
     /// Returns the configured hosturl string in the following
@@ -137,7 +138,7 @@ impl Config {
     /// ```rust,no_run
     /// use kubos_system::Config;
     ///
-    /// let config = Config::new("example-service");
+    /// let config = Config::new("example-service").unwrap();
     /// let raw = config.raw();
     /// let bus = raw["bus"].as_str();
     /// ```
@@ -172,11 +173,7 @@ fn get_config_path() -> String {
     );
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
-        Err(_) => {
-            eprintln!("Using default config values");
-            // suppress errors so applications using Config can have their own Options
-            return DEFAULT_PATH.to_string();
-        }
+        Err(f) => panic!(f.to_string()),
     };
     match matches.opt_str("c") {
         Some(s) => s,
@@ -191,12 +188,12 @@ fn get_file_data(path: String) -> Result<String, io::Error> {
     Ok(contents)
 }
 
-fn parse_config_file(name: &str, path: String) -> Result<Config, toml::de::Error> {
-    let contents = get_file_data(path).unwrap_or_else(|_| "".to_string());
+fn parse_config_file(name: &str, path: String) -> Result<Config, Error> {
+    let contents = get_file_data(path)?;
     parse_config_str(name, &contents)
 }
 
-fn parse_config_str(name: &str, contents: &str) -> Result<Config, toml::de::Error> {
+fn parse_config_str(name: &str, contents: &str) -> Result<Config, Error> {
     let data: Value = toml::from_str(&contents)?;
     let mut config = Config::default();
 
@@ -205,6 +202,8 @@ fn parse_config_str(name: &str, contents: &str) -> Result<Config, toml::de::Erro
             config.addr = address.clone().try_into()?;
         }
         config.raw = data.clone();
+    } else {
+        bail!("Failed to find {} in config", name);
     }
 
     Ok(config)

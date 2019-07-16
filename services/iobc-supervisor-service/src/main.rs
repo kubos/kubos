@@ -111,7 +111,7 @@ fn main() {
     .unwrap();
 
     Service::new(
-        Config::new("iobc-supervisor-service"),
+        Config::new("iobc-supervisor-service").unwrap(),
         Supervisor::new(),
         QueryRoot,
         MutationRoot,

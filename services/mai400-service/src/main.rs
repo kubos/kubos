@@ -432,7 +432,7 @@ fn main() -> MAIResult<()> {
     .unwrap();
 
     Service::new(
-        Config::new("mai400-service"),
+        Config::new("mai400-service").unwrap(),
         Subsystem::new("/dev/ttyS5", Arc::new(ReadData::new()))?,
         QueryRoot,
         MutationRoot,

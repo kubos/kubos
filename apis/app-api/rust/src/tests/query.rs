@@ -37,7 +37,8 @@ fn query_good() {
     });
 
     let result = query(
-        &ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
+        &ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string())
+            .unwrap(),
         request,
         Some(Duration::from_secs(1)),
     )
@@ -57,7 +58,8 @@ fn query_error() {
         }"#;
 
     let result = query(
-        &ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
+        &ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string())
+            .unwrap(),
         request,
         Some(Duration::from_secs(1)),
     )
@@ -74,38 +76,23 @@ fn query_bad_service() {
     let config_file = config_dir.path().join("config.toml");
     mock_service!(config_file, "0.0.0.0", 8763);
 
-    let request = r#"{
-            ping
-        }"#;
-
-    let result = query(
-        &ServiceConfig::new_from_path("fake-service", config_file.to_string_lossy().to_string()),
-        request,
-        Some(Duration::from_secs(1)),
-    )
-    .unwrap_err();
+    let result =
+        ServiceConfig::new_from_path("fake-service", config_file.to_string_lossy().to_string())
+            .unwrap_err();
 
     let result_str = format!("{}", result);
 
-    assert_eq!(result_str, "http://127.0.0.1:8080/: an error occurred trying to connect: Connection refused (os error 111)");
+    assert_eq!(result_str, "Failed to find fake-service in config");
 }
 
 #[test]
 fn query_bad_file() {
-    let request = r#"{
-            ping
-        }"#;
-
-    let result = query(
-        &ServiceConfig::new_from_path("mock-service", "/fake/path".to_string()),
-        request,
-        Some(Duration::from_secs(1)),
-    )
-    .unwrap_err();
+    let result =
+        ServiceConfig::new_from_path("mock-service", "/fake/path".to_string()).unwrap_err();
 
     let result_str = format!("{}", result);
 
-    assert_eq!(result_str, "http://127.0.0.1:8080/: an error occurred trying to connect: Connection refused (os error 111)");
+    assert_eq!(result_str, "No such file or directory (os error 2)");
 }
 
 #[test]
@@ -123,7 +110,8 @@ fn query_mutation() {
     });
 
     let result = query(
-        &ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string()),
+        &ServiceConfig::new_from_path("mock-service", config_file.to_string_lossy().to_string())
+            .unwrap(),
         request,
         Some(Duration::from_secs(1)),
     )

@@ -245,7 +245,7 @@ fn main() -> NslDuplexCommsResult<()> {
     )
     .unwrap();
 
-    let service_config = Config::new("nsl-duplex-comms-service");
+    let service_config = Config::new("nsl-duplex-comms-service")?;
 
     let bus = service_config
         .get("bus")

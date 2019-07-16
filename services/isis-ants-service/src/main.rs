@@ -372,7 +372,7 @@ fn main() -> AntSResult<()> {
     )
     .unwrap();
 
-    let config = Config::new("isis-ants-service");
+    let config = Config::new("isis-ants-service").unwrap();
 
     let bus = config
         .get("bus")

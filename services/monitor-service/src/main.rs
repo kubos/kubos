@@ -73,7 +73,7 @@ fn main() {
     )
     .unwrap();
 
-    let config = Config::new("monitor-service");
+    let config = Config::new("monitor-service").unwrap();
 
     Service::new(config, (), QueryRoot, MutationRoot).start();
 }
