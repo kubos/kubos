@@ -4,6 +4,11 @@ KubOS Design Decisions
 This doc records the high-level reasoning for some of our major design decisions made while
 architecting KubOS.
 
+Linux vs RTOS
+-------------
+
+Check out the :ref:`real-time section <real-time>` in our KubOS Design doc for information about this decision.
+
 Buildroot
 ---------
 

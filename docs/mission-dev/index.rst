@@ -10,7 +10,6 @@ The following steps don't have to be done precisely in this order, but this is g
 
 Although there is already quite a bit of :doc:`supported hardware <../index>` in KubOS, your mission might have some hardware that is not yet supported, or unique to your mission (such as a payload).
 :doc:`Hardware services <../ecosystem/services/hardware-services>` must be developed for any hardware that is not already supported.
-It is also suggested that you create a :doc:`payload service <../ecosystem/services/payload-services>` for your mission's payload.
 
 Radio Integrations
 __________________
@@ -19,7 +18,21 @@ Radios have an additional step that's required to finish integrating them into t
 The hardware service only exposes the commands and telemetry for the radio hardware, but does not expose the uplink or downlink interface(s).
 To expose their downlink and uplink capability to the rest of the system, we provide a :doc:`communication service framework. <../ecosystem/services/comms-framework>`
 
-2. Mission Applications
+2. Payload Integration(s)
+-------------------------
+
+Besides avionics hardware, you likely have a payload you want to integrate for your mission.
+KubOS provides a payload service guide for integrating payloads into KubOS in the *recommended* way:
+
+- :doc:`Payload Services <../ecosystem/services/payload-services>`
+
+We recommend all payload services follow this guide in order to keep system component interoperability simple and organized.
+However, there is no hard requirement forcing payloads to conform to our specifications.
+We want users to retain complete control over their systems and understand there may be cases where following our architecture isn't the best option.
+For example, there might be a payload device which requires a lower latency than our communication flow provides.
+In this case, it would be better for the appropriate mission application to be able to directly communicate with the device, rather than via a payload service.
+
+3. Mission Applications
 -----------------------
 
 In KubOS, services are used primarily to expose functionality of underlying hardware.
@@ -36,7 +49,7 @@ We've listed the typical necessary applications:
     mission-needs
     deployment
 
-3. Update and Recovery
+4. Update and Recovery
 ----------------------
 
 KubOS uses similar procedures for both updating and recovering the operating system.
@@ -63,7 +76,7 @@ In addition, we also recommend doing several test cycles forcing the recovery to
 
 Kubos offers `SLAs <https://www.kubos.com/kubos/>`__ to aid in the augmentation of the process and/or auditing your mission's recovery process.
 
-4. Flight Readiness
+5. Flight Readiness
 -------------------
 
 You have all the hardware integrated, you have all the required mission applications, and you've tested everything to your heart's content...you're ready for launch.
