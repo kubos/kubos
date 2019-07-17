@@ -21,6 +21,7 @@ Required arguments:
         - ``download`` - Transfer ``source-file`` on the remote target to ``target-file`` location
                        on the local host
     - ``source-file`` - The file to be transferred. May be a relative or absolute path.
+    - ``-P {host_port}`` - The UDP port that the file transfer service will send responses to.
     
 Optional arguments:
 
