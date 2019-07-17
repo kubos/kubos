@@ -31,7 +31,7 @@ fn test_udp_timestamp() {
     let port = 8111;
     let udp = 8121;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
+    let (handle, sender) = setup(db, Some(port), Some(udp), None);
 
     let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
     let service = format!("0.0.0.0:{}", udp);
@@ -98,7 +98,7 @@ fn test_udp_no_timestamp() {
     let port = 8112;
     let udp = 8122;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
+    let (handle, sender) = setup(db, Some(port), Some(udp), None);
 
     let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
     let service = format!("0.0.0.0:{}", udp);

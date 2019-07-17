@@ -20,7 +20,6 @@ use crate::common::*;
 use file_protocol::ProtocolError;
 use file_service::recv_loop;
 use kubos_system::Config as ServiceConfig;
-use rand::{thread_rng, Rng};
 use std::fs;
 use std::thread;
 use std::time::Duration;
@@ -46,7 +45,8 @@ fn upload_single() {
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, downlink_port, 4096);
+    let service_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, service_dir);
 
     let result = upload(
         "127.0.0.1",
@@ -54,7 +54,7 @@ fn upload_single() {
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
 
@@ -62,7 +62,7 @@ fn upload_single() {
         println!("Error: {}", err);
     }
 
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
@@ -89,7 +89,8 @@ fn upload_multi_clean() {
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, downlink_port, 4096);
+    let service_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, service_dir);
 
     let result = upload(
         "127.0.0.1",
@@ -97,11 +98,11 @@ fn upload_multi_clean() {
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
 
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
@@ -127,7 +128,8 @@ fn upload_multi_resume() {
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, downlink_port, 4096);
+    let service_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, service_dir);
 
     // Upload a partial version of the file
     let result = upload_partial(
@@ -136,7 +138,7 @@ fn upload_multi_resume() {
         "127.0.0.1:7002",
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
     assert!(result.is_err());
@@ -148,10 +150,10 @@ fn upload_multi_resume() {
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
@@ -177,7 +179,8 @@ fn upload_multi_complete() {
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, downlink_port, 4096);
+    let service_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, service_dir);
 
     // Upload the file once (clean upload)
     let result = upload(
@@ -186,10 +189,10 @@ fn upload_multi_complete() {
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Upload the file again
     let result = upload(
@@ -198,10 +201,10 @@ fn upload_multi_complete() {
         "127.0.0.1:7005",
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
@@ -227,7 +230,8 @@ fn upload_bad_hash() {
 
     let _ = create_test_file(&source, &contents);
 
-    service_new!(service_port, downlink_port, 4096);
+    let service_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, service_dir);
 
     // Upload the file so we can mess with the temporary storage
     let result = upload(
@@ -236,7 +240,7 @@ fn upload_bad_hash() {
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
     assert!(result.is_ok());
@@ -246,8 +250,12 @@ fn upload_bad_hash() {
     thread::sleep(Duration::from_millis(10));
 
     // Create temp folder with bad chunk so that future hash calculation will fail
-    fs::create_dir(format!("service/storage/{}", hash)).unwrap();
-    fs::write(format!("service/storage/{}/0", hash), "bad data".as_bytes()).unwrap();
+    fs::create_dir(format!("{}/service/storage/{}", test_dir_str, hash)).unwrap();
+    fs::write(
+        format!("{}/service/storage/{}/0", test_dir_str, hash),
+        "bad data".as_bytes(),
+    )
+    .unwrap();
 
     let result = upload(
         "127.0.0.1",
@@ -255,7 +263,7 @@ fn upload_bad_hash() {
         "127.0.0.1:7003",
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
 
@@ -293,7 +301,8 @@ fn upload_single_after_bad_input() {
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, downlink_port, 4096);
+    let service_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, service_dir);
 
     {
         let send_socket = UdpSocket::bind("127.0.0.1:0").unwrap();
@@ -307,7 +316,7 @@ fn upload_single_after_bad_input() {
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
 
@@ -315,7 +324,7 @@ fn upload_single_after_bad_input() {
         println!("Error: {}", err);
     }
 
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();

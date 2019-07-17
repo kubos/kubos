@@ -31,7 +31,7 @@ use utils::testing::TestService;
 // monitor service and reading back the response.
 #[test]
 fn query_monitor_service() {
-    let sat_ip = "127.0.0.5";
+    let sat_ip = "127.0.0.1";
     let downlink_port = 15002;
     let service_port = 15005;
     let config = comms_config(sat_ip, downlink_port);

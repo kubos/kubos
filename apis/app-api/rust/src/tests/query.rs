@@ -87,7 +87,8 @@ fn query_bad_service() {
 
     let result_str = format!("{}", result);
 
-    assert_eq!(result_str, "http://127.0.0.1:8080/: an error occurred trying to connect: Connection refused (os error 111)");
+    // Linux returns error 111 while Mac seems to return error 61.
+    assert_eq!(&result_str[..90], "http://127.0.0.1:8080/: an error occurred trying to connect: Connection refused (os error ");
 }
 
 #[test]
@@ -105,7 +106,8 @@ fn query_bad_file() {
 
     let result_str = format!("{}", result);
 
-    assert_eq!(result_str, "http://127.0.0.1:8080/: an error occurred trying to connect: Connection refused (os error 111)");
+    // Linux returns error 111 while Mac seems to return error 61.
+    assert_eq!(&result_str[..90], "http://127.0.0.1:8080/: an error occurred trying to connect: Connection refused (os error ");
 }
 
 #[test]
