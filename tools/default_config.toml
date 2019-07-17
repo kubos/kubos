@@ -12,6 +12,8 @@ port = 8002
 
 [file-transfer-service]
 storage_dir = "file-storage"
+downlink_ip = "127.0.0.1"
+downlink_port = 8013
 
 [file-transfer-service.addr]
 ip = "127.0.0.1"

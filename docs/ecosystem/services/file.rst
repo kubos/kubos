@@ -169,6 +169,8 @@ defined in the system's :doc:`config.toml <../services/service-config>` file:
           in bytes.
         - ``hold_count`` - `Default: 5.` The number of times the protocol waits for
           a new message before ending the transaction.
+        - ``downlink_ip`` - `Required` The IP address that the file service responds to.
+        - ``downlink_port`` - `Required` The port that the file service responds to.
 
     - ``[file-transfer-service.addr]``
 
@@ -180,6 +182,8 @@ For example::
     [file-transfer-service]
     storage_dir = "my/storage/directory"
     timeout = 3600
+    downlink_ip = "127.0.0.1"
+    downlink_port = 8000
     
     [file-transfer-service.addr]
     ip = "0.0.0.0"

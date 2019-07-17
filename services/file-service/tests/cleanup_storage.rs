@@ -32,16 +32,18 @@ fn cleanup_storage_dir() {
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
     let service_port = 8001;
+    let downlink_port = 7001;
 
     let contents = [2; 5000];
 
     let _hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, 4096);
+    service_new!(service_port, downlink_port, 4096);
 
     // Download a partial file so that we can resume the download later
     let _result = download(
         "127.0.0.1",
+        downlink_port,
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
@@ -54,6 +56,7 @@ fn cleanup_storage_dir() {
 
     cleanup(
         "127.0.0.1",
+        downlink_port,
         &format!("127.0.0.1:{}", service_port),
         None,
         Some("client".to_owned()),
