@@ -286,7 +286,7 @@ impl AppServiceFixture {
 pub fn send_query(config: ServiceConfig, query: &str) -> serde_json::Value {
     let client = reqwest::Client::new();
 
-    let uri = format!("http://{}", config.hosturl());
+    let uri = format!("http://{}", config.hosturl().unwrap());
 
     let mut map = ::std::collections::HashMap::new();
     map.insert("query", query);

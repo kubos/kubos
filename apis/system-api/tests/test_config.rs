@@ -20,23 +20,9 @@ use tempfile::NamedTempFile;
 use toml::Value;
 
 #[test]
-fn default_address() {
-    let address = kubos_system::Address::default();
-    assert_eq!(address.ip(), kubos_system::DEFAULT_IP);
-    assert_eq!(address.port(), kubos_system::DEFAULT_PORT);
-}
-
-#[test]
 fn default_config() {
     let config = kubos_system::Config::default();
-    assert_eq!(
-        config.hosturl(),
-        format!(
-            "{}:{}",
-            kubos_system::DEFAULT_IP,
-            kubos_system::DEFAULT_PORT
-        )
-    );
+
     assert_eq!(config.get("addr"), None);
 }
 
@@ -54,14 +40,7 @@ fn new_from_str() {
 
     assert_eq!(config.get("a"), Some(Value::Integer(1)));
     assert_eq!(config.get("b"), Some(Value::Integer(2)));
-    assert_eq!(
-        config.hosturl(),
-        format!(
-            "{}:{}",
-            kubos_system::DEFAULT_IP,
-            kubos_system::DEFAULT_PORT
-        )
-    );
+    assert_eq!(config.get("addr"), None);
 }
 
 #[test]
@@ -93,44 +72,44 @@ fn new_from_file() {
 
     assert_eq!(config.get("a"), Some(Value::Integer(1)));
     assert_eq!(config.get("b"), Some(Value::Integer(2)));
-    assert_eq!(config.hosturl(), "1.2.3.4:1234");
+    assert_eq!(config.hosturl(), Some("1.2.3.4:1234".to_owned()));
     assert_eq!(config.get("root-a"), None);
 }
 
 #[test]
-fn override_ip() {
-    let config = kubos_system::Config::new_from_str(
+fn missing_port() {
+    let result = kubos_system::Config::new_from_str(
         "category-1",
         r#"
     [category-1.addr]
     ip = "10.0.1.1"
     "#,
     )
-    .unwrap();
-    assert_eq!(
-        config.hosturl(),
-        format!("10.0.1.1:{}", kubos_system::DEFAULT_PORT)
-    );
+    .unwrap_err();
+
+    let result_str = format!("{}", result);
+
+    assert_eq!(result_str, "missing field `port`");
 }
 
 #[test]
-fn override_port() {
-    let config = kubos_system::Config::new_from_str(
+fn missing_ip() {
+    let result = kubos_system::Config::new_from_str(
         "category-1",
         r#"
     [category-1.addr]
     port = 9876
     "#,
     )
-    .unwrap();
-    assert_eq!(
-        config.hosturl(),
-        format!("{}:9876", kubos_system::DEFAULT_IP)
-    );
+    .unwrap_err();
+
+    let result_str = format!("{}", result);
+
+    assert_eq!(result_str, "missing field `ip`");
 }
 
 #[test]
-fn override_ip_port() {
+fn good_addr() {
     let config = kubos_system::Config::new_from_str(
         "category-1",
         r#"
@@ -140,7 +119,7 @@ fn override_ip_port() {
     "#,
     )
     .unwrap();
-    assert_eq!(config.hosturl(), "10.0.1.1:9876");
+    assert_eq!(config.hosturl(), Some("10.0.1.1:9876".to_owned()));
 }
 
 #[test]

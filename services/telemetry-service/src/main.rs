@@ -232,7 +232,7 @@ fn main() {
     db.setup();
 
     let direct_udp = config.get("direct_port").map(|port| {
-        let host = config.hosturl();
+        let host = config.hosturl().unwrap();
         let mut host_parts = host.split(':').map(|val| val.to_owned());
         let host_ip = host_parts.next().unwrap();
 

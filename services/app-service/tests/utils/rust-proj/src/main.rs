@@ -38,10 +38,10 @@ impl AppHandler for MyApp {
         if args.is_empty() {
             // Test using a custom config file
             let service = ServiceConfig::new("test-service")?;
-            if service.hosturl() == "123.4.5.6:7890" {
+            if service.hosturl() == Some("123.4.5.6:7890".to_owned()) {
                 success = true;
             } else {
-                bail!("Service URL mismatch: {}", service.hosturl());
+                bail!("Service URL mismatch: {:?}", service.hosturl());
             }
         }
 

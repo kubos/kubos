@@ -83,7 +83,12 @@ pub fn query(
         None => reqwest::Client::builder().build()?,
     };
 
-    let uri = format!("http://{}", config.hosturl());
+    let uri = format!(
+        "http://{}",
+        config
+            .hosturl()
+            .ok_or_else(|| format_err!("Unable to fetch addr for service"))?
+    );
 
     let mut map = ::std::collections::HashMap::new();
     map.insert("query", query);

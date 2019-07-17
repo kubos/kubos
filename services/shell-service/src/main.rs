@@ -31,7 +31,7 @@ fn main() {
 
     let config = ServiceConfig::new("shell-service").unwrap();
 
-    info!("Starting shell service at {}", config.hosturl());
+    info!("Starting shell service at {}", config.hosturl().unwrap());
 
     match recv_loop(&config) {
         Ok(()) => warn!("Service listener loop exited successfully?"),

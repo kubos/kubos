@@ -62,7 +62,9 @@ fn check_read(file_name: &str, test_string: &str) -> Result<(), Error> {
 fn send_error() -> Result<(), Error> {
     // Get the comms service IP address
     let config = ServiceConfig::new(COMMS_SERVICE)?;
-    let host = config.hosturl();
+    let host = config
+        .hosturl()
+        .ok_or_else(|| failure::format_err!("Unable to fetch addr for comms service"))?;
     let mut host_parts = host.split(':').map(|val| val.to_owned());
     let comms_ip = host_parts.next().unwrap_or_else(|| {
         error!("Failed to lookup comms service IP. Using default 0.0.0.0");

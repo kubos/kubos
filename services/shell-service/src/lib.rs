@@ -155,7 +155,9 @@ fn get_message(
 // Starts and runs the main loop receiving new shell protocol messages
 pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
     // Get and bind our UDP listening socket
-    let host = config.hosturl();
+    let host = config
+        .hosturl()
+        .ok_or_else(|| failure::format_err!("Unable to fetch addr for service"))?;
 
     // Extract our local IP address so we can spawn child sockets later
     let mut host_parts = host.split(':').map(|val| val.to_owned());
