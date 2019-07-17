@@ -31,6 +31,7 @@
 use crate::comms::*;
 use comms_service::*;
 use failure::Error;
+use log::error;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -86,43 +87,83 @@ fn main() -> LocalCommsServiceResult<()> {
     log_init().unwrap();
 
     // Get the main service configuration from the system's config.toml file
-    let service_config = kubos_system::Config::new("local-comms-service")?;
+    let service_config = kubos_system::Config::new("local-comms-service").map_err(|err| {
+        error!("Failed to load service config: {:?}", err);
+        err
+    })?;
 
     let gateway_ip = service_config
         .get("gateway_ip")
-        .expect("No 'gateway_ip' parameter in config")
+        .ok_or({
+            error!("No 'gateway_ip' parameter in config");
+            "No 'gateway_ip' parameter in config"
+        })
+        .unwrap()
         .as_str()
+        .ok_or({
+            error!("Failed to parse 'gateway_ip' config value");
+            "Failed to parse 'gateway_ip' config value"
+        })
         .unwrap()
         .to_owned();
 
     let gateway_port = service_config
         .get("gateway_port")
-        .expect("No 'gateway_port' parameter in config")
+        .ok_or({
+            error!("No 'gateway_port' parameter in config");
+            "No 'gateway_port' parameter in config"
+        })
+        .unwrap()
         .as_integer()
+        .ok_or({
+            error!("Failed to parse 'gateway_port' config value");
+            "Failed to parse 'gateway_port' config value"
+        })
         .unwrap() as u16;
 
     let listening_ip = service_config
         .get("listening_ip")
-        .expect("No 'listening_ip' parameter in config")
+        .ok_or({
+            error!("No 'listening_ip' parameter in config");
+            "No 'listening_ip' parameter in config"
+        })
+        .unwrap()
         .as_str()
+        .ok_or({
+            error!("Failed to parse 'listening_ip' config value");
+            "Failed to parse 'listening_ip' config value"
+        })
         .unwrap()
         .to_owned();
 
     let listening_port = service_config
         .get("listening_port")
-        .expect("No 'listening_port' parameter in config")
+        .ok_or({
+            error!("No 'listening_port' parameter in config");
+            "No 'listening_port' parameter in config"
+        })
+        .unwrap()
         .as_integer()
+        .ok_or({
+            error!("Failed to parse 'listening_port' config value");
+            "Failed to parse 'listening_port' config value"
+        })
         .unwrap() as u16;
 
     // Pull out our communication settings
-    let config = CommsConfig::new(service_config)?;
+    let config = CommsConfig::new(service_config).map_err(|err| {
+        error!("Failed to initialize CommsConfig: {:?}", err);
+        err
+    })?;
 
-    let conn = Arc::new(Mutex::new(LocalComms::new(
-        &listening_ip,
-        listening_port,
-        &gateway_ip,
-        gateway_port,
-    )?));
+    let conn = Arc::new(Mutex::new(
+        LocalComms::new(&listening_ip, listening_port, &gateway_ip, gateway_port).map_err(
+            |err| {
+                error!("Failed to initialize LocalComms: {:?}", err);
+                err
+            },
+        )?,
+    ));
 
     // Control block to configure communication service.
     let controls = CommsControlBlock::new(
@@ -131,13 +172,22 @@ fn main() -> LocalCommsServiceResult<()> {
         conn.clone(),
         conn,
         config,
-    )?;
+    )
+    .map_err(|err| {
+        error!("Failed to initialize CommsControlBlock: {:?}", err);
+        err
+    })?;
 
     // Initialize new `CommsTelemetry` object.
     let telem = Arc::new(Mutex::new(CommsTelemetry::default()));
 
     // Start communication service.
-    CommsService::start::<Arc<Mutex<LocalComms>>, SpacePacket>(controls, &telem)?;
+    CommsService::start::<Arc<Mutex<LocalComms>>, SpacePacket>(controls, &telem).map_err(
+        |err| {
+            error!("Failed to start comms service: {:?}", err);
+            err
+        },
+    )?;
 
     // We will eventually start the GraphQL service here.
     loop {

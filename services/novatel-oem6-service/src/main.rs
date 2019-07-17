@@ -328,6 +328,7 @@ use crate::model::{LockData, Subsystem};
 pub use crate::objects::*;
 use crate::schema::{MutationRoot, QueryRoot};
 use kubos_service::{Config, Service};
+use log::error;
 use novatel_oem6_api::OEMResult;
 use std::sync::Arc;
 use syslog::Facility;
@@ -340,11 +341,26 @@ fn main() -> OEMResult<()> {
     )
     .unwrap();
 
-    let config = Config::new("novatel-oem6-service").unwrap();
+    let config = Config::new("novatel-oem6-service")
+        .map_err(|err| {
+            error!("Failed to load service config: {:?}", err);
+            err
+        })
+        .unwrap();
     let bus = config
         .get("bus")
-        .expect("No 'bus' value found in 'novatel-oem6-service' section of config");
-    let bus = bus.as_str().unwrap();
+        .ok_or({
+            error!("No 'bus' value found in 'novatel-oem6-service' section of config");
+            "No 'bus' value found in 'novatel-oem6-service' section of config"
+        })
+        .unwrap();
+    let bus = bus
+        .as_str()
+        .ok_or({
+            error!("Failed to parse 'bus' config value");
+            "Failed to parse 'bus' config value"
+        })
+        .unwrap();
 
     let subsystem = Subsystem::new(bus, Arc::new(LockData::new()))?;
 

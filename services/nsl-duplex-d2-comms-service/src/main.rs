@@ -245,12 +245,23 @@ fn main() -> NslDuplexCommsResult<()> {
     )
     .unwrap();
 
-    let service_config = Config::new("nsl-duplex-comms-service")?;
+    let service_config = Config::new("nsl-duplex-comms-service").map_err(|err| {
+        error!("Failed to load service config: {:?}", err);
+        err
+    })?;
 
     let bus = service_config
         .get("bus")
-        .expect("No 'bus' parameter in config.toml")
+        .ok_or({
+            error!("Failed to load 'bus' config value");
+            "Failed to load 'bus' config value"
+        })
+        .unwrap()
         .as_str()
+        .ok_or({
+            error!("Failed to parse 'bus' config value");
+            "Failed to parse 'bus' config value"
+        })
         .unwrap()
         .to_owned();
 

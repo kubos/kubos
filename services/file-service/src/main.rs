@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 Kubos Corporation
+// Copyright (C) 2019 Kubos Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
@@ -29,12 +29,22 @@ fn main() {
     )
     .unwrap();
 
-    let config = ServiceConfig::new("file-transfer-service").unwrap();
+    let config = ServiceConfig::new("file-transfer-service")
+        .map_err(|err| {
+            error!("Failed to load service config: {:?}", err);
+            err
+        })
+        .unwrap();
 
-    info!(
-        "Starting file transfer service at {}",
-        config.hosturl().unwrap()
-    );
+    let hosturl = config
+        .hosturl()
+        .ok_or({
+            error!("Failed to load service URL");
+            failure::format_err!("Failed to load service URL")
+        })
+        .unwrap();
+
+    info!("Starting file transfer service at {}", hosturl);
 
     match recv_loop(&config) {
         Ok(()) => warn!("Service listener loop exited successfully?"),

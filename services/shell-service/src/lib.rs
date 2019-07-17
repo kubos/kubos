@@ -17,7 +17,7 @@
 use channel_protocol::{ChannelMessage, ChannelProtocol};
 use failure::bail;
 use kubos_system::Config as ServiceConfig;
-use log::{info, warn};
+use log::{error, info, warn};
 use shell_protocol::{ProcessHandler, ProtocolError, ShellMessage, ShellProtocol};
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -42,6 +42,10 @@ fn list_processes(
 ) -> Result<(), failure::Error> {
     let proc_list: HashMap<u32, (String, u32)> = threads
         .lock()
+        .map_err(|err| {
+            error!("Failed to get threads mutex: {:?}", err);
+            err
+        })
         .unwrap()
         .iter()
         .map(|(channel_id, data)| (*channel_id, (data.path.to_owned(), data.pid)))
@@ -129,7 +133,14 @@ fn thread_body(
     }
 
     // Remove ourselves from threads list once we are finished
-    shared_threads.lock().unwrap().remove(&channel_id);
+    shared_threads
+        .lock()
+        .map_err(|err| {
+            error!("Failed to get threads mutex: {:?}", err);
+            err
+        })
+        .unwrap()
+        .remove(&channel_id);
 }
 
 // Retrieves and parses next shell message
@@ -161,7 +172,9 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
 
     // Extract our local IP address so we can spawn child sockets later
     let mut host_parts = host.split(':').map(|val| val.to_owned());
-    let host_addr = host_parts.next().unwrap();
+    let host_addr = host_parts
+        .next()
+        .ok_or_else(|| failure::format_err!("Failed to parse service IP address"))?;
 
     let c_protocol =
         cbor_protocol::Protocol::new(&host.clone(), shell_protocol::CHUNK_SIZE as usize);
@@ -212,7 +225,15 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
                 args,
             } => {
                 info!("<- {{ {}, spawn, {}, {:?} }}", channel_id, command, args);
-                if !threads.lock().unwrap().contains_key(&channel_id) {
+                if !threads
+                    .lock()
+                    .map_err(|err| {
+                        error!("Failed to get threads mutex: {:?}", err);
+                        err
+                    })
+                    .unwrap()
+                    .contains_key(&channel_id)
+                {
                     if let Ok((pid, sender)) = spawn_process(
                         channel_id,
                         &command,
@@ -222,14 +243,21 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
                         timeout,
                         threads.clone(),
                     ) {
-                        threads.lock().unwrap().insert(
-                            channel_id,
-                            ThreadProcess {
-                                sender: sender.clone(),
-                                pid,
-                                path: command.to_owned(),
-                            },
-                        );
+                        threads
+                            .lock()
+                            .map_err(|err| {
+                                error!("Failed to get threads mutex: {:?}", err);
+                                err
+                            })
+                            .unwrap()
+                            .insert(
+                                channel_id,
+                                ThreadProcess {
+                                    sender: sender.clone(),
+                                    pid,
+                                    path: command.to_owned(),
+                                },
+                            );
                     }
                 } else {
                     warn!("Process on channel {} already exists", channel_id);
@@ -237,7 +265,15 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
             }
             // Pass along the message to existing process
             _ => {
-                if let Some(process_handle) = threads.lock().unwrap().get(&channel_id) {
+                if let Some(process_handle) = threads
+                    .lock()
+                    .map_err(|err| {
+                        error!("Failed to get threads mutex: {:?}", err);
+                        err
+                    })
+                    .unwrap()
+                    .get(&channel_id)
+                {
                     if let Err(e) = process_handle
                         .sender
                         .send((channel_message, message_source))
@@ -246,7 +282,15 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
                     }
                 }
 
-                if !threads.lock().unwrap().contains_key(&channel_id) {
+                if !threads
+                    .lock()
+                    .map_err(|err| {
+                        error!("Failed to get threads mutex: {:?}", err);
+                        err
+                    })
+                    .unwrap()
+                    .contains_key(&channel_id)
+                {
                     warn!("No session found for {}", channel_id);
                     let channel_protocol =
                         ChannelProtocol::new(&host_addr, &remote_addr, shell_protocol::CHUNK_SIZE);
@@ -255,7 +299,14 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
                         channel_id,
                         &format!("No session found on channel {}", channel_id),
                     )?)?;
-                    threads.lock().unwrap().remove(&channel_id);
+                    threads
+                        .lock()
+                        .map_err(|err| {
+                            error!("Failed to get threads mutex: {:?}", err);
+                            err
+                        })
+                        .unwrap()
+                        .remove(&channel_id);
                 }
             }
         }
