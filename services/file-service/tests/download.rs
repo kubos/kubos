@@ -44,8 +44,8 @@ fn download_single() {
 
     let hash = create_test_file(&source, &contents);
 
-    let service_dir = format!("{}/service", test_dir_str);
-    service_new!(service_port, downlink_port, 4096, service_dir);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     let result = download(
         "127.0.0.1",
@@ -82,8 +82,8 @@ fn download_multi_clean() {
 
     let hash = create_test_file(&source, &contents);
 
-    let service_dir = format!("{}/service", test_dir_str);
-    service_new!(service_port, downlink_port, 4096, service_dir);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     let result = download(
         "127.0.0.1",
@@ -120,8 +120,8 @@ fn download_multi_resume() {
 
     let hash = create_test_file(&source, &contents);
 
-    let service_dir = format!("{}/service", test_dir_str);
-    service_new!(service_port, downlink_port, 4096, service_dir);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     // Download a partial file so that we can resume the download later
     let result = download_partial(
@@ -174,8 +174,8 @@ fn download_multi_complete() {
 
     let hash = create_test_file(&source, &contents);
 
-    let service_dir = format!("{}/service", test_dir_str);
-    service_new!(service_port, downlink_port, 4096, service_dir);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     // download the file once (clean download)
     let result = download(
@@ -228,8 +228,8 @@ fn download_bad_hash() {
 
     let hash = create_test_file(&source, &contents);
 
-    let service_dir = format!("{}/service", test_dir_str);
-    service_new!(service_port, downlink_port, 4096, service_dir);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     // Download the file so we can mess with the temporary storage
     let result = download(

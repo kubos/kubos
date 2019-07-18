@@ -78,8 +78,8 @@ fn main() {
         file.write_all(&contents).unwrap();
     }
 
-    let service_dir = format!("{}/service", test_dir_str);
-    service_new!(service_port, down_port, 4096, service_dir);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, down_port, 4096, storage_dir);
 
     let result = download(
         "127.0.0.1",

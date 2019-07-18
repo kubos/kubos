@@ -38,8 +38,8 @@ fn cleanup_storage_dir() {
 
     let _hash = create_test_file(&source, &contents);
 
-    let service_dir = format!("{}/service", test_dir_str);
-    service_new!(service_port, downlink_port, 4096, service_dir);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     // Download a partial file so that we can resume the download later
     let _result = download(

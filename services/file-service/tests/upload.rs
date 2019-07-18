@@ -45,8 +45,8 @@ fn upload_single() {
 
     let hash = create_test_file(&source, &contents);
 
-    let service_dir = format!("{}/service", test_dir_str);
-    service_new!(service_port, downlink_port, 4096, service_dir);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     let result = upload(
         "127.0.0.1",
@@ -89,8 +89,8 @@ fn upload_multi_clean() {
 
     let hash = create_test_file(&source, &contents);
 
-    let service_dir = format!("{}/service", test_dir_str);
-    service_new!(service_port, downlink_port, 4096, service_dir);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     let result = upload(
         "127.0.0.1",
@@ -128,8 +128,8 @@ fn upload_multi_resume() {
 
     let hash = create_test_file(&source, &contents);
 
-    let service_dir = format!("{}/service", test_dir_str);
-    service_new!(service_port, downlink_port, 4096, service_dir);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     // Upload a partial version of the file
     let result = upload_partial(
@@ -179,8 +179,8 @@ fn upload_multi_complete() {
 
     let hash = create_test_file(&source, &contents);
 
-    let service_dir = format!("{}/service", test_dir_str);
-    service_new!(service_port, downlink_port, 4096, service_dir);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     // Upload the file once (clean upload)
     let result = upload(
@@ -230,8 +230,8 @@ fn upload_bad_hash() {
 
     let _ = create_test_file(&source, &contents);
 
-    let service_dir = format!("{}/service", test_dir_str);
-    service_new!(service_port, downlink_port, 4096, service_dir);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     // Upload the file so we can mess with the temporary storage
     let result = upload(
@@ -301,8 +301,8 @@ fn upload_single_after_bad_input() {
 
     let hash = create_test_file(&source, &contents);
 
-    let service_dir = format!("{}/service", test_dir_str);
-    service_new!(service_port, downlink_port, 4096, service_dir);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     {
         let send_socket = UdpSocket::bind("127.0.0.1:0").unwrap();
