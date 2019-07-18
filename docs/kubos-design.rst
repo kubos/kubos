@@ -80,7 +80,7 @@ But there are limits to what is achievable for hard real-time within a Linux env
 Worst-case response time guarantees vary greatly depending on how much you've optimized Linux,
 but can be as low as **30 microseconds**.
 This is likely enough to satisfy most hard real-time constraints.
-`Come talk to us <slack.kubos.com>`__ about how to achieve your hard real-time requirement in KubOS!
+`Come talk to us <https://slack.kubos.co/>`__ about how to achieve your hard real-time requirement in KubOS!
 
 Still not enough. What can you do?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
