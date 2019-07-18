@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 Kubos Corporation
+// Copyright (C) 2019 Kubos Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 use file_protocol::{FileProtocol, FileProtocolConfig, ProtocolError, State};
 use kubos_system::Config as ServiceConfig;
-use log::{error, warn};
+use log::{error, info, warn};
 use std::collections::HashMap;
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
 use std::sync::{Arc, Mutex};
@@ -54,6 +54,24 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
         None => 5,
     } as u16;
 
+    // Get the downlink port we'll be using when sending responses
+    let downlink_port = config
+        .get("downlink_port")
+        .and_then(|i| i.as_integer())
+        .expect("Downlink port not found") as u16;
+
+    // Get the downlink ip we'll be using when sending responses
+    let downlink_ip = config
+        .get("downlink_ip")
+        .expect("Downlink IP not found")
+        .as_str()
+        .and_then(|str| Some(str.to_owned()))
+        .expect("Downlink IP not found");
+
+    info!("Starting file transfer service");
+    info!("Listening on {}", host);
+    info!("Downlinking to {}:{}", downlink_ip, downlink_port);
+
     let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
 
     let c_protocol = cbor_protocol::Protocol::new(&host.clone(), chunk_size);
@@ -73,7 +91,7 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
 
     loop {
         // Listen on UDP port
-        let (source, first_message) = match c_protocol.recv_message_peer() {
+        let (_source, first_message) = match c_protocol.recv_message_peer() {
             Ok((source, first_message)) => (source, first_message),
             Err(e) => {
                 warn!("Error receiving message: {:?}", e);
@@ -104,6 +122,7 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
         {
             let (sender, receiver): (Sender<serde_cbor::Value>, Receiver<serde_cbor::Value>) =
                 mpsc::channel();
+
             threads
                 .lock()
                 .map_err(|err| {
@@ -112,9 +131,11 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
                 })
                 .unwrap()
                 .insert(channel_id, sender.clone());
+
             // Break the processing work off into its own thread so we can
             // listen for requests from other clients
             let shared_threads = threads.clone();
+            let downlink_ip_ref = downlink_ip.to_owned();
             thread::spawn(move || {
                 let state = State::Holding {
                     count: 0,
@@ -122,7 +143,11 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
                 };
 
                 // Set up the file system processor with the reply socket information
-                let f_protocol = FileProtocol::new(&host_ref, &format!("{}", source), config_ref);
+                let f_protocol = FileProtocol::new(
+                    &format!("{}:{}", host_ref, 0),
+                    &format!("{}:{}", downlink_ip_ref, downlink_port),
+                    config_ref,
+                );
 
                 // Listen, process, and react to the remaining messages in the
                 // requested operation

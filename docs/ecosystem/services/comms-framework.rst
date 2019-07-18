@@ -96,19 +96,25 @@ Inside of this will be a |Space Packet| containing one of the following payloads
 - GraphQL query or mutation
 - JSON GraphQL responses
 - File/shell service commands or data
-- Any other application data a payload or mission application might need
+- Any other application data or payload which can be passed over UDP
 
 Ground Communication
 ~~~~~~~~~~~~~~~~~~~~
 
 The communications service maintains a constant read thread which listens for messages from the
-ground via the communications device.
+ground via the communications device. Once a message is received, the message's Space Packet
+header is examined to determine the payload type. Currently the communications service framework 
+supports two payload types: GrahpQL and UDP. The payload type determines how the message is 
+passed on to the rest of the system.
 
-Once a message is received, a message handler thread is spawned. This message handler examines the
-port embedded in the message's Space Packet header to determine the internal message destination
-and then makes an HTTP POST to the appropriate service.
-The handler then waits for a response (within a specified timeout duration), wraps the response in a
-Space Packet, and then sends the packet to the communications device for transmission.
+GraphQL Payloads
+^^^^^^^^^^^^^^^^
+
+When a GraphQL message is received, a message handler thread is spawned. This message handler 
+examines the port embedded in the message's Space Packet header to determine the internal 
+message destination and then makes an HTTP POST to the appropriate service.
+The handler then waits for a response (within a specified timeout duration), wraps the response 
+in a Space Packet, and then sends the packet to the communications device for transmission.
 Once this transaction has completed, the message handler thread exits.
 
 .. uml::
@@ -122,7 +128,7 @@ Once this transaction has completed, the message handler thread exits.
     box "Communications Service" #LightBlue
         participant "Read Thread" as read
 
-        Radio <- read : 1. Read data packets from radio
+        Radio -> read : 1. Read data packets from radio
         read -> read : 2. Deframe data packets
         read -> read : 3. Reassemble data packet
 
@@ -140,6 +146,44 @@ Once this transaction has completed, the message handler thread exits.
     destroy handler
 
     @enduml
+
+UDP Payloads
+^^^^^^^^^^^^
+
+When a UDP message is received, a message handler thread is spawned. This message handler 
+examines the port embedded in the message's Space Packet header to determine the internal 
+message destination and then sends a UDP packet containing the message to the appropriate 
+service. The message handler thread exits immediately after sending out the UDP packet.
+UDP payloads sent from the ground to flight are intended to act as a one-way passthrough.
+Any responses must be sent through the appropriate downlink endpoint.
+
+.. uml::
+
+    @startuml
+
+    hide footbox
+
+    actor Radio
+
+    box "Communications Service" #LightBlue
+        participant "Read Thread" as read
+
+        Radio -> read : 1. Read data packets from radio
+        read -> read : 2. Deframe data packets
+        read -> read : 3. Reassemble data packet
+
+        create "Message Handler" as handler
+        read -> handler : 4. Spawn new message handler
+        activate handler
+    end box
+
+    participant "Kubos Service" as service
+
+    handler -> service : 5. Pass UDP packet to service
+    destroy handler
+
+    @enduml
+
 
 Downlink Endpoints
 ~~~~~~~~~~~~~~~~~~

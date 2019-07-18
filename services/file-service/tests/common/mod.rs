@@ -26,7 +26,7 @@ use std::time::Duration;
 
 #[macro_export]
 macro_rules! service_new {
-    ($port:expr, $chunk_size:expr) => {{
+    ($port:expr, $down_port:expr, $chunk_size:expr) => {{
         thread::spawn(move || {
             recv_loop(
                 &ServiceConfig::new_from_str(
@@ -37,11 +37,13 @@ macro_rules! service_new {
                 storage_dir = "service"
                 chunk_size = {}
                 hold_count = 5
+                downlink_ip = "127.0.0.1"
+                downlink_port = {}
                 [file-transfer-service.addr]
                 ip = "127.0.0.1"
                 port = {}
                 "#,
-                        $chunk_size, $port
+                        $chunk_size, $down_port, $port
                     ),
                 )
                 .unwrap(),
@@ -55,6 +57,7 @@ macro_rules! service_new {
 
 pub fn download(
     host_ip: &str,
+    host_port: u16,
     remote_addr: &str,
     source_path: &str,
     target_path: &str,
@@ -63,7 +66,8 @@ pub fn download(
 ) -> Result<(), ProtocolError> {
     let hold_count = 5;
     let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     let channel = f_protocol.generate_channel()?;
 
@@ -92,6 +96,7 @@ pub fn download(
 
 pub fn download_partial(
     host_ip: &str,
+    host_port: u16,
     remote_addr: &str,
     source_path: &str,
     target_path: &str,
@@ -100,7 +105,8 @@ pub fn download_partial(
 ) -> Result<(), ProtocolError> {
     let hold_count = 5;
     let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     let channel = f_protocol.generate_channel()?;
 
@@ -145,6 +151,7 @@ pub fn download_partial(
 
 pub fn upload(
     host_ip: &str,
+    host_port: u16,
     remote_addr: &str,
     source_path: &str,
     target_path: &str,
@@ -153,7 +160,8 @@ pub fn upload(
 ) -> Result<String, ProtocolError> {
     let hold_count = 5;
     let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     // copy file to upload to temp storage. calculate the hash and chunk info
     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
@@ -180,6 +188,7 @@ pub fn upload(
 
 pub fn upload_partial(
     host_ip: &str,
+    host_port: u16,
     remote_addr: &str,
     source_path: &str,
     target_path: &str,
@@ -188,7 +197,8 @@ pub fn upload_partial(
 ) -> Result<String, ProtocolError> {
     let hold_count = 5;
     let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     // Copy file to upload to temp storage. calculate the hash and chunk info
     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
@@ -215,6 +225,7 @@ pub fn upload_partial(
 
 pub fn cleanup(
     host_ip: &str,
+    host_port: u16,
     remote_addr: &str,
     hash: Option<String>,
     prefix: Option<String>,
@@ -222,7 +233,8 @@ pub fn cleanup(
 ) -> Result<(), ProtocolError> {
     let hold_count = 5;
     let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     let channel = f_protocol.generate_channel()?;
 
