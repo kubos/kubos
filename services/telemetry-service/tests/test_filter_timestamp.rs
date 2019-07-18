@@ -38,7 +38,7 @@ fn test_ge() {
     let port = 8112;
     let udp = 8122;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
+    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
 
     let ge_res = do_query(Some(port), "{telemetry(timestampGe: 1004){value}}");
 
@@ -66,7 +66,7 @@ fn test_le() {
     let port = 8113;
     let udp = 8123;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
+    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
 
     let le_res = do_query(Some(port), "{telemetry(timestampLe: 1002){value}}");
 
@@ -95,7 +95,7 @@ fn test_range() {
     let port = 8114;
     let udp = 8124;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
+    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
 
     let range_res = do_query(
         Some(port),
@@ -127,7 +127,7 @@ fn test_single() {
     let port = 8115;
     let udp = 8125;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
+    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
 
     let single_res = do_query(
         Some(port),

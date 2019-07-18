@@ -36,7 +36,7 @@ fn test_parameter() {
     let port = 8111;
     let udp = 8121;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
+    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
 
     let res = do_query(
         Some(port),
@@ -65,7 +65,7 @@ fn test_parameters_multiple() {
     let port = 8112;
     let udp = 8122;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
+    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
 
     let res = do_query(
         Some(port),
@@ -101,7 +101,7 @@ fn test_parameters_single() {
     let port = 8113;
     let udp = 8123;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
+    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
 
     let res = do_query(
         Some(port),
@@ -135,7 +135,7 @@ fn test_conflict() {
     let port = 8114;
     let udp = 8124;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(udp), Some(SQL));
+    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
 
     let res = do_query(
         Some(port),

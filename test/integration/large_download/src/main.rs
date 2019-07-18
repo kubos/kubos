@@ -25,14 +25,14 @@ use std::time::Duration;
 use tempfile::TempDir;
 
 macro_rules! service_new {
-    ($port:expr, $down_port:expr, $chunk_size:expr) => {{
+    ($port:expr, $down_port:expr, $chunk_size:expr, $storage_dir:expr) => {{
         thread::spawn(move || {
             recv_loop(&ServiceConfig::new_from_str(
                 "file-transfer-service",
                 &format!(
                     r#"
                 [file-transfer-service]
-                storage_dir = "service"
+                storage_dir = "{}"
                 chunk_size = {}
                 hold_count = 5
                 downlink_ip = "127.0.0.1"
@@ -41,7 +41,7 @@ macro_rules! service_new {
                 ip = "127.0.0.1"
                 port = {}
                 "#,
-                    $chunk_size, $down_port, $port
+                    $storage_dir, $chunk_size, $down_port, $port
                 ),
             ))
             .unwrap();
@@ -78,7 +78,8 @@ fn main() {
         file.write_all(&contents).unwrap();
     }
 
-    service_new!(service_port, down_port, 4096);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, down_port, 4096, storage_dir);
 
     let result = download(
         "127.0.0.1",
@@ -86,7 +87,7 @@ fn main() {
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
 

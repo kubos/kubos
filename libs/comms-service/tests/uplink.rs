@@ -30,7 +30,7 @@ use util::*;
 // No response is sent from the service
 #[test]
 fn uplink_to_service_no_response() {
-    let sat_ip = "127.0.0.3";
+    let sat_ip = "127.0.0.1";
     let downlink_port = 15002;
     let service_port = 15005;
     let config = comms_config(sat_ip, downlink_port);
@@ -87,7 +87,7 @@ fn uplink_to_service_no_response() {
 // Service sends back a response via the message handler
 #[test]
 fn uplink_to_service_with_handler_response() {
-    let sat_ip = "127.0.0.5";
+    let sat_ip = "127.0.0.1";
     let downlink_port = 16002;
     let service_port = 16005;
     let config = comms_config(sat_ip, downlink_port);
@@ -158,7 +158,7 @@ fn uplink_to_service_with_handler_response() {
 // Service sends back a response via the downlink port
 #[test]
 fn uplink_to_service_with_downlink_response() {
-    let sat_ip = "127.0.0.7";
+    let sat_ip = "127.0.0.1";
     let downlink_port = 17002;
     let service_port = 17005;
     let config = comms_config(sat_ip, downlink_port);
@@ -235,9 +235,9 @@ fn uplink_to_service_with_downlink_response() {
 // Tests sending a udp packet from the ground
 #[test]
 fn uplink_udp_passthrough() {
-    let sat_ip = "127.0.0.8";
-    let downlink_port = 17002;
-    let service_port = 17006;
+    let sat_ip = "127.0.0.1";
+    let downlink_port = 18002;
+    let service_port = 18006;
     let config = comms_config(sat_ip, downlink_port);
     let mock_comms = Arc::new(Mutex::new(MockComms::new()));
     let payload = vec![0, 1, 4, 5];
