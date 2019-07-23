@@ -40,19 +40,19 @@ class IntegrationTest:
 
             # Check for successful test
             if response['test']['success']:
-                print "Status : SUCCESS\n {}".format(service)
-                print "Response : {}\n".format(response)
+                print("Status : SUCCESS\n {}".format(service))
+                print("Response : {}\n".format(response))
             else:
-                print "Status : FAILED\n {}".format(service)
-                print "Response : {}\n".format(response)
+                print("Status : FAILED\n {}".format(service))
+                print("Response : {}\n".format(response))
         except socket.timeout as e:
-            print "Status : TIMEOUT\n {}".format(service)
-            print "No response from server"
-            print "Timeout : {} seconds\n".format(QUERY_TIMEOUT)
+            print("Status : TIMEOUT\n {}".format(service))
+            print("No response from server")
+            print("Timeout : {} seconds\n".format(QUERY_TIMEOUT))
         except KeyError as e:
-            print "Status : FORMAT ERROR\n {}".format(service)
-            print "Service is sending back invalid response format"
-            print "Error : {}, {}\n".format(type(e), e)
+            print("Status : FORMAT ERROR\n {}".format(service))
+            print("Service is sending back invalid response format")
+            print("Error : {}, {}\n".format(type(e), e))
         except Exception as e:
-            print "Status : TEST ERROR\n {}".format(service)
-            print "Error : {}, {}\n".format(type(e), e)
+            print("Status : TEST ERROR\n {}".format(service))
+            print("Error : {}, {}\n".format(type(e), e))

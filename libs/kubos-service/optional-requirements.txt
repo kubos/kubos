@@ -1,7 +1,0 @@
-## Optional Dependencies for Additional HTTP Functionality
-##
-## To install, run:
-##     $ pip install -r optional-requirements.txt
-
-Flask==0.12.2
-Flask-GraphQL==1.4.1

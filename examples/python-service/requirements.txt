@@ -1,4 +1,4 @@
-graphene==2.0.1
 Flask==0.12.2
-Flask-GraphQL==1.4.1
-kubos-service==1.0
+Flask_GraphQL==1.4.1
+graphene==2.1.1
+-f ../../libs/kubos-service kubos_service==1.0
