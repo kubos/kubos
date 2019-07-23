@@ -29,7 +29,7 @@ use util::*;
 // Service sends back a response via the message handler
 #[test]
 fn concurrent_uplinks_to_service_with_handler_response() {
-    let sat_ip = "127.0.0.9";
+    let sat_ip = "127.0.0.1";
     let downlink_port = 18002;
     let service_port = 18005;
     let config = comms_config(sat_ip, downlink_port);
@@ -111,7 +111,7 @@ fn concurrent_uplinks_to_service_with_handler_response() {
 // Service sends back a response via the message handler
 #[test]
 fn too_many_concurrent_uplinks_to_service_with_handler_response() {
-    let sat_ip = "127.0.0.11";
+    let sat_ip = "127.0.0.1";
     let downlink_port = 19002;
     let service_port = 19005;
     let config = comms_config(sat_ip, downlink_port);

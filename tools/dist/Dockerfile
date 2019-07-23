@@ -7,13 +7,18 @@ MAINTAINER catherine@kubos.com, ryan@kubos.com
 RUN apt-get update -y
 
 RUN apt-get upgrade --no-install-recommends -y python3.5
-RUN apt-get install --no-install-recommends -y pkg-config build-essential  python-setuptools git cmake unzip wget sqlite3 libsqlite3-dev libssl-dev curl
+RUN apt-get install --no-install-recommends -y pkg-config build-essential  python-setuptools git cmake unzip wget sqlite3 libsqlite3-dev libssl-dev curl git ssh
 
 # Linux build dependencies
 RUN apt-get install --no-install-recommends -y bc cpio ncurses-dev libc6-i386 lib32stdc++6 lib32z1
 
 # Install pip for Python2 and Python3
 RUN apt-get install --no-install-recommends -y python-pip python3-pip python3-setuptools
+
+# So that we have bdist_wheel available when installing other packages
+RUN pip install wheel
+RUN pip3 install wheel
+
 #Kubos Linux setup
 RUN echo "Installing Kubos Linux Toolchain"
 

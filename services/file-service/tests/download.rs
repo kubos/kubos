@@ -44,7 +44,8 @@ fn download_single() {
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, downlink_port, 4096);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     let result = download(
         "127.0.0.1",
@@ -52,10 +53,10 @@ fn download_single() {
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
@@ -81,7 +82,8 @@ fn download_multi_clean() {
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, downlink_port, 4096);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     let result = download(
         "127.0.0.1",
@@ -89,10 +91,10 @@ fn download_multi_clean() {
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
@@ -118,7 +120,8 @@ fn download_multi_resume() {
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, downlink_port, 4096);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     // Download a partial file so that we can resume the download later
     let result = download_partial(
@@ -127,7 +130,7 @@ fn download_multi_resume() {
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
     // The download should *not* complete with success because we aren't
@@ -141,10 +144,10 @@ fn download_multi_resume() {
         "127.0.0.1:8002",
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
@@ -171,7 +174,8 @@ fn download_multi_complete() {
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, downlink_port, 4096);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     // download the file once (clean download)
     let result = download(
@@ -180,10 +184,10 @@ fn download_multi_complete() {
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
-    assert!(result.is_ok());
+    result.unwrap();
 
     thread::sleep(Duration::from_millis(100));
 
@@ -194,11 +198,11 @@ fn download_multi_complete() {
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
 
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
@@ -224,7 +228,8 @@ fn download_bad_hash() {
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, downlink_port, 4096);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     // Download the file so we can mess with the temporary storage
     let result = download(
@@ -233,14 +238,18 @@ fn download_bad_hash() {
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Recreate temp folder with bad chunk so that future hash calculation will fail
-    fs::create_dir(format!("client/storage/{}", hash)).unwrap();
-    fs::write(format!("client/storage/{}/0", hash), "bad data".as_bytes()).unwrap();
+    fs::create_dir(format!("{}/client/storage/{}", test_dir_str, hash)).unwrap();
+    fs::write(
+        format!("{}/client/storage/{}/0", test_dir_str, hash),
+        "bad data".as_bytes(),
+    )
+    .unwrap();
 
     let result = download(
         "127.0.0.1",
@@ -248,13 +257,8 @@ fn download_bad_hash() {
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
     assert_eq!("File hash mismatch", format!("{}", result.unwrap_err()));
-
-    // Cleanup the temporary files so that the test can be repeatable
-    // The client folder is cleaned up by the protocol as a result
-    // of the hash mismatch
-    let _ = fs::remove_dir_all(format!("service/storage/{}", hash));
 }

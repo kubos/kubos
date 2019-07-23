@@ -87,13 +87,11 @@ fn start_telemetry(config: String) -> (JoinHandle<()>, Sender<bool>) {
 }
 
 pub fn setup(
-    db: Option<&str>,
+    db: &str,
     service_port: Option<u16>,
     udp_port: Option<u16>,
     sql: Option<&str>,
 ) -> (JoinHandle<()>, Sender<bool>) {
-    let db = db.unwrap_or("test.db");
-
     let service_port = service_port.unwrap_or(8111);
     let udp_port = udp_port.unwrap_or(8112);
 

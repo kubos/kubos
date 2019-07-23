@@ -92,7 +92,8 @@ fn query_bad_file() {
 
     let result_str = format!("{}", result);
 
-    assert_eq!(result_str, "No such file or directory (os error 2)");
+    // Linux and Mac may return different error numbers
+    assert_eq!(&result_str[..36], "No such file or directory (os error ");
 }
 
 #[test]

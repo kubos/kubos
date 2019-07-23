@@ -30,7 +30,7 @@ use util::*;
 // and checking if it arrives in the MockComms write queue
 #[test]
 fn downlink_to_ground() {
-    let sat_ip = "127.0.0.3";
+    let sat_ip = "127.0.0.1";
     let downlink_port = 16002;
     let config = comms_config(sat_ip, downlink_port);
     let mock_comms = Arc::new(Mutex::new(MockComms::new()));
