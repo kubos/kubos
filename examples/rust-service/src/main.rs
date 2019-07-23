@@ -62,7 +62,7 @@ fn main() {
     .unwrap();
 
     Service::new(
-        Config::new("example-service"),
+        Config::new("example-service").unwrap(),
         Subsystem::new(),
         QueryRoot,
         MutationRoot,

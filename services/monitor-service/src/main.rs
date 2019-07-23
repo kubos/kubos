@@ -56,6 +56,7 @@ extern crate juniper;
 
 use crate::schema::{MutationRoot, QueryRoot};
 use kubos_service::{Config, Service};
+use log::error;
 use syslog::Facility;
 
 mod meminfo;
@@ -73,7 +74,12 @@ fn main() {
     )
     .unwrap();
 
-    let config = Config::new("monitor-service");
+    let config = Config::new("monitor-service")
+        .map_err(|err| {
+            error!("Failed to load service config: {:?}", err);
+            err
+        })
+        .unwrap();
 
     Service::new(config, (), QueryRoot, MutationRoot).start();
 }

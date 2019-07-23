@@ -419,6 +419,7 @@ use crate::model::{ReadData, Subsystem};
 pub use crate::objects::*;
 use crate::schema::{MutationRoot, QueryRoot};
 use kubos_service::{Config, Service};
+use log::error;
 use mai400_api::MAIResult;
 use std::sync::Arc;
 use syslog::Facility;
@@ -432,8 +433,16 @@ fn main() -> MAIResult<()> {
     .unwrap();
 
     Service::new(
-        Config::new("mai400-service"),
-        Subsystem::new("/dev/ttyS5", Arc::new(ReadData::new()))?,
+        Config::new("mai400-service")
+            .map_err(|err| {
+                error!("Failed to load service config: {:?}", err);
+                err
+            })
+            .unwrap(),
+        Subsystem::new("/dev/ttyS5", Arc::new(ReadData::new())).map_err(|err| {
+            error!("Failed to initialize subsystem: {:?}", err);
+            err
+        })?,
         QueryRoot,
         MutationRoot,
     )

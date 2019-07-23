@@ -85,7 +85,8 @@ fn app_no_args() {
                 .join("config.toml")
                 .to_string_lossy()
         ),
-    );
+    )
+    .unwrap();
 
     setup_app(&fixture.registry_dir.path());
 
@@ -119,7 +120,8 @@ fn app_single_pos_arg() {
                 .join("config.toml")
                 .to_string_lossy()
         ),
-    );
+    )
+    .unwrap();
 
     setup_app(&fixture.registry_dir.path());
 
@@ -153,7 +155,8 @@ fn app_single_flag() {
                 .join("config.toml")
                 .to_string_lossy()
         ),
-    );
+    )
+    .unwrap();
 
     setup_app(&fixture.registry_dir.path());
 
@@ -187,7 +190,8 @@ fn app_flag_arg() {
                 .join("config.toml")
                 .to_string_lossy()
         ),
-    );
+    )
+    .unwrap();
 
     setup_app(&fixture.registry_dir.path());
 
@@ -221,7 +225,8 @@ fn app_custom_config() {
                 .join("config.toml")
                 .to_string_lossy()
         ),
-    );
+    )
+    .unwrap();
 
     setup_app(&fixture.registry_dir.path());
 

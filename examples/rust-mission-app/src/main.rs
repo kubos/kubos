@@ -9,8 +9,8 @@ struct MyApp;
 
 impl AppHandler for MyApp {
     fn on_boot(&self, _args: Vec<String>) -> Result<(), Error> {
-        let monitor_service = ServiceConfig::new("monitor-service");
-        let telemetry_service = ServiceConfig::new("telemetry-service");
+        let monitor_service = ServiceConfig::new("monitor-service")?;
+        let telemetry_service = ServiceConfig::new("telemetry-service")?;
 
         loop {
             thread::sleep(Duration::from_secs(3));
@@ -119,7 +119,7 @@ impl AppHandler for MyApp {
                 }"#;
 
                 match query(
-                    &ServiceConfig::new("app-service"),
+                    &ServiceConfig::new("app-service")?,
                     request,
                     Some(Duration::from_secs(1)),
                 ) {
