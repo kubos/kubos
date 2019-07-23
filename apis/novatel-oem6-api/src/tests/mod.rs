@@ -34,7 +34,9 @@ macro_rules! mock_new {
         }));
         let rx_conn = conn.clone();
 
-        thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send, &response_abbrv_send));
+        thread::spawn(move || {
+            read_thread(&rx_conn, &log_send, &response_send, &response_abbrv_send)
+        });
 
         OEM6 {
             conn,

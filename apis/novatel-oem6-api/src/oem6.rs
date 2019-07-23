@@ -58,7 +58,7 @@ const TIMEOUT: Duration = Duration::from_millis(60);
 /// let (log_send, log_recv) = sync_channel(5);
 /// let (response_send, response_recv) = sync_channel(5);
 /// let (response_abbrv_send, response_abbrv_recv) = sync_channel(5);
-/// 
+///
 /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv, response_abbrv_recv).unwrap();
 ///
 /// let rx_conn = oem.conn.clone();
@@ -276,9 +276,9 @@ impl OEM6 {
     /// let (log_send, log_recv) = sync_channel(5);
     /// let (response_send, response_recv) = sync_channel(5);
     /// let (response_abbrv_send, response_abbrv_recv) = sync_channel(5);
-    /// 
+    ///
     /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv, response_abbrv_recv).unwrap();
-    /// 
+    ///
     /// # Ok(())
     /// # }
     /// ```
@@ -405,7 +405,7 @@ impl OEM6 {
     /// # let (log_send, log_recv) = sync_channel(5);
     /// # let (response_send, response_recv) = sync_channel(5);
     /// # let (response_abbrv_send, response_abbrv_recv) = sync_channel(5);
-    /// 
+    ///
     /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv, response_abbrv_recv).unwrap();
     /// let rx_conn = oem.conn.clone();
     /// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send, &response_abbrv_send));
