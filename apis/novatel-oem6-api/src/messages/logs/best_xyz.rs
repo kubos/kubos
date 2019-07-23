@@ -91,6 +91,7 @@ impl BestXYZLog {
     }
 }
 
+#[cfg(not(feature = "nos3"))]
 named!(parse_bestxyz(&[u8]) -> BestXYZLog,
     do_parse!(
         pos_status: le_u32 >>
@@ -103,6 +104,66 @@ named!(parse_bestxyz(&[u8]) -> BestXYZLog,
         pos_dev_z: le_f32 >>
         vel_status: le_u32 >>
         vel_type: le_u32 >>
+        vel_x: le_f64 >>
+        vel_y: le_f64 >>
+        vel_z: le_f64 >>
+        vel_dev_x: le_f32 >>
+        vel_dev_y: le_f32 >>
+        vel_dev_z: le_f32 >>
+        station_id: take!(4) >>
+        vel_time_latency: le_f32 >>
+        diff_age: le_f32 >>
+        sol_age: le_f32 >>
+        num_sats: le_u8 >>
+        num_sat_vehicles: le_u8 >>
+        num_gg_l1: le_u8 >>
+        num_multi_sats: le_u8 >>
+        le_u8 >>
+        ext_sol_stat: le_u8 >>
+        gal_beidou_sig: le_u8 >>
+        gps_glonass_sig: le_u8 >>
+        (BestXYZLog {
+            recv_status: ReceiverStatusFlags::empty(),
+            time_status: 0,
+            week: 0,
+            ms: 0,
+            pos_status,
+            pos_type,
+            position: [pos_x, pos_y, pos_z],
+            pos_deviation: [pos_dev_x, pos_dev_y, pos_dev_z],
+            vel_status,
+            vel_type,
+            velocity: [vel_x, vel_y, vel_z],
+            vel_deviation: [vel_dev_x, vel_dev_y, vel_dev_z],
+            station_id: String::from_utf8_lossy(station_id).trim_right_matches('\u{0}').to_owned(),
+            vel_time_latency,
+            diff_age,
+            sol_age,
+            num_sats,
+            num_sat_vehicles,
+            num_gg_l1,
+            num_multi_sats,
+            ext_sol_stat,
+            gal_beidou_sig,
+            gps_glonass_sig,
+            }
+        )
+    )
+);
+
+#[cfg(feature = "nos3")]
+named!(parse_bestxyz(&[u8]) -> BestXYZLog,
+    do_parse!(
+        pos_status: be_u32 >>
+        pos_type: be_u32 >>
+        pos_x: le_f64 >>
+        pos_y: le_f64 >>
+        pos_z: le_f64 >>
+        pos_dev_x: le_f32 >>
+        pos_dev_y: le_f32 >>
+        pos_dev_z: le_f32 >>
+        vel_status: be_u32 >>
+        vel_type: be_u32 >>
         vel_x: le_f64 >>
         vel_y: le_f64 >>
         vel_z: le_f64 >>
