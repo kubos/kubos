@@ -18,7 +18,7 @@
 
 use file_service::*;
 use kubos_system::Config as ServiceConfig;
-use log::{error, info, warn};
+use log::{error, warn};
 use syslog::Facility;
 
 fn main() {
@@ -30,8 +30,6 @@ fn main() {
     .unwrap();
 
     let config = ServiceConfig::new("file-transfer-service");
-
-    info!("Starting file transfer service at {}", config.hosturl());
 
     match recv_loop(&config) {
         Ok(()) => warn!("Service listener loop exited successfully?"),

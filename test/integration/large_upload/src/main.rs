@@ -25,21 +25,23 @@ use std::time::Duration;
 use tempfile::TempDir;
 
 macro_rules! service_new {
-    ($port:expr, $chunk_size:expr) => {{
+    ($port:expr, $down_port:expr, $chunk_size:expr, $storage_dir:expr) => {{
         thread::spawn(move || {
             recv_loop(&ServiceConfig::new_from_str(
                 "file-transfer-service",
                 &format!(
                     r#"
                 [file-transfer-service]
-                storage_dir = "service"
+                storage_dir = "{}"
                 chunk_size = {}
                 hold_count = 5
+                downlink_ip = "127.0.0.1"
+                downlink_port = {}
                 [file-transfer-service.addr]
                 ip = "127.0.0.1"
                 port = {}
                 "#,
-                    $chunk_size, $port
+                    $storage_dir, $chunk_size, $down_port, $port
                 ),
             ))
             .unwrap();
@@ -60,6 +62,7 @@ fn main() {
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
     let service_port = 7006;
+    let down_port = 6006;
 
     // Create a 100MB file filled with random data
     {
@@ -77,14 +80,16 @@ fn main() {
         }
     }
 
-    service_new!(service_port, 4096);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, down_port, 4096, storage_dir);
 
     let result = upload(
         "127.0.0.1",
+        down_port,
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
 
@@ -108,6 +113,7 @@ fn main() {
 
 pub fn upload(
     host_ip: &str,
+    host_port: u16,
     remote_addr: &str,
     source_path: &str,
     target_path: &str,
@@ -116,7 +122,8 @@ pub fn upload(
 ) -> Result<String, ProtocolError> {
     let hold_count = 5;
     let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     // copy file to upload to temp storage. calculate the hash and chunk info
     let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;

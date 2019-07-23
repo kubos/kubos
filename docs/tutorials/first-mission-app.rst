@@ -2,11 +2,14 @@ Creating Your First Mission Application
 =======================================
 
 This tutorial guides the user through the process of creating a basic mission application using
-Python3.5.
+Python3.
 
 At the end of the tutorial, the user will have a mission application which is capable of querying
 the monitor service for current system memory usage and then storing that data into the telemetry
 database.
+
+You should be able to go through this tutorial entirely within your development environment.
+You do not need to have an OBC available.
 
 .. note:: 
 
@@ -15,17 +18,25 @@ database.
     for the specific application code. The rest of this document should still be useful for the
     high-level concepts which are involved when developing a mission application.
 
-Pre-Requisites
---------------
+Setup
+-----
 
-- :doc:`Install the Kubos SDK <../installation-docs/sdk-installing>`
-- Have an OBC available with both Python and SSH capabilities
-  (preferably with an :doc:`installation of Kubos Linux <../installation-docs/index>`)
+- :doc:`Install the Kubos SDK <../sdk-docs/sdk-installing>` or set up the dependencies
+  required for a :doc:`local dev environment <../getting-started/local-setup>`
+- If you have not done so already, create a clone of the `KubOS source repo <https://github.com/kubos/kubos>`__::
 
-    - :ref:`Configuring Ethernet <ethernet>`
-
-- Have the monitor service and telemetry database service running on the target OBC
-  (this happens by default when running KubOS)
+    $ git clone https://github.com/kubos/kubos
+    
+- Navigate to the kubos source directory and run the following commands to start the monitor service
+  and telemetry database service in the background (the services may need to be built first, which
+  will take several minutes to complete)::
+  
+    $ cargo run --bin monitor-service -- -c tools/default_config.toml &
+    $ cargo run --bin telemetry-service -- -c tools/default_config.toml &
+    
+- Navigate back out to the development directory of your choosing.
+  This tutorial will use ``/home/user/my-app`` as the example development directory and will assume
+  that the cloned kubos repo is in ``/home/user/kubos``.
 
 Mission Application Overview
 ----------------------------
@@ -33,7 +44,7 @@ Mission Application Overview
 Mission applications are user-created programs which are used to control satellite behavior and
 execute mission logic.
 
-These applications are registered with the :doc:`applications service <../app-docs/app-service>`,
+These applications are registered with the :doc:`applications service <../ecosystem/services/app-service>`,
 which is responsible for tracking versioning, kicking off applications at boot time, and controlling
 application upgrades and rollbacks.
 
@@ -59,7 +70,7 @@ We'll be creating a new file for this tutorial, ``my-mission-app.py``.
 In order to allow the applications service to run our mission application, we'll need to start by
 placing the following line at the top of our new file::
 
-    #!/usr/bin/env python
+    #!/usr/bin/env python3
     
 This allows the file to be run like a normal executable, ``./my-mission-app.py``, rather than needing
 to explicitly call the Python interpreter with ``python my-mission-app.py``.
@@ -115,7 +126,7 @@ All together, it should look like this:
 
 .. code-block:: python
 
-    #!/usr/bin/env python
+    #!/usr/bin/env python3
     
     import argparse
     import sys
@@ -146,132 +157,18 @@ All together, it should look like this:
     if __name__ == "__main__":
         main()
 
-We can test this program locally to verify that it's working as expected::
+We'll now run the program to verify that it's working as expected::
 
     $ ./my-mission-app.py -r OnBoot
     OnBoot logic
     $ ./my-mission-app.py -r OnCommand
     OnCommand logic
-
-Adding Logging
---------------
-
-When our mission application is running in-flight, we likely won't have constant access to ``stdout``.
-
-As a result, it would be better if we were also routing our messages to a log file.
-That way we can check the status of our application at our discretion.
-
-Kubos Linux uses `rsyslog <https://www.rsyslog.com/>`__ to automatically route log messages to the
-appropriate log file and then rotate those files when they become too large.
-
-All user applications should setup their logging to write to the user facility.
-This will cause all log messages to be routed to files in ``/home/system/log``,
-
-.. note::
-
-    Log files are traditionally stored in ``/var/log``. ``/var/log`` has been set up as a symlink to
-    ``/home/system/log``.
-    
-Within this directory, there may be several files:
-
-    - ``app-debug.log`` - Records all log messages
-    - ``app-info.log`` - Records log messages with a priority of ``info`` or higher
-    - ``app-warn.log`` - Records log messages with a priority of ``warn`` or higher
-
-Additionally, there may be files which match one of the above names, but are suffixed with a time
-stamp.
-For example, ``app-debug.log.2018.12.01-00.12.07``.
-These are archived log files. Each log file has a maximum file size.
-Once this size is reached, the current file is renamed as an archive file and a new log file is started.
-By default, nine archive files of each log type will be retained.
-If a new archive file is created and there are already nine files, the oldest will be deleted.
-
-More information about the logging infrastructure can be found in the
-:doc:`Kubos Linux logging doc <../os-docs/logging>`.
-
-For ease-of-use, the Python applications API contains a helper function, ``logging_setup``,
-which will make all of the system calls required in order to set up the logger for the application.
-All the user needs to do is specify the name of the application which should be used when generating
-log messages.
-
-Logging should be setup like so:
-
-.. code-block:: python
-
-    import app_api
-    
-    logger = app_api.logging_setup("mission-app")
-    
-    # Write a test message
-    logger.info("Test Message")
-
-
-Our new file should look like this:
-
-.. code-block:: python
-
-    #!/usr/bin/env python
-    
-    import app_api
-    import argparse
-    import sys
-    
-    def on_boot(logger):
-        
-        logger.info("OnBoot logic")
-        
-    def on_command(logger):
-        
-        logger.info("OnCommand logic")
-    
-    def main():
-    
-        logger = app_api.logging_setup("my-mission-app")
-        
-        parser = argparse.ArgumentParser()
-        
-        parser.add_argument('--run', '-r')
-        
-        args = parser.parse_args()
-        
-        if args.run == 'OnBoot':
-            on_boot(logger)
-        elif args.run == 'OnCommand':
-            on_command(logger)
-        else:
-            logger.error("Unknown run level specified")
-            sys.exit(1)
-        
-    if __name__ == "__main__":
-        main()
-        
-After transferring the file to the target OBC, we can log in to the OBC and test that the logging
-works::
-
-    $ scp my-mission-app.py kubos@10.0.2.20:/home/kubos
-    kubos@10.0.2.20's password: ********
-    my-mission-app.py                                    100%   970    1.0KB/s   00:00
-    $ ssh kubos@10.0.2.20
-    kubos@10.0.2.20's password: ********
-    /home/kubos # ./my-mission-app.py -r OnBoot
-    my-mission-app: OnBoot logic
-    /home/kubos # ./my-mission-app.py -r OnBoot
-    my-mission-app: OnBoot logic
-    /home/kubos # ./my-mission-app.py -r OnCommand
-    my-mission-app: OnCommand logic
-    /home/kubos # cd /var/log/apps
-    /home/system/log # ls app*
-    app-debug.log  app-info.log
-    /home/system/log # cat app-info.log
-    1970-01-01T03:23:08.491359+00:00 Kubos my-mission-app:<info> OnBoot logic
-    1970-01-01T03:24:00.334330+00:00 Kubos my-mission-app:<info> OnBoot logic
-    1970-01-01T03:27:20.841483+00:00 Kubos my-mission-app:<info> OnCommand logic
     
 Kubos Services and GraphQL
 --------------------------
 
 A major component of most mission applications will be interacting with
-:doc:`Kubos services <../services/index>`.
+:ref:`Kubos services <service-docs>`.
 
 These services provided interfaces to underlying hardware and other system resources.
 
@@ -376,143 +273,171 @@ Each service has a schema which defines all of its queries and mutations.
 Users should refer to these to determine what actions are available for each service and how their
 requests should be structured.
 
-Documentation for Kubos services can be found within the :doc:`services <../services/index>` section.
+Documentation for Kubos services can be found within the :ref:`services <service-docs>`
+section.
 
 For example, links to the schemas for all of the pre-built hardware services can be found
 :ref:`here <pre-built-services>`.
 
+Determining Service URLs
+------------------------
+
+In order to communicate with a service, we need to know where to send our messages.
+
+All services rely on a configuration file, ``config.toml``, in order to determine which IP and port
+they should bind a listener thread to.
+
+By default, this file is located in ``/home/system/etc/config.toml``.
+Since we're running these tutorials locally, that file location likely doesn't exist, so instead we
+are using the ``tools/default_config.toml`` file in our cloned copy of the kubos repo.
+
+We'll need to pass our application this path when we go to run it locally.
+
 Querying a Service
 ------------------
 
-For this tutorial, we'll be querying the :doc:`monitor service <../services/monitor-service>` for
-the current amount of available memory.
+For this tutorial, we'll be querying the :doc:`monitor service <../ecosystem/services/monitor-service>`
+to make sure it is successfully up and running.
 
 The monitor service is a unique hardware service which communicates with the OBC itself in order to
 obtain information about current processes running and the amount of memory both available and
 generally present on the system.
 It is unique because it is not tied to a particular hardware device and can, instead, be run on any
-supported OBC.
+supported OBC (or in this instance, the local dev environment).
 Worth noting, the process of communicating with this service is the same as communicating with any
 other core or hardware service.
 
 We intend for this to be an ad-hoc action, so we'll be adding code to the on-command section of
 our program.
 
-The service's ``memInfo`` query has the following schema::
+The all KubOS core services provide a ``ping`` query which can be used to verify that the service
+is currently running on the expected port.
+The request has the following format::
 
     {
-        MemInfo {
-            total: Int,
-            free: Int,
-            available: Int,
-            lowFree: Int,
-        }
+        ping
+    }
+    
+The response should return a single ``"pong"`` result::
+
+    {
+      "data": {
+        "ping": "pong"
+      }
     }
 
-This indicates that there are four possible return fields, however, the lack of an exclamation mark
-means if any of them are not available on the system (for example, ``lowFree`` isn't available on
-all systems), it will be omitted.
-
-To make the communication process simpler, we'll be using the :doc:`Python app API <../app-docs/python-app-api>`
+To make the communication process simpler, we'll be using the :doc:`Python app API <../ecosystem/apps/python-app-api>`
 to send our GraphQL requests.
 
 For each request, it:
 
     - Looks up the HTTP address of the service name which is given from the system's
-      :doc:`config.toml <../services/service-config>` file
+      :doc:`config.toml <../ecosystem/services/service-config>` file
     - Wraps the given request into a proper HTTP packet and sends it to the target service
     - Parses the response message and checks for errors
-    - Returns the message payload if the request was successful
+    - Returns the message payload in the ``"data"`` field if the request was successful
 
-To start, we'll import the API and create a constant for readability::
+To start, we'll import the API::
 
     import app_api
-    
-    SERVICES = app_api.services()
-    
-Then, we'll create the query we want to send, specifying only the item that we are interested in::
 
-    request = '{ memInfo { available } }'
+Then, we'll add a new command line option ``-c`` to allow us to pass a non-default config file for
+testing purposes::
+
+    parser.add_argument('--config', '-c')
+    
+    args = parser.parse_args()
+    
+    if args.config is not None:
+        global SERVICES
+        SERVICES = app_api.Services(args.config)
+    else:
+        SERVICES = app_api.services()
+    
+Then, we'll create the query we want to send::
+
+    request = '{ ping }'
 
 Next, we'll send the request to the monitor service::
 
     response = SERVICES.query(service="monitor-service", query=request)
     
-And finally, we'll parse the result to get our current available memory quantity::
+And finally, we'll parse the result to get our response string::
 
-    data = response["memInfo"]
-    available = data["available"]
-    logger.info("Current available memory: %d kB \r\n" % (available))
+    data = response["ping"]
+    if data == "pong":
+        print("Successfully pinged monitor service")
+    else:
+        print("Unexpected monitor service response: %s" % data)
 
 After adding error handling, our program should look like this:
 
 .. code-block:: python
 
-    #!/usr/bin/env python
+    #!/usr/bin/env python3
 
     import argparse
     import app_api
     import sys
     
-    SERVICES = app_api.Services()
-    
-    def on_boot(logger):
+    def on_boot():
         
-        logger.info("OnBoot logic")
+        print("OnBoot logic")
         
-    def on_command(logger):
+    def on_command():
 
-        request = '{ memInfo { available } }'
+        request = '{ ping }'
         
         try:
             response = SERVICES.query(service="monitor-service", query=request)
         except Exception as e: 
-            logger.error("Something went wrong: " + str(e) + "\r\n")
+            print("Something went wrong: " + str(e))
             sys.exit(1)
         
-        data = response["memInfo"]
-        available = data["available"]
+        data = response["ping"]
         
-        logger.info("Current available memory: %d kB \r\n" % (available))
+        if data == "pong":
+            print("Successfully pinged monitor service")
+        else:
+            print("Unexpected monitor service response: %s" % data)
     
     def main():
-        logger = app_api.logging_setup("my-mission-app")
     
         parser = argparse.ArgumentParser()
         
         parser.add_argument('--run', '-r')
+        parser.add_argument('--config', '-c')
         
         args = parser.parse_args()
         
-        if args.run == 'OnBoot':
-            on_boot(logger)
-        elif args.run == 'OnCommand':
-            on_command(logger)
+        if args.config is not None:
+            global SERVICES
+            SERVICES = app_api.Services(args.config)
         else:
-            logger.error("Unknown run level specified\r\n")
+            SERVICES = app_api.services()
+        
+        if args.run == 'OnBoot':
+            on_boot()
+        elif args.run == 'OnCommand':
+            on_command()
+        else:
+            print("Unknown run level specified")
             sys.exit(1)
         
     if __name__ == "__main__":
         main()
     
-Transferring the program to our OBC and running it should look like this::
+If we run our program, the output should look like this::
 
-    $ scp my-mission-app.py kubos@10.0.2.20:/home/kubos
-    kubos@10.0.2.20's password: ********
-    my-mission-app.py                                     100% 1078     1.1KB/s   00:00
-    $ ssh kubos@10.0.2.20
-    kubos@10.0.2.20's password: ********
-    /home/kubos # ./my-mission-app.py -r OnCommand
-    my-mission-app: Current available memory: 496768 kB
-    /home/kubos # cat /var/log/app-debug.log
-    1970-01-01T03:23:08.491359+00:00 Kubos my-mission-app:<info> Current available memory: 496768 kB
+    $ ./my-mission-app.py -r OnCommand -c ../kubos/tools/default_config.toml
+    Successfully pinged monitor service
 
 Writing Data to the Telemetry Database
 --------------------------------------
 
 Now that we have a data point, we need to save it somewhere useful.
 The telemetry database is the main storage location for all telemetry data.
-The :doc:`telemetry database service <../services/telemetry-db>` is the preferred interface point
+The :doc:`telemetry database service <../ecosystem/services/telemetry-db>` is the preferred interface point
 for storing and retrieving that data.
 
 We'll be using the service's ``insert`` mutation in order to add a new telemetry entry.
@@ -543,12 +468,12 @@ All together, our request should look like this::
 
     request = '''
         mutation {
-            insert(subsystem: "OBC", parameter: "available_mem", value: "%s") {
+            insert(subsystem: "OBC", parameter: "status", value: "%s") {
                 success,
                 errors
             }
         }
-        ''' % (available)
+        ''' % (status)
 
 Like before, we'll now use the app API to send our request, but this time we'll be sending to
 the telemetry database service rather than the monitor service::
@@ -562,54 +487,57 @@ Finally, we'll check the response to make sure the operation finished successful
     errors = data["errors"]
     
     if success == False:
-        logger.error("Telemetry insert encountered errors: " + str(errors) + "\r\n")
+        print("Telemetry insert encountered errors: " + str(errors))
     else:
-        logger.info("Telemetry insert completed successfully")
+        print("Telemetry insert completed successfully")
 
 With some additional error handling, our final application looks like this:
 
 .. code-block:: python
 
-    #!/usr/bin/env python
+    #!/usr/bin/env python3
     
     import argparse
     import app_api
     import sys
     
-    SERVICES = app_api.Services()
-    
-    def on_boot(logger):
+    def on_boot():
         
-        logger.info("OnBoot logic")
+        print("OnBoot logic")
         
-    def on_command(logger):
+    def on_command():
         
-        request = '{memInfo{available}}'
+        request = '{ ping }'
         
         try:
             response = SERVICES.query(service="monitor-service", query=request)
+            
+            data = response["ping"]
+        
+            if data == "pong":
+                print("Successfully pinged monitor service")
+                status = "Okay"
+            else:
+                print("Unexpected monitor service response: %s" % data)
+                status = "Unexpected"
+                
         except Exception as e: 
-            logger.error("Something went wrong: " + str(e) + "\r\n")
-            sys.exit(1)
-        
-        data = response["memInfo"]
-        available = data["available"]
-        
-        logger.info("Current available memory: %s kB \r\n" % (available))
+            print("Something went wrong: " + str(e))
+            status = "Error"
         
         request = '''
             mutation {
-                insert(subsystem: "OBC", parameter: "available_mem", value: "%s") {
+                insert(subsystem: "OBC", parameter: "status", value: "%s") {
                     success,
                     errors
                 }
             }
-            ''' % (available)
+            ''' % (status)
         
         try:
             response = SERVICES.query(service="telemetry-service", query=request)
         except Exception as e: 
-            logger.error("Something went wrong: " + str(e) + "\r\n")
+            print("Something went wrong: " + str(e) )
             sys.exit(1)
             
         data = response["insert"]
@@ -617,51 +545,42 @@ With some additional error handling, our final application looks like this:
         errors = data["errors"]
         
         if success == False:
-            logger.error("Telemetry insert encountered errors: " + str(errors) + "\r\n")
+            print("Telemetry insert encountered errors: " + str(errors))
             sys.exit(1)
         else:
-            logger.info("Telemetry insert completed successfully")
+            print("Telemetry insert completed successfully")
     
     def main():
-    
-        logger = app_api.logging_setup("my-mission-app")
         
         parser = argparse.ArgumentParser()
         
         parser.add_argument('--run', '-r')
+        parser.add_argument('--config', '-c')
         
         args = parser.parse_args()
         
-        if args.run == 'OnBoot':
-            on_boot(logger)
-        elif args.run == 'OnCommand':
-            on_command(logger)
+        if args.config is not None:
+            global SERVICES
+            SERVICES = app_api.Services(args.config)
         else:
-            logger.error("Unknown run level specified")
+            SERVICES = app_api.Services()
+        
+        if args.run == 'OnBoot':
+            on_boot()
+        elif args.run == 'OnCommand':
+            on_command()
+        else:
+            print("Unknown run level specified")
             sys.exit(1)
         
     if __name__ == "__main__":
         main()
 
-Transferring the program to our OBC and running it should look like this::
+If we run our program, the output should look like this::
 
-    $ scp my-mission-app.py kubos@10.0.2.20:/home/kubos
-    kubos@10.0.2.20's password: ********
-    my-mission-app.py                                     100% 1814     1.8KB/s   00:00
-    $ ssh kubos@10.0.2.20
-    kubos@10.0.2.20's password: ********
-    /home/kubos # ./my-mission-app.py -r OnCommand
-    my-mission-app: Current available memory: 497060 kB
-    my-mission-app: Telemetry insert completed successfully
-    /home/kubos # cat /var/log/app-debug.log
-    1970-01-01T03:23:08.491359+00:00 Kubos my-mission-app:<info> Current available memory: 496768 kB
-    1970-01-01T03:23:13.246358+00:00 Kubos my-mission-app:<info> Current available memory: 497060 kB
-    1970-01-01T03:23:13.867534+00:00 Kubos my-mission-app:<info> Telemetry insert completed successfully
-
-.. note::
-
-    If you'd like to double-check the results, you could add an additional action which sends a
-    ``telemetry`` query to the telemetry database service to fetch the entries which were just added.
+    $ ./my-mission-app.py -r OnCommand -c ../kubos/tools/default_config.toml
+    Successfully pinged monitor service
+    Telemetry insert completed successfully
     
 Creating the Manifest File
 --------------------------
@@ -679,12 +598,13 @@ This file has the following key values:
 Our file should look like this::
 
     name = "my-mission-app"
-    executable = "my-misison-app.py"
+    executable = "my-mission-app.py"
     version = "1.0"
     author = "Me"
 
 Next Steps
 ----------
 
-- Registering a mission application with the applications service
-- Writing a deployment application
+- :doc:`Running an application on an OBC <first-obc-project>`
+- :doc:`Registering a mission application with the applications service <app-register>`
+- :doc:`Fetching telemetry data from the database <querying-telemetry>`

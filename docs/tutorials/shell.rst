@@ -1,26 +1,29 @@
 Establishing a Shell Connection with an OBC
 ===========================================
 
-The :doc:`shell service <../services/shell>` is used to provide shell access and commanding from
+The :doc:`shell service <../ecosystem/services/shell>` is used to provide shell access and commanding from
 mission operations or a development environment to the OBC.
 
 Pre-Requisites
 --------------
 
-- :doc:`Install the Kubos SDK <../installation-docs/sdk-installing>`
+- :doc:`Install the Kubos SDK <../sdk-docs/sdk-installing>` or set up the dependencies
+  required for a :doc:`local dev environment <../getting-started/local-setup>`
 - Have an OBC available with ethernet capabilities
-  (preferably with an :doc:`installation of Kubos Linux <../installation-docs/index>`)
+  (preferably with an :doc:`installation of Kubos Linux <../obc-docs/index>`)
 
     - :ref:`Configuring Ethernet <ethernet>`
 
 - Have the shell service running on a target OBC (this happens by default when running KubOS)
 - Windows users: :ref:`Make sure Windows is setup to allow UDP packets from the OBC <windows-udp>`
 
-This tutorial is written under the assumption that you are working inside of the
-Kubos SDK. The shell client can be easily run from inside of the SDK with
-the follow command::
+We'll be using the `shell client <https://github.com/kubos/kubos/tree/master/clients/kubos-shell-client>`__
+in order to communicate with the shell service on our OBC, which is automatically included
+with the Kubos SDK (as of v1.8.0).
 
-  $ kubos-shell-client
+If you are using a local development environment, instead of an instance of the SDK, you'll need to
+clone the repo and navigate to the `clients/kubos-shell-client` folder.
+You'll then run the program with ``cargo run -- {command args}``.
 
 Syntax
 ------
@@ -44,15 +47,18 @@ Optional arguments:
     - ``-i {remote IP}`` - Default: `0.0.0.0`. IP address of the shell service to connect to.
     - ``-p {remote port}`` - Default: `8010`. UDP port of the shell service to connect to.
 
-
 Starting a New Shell Session
 ----------------------------
 
-We'll start by creating a new shell session between our SDK instance and the OBC.
+We'll start by creating a new shell session between our dev environment and the OBC.
 
 Our command should look like this::
 
    $ kubos-shell-client -i 10.0.2.20 -p 8010 start
+   
+Or, from your local dev environment::
+
+    $ cargo run -- -i 10.0.2.20 -p 8010 start
 
 The output from the client should look like this:
 

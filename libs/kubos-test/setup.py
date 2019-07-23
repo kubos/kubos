@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 A setuptools based setup module for the kubos test package.
 See:

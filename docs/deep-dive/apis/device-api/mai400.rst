@@ -1,0 +1,10 @@
+MAI-400 API
+===========
+
+This Rust crate provides an API for interacting with the `Adcole Maryland Aerospace MAI-400 ADACS <https://www.cubesatshop.com/product/mai-400-adacs/>`__
+
+Please refer to the |api| crate documentation for implementation details
+
+ .. |api| raw:: html
+
+    <a href="../../../rust-docs/mai400_api/index.html" target="_blank">MAI-400 API</a>

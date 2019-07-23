@@ -1,7 +1,7 @@
 Registering a Mission Application
 =================================
 
-The Kubos :doc:`applications service <../app-docs/app-service>` is responsible for monitoring and
+The Kubos :doc:`applications service <../ecosystem/services/app-service>` is responsible for monitoring and
 managing all mission applications for a system.
 
 This tutorial walks the user through:
@@ -11,33 +11,44 @@ This tutorial walks the user through:
     - Updating the application to a newer version
     - Verifying what versions of the application have been registered
 
+This tutorial is written to be run entirely within your local development environment, however, you
+may also interact with the applications service on your OBC by setting up its :ref:`ethernet connection <ethernet>`.
+
 Setup
 -----
 
 We'll be using the example application from the :doc:`mission application tutorial <first-mission-app>`.
+Make sure that the `manifest.toml` file is present in the same project directory.
 
-However, we'll need to update the log files to use an absolute path.
-The OnCommand log file should be changed from "oncommand-output" to "/home/kubos/oncommand-output".
-The OnBoot log file should be changed from "onboot-output" to "/home/kubos/onboot-output".
+This tutorial will use the following example directories:
 
-In order to register it, we'll first need to log in to the OBC to set up a folder for the
-application files::
+    - ``/home/user/my-app`` - Project directory
+    - ``/home/user/kubos`` - Cloned copy of the kubos repo
+    - ``/home/user/app-registry`` - Directory used by the applications service to store registered
+      applications
 
-    $ ssh kubos@10.0.2.20
-    kubos@10.0.2.20's password: ********
-    /home/kubos # mkdir my-app
-
-We can then transfer our application file, ``my-mission-app.py``, and our manifest file,
-``manifest.toml``, to the new folder::
-
-    $ scp my-mission-app.py kubos@10.0.2.20:/home/kubos/my-app
-    kubos@10.0.2.20's password: ********
-    my-mission-app.py                                     100% 1814     1.8KB/s   00:00
-    $ scp manifest.toml kubos@10.0.2.20:/home/kubos/my-app
-    kubos@10.0.2.20's password:
-    manifest.toml                                         100%   56     0.1KB/s   00:00
+- Create a directory which will by used by the applications service for registry storage
+- Navigate to the kubos source directory and edit the ``tools/default_config.toml`` file to specify
+  that new directory like so::
+  
+    [app-service]
+    registry-dir = "/home/user/app-registry"
     
-Our application is now ready to be registered.
+- **If you are using the SDK**, update all IP addresses in the ``tools/default_config.toml`` file,
+  changing them from ``127.0.0.1`` to ``0.0.0.0``, so that they are available :ref:`to your host machine <sdk-port-forward>`.
+
+- Run the following command to start the applications service in the background (the service may
+  need to be built first, which will take several minutes to complete)::
+  
+    $ cargo run --bin kubos-app-service -- -c tools/default_config.toml &
+    
+- If you have stopped the monitor and telemetry services since going through the previous tutorial,
+  you will need to start those as well::
+  
+    $ cargo run --bin monitor-service -- -c tools/default_config.toml &
+    $ cargo run --bin telemetry-service -- -c tools/default_config.toml &
+  
+- Navigate back out to the development directory of your choosing.
 
 .. _graphiql:
 
@@ -49,10 +60,10 @@ send and receive GraphQL data via an in-browser graphical interface, GraphiQL.
 
 This graphical interface makes it easier to create and consume more lengthy GraphQL requests.
 
-To access this endpoint, make sure that your OBC is available from your host computer via an IP
-address, then open a web browser and navigate to ``http://{ip}:{port}/grapiql``.
-The ``ip`` and ``port`` parameters should match the IP address of the OBC and the port belonging to
-the service you wish to query.
+To access this endpoint, make sure that your desired service is running, then open a web browser and
+navigate to ``http://{ip}:{port}/graphiql``.
+The ``ip`` and ``port`` parameters should match the values specified for the service in its
+``config.toml`` file.
 
 The resulting interface should look like this:
 
@@ -64,8 +75,11 @@ The resulting JSON response will be displayed on the right-hand side:
 
 .. figure:: ../images/graphiql_ping.png
 
-Please navigate to ``http://{ip}:8000/graphiql`` in order to communicate with the applications
+Please navigate to ``http://127.0.0.1:8000/graphiql`` in order to communicate with the applications
 service for this tutorial.
+
+If you are using the SDK, replace ``127.0.0.1`` with the :ref:`IP address you defined <sdk-port-forward>`
+for your VM.
 
 .. note::
 
@@ -76,7 +90,7 @@ service for this tutorial.
     
     For example::
     
-        $ curl 10.0.2.20:8008 -H "Content-Type: application/json" --data "{\"query\":\"{ping}\"}"
+        $ curl 127.0.0.1:8004 -H "Content-Type: application/json" --data "{\"query\":\"{ping}\"}"
 
 Registering
 -----------
@@ -100,8 +114,13 @@ It has the following schema::
         }
      }
      
-The ``path`` input parameter specifies the directory *on the OBC* where the application and manifest
-files reside.
+The ``path`` input parameter specifies the directory where the application and manifest files reside.
+
+.. note::
+
+    When interacting with the applications service on an OBC, this ``path`` parameter refers to a
+    location *on the OBC*, not in your local development environment
+
 The registration process will copy all of the contents at that path, so care should be taken to
 ensure that only the desired application files are present.
 
@@ -126,13 +145,13 @@ The mutation can return the following fields:
           of the application which will be used when the service attempts to run it. This value should
           always be ``true`` when returned by this mutation
 
-We'll be interacting with the OBC from our SDK instance using the service's GraphiQL interface.
-By default, the applications service uses port 8000.
+We'll be interacting with our local applications service's GraphiQL interface.
+Our service is using port 8000.
 
 Our registration mutation should look like this::
 
     mutation {
-      register(path: "/home/kubos/my-app") {
+      register(path: "/home/user/my-app") {
         success,
         errors,
         entry {
@@ -154,7 +173,7 @@ The response should like this::
           "entry": {
             "app": {
               "name": "my-mission-app",
-              "executable": "/home/system/kubos/apps/my-mission-app/1.0/my-mission-app.py"
+              "executable": "/home/user/app-registry/my-mission-app/1.0/my-mission-app.py"
             }
           }
         }
@@ -163,8 +182,8 @@ The response should like this::
 
 We can break down the resulting executable path like so:
 
-    - ``/home/system/kubos/apps`` - This is the default directory that the applications service uses to
-      save all registered applications
+    - ``/home/user/app-registry`` - This is the directory that the applications service uses to
+      save all registered applications. We previously specified it in our ``config.toml`` file
     - ``my-mission-app`` - The name of our application
     - ``1.0`` - Our manifest file specified that this was version 1.0 of our application
     - ``my-mission-app.py`` - Our application file
@@ -176,7 +195,7 @@ We'll go ahead and start our app now to verify it works using the ``startApp`` m
 It has the following schema::
 
     mutation {
-        startApp(name: String!, runLevel: String!, args: [String]): {
+        startApp(name: String!, runLevel: String!, config: String, args: [String]): {
             success: Bool!
             errors: String,
             pid: Int
@@ -186,6 +205,7 @@ It has the following schema::
 The ``name`` input parameter specifies the name of the application which should be started.
 The ``runLevel`` input parameter specifies which run case should be called; it must be either
 "OnBoot" or "OnCommand".
+The ``config`` input parameter specifies a non-default configuration file which should be used.
 The ``args`` input parameter allows the user to pass additional arguments through to the underlying
 application.
 
@@ -198,7 +218,7 @@ The mutation returns three fields:
 Our request should look like this::
 
     mutation {
-      startApp(name: "my-mission-app", runLevel: "OnCommand") {
+      startApp(name: "my-mission-app", runLevel: "OnCommand", config:"/home/user/kubos/tools/default_config.toml") {
         success,
         pid
       }
@@ -215,33 +235,31 @@ And the response should look like this::
       }
     }
 
-To verify that the app ran successfully, we'll check the contents of our log file::
+The console where you started the app service should show the app's exection messages::
 
-    $ ssh kubos@10.0.2.20
-    kubos@10.0.2.20's password: ********
-    /home/kubos # cat oncommand-output
-    Current available memory: 496768 kB
+    Current available memory: 4390792 kB
+    Telemetry insert completed successfully
 
 Updating
 --------
 
-After looking at our log output, it would be nice if our log message included the timestamp of
-when the system memory was checked.
+After looking at our output, it would be nice if our memory message included the timestamp of
+when the system was checked.
 
 Let's add the ``datetime`` module to our file with ``import datetime`` and then update the log line like so:
 
 .. code-block:: python
 
-    file.write("%s: Current available memory: %s kB \r\n" % (str(datetime.datetime.now()), available))
+    print("%s: Successfully pinged monitor service" % (str(datetime.datetime.now())))
 
 Since this is a new version of our application, we'll then need to update our ``manifest.toml``
 file to change the ``version`` key from ``"1.0"`` to ``"2.0"``.
 
-After transferring both of the files into our remote folder, ``/home/kubos/my-app``,
+After transferring both of the files into our remote folder, ``/home/user/my-app``,
 we can register the updated application using the same ``register`` mutation as before::
 
     mutation {
-      register(path: "/home/kubos/my-app") {
+      register(path: "/home/user/my-app") {
         success,
         errors,
         entry {
@@ -264,20 +282,19 @@ The response should look almost identical::
                 "entry": {
                     "app": {
                         "name":"my-mission-app",
-                        "executable":"/home/system/kubos/apps/my-mission-app/2.0/my-mission-app.py",
+                        "executable":"/home/user/app-registry/my-mission-app/2.0/my-mission-app.py"
                     }
                 }
             }
         }
     }
     
-After running our app again with the ``startApp`` mutation, our log file should now look like this:
+After running our app again with the ``startApp`` mutation, our output should now look like this:
 
 .. code-block:: none
 
-    /home/kubos # cat oncommand-output
-    Current available memory: 496768 kB
-    1970-01-01 01:11:23.947890: Current available memory: 496952 kB
+    2019-07-03 16:15:29.452626: Successfully pinged monitor service
+    Telemetry insert completed successfully
 
 Verifying
 ---------

@@ -1,15 +1,16 @@
 Transferring Files to an OBC
 ============================
 
-Once a satellite is in orbit, the :doc:`file transfer service <../services/file>` can be used to
+Once a satellite is in orbit, the :doc:`file transfer service <../ecosystem/services/file>` can be used to
 transfer files both to and from the ground.
 
 Pre-Requisites
 --------------
 
-- :doc:`Install the Kubos SDK <../installation-docs/sdk-installing>`
+- :doc:`Install the Kubos SDK <../sdk-docs/sdk-installing>` or set up the dependencies
+  required for a :doc:`local dev environment <../getting-started/local-setup>`
 - Have an OBC available with ethernet capabilities
-  (preferably with an :doc:`installation of Kubos Linux <../installation-docs/index>`)
+  (preferably with an :doc:`installation of Kubos Linux <../obc-docs/index>`)
 
     - :ref:`Configuring Ethernet <ethernet>`
 
@@ -19,7 +20,10 @@ Pre-Requisites
 We'll be using the `file transfer client <https://github.com/kubos/kubos/tree/master/clients/kubos-file-client>`__
 in order to communicate with the file transfer service on our OBC, which is automatically included
 with the Kubos SDK (as of v1.8.0).
-As a result, this tutorial assumes that all commands will be run from within an instance of the SDK.
+
+If you are using a local development environment, instead of an instance of the SDK, you'll need to
+clone the repo and navigate to the `clients/kubos-file-client` folder.
+You'll then run the program with ``cargo run -- {command args}``.
 
 Syntax
 ------
@@ -39,6 +43,7 @@ Required arguments:
         - ``cleanup`` - Cleanup the endpoint service's temporary storage directory
 
     - ``source-file`` - The file to be transferred. May be a relative or absolute path.
+    - ``-P {host_port}`` - The UDP port that the file transfer service will send responses to.
 
 Optional arguments:
 
@@ -55,21 +60,36 @@ Optional arguments:
     - ``-t {hold_count}`` - Default: `6`. The number of times the client should fail to receive data
       from the endpoint service before giving up and exiting.
 
-
 Sending a File to an OBC
 ------------------------
 
 We'll start by transferring a file to our OBC.
 For this tutorial, we'll be transferring the application file that was created as part of the
-:doc:`mission application <first-mission-app>` tutorial to the ``kubos`` user's home directory on the
+:doc:`mission application on an OBC <first-obc-project>` tutorial to the ``kubos`` user's home directory on the
 OBC.
 
 We'll need to specify the OBC's IP address and the port that the file transfer service is listening
 on. By default, this is port 8008.
 
+We will also need to specify the port that the file transfer service will be sending data
+back on. There is no default value, so in this tutorial we will use port 8028. You will need
+to modify the file ``/home/system/etc/config.toml`` on-board the OBC and add the 
+following line under the ``[file-transfer-service]`` section::
+
+    downlink_port = 8028
+
+After modifying the ``config.toml`` it will be necessary to restart the file transfer service
+by running the following command on the OBC::
+
+    $ ./etc/init.d/S99kubos-core-file-transfer restart
+
 Our transfer command should look like this::
 
-    $ kubos-file-client -r 10.0.2.20 -p 8008 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
+    $ kubos-file-client -r 10.0.2.20 -p 8008 -P 8028 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
+    
+Or, from your local dev environment::
+
+    $ cargo run -- -r 10.0.2.20 -p 8008 -P 8028 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
     
 The output from the client should look like this:
 
@@ -101,21 +121,20 @@ As a result, if you run the upload command again, you should see a slightly trun
 Receiving a File from an OBC
 ----------------------------
 
-Next, we'll request that the OBC send us the log file that was created by running the on-command
-logic in our mission application::
+Next, we'll request that the OBC send us the application debug log file::
 
-    $ kubos-file-client -r 10.0.2.20 -p 8008 download /home/system/log/apps/info.log
+    $ kubos-file-client -r 10.0.2.20 -p 8008 -P 8028 download /var/log/app-debug.log
     
 We're not specifying a destination file, which will result in the transferred file being saved as
-`oncommand-output` in our current directory.
+`app-debug.log` in our current directory.
 
 The output from the client should look like this:
 
 .. code-block:: none
 
     17:56:27 [INFO] Starting file transfer client
-    17:56:27 [INFO] Downloading remote: /home/system/log/apps/info.log to local: info.log
-    17:56:27 [INFO] -> { import, /home/system/log/apps/info.log }
+    17:56:27 [INFO] Downloading remote: /var/log/app-debug.log to local: app-debug.log
+    17:56:27 [INFO] -> { import, /var/log/app-debug.log }
     17:56:27 [INFO] <- { 796611, true, 1a564e8da7b83c2d6a2a44d447855f6d, 1, 33188 }
     17:56:27 [INFO] -> { 796611, 1a564e8da7b83c2d6a2a44d447855f6d, false, [0, 1] }
     17:56:27 [INFO] <- { 796611, 1a564e8da7b83c2d6a2a44d447855f6d, 0, chunk_data }
@@ -125,12 +144,6 @@ The output from the client should look like this:
 
 We can then check the contents of the transferred file::
 
-    $ cat info.log
-    /home/system/log/apps # cat info.log
-    Jan  1 00:07:18 Kubos my-mission-app: OnBoot logic
-    Jan  1 00:07:21 Kubos my-mission-app: OnBoot logic
-    Jan  1 00:07:24 Kubos my-mission-app: OnCommand logic
-    Jan  1 00:18:55 Kubos my-mission-app: Current available memory: 496768 kB
-    Jan  1 00:23:21 Kubos my-mission-app: Current available memory: 497060 kB
-    Jan  1 00:25:43 Kubos my-mission-app: Current available memory: 496952 kB
-    
+    $ cat /var/log/app-debug.log
+    1970-01-01T03:23:13.246358+00:00 Kubos my-mission-app:<info> Current available memory: 497060 kB
+    1970-01-01T03:23:13.867534+00:00 Kubos my-mission-app:<info> Telemetry insert completed successfully
