@@ -18,6 +18,7 @@ use novatel_oem6_api::mock::*;
 use novatel_oem6_api::*;
 
 #[macro_export]
+/// Mock a service for the OEM6.
 macro_rules! service_new {
     ($mock:ident) => {{
         use crate::objects::AckCommand;
@@ -28,6 +29,7 @@ macro_rules! service_new {
 
         let (log_send, log_recv) = sync_channel(5);
         let (response_send, response_recv) = sync_channel(5);
+        let (response_abbrv_send, response_abbrv_recv) = sync_channel(5);
 
         $mock.read.set_result(Err(UartError::IoError {
             cause: ::std::io::ErrorKind::TimedOut,
@@ -40,11 +42,14 @@ macro_rules! service_new {
             })),
             log_recv: Arc::new(Mutex::new(log_recv)),
             response_recv: Arc::new(Mutex::new(response_recv)),
+            response_abbrv_recv: Arc::new(Mutex::new(response_abbrv_recv)),
         };
 
         let rx_conn = oem.conn.clone();
 
-        thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
+        thread::spawn(move || {
+            read_thread(&rx_conn, &log_send, &response_send, &response_abbrv_send)
+        });
 
         let data = Arc::new(LockData::new());
         let (error_send, error_recv) = sync_channel(10);

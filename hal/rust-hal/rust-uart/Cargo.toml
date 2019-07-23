@@ -4,6 +4,12 @@ version = "0.2.0"
 authors = ["William Greer <wgreer184@gmail.com>", "Catherine Garabedian <catherine@kubos.co>"]
 edition = "2018"
 
+[features]
+nos3 = ["nosengine-rust"]
+
 [dependencies]
 serial = "0.4.0"
 failure = "0.1.2"
+nosengine-rust = { path = "../../../apis/nosengine-rust", optional = true }
+toml = "0.4.0"
+display_derive = "0.0.0"

@@ -135,6 +135,7 @@ impl Message for Header {
 }
 
 /// Device communication ports
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Port {
     COM1 = 32,
     ThisPort = 192,

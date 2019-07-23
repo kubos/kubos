@@ -66,6 +66,16 @@ jobs:
         - checkout
         - run: cargo run --bin large_download --release
 
+    # Rust testing - NOS compile check & integration tests
+    # Run for all PR commits
+    rust_test_nosengine:
+      docker:
+        - image: kubos/kubos-dev:latest
+      steps:
+        - checkout
+        - run: cd apis/nosengine-rust && cargo check
+        - run: cd test/integration/nosengine-rust && cargo run
+
     # Rust testing - Check formatting
     # Run for all PR commits
     rust_fmt:
@@ -148,6 +158,10 @@ workflows:
             branches:
               ignore: master
       - rust_test_large_upload:
+          filters:
+            branches:
+              ignore: master
+      - rust_test_nosengine:
           filters:
             branches:
               ignore: master

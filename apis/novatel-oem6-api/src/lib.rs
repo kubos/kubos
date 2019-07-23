@@ -33,15 +33,16 @@
 //! // Create communication channels to be used between the read thread and the main thread
 //! let (log_send, log_recv) = sync_channel(5);
 //! let (response_send, response_recv) = sync_channel(5);
+//! let (response_abbrv_send, response_abbrv_recv) = sync_channel(5);
 //!
 //! // Create the main connection to the device
-//! let oem = OEM6::new("/dev/ttyS5", BaudRate::Baud9600, log_recv, response_recv).unwrap();
+//! let oem = OEM6::new("/dev/ttyS5", BaudRate::Baud9600, log_recv, response_recv, response_abbrv_recv).unwrap();
 //!
 //! // Clone the connection mutex for the read thread
 //! let rx_conn = oem.conn.clone();
 //!
 //! // Start up a read thread to consume messages from the device
-//! thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
+//! thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send, &response_abbrv_send));
 //!
 //! // Request that the device send position information once per second
 //! oem.request_position(1.0, 0.0, false)?;

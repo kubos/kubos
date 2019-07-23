@@ -4,6 +4,9 @@ version = "0.1.0"
 authors = ["Catherine Garabedian <catherine@kubos.co>"]
 edition = "2018"
 
+[features]
+nos3 = ["rust-uart/nos3"]
+
 [dependencies]
 bitflags = "1.0"
 byteorder = "1.2"
