@@ -81,6 +81,22 @@ Additional Arguments
 
 Additional command line arguments may be used by the application. They will be automatically passed through to the application by the applications service.
 
+The app service will call the application with additional ``--`` characters in order to delineate
+between the Kubos-implemented args (run-level, custom config path), and user-implemented args.
+
+Under the covers, the application would be called like so::
+
+    mission-app -r OnCommand -- --verbose --release
+    
+Where ``--verbose`` and ``--release`` are custom arguments for that particular application.
+
+This behavior is required for Rust applications.
+As a result, we have chosen to enforce this command format to ensure consistency between languages.
+
+Examples of how to define and structure additional arguments can be seen in the `Rust <https://github.com/kubos/kubos/blob/master/examples/rust-mission-app/src/main.rs>`__
+and `Python <https://github.com/kubos/kubos/blob/master/examples/python-mission-application/mission-app.py>`__
+example applications.
+
 .. _app-manifest:
 
 Application Manifest
