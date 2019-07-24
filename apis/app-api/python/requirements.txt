@@ -1,0 +1,5 @@
+mock==3.0.5
+requests==2.21.0
+responses==0.10.6
+setuptools==40.6.3
+toml==0.9.3.1
