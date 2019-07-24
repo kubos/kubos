@@ -1,1 +1,1 @@
--f ../../pumpkin-mcu-api mcu_api==0.1.5
+-f ../../apis/pumpkin-mcu-api mcu_api==0.1.5

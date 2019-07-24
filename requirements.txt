@@ -5,6 +5,6 @@
 -r examples/python-mission-framework/requirements.txt
 -r examples/python-service/requirements.txt
 -r hal/python-hal/i2c/requirements.txt
--r libs/kubos-service/kubos_service/requirements.txt
+-r libs/kubos-service/requirements.txt
 -r libs/kubos-test/requirements.txt
 -r services/pumpkin-mcu-service/requirements.txt
