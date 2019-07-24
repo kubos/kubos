@@ -21,6 +21,7 @@ def on_command(args):
     parser = argparse.ArgumentParser()
     
     parser.add_argument('-t', '--test', nargs=1)
+    parser.add_argument('-e', '--error', action='store_true')
     parser.add_argument('-f', '--flag', action='store_true')
     parser.add_argument('positional', nargs='?')
     
@@ -28,9 +29,12 @@ def on_command(args):
     
     success = False
     
+    if matches.error:
+      sys.exit(123)
+
     if matches.flag:
         success = True
-        
+
     if matches.test is not None and matches.test[0] == "test":
         success = True
         
