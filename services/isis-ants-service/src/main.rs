@@ -354,8 +354,10 @@ extern crate juniper;
 use crate::model::Subsystem;
 pub use crate::objects::*;
 use crate::schema::{MutationRoot, QueryRoot};
+use failure::format_err;
 use isis_ants_api::AntSResult;
 use kubos_service::{Config, Service};
+use log::error;
 use syslog::Facility;
 
 mod model;
@@ -372,16 +374,29 @@ fn main() -> AntSResult<()> {
     )
     .unwrap();
 
-    let config = Config::new("isis-ants-service");
+    let config = Config::new("isis-ants-service")
+        .map_err(|err| {
+            error!("Failed to load service config: {:?}", err);
+            err
+        })
+        .unwrap();
 
     let bus = config
         .get("bus")
-        .expect("No 'bus' value found in 'isis-ants-service' section of config");
+        .ok_or({
+            error!("Failed to load 'bus' config value");
+            format_err!("Failed to load 'bus' config value")
+        })
+        .unwrap();
     let bus = bus.as_str().unwrap();
 
     let primary = config
         .get("primary")
-        .expect("No 'primary' value found in 'isis-ants-service' section of config");
+        .ok_or({
+            error!("No 'primary' value found in 'isis-ants-service' section of config");
+            format_err!("No 'primary' value found in 'isis-ants-service' section of config")
+        })
+        .unwrap();
     let primary = primary.as_str().unwrap();
     let primary: u8 = if primary.starts_with("0x") {
         u8::from_str_radix(&primary[2..], 16).unwrap()
@@ -391,7 +406,11 @@ fn main() -> AntSResult<()> {
 
     let secondary = config
         .get("secondary")
-        .expect("No 'secondary' value found in 'isis-ants-service' section of config");
+        .ok_or({
+            error!("No 'secondary' value found in 'isis-ants-service' section of config");
+            format_err!("No 'secondary' value found in 'isis-ants-service' section of config")
+        })
+        .unwrap();
     let secondary = secondary.as_str().unwrap();
     let secondary: u8 = if secondary.starts_with("0x") {
         u8::from_str_radix(&secondary[2..], 16).unwrap()
@@ -401,12 +420,20 @@ fn main() -> AntSResult<()> {
 
     let antennas = config
         .get("antennas")
-        .expect("No 'antennas' value found in 'isis-ants-service' section of config");
+        .ok_or({
+            error!("No 'antennas' value found in 'isis-ants-service' section of config");
+            format_err!("No 'antennas' value found in 'isis-ants-service' section of config")
+        })
+        .unwrap();
     let antennas = antennas.as_integer().unwrap() as u8;
 
     let wd_timeout = config
         .get("wd_timeout")
-        .expect("No 'wd_timeout' value found in 'isis-ants-service' section of config");
+        .ok_or({
+            error!("No 'wd_timeout' value found in 'isis-ants-service' section of config");
+            format_err!("No 'wd_timeout' value found in 'isis-ants-service' section of config")
+        })
+        .unwrap();
     let wd_timeout = wd_timeout.as_integer().unwrap() as u32;
 
     Service::new(

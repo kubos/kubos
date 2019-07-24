@@ -80,7 +80,7 @@ impl DbTest {
     fn new(iterations: i64, config_path: String) -> DbTest {
         DbTest {
             iterations,
-            config: Config::new_from_path("telemetry-service", config_path),
+            config: Config::new_from_path("telemetry-service", config_path).unwrap(),
         }
     }
 
@@ -169,7 +169,7 @@ impl DbTest {
 
             let client = reqwest::Client::builder().build().unwrap();
 
-            let uri = format!("http://{}", self.config.hosturl());
+            let uri = format!("http://{}", self.config.hosturl().unwrap());
 
             let mut map = ::std::collections::HashMap::new();
             map.insert("query", mutation);
@@ -215,7 +215,7 @@ impl DbTest {
 
         let start = PreciseTime::now();
         let client = reqwest::Client::builder().build().unwrap();
-        let uri = format!("http://{}", self.config.hosturl());
+        let uri = format!("http://{}", self.config.hosturl().unwrap());
         let mut map = ::std::collections::HashMap::new();
         map.insert("query", mutation);
 
@@ -232,7 +232,7 @@ impl DbTest {
 
         let port = self.config.get("direct_port").unwrap();
 
-        let host = self.config.hosturl().to_owned();
+        let host = self.config.hosturl().unwrap().to_owned();
         let ip: Vec<&str> = host.split(':').collect();
 
         let remote_addr = format!("{}:{}", ip[0], port);
@@ -278,7 +278,7 @@ impl DbTest {
 
         let client = reqwest::Client::builder().build().unwrap();
 
-        let uri = format!("http://{}", self.config.hosturl());
+        let uri = format!("http://{}", self.config.hosturl().unwrap());
 
         let mut map = ::std::collections::HashMap::new();
         map.insert("query", mutation);

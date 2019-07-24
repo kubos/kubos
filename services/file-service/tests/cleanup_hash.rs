@@ -38,7 +38,8 @@ fn cleanup_hash_dir() {
 
     let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, downlink_port, 4096);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     // Download a partial file so that we can resume the download later
     let _result = download_partial(
@@ -47,26 +48,26 @@ fn cleanup_hash_dir() {
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
 
     // Storage directory should still exist after successful transfer
-    assert!(fs::read_dir(format!("service/storage/{}", hash)).is_ok());
+    assert!(fs::read_dir(format!("{}/service/storage/{}", test_dir_str, hash)).is_ok());
 
     cleanup(
         "127.0.0.1",
         downlink_port,
         &format!("127.0.0.1:{}", service_port),
         Some(hash.to_owned()),
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4069,
     )
     .unwrap();
 
     // Hash's storage directory should be gone after request for cleanup
-    assert!(fs::read_dir(format!("service/storage/{}", hash)).is_err());
+    assert!(fs::read_dir(format!("{}/service/storage/{}", test_dir_str, hash)).is_err());
 
     // General storage directory should still exist after request for hash cleanup
-    assert!(fs::read_dir(format!("service/storage")).is_ok());
+    assert!(fs::read_dir(format!("{}/service/storage", test_dir_str)).is_ok());
 }

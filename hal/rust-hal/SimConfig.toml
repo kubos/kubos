@@ -1,0 +1,36 @@
+# This file contains configuration options for the simulated NOSEngine HALs.
+# Each HAL needs to know things like how to connect to NOSEngine, which bus to use, etc.
+
+# Connection string to the NOSEngine server. Is generally something like "tcp://<domain>:<port>", but can
+# be other formats. See the connection string section of the NOSEngine user manual for more information.
+connection = "tcp://localhost:12000"
+
+# Name of the nodes created on each NOSEngine bus. Must be different from the nodes created by the simulators.
+nodename = "fsw"
+
+# Minimum timeout in milliseconds. If the user of the HAL sets a timeout less than this, then the
+# timeout will actually be this. This is because communication over the network with the NOSEngine server has
+# different timing from actual UART communication, so there will sometimes be larger delays.
+min_timeout = 500
+
+# This table maps "real" bus names to simulated NOSEngine buses. The keys are the real bus names on the spacecraft,
+# and the values are the simulated bus names within NOSEngine.
+# If this changes, then the configuration of the simulators will have to change.
+[busnames.uart]
+"/dev/ttyUSB0" = "usart_usb0"
+"/dev/ttyS0" = "usart_0"
+"/dev/ttyS1" = "usart_1"
+"/dev/ttyS2" = "usart_2"
+"/dev/ttyS4" = "usart_4"
+"/dev/ttyS5" = "usart_5"
+
+[i2c]
+# In real life, and I2C master doesn't have an address, but NOSEngine requires it. Just choose an address that
+# doesn't conflict with anything else.
+master_address = 119
+
+# Maps real I2C paths to NOSEngine buses. 
+[i2c.busnames]
+"/dev/i2c0" = "i2c_2"
+"/dev/i2c1" = "i2c_1"
+"/dev/i2c-1" = "i2c_0"

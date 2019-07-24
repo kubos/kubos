@@ -112,7 +112,7 @@ Rust
     use std::time::Duration;
     
     // Get the configuration options for the service out of the `config.toml` file
-    let config = Config::new("my-payload-service");
+    let config = Config::new("my-payload-service").unwrap();
 
     // Get the watchdog timeout value
     let timeout = config

@@ -53,7 +53,7 @@ fn uninstall_last_app() {
 
     let result = panic::catch_unwind(|| {
         let result = send_query(
-            ServiceConfig::new_from_path("app-service", config.to_owned()),
+            ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
             r#"mutation {
             uninstall(name: "dummy", version: "0.0.1") {
                 errors,
@@ -65,7 +65,7 @@ fn uninstall_last_app() {
         assert!(result["uninstall"]["success"].as_bool().unwrap());
 
         let result = send_query(
-            ServiceConfig::new_from_path("app-service", config.to_owned()),
+            ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
             "{ apps { active } }",
         );
 
@@ -123,7 +123,7 @@ fn uninstall_notlast_app() {
 
     let result = panic::catch_unwind(|| {
         let result = send_query(
-            ServiceConfig::new_from_path("app-service", config.to_owned()),
+            ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
             r#"mutation {
             uninstall(name: "dummy", version: "0.0.1") {
                 errors,
@@ -135,7 +135,7 @@ fn uninstall_notlast_app() {
         assert!(result["uninstall"]["success"].as_bool().unwrap());
 
         let result = send_query(
-            ServiceConfig::new_from_path("app-service", config.to_owned()),
+            ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
             "{ apps { active } }",
         );
 
@@ -182,7 +182,7 @@ fn uninstall_all_app() {
 
     let result = panic::catch_unwind(|| {
         let result = send_query(
-            ServiceConfig::new_from_path("app-service", config.to_owned()),
+            ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
             r#"mutation {
             uninstall(name: "dummy") {
                 errors,
@@ -194,7 +194,7 @@ fn uninstall_all_app() {
         assert!(result["uninstall"]["success"].as_bool().unwrap());
 
         let result = send_query(
-            ServiceConfig::new_from_path("app-service", config.to_owned()),
+            ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
             "{ apps { active } }",
         );
 
@@ -266,7 +266,7 @@ fn uninstall_new_app() {
     let result = panic::catch_unwind(|| {
         // Register the new version of the app
         let result = send_query(
-            ServiceConfig::new_from_path("app-service", config.to_owned()),
+            ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
             &format!(
                 r#"mutation {{
                 register(path: "{}") {{
@@ -290,7 +290,7 @@ fn uninstall_new_app() {
 
         // Uninstall the version we just registered
         let result = send_query(
-            ServiceConfig::new_from_path("app-service", config.to_owned()),
+            ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
             r#"mutation {
             uninstall(name: "dummy", version: "0.0.1") {
                 errors,

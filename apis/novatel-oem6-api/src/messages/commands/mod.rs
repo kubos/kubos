@@ -35,6 +35,7 @@ pub struct Response {
     pub resp_string: String,
 }
 
+#[allow(dead_code)]
 impl Response {
     pub fn new(msg: &[u8]) -> Option<Self> {
         match le_u32(&msg) {

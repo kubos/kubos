@@ -26,14 +26,15 @@ use std::time::Duration;
 
 #[macro_export]
 macro_rules! service_new {
-    ($port:expr, $down_port:expr, $chunk_size:expr) => {{
+    ($port:expr, $down_port:expr, $chunk_size:expr, $storage_dir:expr) => {{
         thread::spawn(move || {
-            recv_loop(&ServiceConfig::new_from_str(
-                "file-transfer-service",
-                &format!(
-                    r#"
+            recv_loop(
+                &ServiceConfig::new_from_str(
+                    "file-transfer-service",
+                    &format!(
+                        r#"
                 [file-transfer-service]
-                storage_dir = "service"
+                storage_dir = "{}"
                 chunk_size = {}
                 hold_count = 5
                 downlink_ip = "127.0.0.1"
@@ -42,9 +43,11 @@ macro_rules! service_new {
                 ip = "127.0.0.1"
                 port = {}
                 "#,
-                    $chunk_size, $down_port, $port
-                ),
-            ))
+                        $storage_dir, $chunk_size, $down_port, $port
+                    ),
+                )
+                .unwrap(),
+            )
             .unwrap();
         });
 

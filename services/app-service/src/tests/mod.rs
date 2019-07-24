@@ -29,7 +29,7 @@ macro_rules! mock_service {
         );
 
         Service::new(
-            Config::new_from_str("app-service", &config),
+            Config::new_from_str("app-service", &config).unwrap(),
             registry,
             schema::QueryRoot,
             schema::MutationRoot,

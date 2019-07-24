@@ -102,6 +102,11 @@ members=[
 "test/integration/linux/isis-ants",
 ]
 
+exclude = [
+"apis/nosengine-rust",
+"test/integration/nosengine-rust"
+]
+
 [profile.release]
 lto = true
 opt-level = "z"

@@ -45,7 +45,7 @@ type AppResult<T> = Result<T, failure::Error>;
 /// 		ping
 /// 	}"#;
 ///
-/// let result = query(&ServiceConfig::new_from_path("radio-service", "/home/kubos/config.toml".to_owned()), request, Some(Duration::from_secs(1)))?;
+/// let result = query(&ServiceConfig::new_from_path("radio-service", "/home/kubos/config.toml".to_owned())?, request, Some(Duration::from_secs(1)))?;
 ///
 /// let data = result.get("ping").unwrap().as_str();
 ///
@@ -64,7 +64,7 @@ type AppResult<T> = Result<T, failure::Error>;
 /// 		power
 /// 	}"#;
 ///
-/// let result = query(&ServiceConfig::new("antenna-service"), request, Some(Duration::from_secs(1)))?;
+/// let result = query(&ServiceConfig::new("antenna-service")?, request, Some(Duration::from_secs(1)))?;
 ///
 /// let data = result.get("power").unwrap().as_str();
 ///
@@ -83,7 +83,12 @@ pub fn query(
         None => reqwest::Client::builder().build()?,
     };
 
-    let uri = format!("http://{}", config.hosturl());
+    let uri = format!(
+        "http://{}",
+        config
+            .hosturl()
+            .ok_or_else(|| format_err!("Unable to fetch addr for service"))?
+    );
 
     let mut map = ::std::collections::HashMap::new();
     map.insert("query", query);

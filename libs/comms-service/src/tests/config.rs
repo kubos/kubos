@@ -38,7 +38,8 @@ fn config_full_good() {
         timeout = 1400
         ip = "0.0.0.0"
         "#,
-    );
+    )
+    .unwrap();
 
     let config = CommsConfig::new(config).unwrap();
 
@@ -64,7 +65,8 @@ fn config_no_comms_ip() {
         [comms-service.comms]
         downlink_ports = [14011, 14000]
         "#,
-    );
+    )
+    .unwrap();
 
     let result = CommsConfig::new(config);
 
@@ -83,7 +85,8 @@ fn config_write_downlink_mismatch() {
         downlink_ports = [14011, 14012]
         ip = "0.0.0.0"
         "#,
-    );
+    )
+    .unwrap();
 
     let config = CommsConfig::new(config).unwrap();
 

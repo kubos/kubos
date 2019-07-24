@@ -10,7 +10,6 @@ import logging
 from sub import sub
 import sys
 
-SERVICES = app_api.Services()
 
 def on_boot():
     
@@ -66,7 +65,9 @@ def main():
     if args.config is not None:
         global SERVICES
         SERVICES = app_api.Services(args.config[0])
-    
+    else:
+        SERVICES = app_api.Services()
+
     if args.run[0] == 'OnBoot':
         on_boot()
     elif args.run[0] == 'OnCommand':

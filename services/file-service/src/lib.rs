@@ -16,7 +16,7 @@
 
 use file_protocol::{FileProtocol, FileProtocolConfig, ProtocolError, State};
 use kubos_system::Config as ServiceConfig;
-use log::{info, warn};
+use log::{error, info, warn};
 use std::collections::HashMap;
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
 use std::sync::{Arc, Mutex};
@@ -26,11 +26,15 @@ use std::time::Duration;
 // We need this in this lib.rs file so we can build integration tests
 pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
     // Get and bind our UDP listening socket
-    let host = config.hosturl();
+    let host = config
+        .hosturl()
+        .ok_or_else(|| failure::format_err!("Unable to fetch addr for service"))?;
 
     // Extract our local IP address so we can spawn child sockets later
     let mut host_parts = host.split(':').map(|val| val.to_owned());
-    let host_ip = host_parts.next().unwrap();
+    let host_ip = host_parts
+        .next()
+        .ok_or_else(|| failure::format_err!("Failed to parse service IP address"))?;
 
     // Get the storage directory prefix that we'll be using for our
     // temporary/intermediate storage location
@@ -107,10 +111,26 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
             }
         };
 
-        if !threads.lock().unwrap().contains_key(&channel_id) {
+        if !threads
+            .lock()
+            .map_err(|err| {
+                error!("Failed to get threads mutex: {:?}", err);
+                err
+            })
+            .unwrap()
+            .contains_key(&channel_id)
+        {
             let (sender, receiver): (Sender<serde_cbor::Value>, Receiver<serde_cbor::Value>) =
                 mpsc::channel();
-            threads.lock().unwrap().insert(channel_id, sender.clone());
+
+            threads
+                .lock()
+                .map_err(|err| {
+                    error!("Failed to get threads mutex: {:?}", err);
+                    err
+                })
+                .unwrap()
+                .insert(channel_id, sender.clone());
 
             // Break the processing work off into its own thread so we can
             // listen for requests from other clients
@@ -146,19 +166,49 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
                 }
 
                 // Remove ourselves from threads list if we are finished
-                shared_threads.lock().unwrap().remove(&channel_id);
+                shared_threads
+                    .lock()
+                    .map_err(|err| {
+                        error!("Failed to get threads mutex: {:?}", err);
+                        err
+                    })
+                    .unwrap()
+                    .remove(&channel_id);
             });
         }
 
-        if let Some(sender) = threads.lock().unwrap().get(&channel_id) {
+        if let Some(sender) = threads
+            .lock()
+            .map_err(|err| {
+                error!("Failed to get threads mutex: {:?}", err);
+                err
+            })
+            .unwrap()
+            .get(&channel_id)
+        {
             if let Err(e) = sender.send(first_message) {
                 warn!("Error when sending to channel {}: {:?}", channel_id, e);
             }
         }
 
-        if !threads.lock().unwrap().contains_key(&channel_id) {
+        if !threads
+            .lock()
+            .map_err(|err| {
+                error!("Failed to get threads mutex: {:?}", err);
+                err
+            })
+            .unwrap()
+            .contains_key(&channel_id)
+        {
             warn!("No sender found for {}", channel_id);
-            threads.lock().unwrap().remove(&channel_id);
+            threads
+                .lock()
+                .map_err(|err| {
+                    error!("Failed to get threads mutex: {:?}", err);
+                    err
+                })
+                .unwrap()
+                .remove(&channel_id);
         }
     }
 }

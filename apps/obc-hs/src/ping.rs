@@ -64,7 +64,7 @@ fn get_services() -> Result<Vec<(String, ServiceConfig)>, Error> {
             // Reassemble the TOML for this entry and then parse it
             let mut map = BTreeMap::new();
             map.insert(name, value);
-            let config = ServiceConfig::new_from_str(name, &toml::to_string(&map)?);
+            let config = ServiceConfig::new_from_str(name, &toml::to_string(&map)?)?;
 
             services.push((name.to_owned(), config));
         }

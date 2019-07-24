@@ -36,7 +36,7 @@
 //!             }
 //!         }"#;
 //!
-//!     match query(&ServiceConfig::new("radio-service"), request, Some(Duration::from_secs(1))) {
+//!     match query(&ServiceConfig::new("radio-service")?, request, Some(Duration::from_secs(1))) {
 //!         Err(error) => bail!("Failed to communicate with radio service: {}", error),
 //!         Ok(data) => {
 //!             if let Some(success) = data.get("power")

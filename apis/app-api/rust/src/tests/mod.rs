@@ -33,7 +33,7 @@ macro_rules! mock_service {
 
         ::std::thread::spawn(|| {
             Service::new(
-                ServiceConfig::new_from_path("mock-service", config_thread),
+                ServiceConfig::new_from_path("mock-service", config_thread).unwrap(),
                 Subsystem,
                 QueryRoot,
                 MutationRoot,
