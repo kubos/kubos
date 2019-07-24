@@ -38,7 +38,11 @@ fn setup_app(registry_dir: &Path) {
 
     // Copy our app files into our app registry
     fs::copy("tests/utils/python-proj/main.py", app_dir.join("main.py")).unwrap();
-    fs::copy("tests/utils/python-proj/config.toml", app_dir.join("config.toml")).unwrap();
+    fs::copy(
+        "tests/utils/python-proj/config.toml",
+        app_dir.join("config.toml"),
+    )
+    .unwrap();
     fs_extra::dir::copy(
         "tests/utils/python-proj/sub",
         app_dir.clone(),
@@ -227,7 +231,7 @@ fn app_failure() {
                 .to_string_lossy()
         ),
     )
-        .unwrap();
+    .unwrap();
 
     setup_app(&fixture.registry_dir.path());
 
