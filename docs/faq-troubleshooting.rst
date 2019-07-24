@@ -52,6 +52,20 @@ What's the default Kubos Linux login?
 
 kubos/Kubos123
 
+How do I make Rust binaries smaller?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Do a release build (``cargo build --release``)
+- Add the following optimization args to your `Cargo.toml` file and recompile::
+
+    [profile.release]
+    lto = true
+    opt-level = "z"
+    panic = "abort"
+    codegen-units = 1
+    
+- After the binary has been built, run ``arm-linux-strip /path/to/binary``
+
 Troubleshooting
 ---------------
 

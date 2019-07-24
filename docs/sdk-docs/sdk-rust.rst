@@ -56,6 +56,24 @@ Some crates also depend on pkg-config, which requires that an additional environ
 ``PKG_CONFIG_ALLOW_CROSS``, be set in order to enable cross-compiling::
 
     $ PKG_CONFIG_ALLOW_CROSS=1 CC=/usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc cargo build --target armv5te-unknown-linux-gnueabi
+    
+Making Rust Binaries Smaller
+----------------------------
+
+By default, Rust binaries can be quite large.
+These are some steps which we recommend in order to drastically shrink the size of your compiled
+application:
+
+- Do a release build, rather than a debug build (``cargo build --release``)
+- Add the following optimization args to your `Cargo.toml` file and recompile::
+
+    [profile.release]
+    lto = true
+    opt-level = "z"
+    panic = "abort"
+    codegen-units = 1
+    
+- After the binary has been built, run ``arm-linux-strip /path/to/binary``
 
 .. _rust-transfer:
 
