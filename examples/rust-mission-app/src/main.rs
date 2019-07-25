@@ -81,7 +81,7 @@ impl AppHandler for MyApp {
             return Ok(());
         }
 
-        // Parse the command args (skip the first arg with the application name)
+        // Parse the command args
         let matches = match opts.parse(args) {
             Ok(r) => r,
             Err(f) => panic!(f.to_string()),
