@@ -7,16 +7,18 @@ MAINTAINER catherine@kubos.com, ryan@kubos.com
 RUN apt-get update -y
 
 RUN apt-get upgrade --no-install-recommends -y python3.5
-RUN apt-get install --no-install-recommends -y pkg-config build-essential  python-setuptools git cmake unzip wget sqlite3 libsqlite3-dev libssl-dev curl git ssh
+RUN apt-get install --no-install-recommends -y pkg-config build-essential git cmake unzip wget sqlite3 libsqlite3-dev libssl-dev curl git ssh
 
 # Linux build dependencies
 RUN apt-get install --no-install-recommends -y bc cpio ncurses-dev libc6-i386 lib32stdc++6 lib32z1
 
+#Tools to generate docs
+RUN apt-get install --no-install-recommends -y doxygen graphviz plantuml
+
 # Install pip for Python2 and Python3
-RUN apt-get install --no-install-recommends -y python-pip python3-pip python3-setuptools
+RUN apt-get install --no-install-recommends -y python3-pip python3-setuptools
 
 # So that we have bdist_wheel available when installing other packages
-RUN pip install wheel
 RUN pip3 install wheel
 
 #Kubos Linux setup
@@ -30,10 +32,10 @@ RUN wget https://s3.amazonaws.com/kubos-world-readable-assets/bbb_toolchain.tar.
 RUN tar -xf ./bbb_toolchain.tar.gz -C /usr/bin
 RUN rm ./bbb_toolchain.tar.gz
 
-# Setup Python package dependencies
-RUN pip3 install toml
-RUN pip3 install mock
-RUN pip3 install responses
+# Install all Kubos Python dependencies
+RUN git clone https://github.com/kubos/kubos --depth 1
+RUN pip3 install -r kubos/requirements.txt
+RUN rm -r kubos
 
 # Setup rust stuff
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
@@ -46,14 +48,6 @@ RUN rustup component add clippy
 RUN rustup component add rustfmt
 RUN /root/.cargo/bin/cargo install --git https://github.com/kubos/cargo-kubos
 COPY cargo_config /root/.cargo/config
-
-#Tools to generate docs
-RUN apt-get install --no-install-recommends -y doxygen graphviz plantuml
-RUN pip install Sphinx==1.5.6
-RUN pip install breathe==4.12.0
-RUN pip install sphinx-rtd-theme==0.2.4
-RUN pip install sphinxcontrib-plantuml sphinxcontrib-versioning
-RUN pip install sphinx-jsondomain
 
 # Install NOS3 dependencies
 RUN apt-get --no-install-recommends install -y software-properties-common

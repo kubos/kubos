@@ -8,3 +8,4 @@
 -r libs/kubos-service/requirements.txt
 -r libs/kubos-test/requirements.txt
 -r services/pumpkin-mcu-service/requirements.txt
+-r tools/docs/requirements.txt
