@@ -52,6 +52,12 @@ What's the default Kubos Linux login?
 
 kubos/Kubos123
 
+How do I make Rust binaries smaller?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:ref:`Check out our Rust optimization tips <rust-opt>` for suggestions on how to make your compiled
+Rust projects smaller.
+
 Troubleshooting
 ---------------
 
