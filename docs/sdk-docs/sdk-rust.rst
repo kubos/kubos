@@ -61,19 +61,8 @@ Making Rust Binaries Smaller
 ----------------------------
 
 By default, Rust binaries can be quite large.
-These are some steps which we recommend in order to drastically shrink the size of your compiled
-application:
-
-- Do a release build, rather than a debug build (``cargo build --release``)
-- Add the following optimization args to your `Cargo.toml` file and recompile::
-
-    [profile.release]
-    lto = true
-    opt-level = "z"
-    panic = "abort"
-    codegen-units = 1
-    
-- After the binary has been built, run ``arm-linux-strip /path/to/binary``
+:ref:`Check out our Rust optimization tips <rust-opt>` for suggestions on how to make your compiled
+Rust projects smaller.
 
 .. _rust-transfer:
 

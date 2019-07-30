@@ -35,6 +35,8 @@ so::
 
     $ cargo run -- -c config.toml
 
+.. _rust-opt:
+
 Making Rust Binaries Smaller
 ----------------------------
 
