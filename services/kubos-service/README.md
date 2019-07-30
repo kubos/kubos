@@ -9,6 +9,9 @@ configuring it with a hardware subsystem and Juniper Query/Mutation objects.
 
 It also provides a starting entry point and basic configuration file parsing.
 
+More information about developing services can be found in our
+[service development guide](https://docs.kubos.com/latest/ecosystem/services/service-dev.html).
+
 # Use
 
 The basic use of the kubos_service crate is through the Service structure.
@@ -19,7 +22,7 @@ It also provides a starting entry point and basic configuration file parsing.
 ## In Services
 
 Services should only link to the `kubos_service` crate if they have a
-hardware device they want to expose over the service interface (currently GraphQL/UDP).
+hardware device they want to expose over the service interface (currently GraphQL/HTTP).
 
 ## Configuration
 

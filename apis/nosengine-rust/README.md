@@ -1,7 +1,8 @@
 # NOSEngine API Rust Wrapper
 
 This crate contains wrappers around the NOSEngine API. This crate can only be built in a
-system that has NOS3 installed.
+system that has `NOS3 <http://www.stf1.com/NOS3Website/Nos3MainTab.html>`__
+installed.
 
 The examples in this crate will not run properly unless the NOSEngine server is running on
 `tcp://localhost:12001`. This is the way it is configured to run in the NOS3 VM.

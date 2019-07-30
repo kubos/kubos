@@ -21,15 +21,19 @@ impl AppHandler for MyApp {
   fn on_boot(&self, _args: Vec<String>) -> Result<(), Error> {
     println!("OnBoot logic");
 
+    // GraphQL request to turn on the radio
     let request = r#"mutation {
             power(state: ON) {
                 success
             }
         }"#;
 
+    // Send the GraphQL request to the radio sevice
     match query(&ServiceConfig::new("radio-service")?, request, Some(Duration::from_secs(1))) {
         Err(error) => bail!("Failed to communicate with radio service: {}", error),
         Ok(data) => {
+            // Parse the response to verify that the operation was
+            // successful
             if let Some(success) = data.get("power")
                 .and_then(|power| power.get("success"))
             {
@@ -54,6 +58,9 @@ impl AppHandler for MyApp {
 
 fn main() -> Result<(), Error> {
     let app = MyApp { };
+    // Initialize logging and then enter either the `on_boot` or
+    // `on_command` function, depending on what run level was
+    // requested by the user
     app_main!(&app)?;
     Ok(())
 }

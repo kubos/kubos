@@ -2,7 +2,7 @@
 
 Example client "radio" over UART program
 
-Wraps the user's data in a SpacePacket and then sends it over the UART port
+Wraps the user's data in a Space Packet and then sends it over the UART port
 The example communication service, `uart-comms-service`, should be running and listening for
 these messages.
 The service will forward the message on to the requested destination port and then return the
@@ -11,7 +11,7 @@ response once the request has completed.
 Note: Currently this client can only be used to send/receive GraphQL requests
 
 Packets can be additionally encapsulated using the KISS protocol to simulate additional
-radio-specific framing. Resulting packet is `KISS<HTTP<graphql-payload>>`.
+radio-specific framing. Resulting packet is `KISS<space-packet<graphql-payload>>`.
 
 ## Running the Client
 
