@@ -603,7 +603,7 @@ impl AppRegistry {
         })?;
 
         // Give the app a moment to run
-        thread::sleep(Duration::from_millis(100));
+        thread::sleep(Duration::from_millis(300));
 
         // See if the app already exited
         //
