@@ -116,9 +116,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: cd apis/app-api/python && pip3 install .
-        - run: pip install semantic-version
-        - run: ./deploy.sh
+        - run: ./deploy_tag.sh
 
     # Generate and upload new docs
     # Run when code is merged into master or when an official release tag is generated
@@ -127,11 +125,11 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: cd apis/app-api/python && pip install .
+        - run: cd apis/app-api/python && pip3 install .
         - run: ssh-keyscan docs.kubos.co >> ~/.ssh/known_hosts
-        - run: pip install semantic-version
-        - run: ./prep_docs.sh
-        - run: ./deploy_docs.sh
+        - run: pip3 install semantic-version
+        - run: ./tools/docs/prep_docs.sh
+        - run: ./tools/docs/deploy_docs.sh
 
 workflows:
   version: 2
