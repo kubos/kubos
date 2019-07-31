@@ -1,0 +1,159 @@
+Scheduler
+=========
+
+The KubOS system includes a scheduler service to facilitate recurring tasks
+and one time tasks with specific timing requirements.
+
+Behavior
+--------
+
+Upon boot, or service start, the scheduler will read the active schedule file and
+load the schedule into memory. The default active schedule file will be found at
+``/home/system/etc/schedules/active.json``. Any ``init`` tasks will be performed
+immediately. All other ``one-time`` or ``recurring`` tasks will be scheduled 
+to run at their designated times.
+
+By default the scheduler will have two schedules: ``operational`` and ``safemode``. These
+schedules are represented by different schedule files maintained in the schedules directory.
+Only one schedule can be active at any given time.
+
+The scheduler will have its own log file, ``/var/log/kubos-schedule.log``, which
+will log all schedule related actions the scheduler takes.
+
+Schedule Specification
+----------------------
+
+Schedules will be specified in files in the `json` format. Each schedule file will contain
+all of the necessary information for that specific schedule. Different schedules, such as
+operational, safe mode, etc, will each have their own schedule files.
+
+Schedules consist of three sections: ``init``, ``one-time``, and ``recurring``. Each section
+represents a different type of scheduled task.
+
+Tasks in the ``init`` section will be executed on boot or on schedule change. Each 
+task in this section will be specified like so:
+
+.. code-block:: json
+
+    {
+        "task-name": {
+            "app-name": "task app",
+            "app-args": "optional app args",
+            "app-config": "optional path to app config"
+        }
+    }
+
+Tasks in the ``one-time`` section will be executed once at a set time. Each task
+in this section will be specified like so:
+
+.. code-block:: json
+
+    {
+        "task-name": {
+            "time": "time of execution in yyyy-mm-dd hh:mm:ss format",
+            "app-name": "task app",
+            "app-args": "optional app args",
+            "app-config": "optional path to app config"
+        }
+    }
+
+Tasks in the ``recurring`` section will be executed on a recurring basis. A ``start-time`` and
+``end-time`` are given to supply bounds around the occurance of the task. The task
+will occur at the given frequency beginning at the ``start-time``. Each task
+in this section will be specified like so:
+
+.. code-block:: json
+
+    {
+        "task-name": {
+            "start-time": "start time of execution in yyyy-mm-dd hh:mm:ss format",
+            "end-time": "end time of execution in yyyy-mm-dd hh:mm:ss format",
+            "frequency": "frequency of execution in HH:mm:ss format",
+            "app-name": "task app",
+            "app-args": "optional app args",
+            "app-config": "optional path to app config"
+        }
+    }
+
+An example schedule file:
+
+.. code-block:: json
+
+    {
+        "init": {
+            "start-camera": {
+                "app-name": "activate-camera"
+            }
+        },
+        "one-time": {
+            "deploy-solar": {
+                "time": "2019-08-11 15:20:10"
+                "app-name": "deploy-solar-panels"
+            }
+        },
+        "recurring": {
+            "clean-logs-every-12hrs": {
+                "start-time": "2019-08-11 15:20:10"
+                "end-time": "2019-08-12 15:20:10"
+                "frequency": "12:00:00",
+                "app-name": "clean-logs"
+            }
+        }
+    }
+
+Configuration
+-------------
+
+The scheduler has the following available configuration parameter which may be 
+specified in the ``config.toml`` file under ``[scheduler-service]``.
+
+- ``schedules-dir`` - (Default: ``/home/system/etc/schedules/``) The path to the
+directory where schedules will be stored. This directory will be created if it does
+not already exist.
+
+The scheduler also has the standard GraphQL interface parameters available for
+configuration under ``[scheduler-service.addr]``.
+
+- ``ip`` - The IP address of the GraphQL server
+- ``port`` - The port the GraphQL server will listen on
+
+GraphQL API
+-----------
+
+Queries
+~~~~~~~
+
+The scheduler exposes a single query, ``schedule``, which exposes information about
+the currently active schedule. The ``schedule`` query has the following schema::
+
+    {
+        schedule {
+            contents: String,
+            path: String,
+            name: String,
+            timeRegistered: String
+        }
+    }
+
+Mutations
+~~~~~~~~~
+
+The scheduler has two mutations: ``activate`` and ``register``. 
+
+The ``activate`` mutation instructs the scheduler to make the specified schedule active.
+It has the following schema::
+
+    mutation {
+        activate(name: String!): {
+            success: Boolean!
+        }
+    }
+
+The ``register`` mutation allows the scheduler to register a new schedule file. It has
+the following schema::
+
+    mutation {
+        register(path: String!, name:String!): {
+            success: Boolean!
+        }
+    }
