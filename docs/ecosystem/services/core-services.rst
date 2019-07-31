@@ -10,5 +10,6 @@ The core services are all the services that provide critical flight software cap
     Communications Service <comms-framework>
     File Transfer Service <file>
     Monitor Service <monitor-service>
+    Scheduler <scheduler>
     Shell Service <shell>
     Telemetry Database Service <telemetry-db>
