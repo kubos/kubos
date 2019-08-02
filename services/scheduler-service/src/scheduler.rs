@@ -14,18 +14,145 @@
  * limitations under the License.
  */
 
-use crate::objects::{ScheduleConfig, ScheduleFile};
+//!
+//! Structures and functions concerning the actual running of a schedule
+//!
+
+use crate::config::{ScheduleConfig, ScheduleTask};
+use crate::file::get_active_schedule;
+use crate::schema::GenericResponse;
 use kubos_service::Config;
-use log::{error, info, warn};
+use log::{error, info};
+use reqwest::Client;
+use serde::Deserialize;
+use serde_json::from_str;
+use std::collections::HashMap;
 use std::fs;
-use std::os::unix::fs::symlink;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::sync::mpsc::{channel, Sender};
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Instant;
+use tokio::prelude::future::lazy;
+use tokio::prelude::*;
+use tokio::runtime::Runtime;
+use tokio::timer::Delay;
+use std::time::Duration;
 
 pub static DEFAULT_SCHEDULES_DIR: &str = "/home/system/etc/schedules";
 
+// Generates a timer future for tokio to schedule and execute
+fn schedule_task(
+    task: &ScheduleTask,
+    app_service_url: String,
+) -> Box<dyn Future<Item = (), Error = ()> + Send> {
+    let service_url = app_service_url.clone();
+    let name = task.app.name.clone();
+    let config = task.app.config.clone();
+    let args = task.app.args.clone();
+    let runlevel = task
+        .app
+        .run_level
+        .clone()
+        .unwrap_or_else(|| "onBoot".to_owned());
+
+    let duration = match task.get_duration() {
+        Ok(d) => d,
+        Err(e) => {
+            error!("Failed to parse task delay duration: {}", e);
+            return Box::new(future::err::<(), ()>(()));
+        }
+    };
+
+    let when = Instant::now() + duration;
+
+    Box::new(
+        Delay::new(when)
+            .and_then(move |_| {
+                info!("Start app {}", name);
+                let mut query_args = format!("runLevel: \"{}\", name: \"{}\"", runlevel, name);
+                if let Some(config) = config {
+                    query_args.push_str(&format!(", config: \"{}\"", config));
+                }
+                if let Some(args) = args {
+                    let app_args: Vec<String> = args.iter().map(|x| format!("\"{}\"", x)).collect();
+
+                    let app_args = app_args.join(",");
+                    query_args.push_str(&format!(", args: [{}]", app_args));
+                }
+                let query = format!(
+                    r#"mutation {{ startApp({}) {{ success, errors }} }}"#,
+                    query_args
+                );
+                match service_query(&query, &service_url) {
+                    Err(e) => {
+                        error!("Failed to send start app query: {}", e);
+                        panic!("Failed to send start app query: {}", e);
+                    }
+                    Ok(resp) => {
+                        if !resp.data.start_app.success {
+                            error!(
+                                "Failed to start scheduled app: {}",
+                                resp.data.start_app.errors
+                            );
+                            panic!(
+                                "Failed to start scheduled app: {}",
+                                resp.data.start_app.errors
+                            );
+                        }
+                    }
+                }
+                Ok(())
+            })
+            .map_err(|e| {
+                error!("Task delay errored; err={:?}", e);
+                panic!("Task delay errored; err={:?}", e)
+            }),
+    )
+}
+
+#[derive(Debug, Deserialize)]
+pub struct StartAppResponse {
+    #[serde(rename = "startApp")]
+    pub start_app: GenericResponse,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct StartAppGraphQL {
+    pub data: StartAppResponse,
+}
+
+// Helper function for sending query to app service
+pub fn service_query(query: &str, hosturl: &str) -> Result<StartAppGraphQL, String> {
+    let client = Client::builder()
+        .timeout(Duration::from_millis(100))
+        .build()
+        .map_err(|e| format!("Failed to create client: {:?}", e))?;
+    let mut map = HashMap::new();
+    map.insert("query", query);
+    let url = format!("http://{}", hosturl);
+
+    let mut res = client
+        .post(&url)
+        .json(&map)
+        .send()
+        .map_err(|e| format!("Failed to send query: {:?}", e))?;
+
+    Ok(from_str(
+        &res.text()
+            .map_err(|e| format!("Failed to get result text: {:?}", e))?,
+    )
+    .map_err(|e| format!("Failed to convert http result to json: {}", e))?)
+}
+
 #[derive(Clone)]
 pub struct Scheduler {
-    scheduler_dir: String,
+    // Path to directory where schedules are stored
+    pub scheduler_dir: String,
+    // Handle to thread running scheduler runtime
+    scheduler_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
+    // Channel sender for stopping scheduler
+    scheduler_stopper: Arc<Mutex<Option<Sender<()>>>>,
 }
 
 impl Scheduler {
@@ -40,11 +167,13 @@ impl Scheduler {
 
         Scheduler {
             scheduler_dir: sched_dir.to_owned(),
+            scheduler_thread: Arc::new(Mutex::new(None)),
+            scheduler_stopper: Arc::new(Mutex::new(None)),
         }
     }
 
-    // Iterate through the active schedule file and schedule tasks
-    pub fn schedule(&self) -> Result<(), String> {
+    // Iterate through the active schedule file and kick off scheduling tasks
+    pub fn start(&self) -> Result<(), String> {
         let apps_service_config = Config::new("app-service")
             .map_err(|err| format!("Failed to load app service config: {:?}", err))?;
 
@@ -52,127 +181,47 @@ impl Scheduler {
             .hosturl()
             .ok_or_else(|| "Failed to fetch app service url".to_owned())?;
 
-        let active_schedule = self
-            .get_active_schedule()
+        let active_schedule = get_active_schedule(&self.scheduler_dir)
             .ok_or_else(|| "Failed to fetch active schedule".to_owned())?;
         let active_config: ScheduleConfig = serde_json::from_str(&active_schedule.contents)
             .map_err(|e| format!("Failed to parse config: {}", e))?;
 
-        if let Some(init) = active_config.init {
-            for (name, task) in init {
-                let task_app_url = apps_service_url.clone();
-                info!("Scheduling {}", name);
-                if let Err(e) = task.schedule(task_app_url) {
-                    error!("Failed to schedule task {}: {:?}", name, e);
+        let (tx, rx) = channel::<()>();
+        let handle = thread::spawn(move || {
+            let mut runner = Runtime::new().unwrap();
+            runner.spawn(lazy(move || {
+                if let Some(init) = active_config.init {
+                    for (name, task) in init {
+                        let task_app_url = apps_service_url.clone();
+                        info!("Scheduling {}", name);
+                        tokio::spawn(schedule_task(&task, task_app_url));
+                    }
                 }
-            }
-        }
+                Ok(())
+            }));
+            // Wait on the stop message before ending the runtime
+            rx.recv().unwrap();
+            runner.shutdown_now().wait().unwrap();
+        });
+
+        let mut my_handle = self.scheduler_thread.lock().unwrap();
+        *my_handle = Some(handle);
+
+        let mut my_stopper = self.scheduler_stopper.lock().unwrap();
+        *my_stopper = Some(tx);
 
         Ok(())
     }
 
-    // Copy a new schedule file into the schedules directory
-    pub fn import_schedule(&self, path: &str, name: &str) -> Result<(), String> {
-        info!("Importing new schedule '{}': {}", name, path);
-        let schedule_dest = format!("{}/{}.json", self.scheduler_dir, name);
-        fs::copy(path, schedule_dest).map_err(|e| format!("Schedule copy failed: {}", e))?;
-        Ok(())
-    }
-
-    // Make an existing schedule file the active schedule file
-    // TODO: What do we do if any of these fails? Fallback schedule?
-    pub fn activate_schedule(&self, name: &str) -> Result<(), String> {
-        info!("Activating schedule {}", name);
-        let sched_path = format!("{}/{}.json", self.scheduler_dir, name);
-        let active_path = format!("{}/active.json", self.scheduler_dir);
-        let new_active_path = format!("{}/new_active.json", self.scheduler_dir);
-
-        if !Path::new(&sched_path).is_file() {
-            return Err(format!("Schedule {}.json not found", name));
+    // Send signal to scheduler runtime to stop
+    pub fn stop(&self) -> Result<(), String> {
+        let stopper_guard = self.scheduler_stopper.lock().unwrap();
+        if let Some(stopper) = stopper_guard.as_ref() {
+            stopper
+                .send(())
+                .map_err(|e| format!("Failed to send stop to scheduler: {}", e))?;
         }
 
-        symlink(sched_path, &new_active_path)
-            .map_err(|e| format!("Failed to create active symlink: {}", e))?;
-
-        fs::rename(&new_active_path, &active_path)
-            .map_err(|e| format!("Failed to copy over new active symlink: {}", e))?;
-
-        info!("Activated schedule {}", name);
         Ok(())
-    }
-
-    // Remove an existing schedule file from the schedules directory
-    pub fn remove_schedule(&self, name: &str) -> Result<(), String> {
-        info!("Removing schedule {}", name);
-        let sched_path = format!("{}/{}.json", self.scheduler_dir, name);
-
-        fs::remove_file(&sched_path)
-            .map_err(|e| format!("Failed to remove schedule {}.json: {}", name, e))?;
-
-        info!("Removed schedule {}", name);
-        Ok(())
-    }
-
-    // Retrieve information on the active schedule file
-    pub fn get_active_schedule(&self) -> Option<ScheduleFile> {
-        let active_path = fs::read_link(format!("{}/active.json", &self.scheduler_dir)).ok()?;
-
-        match ScheduleFile::from_path(&active_path) {
-            Ok(mut s) => {
-                s.active = true;
-                Some(s)
-            }
-            Err(e) => {
-                warn!("Failed to parse active schedule: {}", e);
-                None
-            }
-        }
-    }
-
-    // Retrieve information on all schedule files in the schedules directory
-    pub fn get_available_schedules(
-        &self,
-        name: Option<String>,
-    ) -> Result<Vec<ScheduleFile>, String> {
-        let mut schedules: Vec<ScheduleFile> = vec![];
-
-        let active_path: Option<PathBuf> =
-            fs::read_link(format!("{}/active.json", &self.scheduler_dir)).ok();
-
-        for path in fs::read_dir(&self.scheduler_dir)
-            .map_err(|e| format!("Failed to read schedules dir: {}", e))?
-            // Filter out invalid entries
-            .filter_map(|x| x.ok())
-            // Convert DirEntry -> PathBuf
-            .map(|entry| entry.path())
-            // Filter out non-files
-            .filter(|entry| entry.is_file())
-            // Filter out active.json
-            .filter(|path| !path.ends_with("active.json"))
-            // Filter on name if specified
-            .filter(|path| {
-                if let Some(name_str) = &name {
-                    path.ends_with(format!("{}.json", name_str))
-                } else {
-                    true
-                }
-            })
-        {
-            let active = if let Some(active_sched) = active_path.clone() {
-                active_sched == path
-            } else {
-                false
-            };
-
-            match ScheduleFile::from_path(&path) {
-                Ok(mut sched) => {
-                    sched.active = active;
-                    schedules.push(sched);
-                }
-                Err(e) => warn!("Error loading schedule: {}", e),
-            }
-        }
-
-        Ok(schedules)
     }
 }
