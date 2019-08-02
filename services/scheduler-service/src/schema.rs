@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::objects::{GenericResponse, Schedule};
+use crate::objects::{GenericResponse, ScheduleFile};
 use crate::scheduler::Scheduler;
 use juniper::FieldResult;
 use kubos_service;
@@ -37,36 +37,36 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
         Ok(String::from("pong"))
     }
 
-    // Returns information on the currently active schedule
+    // Returns information on the currently active schedule file
     // {
     //     activeSchedule: {
     //         contents: String,
     //         path: String,
     //         name: String,
-    //         timeRegistered: String,
+    //         timeImported: String,
     //         active: Boolean
     //     }
     // }
-    field active_schedule(&executor) -> FieldResult<Option<Schedule>> as "Current Schedule"
+    field active_schedule(&executor) -> FieldResult<Option<ScheduleFile>> as "Current Schedule File"
     {
         Ok(executor.context().subsystem().get_active_schedule())
     }
 
-    // Returns a list of information on currently registered schedules
+    // Returns a list of information on currently available schedules
     // {
-    //     registeredSchedules: [
+    //     availableSchedules: [
     //         {
     //             contents: String,
     //             path: String,
     //             name: String,
-    //             timeRegistered: String,
+    //             timeImported: String,
     //             active: Boolean
     //         }
     //     ]
     // }
-    field registered_schedules(&executor, name: Option<String>) -> FieldResult<Vec<Schedule>> as "Registered Schedules"
+    field available_schedules(&executor, name: Option<String>) -> FieldResult<Vec<ScheduleFile>> as "Available Schedule Files"
     {
-        Ok(executor.context().subsystem().get_registered_schedules(name)?)
+        Ok(executor.context().subsystem().get_available_schedules(name)?)
     }
 });
 
@@ -75,16 +75,16 @@ pub struct MutationRoot;
 // Base GraphQL mutation model
 graphql_object!(MutationRoot: Context as "Mutation" |&self| {
 
-    // Registers a new schedule
+    // Imports a new schedule
     //
     // mutation {
-    //     register(path: String!, name: String!): {
+    //     import(path: String!, name: String!): {
     //         errors: String,
     //         success: Boolean
     //    }
     // }
-    field register(&executor, path: String, name: String) -> FieldResult<GenericResponse> {
-        Ok(match executor.context().subsystem().register_schedule(&path, &name) {
+    field import(&executor, path: String, name: String) -> FieldResult<GenericResponse> {
+        Ok(match executor.context().subsystem().import_schedule(&path, &name) {
             Ok(_) => GenericResponse { success: true, errors: "".to_owned() },
             Err(error) => GenericResponse { success: false, errors: error.to_string() }
         })

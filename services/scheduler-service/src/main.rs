@@ -25,6 +25,7 @@ extern crate juniper;
 mod objects;
 mod scheduler;
 mod schema;
+mod util;
 
 use kubos_service::{Config, Service};
 use log::{error, info};
@@ -33,7 +34,7 @@ use schema::{MutationRoot, QueryRoot};
 
 // Initialize logging for the service
 // All messages will be routed to syslog and echoed to the console
-fn log_init() {
+fn log_init() -> Result<(), String> {
     use log4rs::append::console::ConsoleAppender;
     use log4rs::encode::pattern::PatternEncoder;
     use log4rs_syslog::SyslogAppender;
@@ -65,24 +66,27 @@ fn log_init() {
                 // Set the minimum logging level to record
                 .build(log::LevelFilter::Debug),
         )
-        .unwrap();
+        .map_err(|e| format!("Logging configuration failed: {}", e))?;
 
     // Start the logger
-    log4rs::init_config(config).unwrap();
+    log4rs::init_config(config).map_err(|e| format!("Logging setup failed: {}", e))?;
+    Ok(())
 }
 
-fn main() {
-    log_init();
+fn main() -> Result<(), String> {
+    log_init()?;
 
-    let config = Config::new("scheduler-service")
-        .map_err(|err| {
-            error!("Failed to load service config: {:?}", err);
-            err
-        })
-        .unwrap();
+    let config = Config::new("scheduler-service").map_err(|err| {
+        error!("Failed to load service config: {:?}", err);
+        format!("Failed to load service config: {}", err)
+    })?;
 
     let scheduler_dir = if let Some(s_dir) = config.get("schedules_dir") {
-        String::from(s_dir.as_str().unwrap())
+        String::from(
+            s_dir
+                .as_str()
+                .ok_or_else(|| format!("Error parsing scheduler dir path"))?,
+        )
     } else {
         String::from(DEFAULT_SCHEDULES_DIR)
     };
@@ -91,5 +95,12 @@ fn main() {
 
     info!("Starting scheduler-service - {:?}", scheduler_dir);
 
+    // For now we will only kick off scheduling when the scheduler comes up
+    if let Err(e) = scheduler.schedule() {
+        error!("Failed to schedule tasks: {:?}", e);
+    }
+
     Service::new(config, scheduler, QueryRoot, MutationRoot).start();
+
+    Ok(())
 }
