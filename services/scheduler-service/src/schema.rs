@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-use crate::scheduler::{Schedule, Scheduler};
+use crate::objects::{GenericResponse, Schedule};
+use crate::scheduler::Scheduler;
 use juniper::FieldResult;
 use kubos_service;
 use log::info;
@@ -94,14 +95,35 @@ pub struct MutationRoot;
 graphql_object!(MutationRoot: Context as "Mutation" |&self| {
 
     // Registers a new schedule
-    field register(&executor, path: String, name: String) -> FieldResult<bool> {
-        info!("Registered new schedule {}:{}", name, path);
-        Ok(true)
+    //
+    // mutation {
+    //     register(path: String!, name: String!): {
+    //         errors: String,
+    //         success: Boolean
+    //    }
+    // }
+    field register(&executor, path: String, name: String) -> FieldResult<GenericResponse> {
+        Ok(match executor.context().subsystem().register_schedule(&path, &name) {
+            Ok(_) => GenericResponse { success: true, errors: "".to_owned() },
+            Err(error) => GenericResponse { success: false, errors: error.to_string() }
+        })
     }
 
     // Activates a schedule
-    field activate(&executor, name: String) -> FieldResult<bool> {
-        info!("Activated schedule {}", name);
-        Ok(true)
+    //
+    // mutation {
+    //     activate(name: String!): {
+    //         errors: String,
+    //         success: Boolean
+    //    }
+    // }
+    field activate(&executor, name: String) -> FieldResult<GenericResponse> {
+        Ok(match executor.context().subsystem().activate_schedule(&name) {
+            Ok(_) => {
+                info!("Activated schedule {}", name);
+                GenericResponse { success: true, errors: "".to_owned() }
+            },
+            Err(error) => GenericResponse { success: false, errors: error.to_string() }
+        })
     }
 });
