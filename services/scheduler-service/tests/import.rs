@@ -28,7 +28,7 @@ fn import_new_schedule() {
 
     fixture.create_mode("operational");
 
-    let schedule = json!({ "init": [ ] });
+    let schedule = json!({ "tasks": [ ] });
     let schedule_path = fixture.create_config(Some(schedule.to_string()));
     assert_eq!(
         fixture.import_config("first", &schedule_path, "operational"),
@@ -60,6 +60,11 @@ fn import_new_schedule() {
             }
         })
     );
+}
+
+#[test]
+fn import_broken_schedule() {
+    // assert_eq!(1, 0);
 }
 
 #[test]
@@ -119,7 +124,7 @@ fn import_duplicate_schedule() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8023);
     fixture.create_mode("operational");
 
-    let schedule = json!({ "init": [ ] });
+    let schedule = json!({ "tasks": [ ] });
     let schedule_one_path = fixture.create_config(Some(schedule.to_string()));
     let schedule_two_path = fixture.create_config(Some(schedule.to_string()));
 
@@ -191,7 +196,7 @@ fn import_two_schedules() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8024);
     fixture.create_mode("flight");
 
-    let schedule = json!({ "init": [ ] });
+    let schedule = json!({ "tasks": [ ] });
     let schedule_one_path = fixture.create_config(Some(schedule.to_string()));
     let schedule_two_path = fixture.create_config(Some(schedule.to_string()));
 
@@ -247,7 +252,7 @@ fn import_two_schedules_check_revised() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8025);
     fixture.create_mode("flight");
 
-    let schedule = json!({ "init": [ ] });
+    let schedule = json!({ "tasks": [ ] });
     let schedule_one_path = fixture.create_config(Some(schedule.to_string()));
     let schedule_two_path = fixture.create_config(Some(schedule.to_string()));
 

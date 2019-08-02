@@ -42,7 +42,7 @@ fn run_init_single_no_delay() {
 
     // Create some schedule with an init task
     let schedule = json!({
-        "init": [
+        "tasks": [
             {
                 "name": "basic-task",
                 "delay": "0s",
@@ -73,7 +73,7 @@ fn run_init_single_with_delay() {
 
     // Create some schedule with an init task
     let schedule = json!({
-        "init": [
+        "tasks": [
             {
                 "name": "basic-task",
                 "delay": "1s",
@@ -108,7 +108,7 @@ fn run_init_two_tasks() {
 
     // Create some schedule with an init task
     let schedule = json!({
-        "init": [
+        "tasks": [
             {
                 "name": "second-task",
                 "delay": "1s",
@@ -149,7 +149,7 @@ fn run_init_single_args() {
 
     // Create some schedule with an init task
     let schedule = json!({
-        "init": [
+        "tasks": [
             {
                 "name": "basic-task",
                 "delay": "0s",
@@ -181,7 +181,7 @@ fn run_init_single_custom_config() {
 
     // Create some schedule with an init task
     let schedule = json!({
-        "init": [
+        "tasks": [
             {
                 "name": "basic-task",
                 "delay": "0s",
@@ -213,7 +213,7 @@ fn run_init_single_custom_runlevel() {
 
     // Create some schedule with an init task
     let schedule = json!({
-        "init": [
+        "tasks": [
             {
                 "name": "basic-task",
                 "delay": "0s",
@@ -245,7 +245,7 @@ fn run_init_two_schedules_one_mode() {
 
     // Create first schedule with an init task
     let schedule = json!({
-        "init": [
+        "tasks": [
             {
                 "name": "basic-task",
                 "delay": "0s",
@@ -260,7 +260,7 @@ fn run_init_two_schedules_one_mode() {
 
     // Create second schedule with an init task
     let schedule = json!({
-        "init": [
+        "tasks": [
             {
                 "name": "basic-task",
                 "delay": "1s",
@@ -295,7 +295,7 @@ fn run_init_two_modes() {
 
     // Create first schedule with an init task
     let schedule = json!({
-        "init": [
+        "tasks": [
             {
                 "name": "basic-task",
                 "delay": "0s",
@@ -310,7 +310,7 @@ fn run_init_two_modes() {
 
     // Create second schedule with an init task
     let schedule = json!({
-        "init": [
+        "tasks": [
             {
                 "name": "basic-task",
                 "delay": "0s",
@@ -349,7 +349,7 @@ fn run_init_two_modes_check_stop() {
 
     // Register first schedule with an init task
     let schedule = json!({
-        "init": [
+        "tasks": [
             {
                 "name": "basic-task",
                 "delay": "1s",
@@ -364,7 +364,7 @@ fn run_init_two_modes_check_stop() {
 
     // Register second schedule with an init task
     let schedule = json!({
-        "init": [
+        "tasks": [
             {
                 "name": "basic-task",
                 "delay": "0s",

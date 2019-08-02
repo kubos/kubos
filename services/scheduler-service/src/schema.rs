@@ -18,10 +18,11 @@
 //! GraphQL schema for scheduler service's public interface
 //!
 
-use crate::file::*;
+use crate::config::{import_config, remove_config};
 use crate::mode::*;
 use crate::scheduler::Scheduler;
 use juniper::FieldResult;
+use juniper::{graphql_object, GraphQLObject};
 use kubos_service;
 use serde::Deserialize;
 
