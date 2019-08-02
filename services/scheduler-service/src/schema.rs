@@ -47,15 +47,9 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //         active: Boolean
     //     }
     // }
-    field active_schedule() -> FieldResult<Schedule> as "Current Schedule"
+    field active_schedule(&executor) -> FieldResult<Option<Schedule>> as "Current Schedule"
     {
-        Ok(Schedule {
-            contents: "{json_blob}".to_owned(),
-            path: "/home/system/etc/schedules/operational.json".to_owned(),
-            name: "Operational".to_owned(),
-            time_registered: "2019-08-02 14:45:45".to_owned(),
-            active: true
-        })
+        Ok(executor.context().subsystem().get_active_schedule())
     }
 
     // Returns a list of information on currently registered schedules
@@ -70,21 +64,9 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //         }
     //     ]
     // }
-    field registered_schedules() -> FieldResult<Vec<Schedule>> as "Registered Schedules"
+    field registered_schedules(&executor, name: Option<String>) -> FieldResult<Vec<Schedule>> as "Registered Schedules"
     {
-        Ok(vec![Schedule {
-            contents: "{json_blob}".to_owned(),
-            path: "/home/system/etc/schedules/operational.json".to_owned(),
-            name: "Operational".to_owned(),
-            time_registered: "2019-08-02 14:45:45".to_owned(),
-            active: true
-        }, Schedule {
-            contents: "{json_blob}".to_owned(),
-            path: "/home/system/etc/schedules/safemode.json".to_owned(),
-            name: "Safemode".to_owned(),
-            time_registered: "2019-08-01 14:00:45".to_owned(),
-            active: false
-        }])
+        Ok(executor.context().subsystem().get_registered_schedules(name)?)
     }
 });
 
