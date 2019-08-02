@@ -19,14 +19,12 @@
 // #![deny(warnings)]
 // #![deny(missing_docs)]
 
-#[macro_use]
-extern crate juniper;
-
+mod app;
 mod config;
-mod file;
 mod mode;
 mod scheduler;
 mod schema;
+mod task;
 
 use kubos_service::{Config, Service};
 use log::{error, info};

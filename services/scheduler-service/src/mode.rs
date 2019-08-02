@@ -18,9 +18,10 @@
 //! Definitions and functions concerning the manipulation of schedule modes
 //!
 
-use crate::file::{get_mode_schedules, ScheduleFile};
+use crate::config::{get_mode_configs, ScheduleConfig};
 use chrono::offset::TimeZone;
 use chrono::{DateTime, Utc};
+use juniper::GraphQLObject;
 use log::{info, warn};
 use std::fs;
 use std::os::unix::fs::symlink;
@@ -32,7 +33,7 @@ pub struct ScheduleMode {
     pub name: String,
     pub path: String,
     pub last_revised: String,
-    pub schedules: Vec<ScheduleFile>,
+    pub schedules: Vec<ScheduleConfig>,
     pub active: bool,
 }
 
@@ -49,7 +50,7 @@ impl ScheduleMode {
             .ok_or_else(|| "Failed to read mode name".to_owned())?
             .to_owned();
 
-        let schedules = get_mode_schedules(&path)?;
+        let schedules = get_mode_configs(&path)?;
 
         let mut last_revised: DateTime<Utc> = Utc.ymd(1970, 1, 1).and_hms(0, 0, 0);
         for s in &schedules {

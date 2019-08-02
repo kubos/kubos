@@ -139,7 +139,7 @@ pub struct ScheduleConfig {
 
 // Descriptive information about a Schedule File
 #[derive(Debug, GraphQLObject)]
-pub struct ScheduleFile {
+pub struct ScheduleConfig {
     pub contents: String,
     pub path: String,
     pub name: String,
@@ -148,8 +148,8 @@ pub struct ScheduleFile {
 >>>>>>> Adding parsing schedule configs from files and init tasks.:services/scheduler-service/src/objects.rs
 }
 
-impl ScheduleFile {
-    pub fn from_path(path_obj: &Path) -> Result<ScheduleFile, String> {
+impl ScheduleConfig {
+    pub fn from_path(path_obj: &Path) -> Result<ScheduleConfig, String> {
         let path = path_obj
             .to_str()
             .map(|path| path.to_owned())
@@ -174,7 +174,7 @@ impl ScheduleFile {
         let contents = fs::read_to_string(&path_obj)
             .map_err(|e| format!("Failed to read schedule contents: {}", e))?;
 
-        Ok(ScheduleFile {
+        Ok(ScheduleConfig {
             path,
             name,
             contents,

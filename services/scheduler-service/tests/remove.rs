@@ -132,7 +132,7 @@ fn remove_existing_schedule() {
 
     fixture.create_mode("operational");
 
-    let schedule = json!({ "init": [ ] });
+    let schedule = json!({ "tasks": [ ] });
     let schedule_path = fixture.create_config(Some(schedule.to_string()));
     fixture.import_config("first", &schedule_path, "operational");
 

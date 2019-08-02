@@ -18,133 +18,20 @@
 //! Structures and functions concerning the actual running of a schedule
 //!
 
-use crate::config::ScheduleTask;
-use crate::file::get_mode_schedules;
+use crate::config::get_mode_configs;
 use crate::mode::get_active_mode;
-use crate::schema::GenericResponse;
 use kubos_service::Config;
 use log::{error, info};
-use reqwest::Client;
-use serde::Deserialize;
-use serde_json::from_str;
-use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 use std::sync::mpsc::{channel, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::Duration;
-use std::time::Instant;
 use tokio::prelude::future::lazy;
 use tokio::prelude::*;
 use tokio::runtime::Runtime;
-use tokio::timer::Delay;
 
 pub static DEFAULT_SCHEDULES_DIR: &str = "/home/system/etc/schedules";
-
-// Generates a timer future for tokio to schedule and execute
-fn schedule_task(
-    task: &ScheduleTask,
-    app_service_url: String,
-) -> Box<dyn Future<Item = (), Error = ()> + Send> {
-    let service_url = app_service_url.clone();
-    let name = task.app.name.clone();
-    let config = task.app.config.clone();
-    let args = task.app.args.clone();
-    let runlevel = task
-        .app
-        .run_level
-        .clone()
-        .unwrap_or_else(|| "onBoot".to_owned());
-
-    let duration = match task.get_duration() {
-        Ok(d) => d,
-        Err(e) => {
-            error!("Failed to parse task delay duration: {}", e);
-            return Box::new(future::err::<(), ()>(()));
-        }
-    };
-
-    let when = Instant::now() + duration;
-
-    Box::new(
-        Delay::new(when)
-            .and_then(move |_| {
-                info!("Start app {}", name);
-                let mut query_args = format!("runLevel: \"{}\", name: \"{}\"", runlevel, name);
-                if let Some(config) = config {
-                    query_args.push_str(&format!(", config: \"{}\"", config));
-                }
-                if let Some(args) = args {
-                    let app_args: Vec<String> = args.iter().map(|x| format!("\"{}\"", x)).collect();
-
-                    let app_args = app_args.join(",");
-                    query_args.push_str(&format!(", args: [{}]", app_args));
-                }
-                let query = format!(
-                    r#"mutation {{ startApp({}) {{ success, errors }} }}"#,
-                    query_args
-                );
-                match service_query(&query, &service_url) {
-                    Err(e) => {
-                        error!("Failed to send start app query: {}", e);
-                        panic!("Failed to send start app query: {}", e);
-                    }
-                    Ok(resp) => {
-                        if !resp.data.start_app.success {
-                            error!(
-                                "Failed to start scheduled app: {}",
-                                resp.data.start_app.errors
-                            );
-                            panic!(
-                                "Failed to start scheduled app: {}",
-                                resp.data.start_app.errors
-                            );
-                        }
-                    }
-                }
-                Ok(())
-            })
-            .map_err(|e| {
-                error!("Task delay errored; err={:?}", e);
-                panic!("Task delay errored; err={:?}", e)
-            }),
-    )
-}
-
-#[derive(Debug, Deserialize)]
-pub struct StartAppResponse {
-    #[serde(rename = "startApp")]
-    pub start_app: GenericResponse,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct StartAppGraphQL {
-    pub data: StartAppResponse,
-}
-
-// Helper function for sending query to app service
-pub fn service_query(query: &str, hosturl: &str) -> Result<StartAppGraphQL, String> {
-    let client = Client::builder()
-        .timeout(Duration::from_millis(100))
-        .build()
-        .map_err(|e| format!("Failed to create client: {:?}", e))?;
-    let mut map = HashMap::new();
-    map.insert("query", query);
-    let url = format!("http://{}", hosturl);
-
-    let mut res = client
-        .post(&url)
-        .json(&map)
-        .send()
-        .map_err(|e| format!("Failed to send query: {:?}", e))?;
-
-    Ok(from_str(
-        &res.text()
-            .map_err(|e| format!("Failed to get result text: {:?}", e))?,
-    )
-    .map_err(|e| format!("Failed to convert http result to json: {}", e))?)
-}
 
 #[derive(Clone)]
 pub struct Scheduler {
@@ -191,14 +78,13 @@ impl Scheduler {
                 panic!("Failed to create timer runtime: {}", e);
             });
 
-            for sched in get_mode_schedules(&active_mode.path).unwrap() {
+            for sched in get_mode_configs(&active_mode.path).unwrap() {
                 let task_app_url = apps_service_url.clone();
                 runner.spawn(lazy(move || {
-                    if let Some(init) = sched.config.init {
-                        for task in init {
-                            info!("Scheduling {}", &task.name);
-                            tokio::spawn(schedule_task(&task, task_app_url.clone()));
-                        }
+                    for task in sched.tasks {
+                        info!("Scheduling init task: {}", &task.name);
+                        // tokio::spawn(schedule_task(&task, task_app_url.clone()));
+                        tokio::spawn(task.schedule(task_app_url.clone()));
                     }
                     Ok(())
                 }));

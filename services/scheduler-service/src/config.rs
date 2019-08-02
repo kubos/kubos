@@ -15,72 +15,127 @@
  */
 
 //!
-//! Definitions and parsing instructions for Schedule Configurations
+//! Definitions and functions concerning the manipulation of schedule configs
 //!
 
-use log::error;
+use crate::task::ScheduleTask;
+use chrono::{DateTime, Utc};
+use juniper::GraphQLObject;
+use log::info;
 use serde::{Deserialize, Serialize};
-use std::time::Duration;
+use std::fs;
+use std::path::{Path, PathBuf};
 
-// Configuration used for execution of an app
+// Schedule config's contents
 #[derive(Debug, GraphQLObject, Serialize, Deserialize)]
-pub struct ScheduleApp {
-    pub name: String,
-    pub args: Option<Vec<String>>,
-    pub config: Option<String>,
-    pub run_level: Option<String>,
+struct ConfigContents {
+    pub tasks: Vec<ScheduleTask>,
 }
 
-// Configuration used to schedule app execution
-#[derive(Debug, GraphQLObject, Serialize, Deserialize)]
-pub struct ScheduleTask {
-    // Descriptive name of task
+// Schedule config's metadata
+#[derive(Debug, GraphQLObject)]
+pub struct ScheduleConfig {
+    pub tasks: Vec<ScheduleTask>,
+    pub path: String,
     pub name: String,
-    // Start delay specified in HH:mm:ss format
-    // Used by init and recurring tasks
-    pub delay: Option<String>,
-    // Details of the app to be executed
-    pub app: ScheduleApp,
+    pub time_imported: String,
 }
 
-impl ScheduleTask {
-    // Parse delay duration from delay field
-    pub fn get_duration(&self) -> Result<Duration, String> {
-        if let Some(delay) = &self.delay {
-            let delay_parts: Vec<String> = delay.split(' ').map(|s| s.to_owned()).collect();
-            let mut task_delay: u64 = 0;
-            for mut delay in delay_parts {
-                let unit: Option<char> = delay.pop();
-                let num: Result<u64, _> = delay.parse();
-                if let Ok(num) = num {
-                    match unit {
-                        Some('s') => {
-                            task_delay += num;
-                        }
-                        Some('m') => {
-                            task_delay += num * 60;
-                        }
-                        Some('h') => {
-                            task_delay += num * 60 * 60;
-                        }
-                        _ => {
-                            error!("Failed to parse delay for task");
-                            return Err("Failed to parse delay for task".to_owned());
-                        }
-                    }
-                }
-            }
-            dbg!(task_delay);
-            Ok(Duration::from_secs(task_delay))
-        } else {
-            Err("No delay defined for task".to_owned())
-        }
+impl ScheduleConfig {
+    pub fn from_path(path_obj: &Path) -> Result<ScheduleConfig, String> {
+        let path = path_obj
+            .to_str()
+            .map(|path| path.to_owned())
+            .ok_or_else(|| "Failed to convert path".to_owned())?;
+
+        let data = path_obj
+            .metadata()
+            .map_err(|e| format!("Failed to read file metadata: {}", e))?;
+
+        let time_imported: DateTime<Utc> = data
+            .modified()
+            .map_err(|e| format!("Failed to get modified time: {}", e))?
+            .into();
+        let time_imported = time_imported.format("%Y-%m-%d %H:%M:%S").to_string();
+
+        let name = path_obj
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .ok_or_else(|| "Failed to read schedule name".to_owned())?
+            .to_owned();
+
+        let config = fs::read_to_string(&path_obj)
+            .map_err(|e| format!("Failed to read schedule contents: {}", e))?;
+
+        let config: ConfigContents = serde_json::from_str(&config)
+            .map_err(|e| format!("Failed to parse schedule config: {}", e))?;
+
+        let tasks = config.tasks;
+
+        Ok(ScheduleConfig {
+            path,
+            name,
+            tasks,
+            time_imported,
+        })
     }
 }
 
-// Schedule configuration information - the guts of the actual schedule
-#[derive(Debug, GraphQLObject, Serialize, Deserialize)]
-pub struct ScheduleConfig {
-    pub init: Option<Vec<ScheduleTask>>,
-    pub one_time: Option<Vec<ScheduleTask>>,
+// Copy a new schedule config into a mode directory
+pub fn import_config(
+    scheduler_dir: &str,
+    path: &str,
+    name: &str,
+    mode: &str,
+) -> Result<(), String> {
+    info!(
+        "Importing new config '{}': {} into mode '{}'",
+        name, path, mode
+    );
+    let schedule_dest = format!("{}/{}/{}.json", scheduler_dir, mode, name);
+    fs::copy(path, schedule_dest).map_err(|e| format!("Schedule copy failed: {}", e))?;
+    Ok(())
+}
+
+// Remove an existing schedule config from the mode's directory
+pub fn remove_config(scheduler_dir: &str, name: &str, mode: &str) -> Result<(), String> {
+    info!("Removing config {}", name);
+    let sched_path = format!("{}/{}/{}.json", scheduler_dir, mode, name);
+
+    if !Path::new(&format!("{}/{}", scheduler_dir, mode)).is_dir() {
+        return Err(format!("Mode {} not found", mode));
+    }
+
+    if !Path::new(&sched_path).is_file() {
+        return Err(format!("Config file {}.json not found", name));
+    }
+
+    fs::remove_file(&sched_path)
+        .map_err(|e| format!("Failed to remove config {}.json: {}", name, e))?;
+
+    info!("Removed config {}", name);
+    Ok(())
+}
+
+// Get all the schedules in a mode's directory
+pub fn get_mode_configs(mode_path: &str) -> Result<Vec<ScheduleConfig>, String> {
+    let mut schedules = vec![];
+
+    let mut files_list: Vec<PathBuf> = fs::read_dir(mode_path)
+        .map_err(|e| format!("Failed to read mode dir: {}", e))?
+        // Filter out invalid entries
+        .filter_map(|x| x.ok())
+        // Convert DirEntry -> PathBuf
+        .map(|entry| entry.path())
+        // Filter out non-directories
+        .filter(|entry| entry.is_file())
+        .collect();
+    // Sort into predictable order
+    files_list.sort();
+
+    for path in files_list {
+        schedules.push(ScheduleConfig::from_path(&path)?);
+    }
+
+    Ok(schedules)
 }
