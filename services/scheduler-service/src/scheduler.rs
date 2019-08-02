@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-pub static DEFAULT_SCHEDULES_DIR: &str = "/home/system/etc/schedules";
+use log::{error, info};
+use std::fs;
+use std::os::unix::fs::symlink;
+use std::path::Path;
 
-#[derive(GraphQLObject)]
-pub struct Schedule {
-    pub contents: String,
-    pub path: String,
-    pub name: String,
-    pub time_registered: String,
-    pub active: bool,
-}
+pub static DEFAULT_SCHEDULES_DIR: &str = "/home/system/etc/schedules";
 
 #[derive(Clone)]
 pub struct Scheduler {
@@ -32,8 +28,41 @@ pub struct Scheduler {
 
 impl Scheduler {
     pub fn new(sched_dir: &str) -> Scheduler {
+        if !Path::new(&sched_dir).is_dir() {
+            if let Err(e) = fs::create_dir(&sched_dir) {
+                error!("Failed to create schedule dir: {}", e);
+                panic!("Failed to create schedule dir: {}", e)
+            }
+        }
+
         Scheduler {
             scheduler_dir: sched_dir.to_owned(),
         }
+    }
+
+    pub fn register_schedule(&self, path: &str, name: &str) -> Result<(), String> {
+        info!("Registering new schedule {}:{}", path, name);
+        let schedule_dest = format!("{}/{}.json", self.scheduler_dir, name);
+        fs::copy(path, schedule_dest).map_err(|e| format!("Schedule copy failed: {}", e))?;
+        Ok(())
+    }
+
+    pub fn activate_schedule(&self, name: &str) -> Result<(), String> {
+        info!("Activating schedule {}", name);
+        let sched_path = format!("{}/{}.json", self.scheduler_dir, name);
+        let active_path = format!("{}/active.json", self.scheduler_dir);
+
+        if !Path::new(&sched_path).is_file() {
+            return Err(format!("Schedule {}.json not found", name));
+        }
+
+        if Path::new(&active_path).is_file() {
+            fs::remove_file(&active_path)
+                .map_err(|e| format!("Failed to remove active symlink: {}", e))?;
+        }
+
+        symlink(sched_path, active_path)
+            .map_err(|e| format!("Failed to create active symlink: {}", e))?;
+        Ok(())
     }
 }
