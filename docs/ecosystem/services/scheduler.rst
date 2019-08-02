@@ -28,18 +28,40 @@ all of the necessary information for that specific schedule. Different schedules
 operational, safe mode, etc, will each have their own schedule files.
 
 Schedules consist of three sections: ``init``, ``one-time``, and ``recurring``. Each section
-represents a different type of scheduled task.
+represents a different type of scheduled task. Each specified task in a section
+represents the future scheduled execution of an app by the app service.
 
-Tasks in the ``init`` section will be executed on boot or on schedule change. Each
-task in this section will be specified like so:
+Inside of each section is the description of a task to schedule. Each task has an
+associated ``app``. The scheduler currently delegates the actual running of tasks
+to the ``app-service``, so each ``app`` contains the necessary information needed
+by the ``app-service`` to run the app.
+
+.. code-block::json
+
+   {
+       "app": {
+           "name": "Required name of app as known by the app service",
+           "args": ["Optional", "command", "line", "app", "args"],
+           "config": "Optional path to app config file",
+       }
+   }
+
+Tasks in the ``init`` section will be executed on boot or on schedule change. Tasks will be
+assigned to the scheduler in an unpredictable order. The actual execution time
+of the task will be affected by the associated delay times. If more than
+one init task has the exact same delay, the execution order might be unpredictable.
+Each task in this section will be specified like so:
 
 .. code-block:: json
 
     {
         "task-name": {
-            "app-name": "task app",
-            "app-args": "optional app args",
-            "app-config": "optional path to app config"
+            "delay": "Required start delay in HH:mm:ss format"
+            "app": {
+                "name": "Required registered name of app to run",
+                "args": ["Optional", "command", "line", "app", "args"],
+                "config": "Optional path to app config",
+            }
         }
     }
 
@@ -50,28 +72,30 @@ in this section will be specified like so:
 
     {
         "task-name": {
-            "time": "time of execution in yyyy-mm-dd hh:mm:ss format",
-            "app-name": "task app",
-            "app-args": "optional app args",
-            "app-config": "optional path to app config"
+            "time": "Required time of execution in yyyy-mm-dd hh:mm:ss format",
+            "app": {
+                "name": "Required registered name of app to run",
+                "args": ["Optional", "command", "line", "app", "args"],
+                "config": "Optional path to app config"
+            }
         }
     }
 
-Tasks in the ``recurring`` section will be executed on a recurring basis. A ``start-time`` and
-``end-time`` are given to supply bounds around the occurance of the task. The task
-will occur at the given frequency beginning at the ``start-time``. Each task
-in this section will be specified like so:
+Tasks in the ``recurring`` section will be executed on a recurring basis. The task
+will occur at the given ``period`` beginning after the ``delay`` has expired.
+Each task in this section will be specified like so:
 
 .. code-block:: json
 
     {
         "task-name": {
-            "start-time": "start time of execution in yyyy-mm-dd hh:mm:ss format",
-            "end-time": "end time of execution in yyyy-mm-dd hh:mm:ss format",
-            "frequency": "frequency of execution in HH:mm:ss format",
-            "app-name": "task app",
-            "app-args": "optional app args",
-            "app-config": "optional path to app config"
+            "delay": "Required start delay in HH:mm:ss format",
+            "period": "Required period of execution in HH:mm:ss format",
+            "app": {
+                "name": "Required registered name of app to run",
+                "args": ["Optional", "command", "line", "app", "args"],
+                "config": "Optional path to app config"
+            }
         }
     }
 
@@ -82,21 +106,27 @@ An example schedule file:
     {
         "init": {
             "start-camera": {
-                "app-name": "activate-camera"
+                "delay": "00:10:00",
+                "app": {
+                    "name": "activate-camera"
+                }
             }
         },
         "one-time": {
             "deploy-solar": {
                 "time": "2019-08-11 15:20:10",
-                "app-name": "deploy-solar-panels"
+                "app": {
+                    "name": "deploy-solar-panels"
+                 }
             }
         },
         "recurring": {
             "clean-logs-every-12hrs": {
-                "start-time": "2019-08-11 15:20:10",
-                "end-time": "2019-08-12 15:20:10",
-                "frequency": "12:00:00",
-                "app-name": "clean-logs"
+                "delay": "1:00:00",
+                "period": "12:00:00",
+                "app": {
+                    "name": "clean-logs"
+                }
             }
         }
     }
@@ -123,7 +153,7 @@ GraphQL API
 Queries
 ~~~~~~~
 
-The scheduler exposes a two queries, ``activeSchedule`` and ``registeredSchedules``.
+The scheduler exposes a two queries, ``activeSchedule`` and ``availableSchedules``.
 
 The ``activeSchedule`` query  exposes information about the currently active
 schedule. It has the following schema::
@@ -133,21 +163,21 @@ schedule. It has the following schema::
             contents: String,
             path: String,
             name: String,
-            timeRegistered: String,
+            timeImported: String,
             active: Boolean
         }
     }
 
-The ``registeredSchedules`` query  exposes information about the currently registered
+The ``availableSchedules`` query  exposes information about the currently available
 schedules. It has the following schema::
 
     {
-        registeredSchedules(name: String): [
+        availableSchedules(name: String): [
             {
                contents: String,
                path: String,
                name: String,
-               timeRegistered: String,
+               timeImported: String,
                active: Boolean
             }
         ]
@@ -157,7 +187,7 @@ schedules. It has the following schema::
 Mutations
 ~~~~~~~~~
 
-The scheduler has two mutations: ``activate`` and ``register``.
+The scheduler has two mutations: ``activate`` and ``import``.
 
 The ``activate`` mutation instructs the scheduler to make the specified schedule active.
 It has the following schema::
@@ -168,11 +198,11 @@ It has the following schema::
         }
     }
 
-The ``register`` mutation allows the scheduler to register a new schedule file. It has
-the following schema::
+The ``import`` mutation allows the scheduler to import a new schedule file and
+make it available for use. It has the following schema::
 
     mutation {
-        register(path: String!, name:String!): {
+        import(path: String!, name:String!): {
             success: Boolean!
         }
     }
