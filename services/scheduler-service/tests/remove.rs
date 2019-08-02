@@ -17,88 +17,93 @@
 mod util;
 
 use serde_json::json;
-use tempfile::{NamedTempFile, TempDir};
-use util::{activate_schedule, register_schedule, remove_schedule, spawn_scheduler};
+use util::SchedulerFixture;
 
 #[test]
 fn remove_existing_schedule() {
-    let schedules_dir = TempDir::new().unwrap();
-    let graphql_ip = "127.0.0.1";
-    let graphql_port = 8020;
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8020);
 
-    let _scheduler_service = spawn_scheduler(
-        &graphql_ip,
-        graphql_port,
-        schedules_dir.path().to_str().unwrap(),
+    let schedule_path = fixture.create();
+    fixture.register("operational", &schedule_path);
+
+    assert_eq!(
+        fixture.remove("operational"),
+        json!({
+            "data": {
+                "remove": {
+                    "errors": "",
+                    "success": true
+                }
+            }
+        })
     );
 
-    let schedule = NamedTempFile::new().unwrap();
-    let schedule_path = schedule.path().to_str().unwrap();
+    assert_eq!(
+        fixture.query(r#"{ registeredSchedules { name, active } }"#),
+        json!({
+            "data": {
+                "registeredSchedules": [
 
-    register_schedule("operational", schedule_path, graphql_ip, graphql_port);
-
-    let expected = json!({
-        "data": {
-            "remove": {
-                "errors": "",
-                "success": true
+                ]
             }
-        }
-    });
-    let response = remove_schedule("operational", graphql_ip, graphql_port);
-    assert_eq!(expected, response);
+        })
+    );
 }
 
 #[test]
-fn remove_active_schedule() {
-    let schedules_dir = TempDir::new().unwrap();
-    let graphql_ip = "127.0.0.1";
-    let graphql_port = 8022;
+fn remove_active() {
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8021);
 
-    let _scheduler_service = spawn_scheduler(
-        &graphql_ip,
-        graphql_port,
-        schedules_dir.path().to_str().unwrap(),
+    let schedule_path = fixture.create();
+    fixture.register("operational", &schedule_path);
+    fixture.activate("operational");
+
+    assert_eq!(
+        fixture.remove("operational"),
+        json!({
+            "data": {
+                "remove": {
+                    "errors": "",
+                    "success": true
+                }
+            }
+        })
     );
 
-    let schedule = NamedTempFile::new().unwrap();
-    let schedule_path = schedule.path().to_str().unwrap();
-
-    register_schedule("operational", schedule_path, graphql_ip, graphql_port);
-    activate_schedule("operational", graphql_ip, graphql_port);
-
-    let expected = json!({
-        "data": {
-            "remove": {
-                "errors": "",
-                "success": true
+    assert_eq!(
+        fixture.query(r#"{ activeSchedule { name } }"#),
+        json!({
+            "data": {
+                "activeSchedule": serde_json::Value::Null
             }
-        }
-    });
-    let response = remove_schedule("operational", graphql_ip, graphql_port);
-    assert_eq!(expected, response);
+        })
+    );
+
+    assert_eq!(
+        fixture.query(r#"{ registeredSchedules { name, active } }"#),
+        json!({
+            "data": {
+                "registeredSchedules": [
+
+                ]
+            }
+        })
+    );
 }
 
 #[test]
-fn remove_nonexistant_schedule() {
-    let schedules_dir = TempDir::new().unwrap();
-    let graphql_ip = "127.0.0.1";
-    let graphql_port = 8021;
+fn remove_nonexistant() {
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8022);
 
-    let _scheduler_service = spawn_scheduler(
-        &graphql_ip,
-        graphql_port,
-        schedules_dir.path().to_str().unwrap(),
-    );
-
-    let expected = json!({
-        "data": {
-            "remove": {
-                "errors": "Failed to remove schedule operational.json: No such file or directory (os error 2)",
-                "success": false
+    assert_eq!(
+        fixture.remove("operational"),
+        json!({
+            "data": {
+                "remove": {
+                    "errors": "Failed to remove schedule operational.json: No such file or directory (os error 2)",
+                    "success": false
+                }
             }
-        }
-    });
-    let response = remove_schedule("operational", graphql_ip, graphql_port);
-    assert_eq!(expected, response);
+        })
+    );
 }

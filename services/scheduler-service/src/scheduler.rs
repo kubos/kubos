@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-use log::{error, info};
+use crate::objects::Schedule;
+use log::{error, info, warn};
 use std::fs;
 use std::os::unix::fs::symlink;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub static DEFAULT_SCHEDULES_DIR: &str = "/home/system/etc/schedules";
 
@@ -76,5 +77,63 @@ impl Scheduler {
 
         info!("Removed schedule {}", name);
         Ok(())
+    }
+
+    pub fn get_active_schedule(&self) -> Option<Schedule> {
+        let active_path = fs::read_link(format!("{}/active.json", &self.scheduler_dir)).ok()?;
+
+        match Schedule::from_path(&active_path) {
+            Ok(mut s) => {
+                s.active = true;
+                Some(s)
+            }
+            Err(e) => {
+                warn!("Failed to parse active schedule: {}", e);
+                None
+            }
+        }
+    }
+
+    pub fn get_registered_schedules(&self, name: Option<String>) -> Result<Vec<Schedule>, String> {
+        let mut schedules: Vec<Schedule> = vec![];
+
+        let active_path: Option<PathBuf> =
+            fs::read_link(format!("{}/active.json", &self.scheduler_dir)).ok();
+
+        for path in fs::read_dir(&self.scheduler_dir)
+            .map_err(|e| format!("Failed to read schedules dir: {}", e))?
+            // Filter out invalid entries
+            .filter_map(|x| x.ok())
+            // Convert DirEntry -> PathBuf
+            .map(|entry| entry.path())
+            // Filter out non-files
+            .filter(|entry| entry.is_file())
+            // Filter out active.json
+            .filter(|path| !path.ends_with("active.json"))
+            // Filter on name if specified
+            .filter(|path| {
+                if let Some(name_str) = &name {
+                    path.ends_with(format!("{}.json", name_str))
+                } else {
+                    true
+                }
+            })
+        {
+            let active = if let Some(active_sched) = active_path.clone() {
+                active_sched == path
+            } else {
+                false
+            };
+
+            match Schedule::from_path(&path) {
+                Ok(mut sched) => {
+                    sched.active = active;
+                    schedules.push(sched);
+                }
+                Err(e) => warn!("Error loading schedule: {}", e),
+            }
+        }
+
+        Ok(schedules)
     }
 }
