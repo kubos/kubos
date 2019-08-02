@@ -142,7 +142,7 @@ The ``registeredSchedules`` query  exposes information about the currently regis
 schedules. It has the following schema::
 
     {
-        registeredSchedules: [
+        registeredSchedules(name: String): [
             {
                contents: String,
                path: String,
