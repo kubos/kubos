@@ -22,6 +22,7 @@
 #[macro_use]
 extern crate juniper;
 
+mod objects;
 mod scheduler;
 mod schema;
 
@@ -80,11 +81,13 @@ fn main() {
         })
         .unwrap();
 
-    let scheduler_dir = config
-        .get("scheduler_dir")
-        .and_then(|s| s.try_into().ok())
-        .unwrap_or(DEFAULT_SCHEDULES_DIR);
-    let scheduler = Scheduler::new(scheduler_dir);
+    let scheduler_dir = if let Some(s_dir) = config.get("schedules_dir") {
+        String::from(s_dir.as_str().unwrap())
+    } else {
+        String::from(DEFAULT_SCHEDULES_DIR)
+    };
+
+    let scheduler = Scheduler::new(&scheduler_dir);
 
     info!("Starting scheduler-service - {:?}", scheduler_dir);
 
