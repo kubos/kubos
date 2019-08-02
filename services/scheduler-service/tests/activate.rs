@@ -23,12 +23,12 @@ use util::SchedulerFixture;
 fn activate_existing_schedule() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8020);
 
-    let schedule_path = fixture.create();
+    let schedule_path = fixture.create(None);
     assert_eq!(
         fixture.register("imaging", &schedule_path),
         json!({
             "data" : {
-                "register": {
+                "import": {
                     "errors": "",
                     "success": true
                 }
@@ -60,10 +60,10 @@ fn activate_existing_schedule() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ registeredSchedules { name, active } }"#),
+        fixture.query(r#"{ availableSchedules { name, active } }"#),
         json!({
             "data": {
-                "registeredSchedules": [{
+                "availableSchedules": [{
                     "name": "imaging",
                     "active": true
                 }]
@@ -103,8 +103,8 @@ fn activate_non_existent_schedule() {
 fn activate_two_schedules() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8022);
 
-    let schedule_one_path = fixture.create();
-    let schedule_two_path = fixture.create();
+    let schedule_one_path = fixture.create(None);
+    let schedule_two_path = fixture.create(None);
 
     fixture.register("imaging", &schedule_one_path);
     fixture.register("operational", &schedule_two_path);
@@ -122,10 +122,10 @@ fn activate_two_schedules() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ registeredSchedules { name, active } }"#),
+        fixture.query(r#"{ availableSchedules { name, active } }"#),
         json!({
             "data": {
-                "registeredSchedules": [{
+                "availableSchedules": [{
                     "name": "imaging",
                     "active": true
                 }, {
@@ -160,10 +160,10 @@ fn activate_two_schedules() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ registeredSchedules { name, active } }"#),
+        fixture.query(r#"{ availableSchedules { name, active } }"#),
         json!({
             "data": {
-                "registeredSchedules": [{
+                "availableSchedules": [{
                     "name": "imaging",
                     "active": false
                 }, {
