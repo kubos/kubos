@@ -23,7 +23,7 @@ use util::SchedulerFixture;
 fn remove_existing_schedule() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8020);
 
-    let schedule_path = fixture.create();
+    let schedule_path = fixture.create(None);
     fixture.register("operational", &schedule_path);
 
     assert_eq!(
@@ -39,10 +39,10 @@ fn remove_existing_schedule() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ registeredSchedules { name, active } }"#),
+        fixture.query(r#"{ availableSchedules { name, active } }"#),
         json!({
             "data": {
-                "registeredSchedules": [
+                "availableSchedules": [
 
                 ]
             }
@@ -54,7 +54,7 @@ fn remove_existing_schedule() {
 fn remove_active() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8021);
 
-    let schedule_path = fixture.create();
+    let schedule_path = fixture.create(None);
     fixture.register("operational", &schedule_path);
     fixture.activate("operational");
 
@@ -80,10 +80,10 @@ fn remove_active() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ registeredSchedules { name, active } }"#),
+        fixture.query(r#"{ availableSchedules { name, active } }"#),
         json!({
             "data": {
-                "registeredSchedules": [
+                "availableSchedules": [
 
                 ]
             }

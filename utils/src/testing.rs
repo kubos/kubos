@@ -18,6 +18,7 @@ extern crate tempfile;
 
 use serde_json::Value;
 use std::cell::RefCell;
+use std::collections::VecDeque;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::SeekFrom;
@@ -25,7 +26,10 @@ use std::io::Write;
 use std::process;
 use std::process::{Command, Stdio};
 use std::str;
+use std::sync::{Arc, Mutex};
+use std::thread;
 use tempfile::tempdir;
+use warp::{self, Buf, Filter};
 
 pub struct TestCommand {
     command: String,
@@ -134,6 +138,14 @@ impl TestService {
         let mut child_handle = self.child_handle.borrow_mut();
         *child_handle = Box::new(Some(child));
     }
+
+    /// Kill the running process.
+    pub fn kill(&self) {
+        let mut borrowed_child = self.child_handle.borrow_mut();
+        if let Some(mut handle) = borrowed_child.take() {
+            handle.kill().unwrap();
+        }
+    }
 }
 
 /// Implement custom drop functionality which
@@ -159,4 +171,43 @@ pub fn service_query(query: &str, ip: &str, port: u16) -> Value {
         .unwrap();
 
     serde_json::from_str(&res.text().unwrap()).unwrap()
+}
+
+pub struct ServiceListener {
+    requests: Arc<Mutex<VecDeque<String>>>,
+}
+
+impl ServiceListener {
+    /// Spawns a new dummy service listener
+    /// This listener will just listen for posts and save off
+    /// the request bodies for examination in tests
+    pub fn spawn(_ip: &str, port: u16) -> ServiceListener {
+        let requests = Arc::new(Mutex::new(VecDeque::<String>::new()));
+
+        let req_handle = requests.clone();
+
+        let listener = warp::post2()
+            .and(warp::any())
+            .and(warp::body::concat().and_then(|body: warp::body::FullBody| {
+                std::str::from_utf8(body.bytes())
+                    .map(String::from)
+                    .map_err(warp::reject::custom)
+            }))
+            .map(move |body: String| {
+                req_handle.lock().unwrap().push_back(body.to_owned());
+                "hi"
+            });
+
+        thread::spawn(move || warp::serve(listener).run(([127, 0, 0, 1], port)));
+
+        ServiceListener {
+            requests: requests.clone(),
+        }
+    }
+
+    /// Pops a request body from the collected queue
+    /// These are popped off in FIFO fashion
+    pub fn get_request(&self) -> Option<String> {
+        self.requests.lock().unwrap().pop_front()
+    }
 }
