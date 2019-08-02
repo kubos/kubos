@@ -19,25 +19,25 @@
 //!
 
 use crate::config::{ScheduleConfig, ScheduleTask};
-use crate::file::{get_active_schedule, ScheduleFile};
+use crate::file::get_active_schedule;
 use crate::schema::GenericResponse;
 use kubos_service::Config;
-use log::{error, info, warn};
+use log::{error, info};
 use reqwest::Client;
 use serde::Deserialize;
 use serde_json::from_str;
 use std::collections::HashMap;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::mpsc::{channel, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::Duration;
 use std::time::Instant;
 use tokio::prelude::future::lazy;
 use tokio::prelude::*;
 use tokio::runtime::Runtime;
 use tokio::timer::Delay;
+use std::time::Duration;
 
 pub static DEFAULT_SCHEDULES_DIR: &str = "/home/system/etc/schedules";
 
@@ -223,66 +223,5 @@ impl Scheduler {
         }
 
         Ok(())
-    }
-
-    pub fn get_active_schedule(&self) -> Option<ScheduleFile> {
-        let active_path = fs::read_link(format!("{}/active.json", &self.scheduler_dir)).ok()?;
-
-        match ScheduleFile::from_path(&active_path) {
-            Ok(mut s) => {
-                s.active = true;
-                Some(s)
-            }
-            Err(e) => {
-                warn!("Failed to parse active schedule: {}", e);
-                None
-            }
-        }
-    }
-
-    pub fn get_registered_schedules(
-        &self,
-        name: Option<String>,
-    ) -> Result<Vec<ScheduleFile>, String> {
-        let mut schedules: Vec<ScheduleFile> = vec![];
-
-        let active_path: Option<PathBuf> =
-            fs::read_link(format!("{}/active.json", &self.scheduler_dir)).ok();
-
-        for path in fs::read_dir(&self.scheduler_dir)
-            .map_err(|e| format!("Failed to read schedules dir: {}", e))?
-            // Filter out invalid entries
-            .filter_map(|x| x.ok())
-            // Convert DirEntry -> PathBuf
-            .map(|entry| entry.path())
-            // Filter out non-files
-            .filter(|entry| entry.is_file())
-            // Filter out active.json
-            .filter(|path| !path.ends_with("active.json"))
-            // Filter on name if specified
-            .filter(|path| {
-                if let Some(name_str) = &name {
-                    path.ends_with(format!("{}.json", name_str))
-                } else {
-                    true
-                }
-            })
-        {
-            let active = if let Some(active_sched) = active_path.clone() {
-                active_sched == path
-            } else {
-                false
-            };
-
-            match ScheduleFile::from_path(&path) {
-                Ok(mut sched) => {
-                    sched.active = active;
-                    schedules.push(sched);
-                }
-                Err(e) => warn!("Error loading schedule: {}", e),
-            }
-        }
-
-        Ok(schedules)
     }
 }
