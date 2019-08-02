@@ -15,13 +15,14 @@
 //
 
 use std::cell::RefCell;
+use std::io::Write;
 use std::thread;
 use std::time::Duration;
 use tempfile::{NamedTempFile, TempDir};
 use utils::testing::{service_query, TestService};
 
 pub struct SchedulerFixture {
-    _service: TestService,
+    service: RefCell<TestService>,
     ip: String,
     port: u16,
     _schedules_dir: TempDir,
@@ -36,10 +37,15 @@ impl SchedulerFixture {
 
         let config = format!(
             r#"
+        [app-service.addr]
+        ip = "{}"
+        port = {}
         [scheduler-service]
         schedules_dir = "{}"
         "#,
-            schedules_dir_path
+            ip,
+            (port + 1000),
+            schedules_dir_path,
         );
 
         let mut scheduler_service = TestService::new("scheduler-service", ip, port);
@@ -50,7 +56,7 @@ impl SchedulerFixture {
         thread::sleep(Duration::from_millis(1000));
 
         SchedulerFixture {
-            _service: scheduler_service,
+            service: RefCell::new(scheduler_service),
             ip: ip.to_owned(),
             port,
             _schedules_dir: schedules_dir,
@@ -58,8 +64,20 @@ impl SchedulerFixture {
         }
     }
 
-    pub fn create(&self) -> String {
-        let schedule = NamedTempFile::new().unwrap();
+    pub fn restart(&self) {
+        let borrowed_service = self.service.borrow_mut();
+        borrowed_service.kill();
+        borrowed_service.spawn();
+        thread::sleep(Duration::from_millis(1000));
+    }
+
+    pub fn create(&self, contents: Option<String>) -> String {
+        let mut schedule = NamedTempFile::new().unwrap();
+
+        if let Some(c) = contents {
+            schedule.write_all(c.as_bytes()).unwrap();
+        }
+
         let path = schedule.path().to_str().unwrap().to_owned();
 
         self.schedules_holder.borrow_mut().push(schedule);

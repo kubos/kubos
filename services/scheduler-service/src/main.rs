@@ -25,6 +25,7 @@ extern crate juniper;
 mod objects;
 mod scheduler;
 mod schema;
+mod util;
 
 use kubos_service::{Config, Service};
 use log::{error, info};
@@ -71,7 +72,7 @@ fn log_init() {
     log4rs::init_config(config).unwrap();
 }
 
-fn main() {
+fn main() -> Result<(), String> {
     log_init();
 
     let config = Config::new("scheduler-service")
@@ -91,5 +92,12 @@ fn main() {
 
     info!("Starting scheduler-service - {:?}", scheduler_dir);
 
+    // For now we will only kick off scheduling when the scheduler comes up
+    if let Err(e) = scheduler.schedule() {
+        error!("Failed to schedule tasks: {:?}", e);
+    }
+
     Service::new(config, scheduler, QueryRoot, MutationRoot).start();
+
+    Ok(())
 }

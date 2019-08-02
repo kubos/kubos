@@ -14,19 +14,76 @@
  * limitations under the License.
  */
 
+use crate::util::service_query;
 use chrono::{DateTime, Utc};
+use log::info;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::fs;
-
 use std::path::Path;
+use std::time::{Duration, Instant};
+use tokio::prelude::*;
+use tokio::timer::Delay;
 
+// Generic GraphQL Response
 #[derive(GraphQLObject)]
 pub struct GenericResponse {
     pub success: bool,
     pub errors: String,
 }
 
-#[derive(GraphQLObject)]
-pub struct Schedule {
+// Configuration used for execution of an app
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ScheduleApp {
+    pub name: String,
+    pub args: Option<String>,
+    pub config: Option<String>,
+}
+
+// Configuration used to schedule app execution
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ScheduleTask {
+    pub delay: String,
+    pub app: ScheduleApp,
+}
+
+impl ScheduleTask {
+    pub fn schedule(&self, app_service_url: String) -> Result<(), String> {
+        let service_url = app_service_url.clone();
+        let delay = self.delay.clone();
+        let name = self.app.name.clone();
+        std::thread::spawn(move || {
+            let mut task_delay: Vec<&str> = delay.split(':').collect();
+            let delay_s: u64 = task_delay.pop().unwrap_or("").parse().unwrap_or(0);
+            let delay_m: u64 = task_delay.pop().unwrap_or("").parse().unwrap_or(0) * 60;
+            let delay_h: u64 = task_delay.pop().unwrap_or("").parse().unwrap_or(0) * 3600;
+            let when = Instant::now() + Duration::from_secs(delay_s + delay_m + delay_h);
+
+            let task = Delay::new(when)
+                .and_then(move |_| {
+                    info!("Start app {}", name);
+                    let query =
+                        format!(r#"mutation {{ startApp(name: "{}") {{ success }} }}"#, name);
+                    service_query(&query, &service_url);
+                    Ok(())
+                })
+                .map_err(|e| panic!("delay errored; err={:?}", e));
+
+            tokio::run(task);
+        });
+        Ok(())
+    }
+}
+
+// Schedule configuration information - the guts of the actual schedule
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ScheduleConfig {
+    pub init: Option<HashMap<String, ScheduleTask>>,
+}
+
+// Descriptive information about a Schedule File
+#[derive(Debug, GraphQLObject)]
+pub struct ScheduleFile {
     pub contents: String,
     pub path: String,
     pub name: String,
@@ -34,8 +91,8 @@ pub struct Schedule {
     pub active: bool,
 }
 
-impl Schedule {
-    pub fn from_path(path_obj: &Path) -> Result<Schedule, String> {
+impl ScheduleFile {
+    pub fn from_path(path_obj: &Path) -> Result<ScheduleFile, String> {
         let path = path_obj
             .to_str()
             .map(|path| path.to_owned())
@@ -60,7 +117,7 @@ impl Schedule {
         let contents = fs::read_to_string(&path_obj)
             .map_err(|e| format!("Failed to read schedule contents: {}", e))?;
 
-        Ok(Schedule {
+        Ok(ScheduleFile {
             path,
             name,
             contents,

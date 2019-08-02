@@ -28,18 +28,25 @@ all of the necessary information for that specific schedule. Different schedules
 operational, safe mode, etc, will each have their own schedule files.
 
 Schedules consist of three sections: ``init``, ``one-time``, and ``recurring``. Each section
-represents a different type of scheduled task.
+represents a different type of scheduled task. Each specified task in a section
+represents the future scheduled execution of an app by the app service.
 
-Tasks in the ``init`` section will be executed on boot or on schedule change. Each
-task in this section will be specified like so:
+Tasks in the ``init`` section will be executed on boot or on schedule change. Tasks will be
+assigned to the scheduler in the order specified by the schedule file. The actual
+execution time of the task will be affected by the associated delay times. If more than
+one init task has the exact same delay, the execution order might be unpredictable.
+Each task in this section will be specified like so:
 
 .. code-block:: json
 
     {
         "task-name": {
-            "app-name": "task app",
-            "app-args": "optional app args",
-            "app-config": "optional path to app config"
+            "delay": "Required start delay in HH:mm:ss format"
+            "app": {
+                "name": "Required name of app to run",
+                "args": "Optional app args",
+                "config": "Optional path to app config",
+            }
         }
     }
 
@@ -50,28 +57,30 @@ in this section will be specified like so:
 
     {
         "task-name": {
-            "time": "time of execution in yyyy-mm-dd hh:mm:ss format",
-            "app-name": "task app",
-            "app-args": "optional app args",
-            "app-config": "optional path to app config"
+            "time": "Required time of execution in yyyy-mm-dd hh:mm:ss format",
+            "app": {
+                "name": "Required name of app to run",
+                "args": "Optional app args",
+                "config": "Optional path to app config"
+            }
         }
     }
 
-Tasks in the ``recurring`` section will be executed on a recurring basis. A ``start-time`` and
-``end-time`` are given to supply bounds around the occurance of the task. The task
-will occur at the given frequency beginning at the ``start-time``. Each task
-in this section will be specified like so:
+Tasks in the ``recurring`` section will be executed on a recurring basis. The task
+will occur at the given ``frequency`` beginning after the ``delay`` has expired.
+Each task in this section will be specified like so:
 
 .. code-block:: json
 
     {
         "task-name": {
-            "start-time": "start time of execution in yyyy-mm-dd hh:mm:ss format",
-            "end-time": "end time of execution in yyyy-mm-dd hh:mm:ss format",
-            "frequency": "frequency of execution in HH:mm:ss format",
-            "app-name": "task app",
-            "app-args": "optional app args",
-            "app-config": "optional path to app config"
+            "delay": "Required start delay in HH:mm:ss format",
+            "frequency": "Required frequency of execution in HH:mm:ss format",
+            "app": {
+                "name": "Required name of app to run",
+                "args": "Optional app args",
+                "config": "Optional path to app config"
+            }
         }
     }
 
@@ -82,21 +91,27 @@ An example schedule file:
     {
         "init": {
             "start-camera": {
-                "app-name": "activate-camera"
+                "delay": "00:10:00",
+                "app": {
+                    "name": "activate-camera"
+                }
             }
         },
         "one-time": {
             "deploy-solar": {
                 "time": "2019-08-11 15:20:10",
-                "app-name": "deploy-solar-panels"
+                "app": {
+                    "name": "deploy-solar-panels"
+                 }
             }
         },
         "recurring": {
             "clean-logs-every-12hrs": {
-                "start-time": "2019-08-11 15:20:10",
-                "end-time": "2019-08-12 15:20:10",
+                "delay": "1:00:00",
                 "frequency": "12:00:00",
-                "app-name": "clean-logs"
+                "app": {
+                    "name": "clean-logs"
+                }
             }
         }
     }

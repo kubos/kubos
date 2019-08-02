@@ -23,7 +23,7 @@ use util::SchedulerFixture;
 fn register_new_schedule() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8020);
 
-    let schedule_path = fixture.create();
+    let schedule_path = fixture.create(None);
     assert_eq!(
         fixture.register("operational", &schedule_path),
         json!({
@@ -84,8 +84,8 @@ fn register_new_schedule_nonexistant_file() {
 fn register_duplicate_schedule() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8022);
 
-    let schedule_one_path = fixture.create();
-    let schedule_two_path = fixture.create();
+    let schedule_one_path = fixture.create(None);
+    let schedule_two_path = fixture.create(None);
 
     assert_eq!(
         fixture.register("operational", &schedule_one_path),
@@ -144,8 +144,8 @@ fn register_duplicate_schedule() {
 fn register_two_schedules() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8023);
 
-    let schedule_one_path = fixture.create();
-    let schedule_two_path = fixture.create();
+    let schedule_one_path = fixture.create(None);
+    let schedule_two_path = fixture.create(None);
 
     assert_eq!(
         fixture.register("operational", &schedule_one_path),
@@ -206,8 +206,8 @@ fn register_two_schedules() {
 fn register_two_schedules_filter_query() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8024);
 
-    let schedule_one_path = fixture.create();
-    let schedule_two_path = fixture.create();
+    let schedule_one_path = fixture.create(None);
+    let schedule_two_path = fixture.create(None);
 
     fixture.register("operational", &schedule_one_path);
     fixture.register("imaging", &schedule_two_path);

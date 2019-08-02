@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-use crate::objects::{GenericResponse, Schedule};
+use crate::objects::{GenericResponse, ScheduleFile};
 use crate::scheduler::Scheduler;
 use juniper::FieldResult;
 use kubos_service;
@@ -37,7 +37,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
         Ok(String::from("pong"))
     }
 
-    // Returns information on the currently active schedule
+    // Returns information on the currently active schedule file
     // {
     //     activeSchedule: {
     //         contents: String,
@@ -47,7 +47,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //         active: Boolean
     //     }
     // }
-    field active_schedule(&executor) -> FieldResult<Option<Schedule>> as "Current Schedule"
+    field active_schedule(&executor) -> FieldResult<Option<ScheduleFile>> as "Current Schedule File"
     {
         Ok(executor.context().subsystem().get_active_schedule())
     }
@@ -64,7 +64,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //         }
     //     ]
     // }
-    field registered_schedules(&executor, name: Option<String>) -> FieldResult<Vec<Schedule>> as "Registered Schedules"
+    field registered_schedules(&executor, name: Option<String>) -> FieldResult<Vec<ScheduleFile>> as "Registered Schedule Files"
     {
         Ok(executor.context().subsystem().get_registered_schedules(name)?)
     }
