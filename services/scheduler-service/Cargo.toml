@@ -17,6 +17,7 @@ serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"]}
 syslog = "4.0"
 tokio = "0.1"
+futures = "*"
 
 [dev-dependencies]
 tempfile = "3.0"

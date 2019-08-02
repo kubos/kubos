@@ -23,7 +23,7 @@ use util::SchedulerFixture;
 fn activate_existing_schedule() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8020);
 
-    let schedule_path = fixture.create(None);
+    let schedule_path = fixture.create(Some("{}".to_owned()));
     assert_eq!(
         fixture.register("imaging", &schedule_path),
         json!({
@@ -103,8 +103,8 @@ fn activate_non_existent_schedule() {
 fn activate_two_schedules() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8022);
 
-    let schedule_one_path = fixture.create(None);
-    let schedule_two_path = fixture.create(None);
+    let schedule_one_path = fixture.create(Some("{}".to_owned()));
+    let schedule_two_path = fixture.create(Some("{}".to_owned()));
 
     fixture.register("imaging", &schedule_one_path);
     fixture.register("operational", &schedule_two_path);
