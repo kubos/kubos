@@ -1,0 +1,14 @@
+[package]
+name = "scheduler-service"
+version = "0.1.0"
+authors = ["Ryan Plauche <ryan@kubos.co>"]
+edition = "2018"
+
+[dependencies]
+failure = "0.1.2"
+juniper = "0.11"
+kubos-service = { path = "../kubos-service" }
+log = "^0.4.0"
+log4rs = "0.8"
+log4rs-syslog = "3.0"
+syslog = "4.0"
