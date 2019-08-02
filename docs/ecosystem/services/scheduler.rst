@@ -69,12 +69,22 @@ Each task in this section will be specified like so:
 .. code-block:: json
 
     {
+<<<<<<< HEAD
         "name": "Descriptive task-name",
         "delay": "Required start delay in Xh Ym Zs format"
         "app": {
             "name": "Required registered name of app to run",
             "args": ["Optional", "command", "line", "app", "args"],
             "config": "Optional path to app config",
+=======
+        "task-name": {
+            "delay": "Required start delay in HH:mm:ss format"
+            "app": {
+                "name": "Required registered name of app to run",
+                "args": ["Optional", "command", "line", "app", "args"],
+                "config": "Optional path to app config",
+            }
+>>>>>>> Adding parsing schedule configs from files and init tasks.
         }
     }
 
@@ -84,12 +94,22 @@ in this section will be specified like so:
 .. code-block:: json
 
     {
+<<<<<<< HEAD
         "name": "Descriptive task-name",
         "time": "Required time of execution in yyyy-mm-dd hh:mm:ss format",
         "app": {
             "name": "Required registered name of app to run",
             "args": ["Optional", "command", "line", "app", "args"],
             "config": "Optional path to app config"
+=======
+        "task-name": {
+            "time": "Required time of execution in yyyy-mm-dd hh:mm:ss format",
+            "app": {
+                "name": "Required registered name of app to run",
+                "args": ["Optional", "command", "line", "app", "args"],
+                "config": "Optional path to app config"
+            }
+>>>>>>> Adding parsing schedule configs from files and init tasks.
         }
     }
 
@@ -100,6 +120,7 @@ Each task in this section will be specified like so:
 .. code-block:: json
 
     {
+<<<<<<< HEAD
         "name": "Descriptive task-name",
         "delay": "Required start delay in Xh Ym Zs format",
         "period": "Required period of execution in Xh Ym Zs format",
@@ -107,6 +128,16 @@ Each task in this section will be specified like so:
             "name": "Required registered name of app to run",
             "args": ["Optional", "command", "line", "app", "args"],
             "config": "Optional path to app config"
+=======
+        "task-name": {
+            "delay": "Required start delay in HH:mm:ss format",
+            "period": "Required period of execution in HH:mm:ss format",
+            "app": {
+                "name": "Required registered name of app to run",
+                "args": ["Optional", "command", "line", "app", "args"],
+                "config": "Optional path to app config"
+            }
+>>>>>>> Adding parsing schedule configs from files and init tasks.
         }
     }
 
@@ -115,10 +146,16 @@ An example schedule config:
 .. code-block:: json
 
     {
+<<<<<<< HEAD
         "init": [
             {
                 "name": "start-camera",
                 "delay": "10m",
+=======
+        "init": {
+            "start-camera": {
+                "delay": "00:10:00",
+>>>>>>> Adding parsing schedule configs from files and init tasks.
                 "app": {
                     "name": "activate-camera"
                 }
@@ -130,6 +167,7 @@ An example schedule config:
                 "time": "2019-08-11 15:20:10",
                 "app": {
                     "name": "deploy-solar-panels"
+<<<<<<< HEAD
                 }
             }
         ],
@@ -138,6 +176,15 @@ An example schedule config:
                 "name": "clean-logs-every-12hrs":
                 "delay": "1h",
                 "period": "12h",
+=======
+                 }
+            }
+        },
+        "recurring": {
+            "clean-logs-every-12hrs": {
+                "delay": "1:00:00",
+                "period": "12:00:00",
+>>>>>>> Adding parsing schedule configs from files and init tasks.
                 "app": {
                     "name": "clean-logs"
                 }
@@ -167,7 +214,11 @@ GraphQL API
 Queries
 ~~~~~~~
 
+<<<<<<< HEAD
 The scheduler exposes two queries, ``activeMode`` and ``availableModes``.
+=======
+The scheduler exposes a two queries, ``activeSchedule`` and ``availableSchedules``.
+>>>>>>> Adding parsing schedule configs from files and init tasks.
 
 The ``activeMode`` query  exposes information about the currently active
 mode. It has the following schema::
@@ -175,23 +226,39 @@ mode. It has the following schema::
     {
         activeMode: {
             name: String,
+<<<<<<< HEAD
             path: String,
             lastRevised: String,
             schedules: [ScheduleConfigFile],
+=======
+            timeImported: String,
+>>>>>>> Adding parsing schedule configs from files and init tasks.
             active: Boolean
         }
     }
 
+<<<<<<< HEAD
 The ``availableModes`` query  exposes information about the currently available
 modes. It has the following schema::
 
     {
         availableModes(name: String): [
+=======
+The ``availableSchedules`` query  exposes information about the currently available
+schedules. It has the following schema::
+
+    {
+        availableSchedules(name: String): [
+>>>>>>> Adding parsing schedule configs from files and init tasks.
             {
                name: String,
+<<<<<<< HEAD
                path: String,
                lastRevised: String,
                schedules: [ScheduleConfigFile],
+=======
+               timeImported: String,
+>>>>>>> Adding parsing schedule configs from files and init tasks.
                active: Boolean
             }
         ]
@@ -241,8 +308,12 @@ individual schedule configs. They have the following schemas::
 Mutations
 ~~~~~~~~~
 
+<<<<<<< HEAD
 The scheduler also exposes the following mutations: ``createMode``, ``removeMode``,
 ``activateMode``, ``importConfig``, and ``removeConfig``.
+=======
+The scheduler has two mutations: ``activate`` and ``import``.
+>>>>>>> Adding parsing schedule configs from files and init tasks.
 
 The ``createMode`` mutation instructs the scheduler to create a new empty schedule mode.
 It has the following schema::
@@ -254,6 +325,7 @@ It has the following schema::
         }
     }
 
+<<<<<<< HEAD
 The ``removeMode`` mutation instructs the scheduler to delete an existing mode's
 directory and all schedules within. It cannot be applied to the currently active
 mode, or to the *safe* mode. It has the following schema::
@@ -262,6 +334,14 @@ mode, or to the *safe* mode. It has the following schema::
         removeMode(name: String!) {
             success: Boolean,
             errors: String
+=======
+The ``import`` mutation allows the scheduler to import a new schedule file and
+make it available for use. It has the following schema::
+
+    mutation {
+        import(path: String!, name:String!): {
+            success: Boolean!
+>>>>>>> Adding parsing schedule configs from files and init tasks.
         }
     }
 
