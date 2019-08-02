@@ -16,8 +16,11 @@
 
 extern crate tempfile;
 
+use serde_json::Value;
 use std::cell::RefCell;
 use std::fs::File;
+use std::io::prelude::*;
+use std::io::SeekFrom;
 use std::io::Write;
 use std::process;
 use std::process::{Command, Stdio};
@@ -93,6 +96,12 @@ impl TestService {
         }
     }
 
+    /// Appends additional configuration data to service's config
+    pub fn config(&mut self, config_data: &str) {
+        self._config_file.seek(SeekFrom::End(0)).unwrap();
+        self._config_file.write_all(config_data.as_bytes()).unwrap();
+    }
+
     /// Ask Cargo to build the service binary.
     /// This is a *blocking* function. We know when it returns
     /// that the service is ready to be run.
@@ -136,4 +145,18 @@ impl Drop for TestService {
             handle.kill().unwrap();
         }
     }
+}
+
+pub fn service_query(query: &str, ip: &str, port: u16) -> Value {
+    let client = reqwest::Client::builder().build().unwrap();
+    let mut map = ::std::collections::HashMap::new();
+    map.insert("query", query);
+
+    let mut res = client
+        .post(&format!("http://{}:{}", ip, port))
+        .json(&map)
+        .send()
+        .unwrap();
+
+    serde_json::from_str(&res.text().unwrap()).unwrap()
 }
