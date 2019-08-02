@@ -10,7 +10,7 @@ Behavior
 Upon boot, or service start, the scheduler will read the active schedule file and
 load the schedule into memory. The default active schedule file will be found at
 ``/home/system/etc/schedules/active.json``. Any ``init`` tasks will be performed
-immediately. All other ``one-time`` or ``recurring`` tasks will be scheduled 
+immediately. All other ``one-time`` or ``recurring`` tasks will be scheduled
 to run at their designated times.
 
 By default the scheduler will have two schedules: ``operational`` and ``safemode``. These
@@ -30,7 +30,7 @@ operational, safe mode, etc, will each have their own schedule files.
 Schedules consist of three sections: ``init``, ``one-time``, and ``recurring``. Each section
 represents a different type of scheduled task.
 
-Tasks in the ``init`` section will be executed on boot or on schedule change. Each 
+Tasks in the ``init`` section will be executed on boot or on schedule change. Each
 task in this section will be specified like so:
 
 .. code-block:: json
@@ -87,14 +87,14 @@ An example schedule file:
         },
         "one-time": {
             "deploy-solar": {
-                "time": "2019-08-11 15:20:10"
+                "time": "2019-08-11 15:20:10",
                 "app-name": "deploy-solar-panels"
             }
         },
         "recurring": {
             "clean-logs-every-12hrs": {
-                "start-time": "2019-08-11 15:20:10"
-                "end-time": "2019-08-12 15:20:10"
+                "start-time": "2019-08-11 15:20:10",
+                "end-time": "2019-08-12 15:20:10",
                 "frequency": "12:00:00",
                 "app-name": "clean-logs"
             }
@@ -104,7 +104,7 @@ An example schedule file:
 Configuration
 -------------
 
-The scheduler has the following available configuration parameter which may be 
+The scheduler has the following available configuration parameter which may be
 specified in the ``config.toml`` file under ``[scheduler-service]``.
 
 - ``schedules-dir`` - (Default: ``/home/system/etc/schedules/``) The path to the
@@ -123,22 +123,41 @@ GraphQL API
 Queries
 ~~~~~~~
 
-The scheduler exposes a single query, ``schedule``, which exposes information about
-the currently active schedule. The ``schedule`` query has the following schema::
+The scheduler exposes a two queries, ``activeSchedule`` and ``registeredSchedules``.
+
+The ``activeSchedule`` query  exposes information about the currently active
+schedule. It has the following schema::
 
     {
-        schedule {
+        activeSchedule: {
             contents: String,
             path: String,
             name: String,
-            timeRegistered: String
+            timeRegistered: String,
+            active: Boolean
         }
     }
+
+The ``registeredSchedules`` query  exposes information about the currently registered
+schedules. It has the following schema::
+
+    {
+        registeredSchedules: [
+            {
+               contents: String,
+               path: String,
+               name: String,
+               timeRegistered: String,
+               active: Boolean
+            }
+        ]
+    }
+
 
 Mutations
 ~~~~~~~~~
 
-The scheduler has two mutations: ``activate`` and ``register``. 
+The scheduler has two mutations: ``activate`` and ``register``.
 
 The ``activate`` mutation instructs the scheduler to make the specified schedule active.
 It has the following schema::
