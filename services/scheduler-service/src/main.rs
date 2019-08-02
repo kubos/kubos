@@ -16,16 +16,16 @@
 
 //! Service for scheduling tasks in the KubOS system.
 
-#![deny(warnings)]
-#![deny(missing_docs)]
+// #![deny(warnings)]
+// #![deny(missing_docs)]
 
 #[macro_use]
 extern crate juniper;
 
-mod objects;
+mod config;
+mod file;
 mod scheduler;
 mod schema;
-mod util;
 
 use kubos_service::{Config, Service};
 use log::{error, info};
@@ -85,7 +85,7 @@ fn main() -> Result<(), String> {
         String::from(
             s_dir
                 .as_str()
-                .ok_or_else(|| format!("Error parsing scheduler dir path"))?,
+                .ok_or_else(|| "Error parsing scheduler dir path".to_owned())?,
         )
     } else {
         String::from(DEFAULT_SCHEDULES_DIR)
@@ -96,7 +96,7 @@ fn main() -> Result<(), String> {
     info!("Starting scheduler-service - {:?}", scheduler_dir);
 
     // For now we will only kick off scheduling when the scheduler comes up
-    if let Err(e) = scheduler.schedule() {
+    if let Err(e) = scheduler.start() {
         error!("Failed to schedule tasks: {:?}", e);
     }
 

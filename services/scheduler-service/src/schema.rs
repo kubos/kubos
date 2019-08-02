@@ -14,12 +14,24 @@
  * limitations under the License.
  */
 
-use crate::objects::{GenericResponse, ScheduleFile};
+//!
+//! GraphQL schema for scheduler service's public interface
+//!
+
+use crate::file::*;
 use crate::scheduler::Scheduler;
 use juniper::FieldResult;
 use kubos_service;
+use serde::Deserialize;
 
 type Context = kubos_service::Context<Scheduler>;
+
+// Generic GraphQL Response
+#[derive(Debug, Deserialize, GraphQLObject)]
+pub struct GenericResponse {
+    pub success: bool,
+    pub errors: String,
+}
 
 pub struct QueryRoot;
 
@@ -49,7 +61,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // }
     field active_schedule(&executor) -> FieldResult<Option<ScheduleFile>> as "Current Schedule File"
     {
-        Ok(executor.context().subsystem().get_active_schedule())
+        Ok(get_active_schedule(&executor.context().subsystem().scheduler_dir))
     }
 
     // Returns a list of information on currently available schedules
@@ -66,7 +78,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     // }
     field available_schedules(&executor, name: Option<String>) -> FieldResult<Vec<ScheduleFile>> as "Available Schedule Files"
     {
-        Ok(executor.context().subsystem().get_available_schedules(name)?)
+        Ok(get_available_schedules(&executor.context().subsystem().scheduler_dir, name)?)
     }
 });
 
@@ -83,8 +95,9 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //         success: Boolean
     //    }
     // }
+    // TODO: Maybe change to import?
     field import(&executor, path: String, name: String) -> FieldResult<GenericResponse> {
-        Ok(match executor.context().subsystem().import_schedule(&path, &name) {
+        Ok(match import_schedule(&executor.context().subsystem().scheduler_dir, &path, &name) {
             Ok(_) => GenericResponse { success: true, errors: "".to_owned() },
             Err(error) => GenericResponse { success: false, errors: error.to_string() }
         })
@@ -99,7 +112,9 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //    }
     // }
     field activate(&executor, name: String) -> FieldResult<GenericResponse> {
-        Ok(match executor.context().subsystem().activate_schedule(&name) {
+        Ok(match activate_schedule(&executor.context().subsystem().scheduler_dir, &name)
+        .and_then(|_| executor.context().subsystem().stop())
+        .and_then(|_| executor.context().subsystem().start()) {
             Ok(_) => {
                 GenericResponse { success: true, errors: "".to_owned() }
             },
@@ -116,7 +131,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //    }
     // }
     field remove(&executor, name: String) -> FieldResult<GenericResponse> {
-        Ok(match executor.context().subsystem().remove_schedule(&name) {
+        Ok(match remove_schedule(&executor.context().subsystem().scheduler_dir, &name) {
             Ok(_) => {
                 GenericResponse { success: true, errors: "".to_owned() }
             },

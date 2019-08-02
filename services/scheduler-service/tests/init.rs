@@ -53,8 +53,7 @@ fn run_init_single_no_delay() {
     fixture.register("imaging", &schedule_path);
     fixture.activate("imaging");
 
-    // Restart the service to run the task
-    fixture.restart();
+    // Wait for the service to restart the scheduler
     thread::sleep(Duration::from_millis(100));
 
     let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"basic-app\") { success, errors } }"}"#;
@@ -83,9 +82,8 @@ fn run_init_single_with_delay() {
     fixture.register("imaging", &schedule_path);
     fixture.activate("imaging");
 
-    // Restart the service to run the task
-    fixture.restart();
-    thread::sleep(Duration::from_secs(1));
+    // Wait for service to restart scheduler and run task
+    thread::sleep(Duration::from_millis(1100));
 
     let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"basic-app\") { success, errors } }"}"#;
 
@@ -119,9 +117,8 @@ fn run_init_two_tasks() {
     fixture.register("two", &schedule_path);
     fixture.activate("two");
 
-    // Restart the service to run the task
-    fixture.restart();
-    thread::sleep(Duration::from_secs(1));
+    // Wait for service to restart scheduler and run tasks
+    thread::sleep(Duration::from_millis(1100));
 
     // Check if first task ran
     let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"basic-app\") { success, errors } }"}"#;
@@ -153,8 +150,7 @@ fn run_init_single_args() {
     fixture.register("imaging", &schedule_path);
     fixture.activate("imaging");
 
-    // Restart the service to run the task
-    fixture.restart();
+    // Wait for service to restart scheduler and run task
     thread::sleep(Duration::from_millis(100));
 
     let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"basic-app\", args: [\"-l\",\"-h\"]) { success, errors } }"}"#;
@@ -184,8 +180,7 @@ fn run_init_single_custom_config() {
     fixture.register("imaging", &schedule_path);
     fixture.activate("imaging");
 
-    // Restart the service to run the task
-    fixture.restart();
+    // Wait for service to restart scheduler and run task
     thread::sleep(Duration::from_millis(100));
 
     let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"basic-app\", config: \"path/to/custom.toml\") { success, errors } }"}"#;
@@ -215,12 +210,119 @@ fn run_init_single_custom_runlevel() {
     fixture.register("imaging", &schedule_path);
     fixture.activate("imaging");
 
-    // Restart the service to run the task
-    fixture.restart();
+    // Wait for service to restart scheduler and run task
     thread::sleep(Duration::from_millis(100));
 
     let query = r#"{"query":"mutation { startApp(runLevel: \"onCommand\", name: \"basic-app\") { success, errors } }"}"#;
 
     // Check if the task actually ran
     assert_eq!(listener.get_request(), Some(query.to_owned()))
+}
+
+#[test]
+fn run_init_two_schedules() {
+    let listener = ServiceListener::spawn("127.0.0.1", 9027);
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8027);
+
+    // Register first schedule with an init task
+    let schedule = json!({
+        "init": {
+            "basic-task": {
+                "delay": "00:00:00",
+                "app": {
+                    "name": "first-app"
+                }
+            },
+            "delay-task": {
+                "delay": "00:00:01",
+                "app": {
+                    "name": "delay-app"
+                }
+            }
+        }
+    });
+    let schedule_path = fixture.create(Some(schedule.to_string()));
+    fixture.register("first", &schedule_path);
+
+    // Register second schedule with an init task
+    let schedule = json!({
+        "init": {
+            "basic-task": {
+                "delay": "00:00:00",
+                "app": {
+                    "name": "second-app"
+                }
+            }
+        }
+    });
+    let schedule_path = fixture.create(Some(schedule.to_string()));
+    fixture.register("second", &schedule_path);
+
+    // Activate first schedule, wait for task to run
+    fixture.activate("first");
+    thread::sleep(Duration::from_millis(100));
+
+    // Check if the task ran
+    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"first-app\") { success, errors } }"}"#;
+    assert_eq!(listener.get_request(), Some(query.to_owned()));
+
+    // Activate second schedule, wait for task to run
+    fixture.activate("second");
+    thread::sleep(Duration::from_millis(100));
+
+    // Check if the task ran
+    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"second-app\") { success, errors } }"}"#;
+    assert_eq!(listener.get_request(), Some(query.to_owned()))
+}
+
+#[test]
+fn run_init_two_schedules_check_stop() {
+    let listener = ServiceListener::spawn("127.0.0.1", 9028);
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8028);
+
+    // Register first schedule with an init task
+    let schedule = json!({
+        "init": {
+            "delay-task": {
+                "delay": "00:00:01",
+                "app": {
+                    "name": "delay-app"
+                }
+            }
+        }
+    });
+    let schedule_path = fixture.create(Some(schedule.to_string()));
+    fixture.register("first", &schedule_path);
+
+    // Register second schedule with an init task
+    let schedule = json!({
+        "init": {
+            "basic-task": {
+                "delay": "00:00:00",
+                "app": {
+                    "name": "second-app"
+                }
+            }
+        }
+    });
+    let schedule_path = fixture.create(Some(schedule.to_string()));
+    fixture.register("second", &schedule_path);
+
+    // Activate first schedule, wait for task to run
+    fixture.activate("first");
+    thread::sleep(Duration::from_millis(100));
+
+    // Activate second schedule, wait for task to run
+    fixture.activate("second");
+    thread::sleep(Duration::from_millis(100));
+
+    // Check if the task ran
+    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"second-app\") { success, errors } }"}"#;
+    assert_eq!(listener.get_request(), Some(query.to_owned()));
+
+    // Give the scheduler time to run (or not) delayed task from first schedule
+    thread::sleep(Duration::from_millis(1100));
+
+    // Check if the task ran
+    assert_eq!(listener.get_request(), None)
 }
