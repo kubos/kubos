@@ -16,8 +16,8 @@
 
 //! Service for scheduling tasks in the KubOS system.
 
-#![deny(warnings)]
-#![deny(missing_docs)]
+// #![deny(warnings)]
+// #![deny(missing_docs)]
 
 #[macro_use]
 extern crate juniper;
