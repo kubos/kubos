@@ -21,14 +21,15 @@ use std::process::Child;
 use std::sync::{Arc, Mutex};
 
 /// Apps which have been started and are being monitored until they finish
-#[derive(Debug, GraphQLObject)]
+#[derive(Clone, Debug, GraphQLObject)]
 pub struct MonitorEntry {
-    name: String,
-    version: String,
-    pid: i32,
-    run_level: String,
-    args: Option<Vec<String>>,
-    config: Option<String>,
+    pub name: String,
+    pub version: String,
+    pub pid: i32,
+    pub run_level: String,
+    pub args: Option<Vec<String>>,
+    pub config: Option<String>,
+    // TODO: Start time
 }
 
 pub fn monitor_app(
@@ -69,6 +70,8 @@ pub fn monitor_app(
     } else {
         warn!("App {} terminated for unknown reasons", name);
     }
+
+    // TODO: Save return code in main registry entry
 
     // Remove the app from our monitoring registry
     remove_entry(registry, name);

@@ -70,9 +70,23 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
 
     field running_apps(&executor,
         name: Option<String>)
-        -> FieldResult<MonitorEntry> as "Running Apps Query"
+        -> FieldResult<Vec<MonitorEntry>> as "Running Apps Query"
     {
-        unimplemented!();
+        let mut result: Vec<MonitorEntry> = Vec::new();
+        let entries = executor.context().subsystem().monitoring.lock()?;
+        let final_iter = entries.iter().filter(|e| {
+            if name.is_some() && &e.name != name.as_ref().unwrap() {
+                return false;
+            }
+            true
+        });
+
+        for entry in final_iter {
+            let app = (*entry).clone();
+            result.push(app);
+        }
+
+        Ok(result)
     }
 
 });

@@ -69,7 +69,13 @@ fn uninstall_last_app() {
             "{ registeredApps { active } }",
         );
 
-        assert_eq!(result["registeredApps"].as_array().expect("Not an array").len(), 0);
+        assert_eq!(
+            result["registeredApps"]
+                .as_array()
+                .expect("Not an array")
+                .len(),
+            0
+        );
     });
 
     // Our app directory should now no longer exist
@@ -198,7 +204,13 @@ fn uninstall_all_app() {
             "{ registeredApps { active } }",
         );
 
-        assert_eq!(result["registeredApps"].as_array().expect("Not an array").len(), 0);
+        assert_eq!(
+            result["registeredApps"]
+                .as_array()
+                .expect("Not an array")
+                .len(),
+            0
+        );
     });
 
     // Our app directory should now no longer exist
