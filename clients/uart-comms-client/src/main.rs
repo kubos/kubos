@@ -24,7 +24,7 @@
 // Note: Currently this client can only be used to send/receive GraphQL requests
 //
 // Packets can be additionally encapsulated using the KISS protocol to simulate additional
-// radio-specific framing. Resulting packet is `KISS<UDP<payload>>`.
+// radio-specific framing. Resulting packet is `KISS<HTTP<graphql-payload>>`.
 
 mod comms;
 mod kiss;
