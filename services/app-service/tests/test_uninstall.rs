@@ -66,10 +66,10 @@ fn uninstall_last_app() {
 
         let result = send_query(
             ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
-            "{ apps { active } }",
+            "{ registeredApps { active } }",
         );
 
-        assert_eq!(result["apps"].as_array().expect("Not an array").len(), 0);
+        assert_eq!(result["registeredApps"].as_array().expect("Not an array").len(), 0);
     });
 
     // Our app directory should now no longer exist
@@ -136,10 +136,10 @@ fn uninstall_notlast_app() {
 
         let result = send_query(
             ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
-            "{ apps { active } }",
+            "{ registeredApps { active } }",
         );
 
-        assert_eq!(result["apps"][0]["active"], true);
+        assert_eq!(result["registeredApps"][0]["active"], true);
     });
 
     // Our app directory should still exist since there's a version left in the registry
@@ -195,10 +195,10 @@ fn uninstall_all_app() {
 
         let result = send_query(
             ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
-            "{ apps { active } }",
+            "{ registeredApps { active } }",
         );
 
-        assert_eq!(result["apps"].as_array().expect("Not an array").len(), 0);
+        assert_eq!(result["registeredApps"].as_array().expect("Not an array").len(), 0);
     });
 
     // Our app directory should now no longer exist
