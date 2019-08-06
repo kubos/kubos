@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::monitor::MonitorEntry;
 use crate::objects::*;
 use crate::registry::AppRegistry;
 use juniper::FieldResult;
@@ -39,7 +40,7 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
         Ok(String::from("pong"))
     }
 
-    field apps(&executor,
+    field registered_apps(&executor,
                name: Option<String>,
                version: Option<String>,
                active: Option<bool>)
@@ -66,6 +67,14 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
 
         Ok(result)
     }
+
+    field running_apps(&executor,
+        name: Option<String>)
+        -> FieldResult<MonitorEntry> as "Running Apps Query"
+    {
+        unimplemented!();
+    }
+
 });
 
 ///
@@ -134,7 +143,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
         };
 
         Ok(match executor.context().subsystem().start_app(&name, &run_level_o, config, args) {
-            Ok(num) => StartResponse { success: true, errors: "".to_owned(), pid: Some(num as i32)},
+            Ok(pid) => StartResponse { success: true, errors: "".to_owned(), pid},
             Err(error) => StartResponse { success: false, errors: error.to_string(), pid: None },
         })
     }

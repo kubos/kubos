@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#![deny(warnings)]
+//#![deny(warnings)]
 
 #[macro_use]
 extern crate juniper;
 
 mod app_entry;
 mod error;
+mod monitor;
 mod objects;
 mod registry;
 mod schema;
