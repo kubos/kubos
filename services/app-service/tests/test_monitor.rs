@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// Test starting a Rust application with and without additional arguments
+// Test application monitoring
 
 use kubos_app::ServiceConfig;
 use std::fs;
@@ -109,7 +109,6 @@ fn monitor_good() {
     let pid = result["startApp"]["pid"].as_i64().unwrap();
 
     // Query the app service to make sure the app is still running
-    // TODO: add start time
     let result = send_query(
         config.clone(),
         r#"{
@@ -119,12 +118,11 @@ fn monitor_good() {
                 pid,
                 config,
                 args,
-                runLevel
+                runLevel,
+                startTime
             }
         }"#,
     );
-
-    eprintln!("Result: {:?}", result);
 
     // Make sure our app info matches what we'd expect
     let args: Vec<&str> = result["runningApps"][0]["args"]
@@ -146,12 +144,12 @@ fn monitor_good() {
         result["runningApps"][0]["runLevel"].as_str().unwrap(),
         "OnCommand"
     );
+    assert!(result["runningApps"][0]["startTime"].is_string());
 
     // The app has its own 2 second sleep time, so we need to wait that long for it to finish
     thread::sleep(Duration::from_secs(2));
 
     // The `runningApps` query should now return an empty array
-    // TODO: add start time
     let result = send_query(
         config,
         r#"{
@@ -166,4 +164,87 @@ fn monitor_good() {
     let array = result["runningApps"].as_array().unwrap();
 
     assert!(array.is_empty());
+}
+
+#[test]
+fn monitor_existing_bad() {
+    let mut fixture = AppServiceFixture::setup();
+    let config = ServiceConfig::new_from_path(
+        "app-service",
+        format!(
+            "{}",
+            fixture
+                .registry_dir
+                .path()
+                .join("config.toml")
+                .to_string_lossy()
+        ),
+    )
+    .unwrap();
+
+    setup_app(&fixture.registry_dir.path());
+
+    fixture.start_service(true);
+
+    let start_app = r#"mutation {
+            startApp(name: "rust-proj", runLevel: "OnCommand", args: "-l") {
+                errors
+            }
+        }"#;
+
+    send_query(config.clone(), start_app);
+
+    // If we try to start the app a second time, it should fail
+    let result = send_query(config.clone(), start_app);
+
+    fixture.teardown();
+
+    assert_eq!(
+        result["startApp"]["errors"].as_str().unwrap(),
+        "Failed to start app: Instance of rust-proj already running OnCommand"
+    );
+}
+
+#[test]
+fn monitor_existing_good() {
+    let mut fixture = AppServiceFixture::setup();
+    let config = ServiceConfig::new_from_path(
+        "app-service",
+        format!(
+            "{}",
+            fixture
+                .registry_dir
+                .path()
+                .join("config.toml")
+                .to_string_lossy()
+        ),
+    )
+    .unwrap();
+
+    setup_app(&fixture.registry_dir.path());
+
+    fixture.start_service(true);
+
+    send_query(
+        config.clone(),
+        r#"mutation {
+            startApp(name: "rust-proj", runLevel: "OnCommand", args: "-l") {
+                errors
+            }
+        }"#,
+    );
+
+    // If we try to start the app a second time, it should fail
+    let result = send_query(
+        config.clone(),
+        r#"mutation {
+            startApp(name: "rust-proj", runLevel: "OnBoot") {
+                success
+            }
+        }"#,
+    );
+
+    fixture.teardown();
+
+    assert!(result["startApp"]["success"].as_bool().unwrap());
 }

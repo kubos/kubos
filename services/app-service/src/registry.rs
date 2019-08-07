@@ -17,6 +17,7 @@
 use crate::app_entry::*;
 use crate::error::*;
 use crate::monitor::*;
+use chrono::Utc;
 use failure::format_err;
 use fs_extra;
 use kubos_app::RunLevel;
@@ -589,8 +590,6 @@ impl AppRegistry {
             warn!("Failed to set cwd before executing {}: {:?}", app_name, err);
         }
 
-        // TODO: Log "Starting app {name}: {run-level} {config-path} {args}"
-
         let mut cmd = Command::new(app_path);
 
         cmd.arg("-r").arg(format!("{}", run_level));
@@ -606,6 +605,12 @@ impl AppRegistry {
         let mut child = cmd.spawn().map_err(|err| AppError::StartError {
             err: format!("Failed to spawn app: {:?}", err),
         })?;
+
+        let start_time = Utc::now();
+        info!(
+            "Starting {}. Run Level: {}, Config: {:?}, Args: {:?}",
+            app_name, run_level, config, args
+        );
 
         // Give the app a moment to run
         thread::sleep(Duration::from_millis(300));
@@ -629,22 +634,42 @@ impl AppRegistry {
                 }
             }
             Ok(None) => {
+                let name = app_name.to_owned();
                 let pid = child.id() as i32;
                 let run_level_str = format!("{}", run_level);
                 let registry = self.monitoring.clone();
-                // TODO: Check if app is already running
+
+                // Check if app is already running
+                let running_status = find_entry(&registry, app_name, &run_level_str);
+                if running_status == Ok(true) {
+                    return Err(AppError::StartError {
+                        err: format!("Instance of {} already running {}", app_name, run_level_str),
+                    });
+                } else if let Err(err) = running_status {
+                    // The only way this happens is if the monitoring registry mutex gets poisoned.
+                    // In that case, we want to crash this service so that it can be restarted in a
+                    // good state.
+                    error!("Crashing service: {:?}", err);
+                    panic!("{:?}", err);
+                }
+
                 // Spawn monitor thread
                 thread::spawn(move || {
                     monitor_app(
                         registry,
                         child,
-                        app.name,
-                        app.version,
-                        run_level_str,
-                        args,
-                        config,
+                        MonitorEntry {
+                            start_time,
+                            name,
+                            version: app.version,
+                            pid,
+                            run_level: run_level_str,
+                            args,
+                            config,
+                        },
                     )
                 });
+
                 Ok(Some(pid))
             }
             Err(err) => Err(AppError::StartError {

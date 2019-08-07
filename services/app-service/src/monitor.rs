@@ -15,6 +15,7 @@
  */
 
 use crate::error::*;
+use chrono::{DateTime, Utc};
 use log::*;
 use std::os::unix::process::ExitStatusExt;
 use std::process::Child;
@@ -23,89 +24,60 @@ use std::sync::{Arc, Mutex};
 /// Apps which have been started and are being monitored until they finish
 #[derive(Clone, Debug, GraphQLObject)]
 pub struct MonitorEntry {
+    pub start_time: DateTime<Utc>,
     pub name: String,
     pub version: String,
     pub pid: i32,
     pub run_level: String,
     pub args: Option<Vec<String>>,
     pub config: Option<String>,
-    // TODO: Start time
 }
 
 pub fn monitor_app(
     registry: Arc<Mutex<Vec<MonitorEntry>>>,
-    mut child: Child,
-    name: String,
-    version: String,
-    run_level: String,
-    args: Option<Vec<String>>,
-    config: Option<String>,
+    mut process_handle: Child,
+    app: MonitorEntry,
 ) {
     // Add the app information to our monitoring registry
-    insert_entry(
-        registry.clone(),
-        name.clone(),
-        version,
-        child.id() as i32,
-        run_level,
-        args,
-        config,
-    );
+    insert_entry(registry.clone(), &app);
 
     // Wait for the application to finish running
-    let status = child
+    let status = process_handle
         .wait()
         .map_err(|err| AppError::MonitorError {
-            err: format!("Failed to wait for {} to finish: {:?}", name, err),
+            err: format!("Failed to wait for {} to finish: {:?}", app.name, err),
         })
         .unwrap();
 
     // Parse and log the result
     if status.success() {
-        info!("App {} completed successfully", name);
+        info!("App {} completed successfully", app.name);
     } else if let Some(code) = status.code() {
-        error!("App {} failed. RC: {}", name, code);
+        error!("App {} failed. RC: {}", app.name, code);
     } else if let Some(signal) = status.signal() {
-        warn!("App {} terminated by signal {}", name, signal);
+        warn!("App {} terminated by signal {}", app.name, signal);
     } else {
-        warn!("App {} terminated for unknown reasons", name);
+        warn!("App {} terminated for unknown reasons", app.name);
     }
 
-    // TODO: Save return code in main registry entry
-
     // Remove the app from our monitoring registry
-    remove_entry(registry, name);
+    remove_entry(registry, &app.name, &app.run_level);
 }
 
-fn insert_entry(
-    registry: Arc<Mutex<Vec<MonitorEntry>>>,
-    name: String,
-    version: String,
-    pid: i32,
-    run_level: String,
-    args: Option<Vec<String>>,
-    config: Option<String>,
-) {
+fn insert_entry(registry: Arc<Mutex<Vec<MonitorEntry>>>, entry: &MonitorEntry) {
     registry
         .lock()
         .map_err(|err| AppError::MonitorError {
             err: format!(
                 "Failed to add {} to monitoring. Couldn't get entries mutex: {:?}",
-                name, err
+                entry.name, err
             ),
         })
         .unwrap()
-        .push(MonitorEntry {
-            name,
-            version,
-            pid,
-            run_level,
-            args,
-            config,
-        });
+        .push(entry.clone());
 }
 
-fn remove_entry(registry: Arc<Mutex<Vec<MonitorEntry>>>, name: String) {
+fn remove_entry(registry: Arc<Mutex<Vec<MonitorEntry>>>, name: &str, run_level: &str) {
     let mut entries = registry
         .lock()
         .map_err(|err| AppError::MonitorError {
@@ -115,11 +87,28 @@ fn remove_entry(registry: Arc<Mutex<Vec<MonitorEntry>>>, name: String) {
             ),
         })
         .unwrap();
-    if let Some(index) = entries.iter().position(|ref e| e.name == name) {
+    if let Some(index) = entries
+        .iter()
+        .position(|ref e| e.name == name && e.run_level == run_level)
+    {
         entries.remove(index);
     } else {
         // This would only happen if we were somehow trying to doubly free a monitor entry,
         // which shouldn't ever happen
         error!("Failed to unmonitor {}", name);
     }
+}
+
+pub fn find_entry(
+    registry: &Arc<Mutex<Vec<MonitorEntry>>>,
+    name: &str,
+    run_level: &str,
+) -> Result<bool, AppError> {
+    let entries = registry.lock().map_err(|err| AppError::MonitorError {
+        err: format!("Failed get entries mutex: {:?}", err),
+    })?;
+
+    Ok(entries
+        .iter()
+        .any(|entry| entry.name == name && entry.run_level == run_level))
 }
