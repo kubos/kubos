@@ -25,6 +25,7 @@ use log::*;
 use std::fs;
 use std::io::Read;
 use std::os::unix;
+use std::os::unix::process::ExitStatusExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::{Arc, Mutex};
@@ -624,13 +625,25 @@ impl AppRegistry {
         match child.try_wait() {
             Ok(Some(status)) => {
                 // App exited already. Check for errors and then return
-                if !status.success() {
-                    Err(AppError::StartError {
-                        err: format!("App returned {}", status),
-                    })
-                } else {
+                if status.success() {
+                    info!("App {} completed successfully", app.name);
                     // App finished successfully, so there are no errors, but also no PID
                     Ok(None)
+                } else if let Some(code) = status.code() {
+                    error!("App {} failed. RC: {}", app.name, code);
+                    Err(AppError::StartError {
+                        err: format!("App {} failed. RC: {}", app.name, code),
+                    })
+                } else if let Some(signal) = status.signal() {
+                    warn!("App {} terminated by signal {}", app.name, signal);
+                    Err(AppError::StartError {
+                        err: format!("App {} terminated by signal {}", app.name, signal),
+                    })
+                } else {
+                    warn!("App {} terminated for unknown reasons", app.name);
+                    Err(AppError::StartError {
+                        err: format!("App {} terminated for unknown reasons", app.name),
+                    })
                 }
             }
             Ok(None) => {
