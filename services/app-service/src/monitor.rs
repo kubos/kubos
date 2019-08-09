@@ -30,7 +30,7 @@ pub struct MonitorEntry {
     pub pid: i32,
     pub run_level: String,
     pub args: Option<Vec<String>>,
-    pub config: Option<String>,
+    pub config: String,
 }
 
 pub fn monitor_app(

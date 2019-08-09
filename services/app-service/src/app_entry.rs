@@ -34,6 +34,8 @@ pub struct AppMetadata {
     pub version: String,
     /// The author of the application
     pub author: String,
+    /// The custom configuration file which should be passed to the application when it is started
+    pub config: Option<String>,
 }
 /// Kubos App struct
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -46,6 +48,8 @@ pub struct App {
     pub version: String,
     /// The author of the application
     pub author: String,
+    /// Configuration file to be passed to the application
+    pub config: String,
 }
 /// AppRegistryEntry
 #[derive(Clone, Debug, Deserialize, Serialize)]

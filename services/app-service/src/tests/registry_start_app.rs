@@ -59,6 +59,7 @@ fn start_app_good() {
                 name = "tiny-app"
                 version = "1.0"
                 author = "user"
+                config = "/custom/config.toml"
                 "#,
             registry_dir.path().to_string_lossy(),
         );
@@ -104,6 +105,7 @@ fn start_app_fail() {
                 name = "tiny-app"
                 version = "1.0"
                 author = "user"
+                config = "/custom/config.toml"
                 "#,
             registry_dir.path().to_string_lossy(),
         );
@@ -144,6 +146,7 @@ fn start_app_bad() {
             name = "tiny-app"
             version = "1.0"
             author = "user"
+            config = "/custom/config.toml"
             "#,
         registry_dir.path().to_string_lossy(),
     );
@@ -199,6 +202,7 @@ fn start_app_nonzero_rc() {
                 name = "tiny-app"
                 version = "1.0"
                 author = "user"
+                config = "/custom/config.toml"
                 "#,
             registry_dir.path().to_string_lossy(),
         );

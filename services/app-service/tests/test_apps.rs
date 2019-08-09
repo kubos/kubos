@@ -33,6 +33,7 @@ fn setup_apps(registry_dir: &Path) {
     MockAppBuilder::new("app1")
         .version("0.0.2")
         .active(false)
+        .config("/custom/config.toml")
         .install(&registry_dir);
     MockAppBuilder::new("app2")
         .version("1.0.0")
@@ -244,6 +245,22 @@ test_query!(
         assert_eq!(
             apps[2],
             json!({"app": {"name": "app2", "version": "1.0.0"}})
+        );
+    }
+);
+
+test_query!(
+    config,
+    "{ registeredApps(name: \"app1\") { app { name, version, config } } }",
+    |apps| {
+        assert_eq!(apps.len(), 2);
+        assert_eq!(
+            apps[0],
+            json!({"app": {"name": "app1", "version": "0.0.1", "config": "/home/system/etc/config.toml"}})
+        );
+        assert_eq!(
+            apps[1],
+            json!({"app": {"name": "app1", "version": "0.0.2", "config": "/custom/config.toml"}})
         );
     }
 );
