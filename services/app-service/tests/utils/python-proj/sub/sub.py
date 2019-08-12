@@ -7,4 +7,3 @@
 def test_func():
     
     print("I'm a test function")
-    exit(0)

@@ -33,7 +33,6 @@ pub struct MockAppBuilder {
     _version: Option<String>,
     _author: Option<String>,
     _active: Option<bool>,
-    _run_level: Option<String>,
     _config: Option<String>,
 }
 
@@ -45,7 +44,6 @@ impl MockAppBuilder {
             _version: None,
             _author: None,
             _active: None,
-            _run_level: None,
             _config: None,
         }
     }
@@ -70,11 +68,6 @@ impl MockAppBuilder {
         self
     }
 
-    pub fn run_level<'a>(&'a mut self, run_level: &str) -> &'a mut Self {
-        self._run_level = Some(String::from(run_level));
-        self
-    }
-
     pub fn config<'a>(&'a mut self, config: &str) -> &'a mut Self {
         self._config = Some(String::from(config));
         self
@@ -84,7 +77,6 @@ impl MockAppBuilder {
         format!(
             r#"
             active_version = {active}
-            run_level = "{run_level}"
 
             [app]
             executable = "{dir}/{name}/{version}/{bin}"
@@ -96,7 +88,6 @@ impl MockAppBuilder {
             name = self._name,
             dir = registry_dir,
             active = self._active.unwrap_or(true),
-            run_level = self._run_level.as_ref().unwrap_or(&String::from("OnBoot")),
             version = self._version.as_ref().unwrap_or(&String::from("0.0.1")),
             author = self._author.as_ref().unwrap_or(&String::from("unknown")),
             bin = self._bin.as_ref().unwrap_or(&self._name),
@@ -116,7 +107,7 @@ impl MockAppBuilder {
                 echo version = \"{version}\"
                 echo author = \"{author}\"
             else
-                echo run_level = \"$KUBOS_APP_RUN_LEVEL\"
+                echo "Hello, World!"
             fi
             "#,
             name = self._name,
@@ -239,7 +230,7 @@ impl AppServiceFixture {
         }
     }
 
-    pub fn start_service(&mut self, onboot: bool) {
+    pub fn start_service(&mut self) {
         let mut app_service = env::current_exe().unwrap();
         app_service.pop();
         app_service.set_file_name("kubos-app-service");
@@ -255,10 +246,6 @@ impl AppServiceFixture {
                 .arg(config_toml.to_str().unwrap())
                 .stdin(Stdio::piped())
                 .stdout(Stdio::piped());
-
-            if onboot {
-                service.arg("-b");
-            }
 
             let mut service_proc = service.spawn().unwrap();
 

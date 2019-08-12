@@ -60,7 +60,6 @@ fn setup_app(registry_dir: &Path) {
     let toml = format!(
         r#"
             active_version = true
-            run_level = "onCommand"
 
             [app]
             executable = "{}/rust-proj/1.0/rust-proj"
@@ -93,12 +92,12 @@ fn monitor_good() {
 
     setup_app(&fixture.registry_dir.path());
 
-    fixture.start_service(false);
+    fixture.start_service();
 
     let result = send_query(
         config.clone(),
         r#"mutation {
-            startApp(name: "rust-proj", runLevel: "OnCommand", args: "-l") {
+            startApp(name: "rust-proj", args: "-l") {
                 errors,
                 success,
                 pid
@@ -120,7 +119,6 @@ fn monitor_good() {
                 running,
                 config,
                 args,
-                runLevel,
                 startTime
             }
         }"#,
@@ -146,12 +144,8 @@ fn monitor_good() {
         result["appStatus"][0]["config"].as_str().unwrap(),
         "/home/system/etc/config.toml"
     );
-    assert_eq!(args, ["--", "-l"]);
-    assert_eq!(
-        result["appStatus"][0]["runLevel"].as_str().unwrap(),
-        "OnCommand"
-    );
-    assert!(result["appStatus"][0]["startTime"].is_string());
+    assert_eq!(args, ["-l"]);
+    assert!(result["runningApps"][0]["startTime"].is_string());
 
     // The app has its own 2 second sleep time, so we need to wait that long for it to finish
     thread::sleep(Duration::from_secs(2));
@@ -188,7 +182,7 @@ fn monitor_good() {
 }
 
 #[test]
-fn monitor_existing_bad() {
+fn monitor_existing() {
     let mut fixture = AppServiceFixture::setup();
     let config = ServiceConfig::new_from_path(
         "app-service",
@@ -205,10 +199,10 @@ fn monitor_existing_bad() {
 
     setup_app(&fixture.registry_dir.path());
 
-    fixture.start_service(true);
+    fixture.start_service();
 
     let start_app = r#"mutation {
-            startApp(name: "rust-proj", runLevel: "OnCommand", args: "-l") {
+            startApp(name: "rust-proj", args: "-l") {
                 errors
             }
         }"#;
@@ -222,51 +216,6 @@ fn monitor_existing_bad() {
 
     assert_eq!(
         result["startApp"]["errors"].as_str().unwrap(),
-        "Failed to start app: Instance of rust-proj already running OnCommand"
+        "Failed to start app: Instance of rust-proj already running"
     );
-}
-
-#[test]
-fn monitor_existing_good() {
-    let mut fixture = AppServiceFixture::setup();
-    let config = ServiceConfig::new_from_path(
-        "app-service",
-        format!(
-            "{}",
-            fixture
-                .registry_dir
-                .path()
-                .join("config.toml")
-                .to_string_lossy()
-        ),
-    )
-    .unwrap();
-
-    setup_app(&fixture.registry_dir.path());
-
-    fixture.start_service(true);
-
-    send_query(
-        config.clone(),
-        r#"mutation {
-            startApp(name: "rust-proj", runLevel: "OnCommand", args: "-l") {
-                errors
-            }
-        }"#,
-    );
-
-    // If we try to start the app a second time, it should pass, because we're starting with the
-    // other run level
-    let result = send_query(
-        config.clone(),
-        r#"mutation {
-            startApp(name: "rust-proj", runLevel: "OnBoot") {
-                success
-            }
-        }"#,
-    );
-
-    fixture.teardown();
-
-    assert!(result["startApp"]["success"].as_bool().unwrap());
 }

@@ -27,7 +27,6 @@ fn setup_apps(registry_dir: &Path) {
     MockAppBuilder::new("app1")
         .version("0.0.1")
         .active(false)
-        .run_level("OnCommand")
         .author("mham")
         .install(&registry_dir);
     MockAppBuilder::new("app1")
@@ -50,7 +49,6 @@ fn setup_apps(registry_dir: &Path) {
     MockAppBuilder::new("app4")
         .version("1.0.0")
         .active(true)
-        .run_level("OnBoot")
         .author("user")
         .install(&registry_dir);
 }
@@ -88,7 +86,7 @@ macro_rules! test_query {
                     .to_string_lossy()
             );
             setup_apps(&fixture.registry_dir.path());
-            fixture.start_service(false);
+            fixture.start_service();
 
             let result = panic::catch_unwind(|| {
                 let test: &dyn Fn(Vec<serde_json::Value>) = &$test_closure;

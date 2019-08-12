@@ -89,13 +89,10 @@ fn uninstall_last_app() {
             .to_string_lossy()
     );
     let mut app = MockAppBuilder::new("dummy");
-    app.active(true)
-        .run_level("OnBoot")
-        .version("0.0.1")
-        .author("user");
+    app.active(true).version("0.0.1").author("user");
 
     app.install(&fixture.registry_dir.path());
-    fixture.start_service(false);
+    fixture.start_service();
 
     // Make sure our app directory and active symlink exist
     assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
@@ -161,21 +158,15 @@ fn uninstall_notlast_app() {
             .to_string_lossy()
     );
     let mut app = MockAppBuilder::new("dummy");
-    app.active(true)
-        .run_level("OnBoot")
-        .version("0.0.1")
-        .author("user");
+    app.active(true).version("0.0.1").author("user");
 
     app.install(&fixture.registry_dir.path());
 
     let mut app = MockAppBuilder::new("dummy");
-    app.active(true)
-        .run_level("OnBoot")
-        .version("0.0.2")
-        .author("user");
+    app.active(true).version("0.0.2").author("user");
 
     app.install(&fixture.registry_dir.path());
-    fixture.start_service(false);
+    fixture.start_service();
 
     // Make sure our app directory exists
     assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
@@ -220,21 +211,15 @@ fn uninstall_all_app() {
             .to_string_lossy()
     );
     let mut app = MockAppBuilder::new("dummy");
-    app.active(true)
-        .run_level("OnBoot")
-        .version("0.0.1")
-        .author("user");
+    app.active(true).version("0.0.1").author("user");
 
     app.install(&fixture.registry_dir.path());
 
     let mut app = MockAppBuilder::new("dummy");
-    app.active(true)
-        .run_level("OnBoot")
-        .version("0.0.2")
-        .author("user");
+    app.active(true).version("0.0.2").author("user");
 
     app.install(&fixture.registry_dir.path());
-    fixture.start_service(false);
+    fixture.start_service();
 
     // Make sure our app directory exists
     assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
@@ -287,29 +272,20 @@ fn uninstall_new_app() {
 
     // Pre-load the app registry
     let mut app = MockAppBuilder::new("dummy");
-    app.active(true)
-        .run_level("OnBoot")
-        .version("0.0.2")
-        .author("user");
+    app.active(true).version("0.0.2").author("user");
 
     app.install(&fixture.registry_dir.path());
 
     let mut app = MockAppBuilder::new("dummy");
-    app.active(true)
-        .run_level("OnBoot")
-        .version("0.0.3")
-        .author("user");
+    app.active(true).version("0.0.3").author("user");
 
     app.install(&fixture.registry_dir.path());
 
     let mut app = MockAppBuilder::new("dummy2");
-    app.active(true)
-        .run_level("OnBoot")
-        .version("0.0.2")
-        .author("user");
+    app.active(true).version("0.0.2").author("user");
 
     app.install(&fixture.registry_dir.path());
-    fixture.start_service(false);
+    fixture.start_service();
 
     // Create a new version of our app to be installed
     let app_dir = TempDir::new().unwrap();

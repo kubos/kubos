@@ -58,7 +58,6 @@ fn setup_app(registry_dir: &Path) {
     let toml = format!(
         r#"
             active_version = true
-            run_level = "onCommand"
 
             [app]
             executable = "{}/rust-proj/1.0/rust-proj"
@@ -91,12 +90,12 @@ fn app_no_args() {
 
     setup_app(&fixture.registry_dir.path());
 
-    fixture.start_service(true);
+    fixture.start_service();
 
     let result = send_query(
         config,
         r#"mutation {
-            startApp(name: "rust-proj", runLevel: "OnBoot") {
+            startApp(name: "rust-proj") {
                 errors,
                 success
             }
@@ -105,7 +104,12 @@ fn app_no_args() {
 
     fixture.teardown();
 
-    assert!(result["startApp"]["success"].as_bool().unwrap());
+    // The test app is setup to verify arguments, so for this case we want to make sure it failed
+    // as expected
+    assert_eq!(
+        result["startApp"]["errors"].as_str().unwrap(),
+        "Failed to start app: App returned exit code: 1"
+    );
 }
 
 #[test]
@@ -126,12 +130,12 @@ fn app_single_pos_arg() {
 
     setup_app(&fixture.registry_dir.path());
 
-    fixture.start_service(true);
+    fixture.start_service();
 
     let result = send_query(
         config,
         r#"mutation {
-            startApp(name: "rust-proj", runLevel: "OnCommand", args: ["pos"]) {
+            startApp(name: "rust-proj", args: ["pos"]) {
                 errors,
                 success
             }
@@ -161,12 +165,12 @@ fn app_single_flag() {
 
     setup_app(&fixture.registry_dir.path());
 
-    fixture.start_service(true);
+    fixture.start_service();
 
     let result = send_query(
         config,
         r#"mutation {
-            startApp(name: "rust-proj", runLevel: "OnCommand", args: ["-f"]) {
+            startApp(name: "rust-proj", args: ["-f"]) {
                 errors,
                 success
             }
@@ -196,12 +200,12 @@ fn app_flag_arg() {
 
     setup_app(&fixture.registry_dir.path());
 
-    fixture.start_service(true);
+    fixture.start_service();
 
     let result = send_query(
         config,
         r#"mutation {
-            startApp(name: "rust-proj", runLevel: "OnCommand", args: ["-t", "test"]) {
+            startApp(name: "rust-proj", args: ["-t", "test"]) {
                 errors,
                 success
             }
@@ -231,12 +235,12 @@ fn app_custom_config() {
 
     setup_app(&fixture.registry_dir.path());
 
-    fixture.start_service(true);
+    fixture.start_service();
 
     let result = send_query(
         config,
         r#"mutation {
-            startApp(name: "rust-proj", runLevel: "OnCommand", config: "config.toml") {
+            startApp(name: "rust-proj", config: "config.toml", args: ["-f"]) {
                 errors,
                 success
             }

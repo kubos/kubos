@@ -20,7 +20,6 @@ use crate::monitor::*;
 use chrono::Utc;
 use failure::format_err;
 use fs_extra;
-use kubos_app::RunLevel;
 use log::*;
 use nix::sys::signal;
 use nix::unistd::Pid;
@@ -589,19 +588,19 @@ impl AppRegistry {
     /// # Arguments
     ///
     /// * `app_name` - The name of the app to start
-    /// * `run_level` - Which Run Level to run the app with
+    /// * `config` - (Optional) The custom config file path to use
+    /// * `args` - (Optional) Arguments which should be passed to the application
     ///
     /// # Examples
     ///
     /// ```
-    /// # use kubos_app::registry::{AppRegistry, RunLevel};
+    /// # use kubos_app::registry::AppRegistry;
     /// let registry = AppRegistry::new();
-    /// registry.start_app("my-app", RunLevel::OnCommand);
+    /// registry.start_app("my-app", None, None);
     /// ```
     pub fn start_app(
         &self,
         app_name: &str,
-        run_level: &RunLevel,
         config: Option<String>,
         args: Option<Vec<String>>,
     ) -> Result<Option<i32>, AppError> {
@@ -651,13 +650,12 @@ impl AppRegistry {
         }
 
         // Check if app is already running
-        let run_level_str = format!("{}", run_level);
-        let running_status = find_running(&self.monitoring, app_name, &run_level_str);
+        let running_status = find_running(&self.monitoring, app_name);
         match running_status {
             Ok(None) => {}
             Ok(Some(_)) => {
                 return Err(AppError::StartError {
-                    err: format!("Instance of {} already running {}", app_name, run_level_str),
+                    err: format!("Instance of {} already running", app_name),
                 });
             }
             Err(err) => {
@@ -670,8 +668,6 @@ impl AppRegistry {
         }
 
         let mut cmd = Command::new(app_path);
-
-        cmd.arg("-r").arg(format!("{}", run_level));
 
         let config_path = match config {
             // Use the requested config file
@@ -692,8 +688,8 @@ impl AppRegistry {
 
         let start_time = Utc::now();
         info!(
-            "Starting {}. Run Level: {}, Config: {:?}, Args: {:?}",
-            app_name, run_level, config_path, args
+            "Starting {}. Config: {:?}, Args: {:?}",
+            app_name, config_path, args
         );
 
         // Add/update the monitoring registry with the new run info
@@ -706,7 +702,6 @@ impl AppRegistry {
             pid: Some(child.id() as i32),
             last_rc: None,
             last_signal: None,
-            run_level: run_level_str.clone(),
             args,
             config: config_path,
         };
@@ -733,7 +728,6 @@ impl AppRegistry {
                     &self.monitoring,
                     app_name,
                     &app.version,
-                    &run_level_str,
                     status,
                 )?;
 
@@ -752,7 +746,7 @@ impl AppRegistry {
 
                 // Spawn monitor thread
                 thread::spawn(move || {
-                    let result = monitor_app(registry, child, &name, &app.version, &run_level_str);
+                    let result = monitor_app(registry, child, &name, &app.version);
 
                     if let Err(error) = result {
                         error!("{:?}", error);
@@ -769,65 +763,14 @@ impl AppRegistry {
             }),
         }
     }
-
-    /// Call the active version of all registered applications with the "OnBoot" run level
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use kubos_app::registry::{AppRegistry, RunLevel};
-    /// let registry = AppRegistry::new();
-    /// registry.run_onboot();
-    /// ```
-    pub fn run_onboot(&self) -> Result<(), AppError> {
-        let mut apps_started = 0;
-        let mut apps_not_started = 0;
-
-        let active_symlink = PathBuf::from(format!("{}/active", self.apps_dir));
-        if !active_symlink.exists() {
-            return Err(AppError::FileError {
-                err: "Failed to get list of active applications".to_owned(),
-            });
-        }
-
-        for entry in fs::read_dir(active_symlink)? {
-            match entry {
-                Ok(file) => {
-                    let name = file.file_name();
-                    match self.start_app(&name.to_string_lossy(), &RunLevel::OnBoot, None, None) {
-                        Ok(_) => apps_started += 1,
-                        Err(error) => {
-                            error!("Failed to start {}: {}", name.to_string_lossy(), error);
-                            apps_not_started += 1
-                        }
-                    }
-                }
-                Err(_) => apps_not_started += 1,
-            }
-        }
-
-        info!(
-            "Apps started: {}, Apps failed: {}",
-            apps_started, apps_not_started
-        );
-
-        if apps_not_started != 0 {
-            return Err(AppError::SystemError {
-                err: format!("Failed to start {} app/s", apps_not_started),
-            });
-        }
-
-        Ok(())
-    }
-
+    
     pub fn kill_app(
         &self,
         name: &str,
-        run_level: &str,
         signal: Option<i32>,
     ) -> Result<(), AppError> {
         // Lookup the app in the monitoring registry to get the PID to kill
-        let app = find_running(&self.monitoring, name, run_level)?.ok_or(AppError::KillError {
+        let app = find_running(&self.monitoring, name)?.ok_or(AppError::KillError {
             err: "No matching monitoring entry found".to_owned(),
         })?;
 

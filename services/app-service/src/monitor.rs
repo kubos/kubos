@@ -26,7 +26,6 @@ use std::sync::{Arc, Mutex};
 pub struct MonitorEntry {
     pub name: String,
     pub version: String,
-    pub run_level: String,
     pub start_time: DateTime<Utc>,
     pub end_time: Option<DateTime<Utc>>,
     pub running: bool,
@@ -40,15 +39,14 @@ pub struct MonitorEntry {
 // Check if any version of the application is running with the requested run level
 pub fn find_running(
     registry: &Arc<Mutex<Vec<MonitorEntry>>>,
-    name: &str,
-    run_level: &str,
+    name: &str
 ) -> Result<Option<MonitorEntry>, AppError> {
     let entries = registry.lock().map_err(|err| AppError::MonitorError {
         err: format!("Failed get entries mutex: {:?}", err),
     })?;
 
     Ok(entries.iter().find_map(|entry| {
-        if entry.name == name && entry.run_level == run_level && entry.running {
+        if entry.name == name && entry.running {
             Some(entry.clone())
         } else {
             None
@@ -60,8 +58,7 @@ pub fn monitor_app(
     registry: Arc<Mutex<Vec<MonitorEntry>>>,
     mut process_handle: Child,
     name: &str,
-    version: &str,
-    run_level: &str,
+    version: &str
 ) -> Result<(), AppError> {
     // Wait for the application to finish running
     let status = process_handle
@@ -70,7 +67,7 @@ pub fn monitor_app(
             err: format!("Failed to wait for {} to finish: {:?}", name, err),
         })?;
 
-    finish_entry(&registry, &name, &version, &run_level, status)
+    finish_entry(&registry, &name, &version, status)
 }
 
 // Update/add an entry to denote the start of a new execution of an app
@@ -90,7 +87,6 @@ pub fn start_entry(
     if let Some(index) = entries.iter().position(|ref e| {
         e.name == new_entry.name
             && e.version == new_entry.version
-            && e.run_level == new_entry.run_level
     }) {
         debug!(
             "Updating existing entry for {} {} {}",
@@ -110,7 +106,6 @@ pub fn finish_entry(
     registry: &Arc<Mutex<Vec<MonitorEntry>>>,
     name: &str,
     version: &str,
-    run_level: &str,
     status: ExitStatus,
 ) -> Result<(), AppError> {
     let mut last_rc = None;
@@ -141,7 +136,7 @@ pub fn finish_entry(
     // Find the monitoring entry and update it with the return code/exit signal and the end time
     if let Some(index) = entries
         .iter()
-        .position(|ref e| e.name == name && e.version == version && e.run_level == run_level)
+        .position(|ref e| e.name == name && e.version == version)
     {
         entries[index].running = false;
         entries[index].last_rc = last_rc;
@@ -150,8 +145,8 @@ pub fn finish_entry(
         entries[index].end_time = Some(end_time);
     } else {
         warn!(
-            "Unable to find entry for {} {} {}",
-            name, version, run_level
+            "Unable to find entry for {} {}",
+            name, version
         );
     }
 
@@ -163,8 +158,7 @@ pub fn finish_entry(
 pub fn remove_entry(
     registry: &Arc<Mutex<Vec<MonitorEntry>>>,
     name: &str,
-    version: &str,
-    run_level: &str,
+    version: &str
 ) -> Result<(), AppError> {
     let mut entries = registry.lock().map_err(|err| AppError::MonitorError {
         err: format!(
@@ -174,7 +168,7 @@ pub fn remove_entry(
     })?;
     if let Some(index) = entries
         .iter()
-        .position(|ref e| e.name == name && e.version == version && e.run_level == run_level)
+        .position(|ref e| e.name == name && e.version == version)
     {
         entries.remove(index);
     }
@@ -200,4 +194,5 @@ pub fn remove_entries(
     entries.retain(|entry| entry.name != name);
 
     Ok(())
+
 }
