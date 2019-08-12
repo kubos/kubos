@@ -17,7 +17,6 @@
 // OBC Housekeeping Application
 //
 // Default behavior:
-// Every hour -
 // - Clean out any telemetry database entries which are older than a week
 // - Check for excessive disk or RAM usage
 // - Check for corruption in the user data partition
@@ -33,8 +32,6 @@ mod ping;
 use failure::{bail, err_msg, Error};
 use kubos_app::*;
 use log::*;
-use std::cell::Cell;
-use std::thread;
 use std::time::Duration;
 
 /************** App Configuration Values **********************/
@@ -57,8 +54,6 @@ pub const CONFIG_PATH: &str = "/home/system/etc/config.toml";
 pub const TELEMETRY_AGE: f64 = 604_800.0;
 // Maximum telemetry entry age when system is low on disk space. Default: 1 day (60*60*24)
 pub const CRITICAL_AGE: f64 = 86400.0;
-// How long to wait before re-running the housekeeping actions
-pub const INTERVAL: Duration = Duration::from_secs(60);
 
 // RAM usage % which is considered nominal
 pub const RAM_NOMINAL: u8 = 50;
@@ -79,59 +74,35 @@ pub const QUERY_TIMEOUT: Duration = Duration::from_millis(200);
 
 /************** End of Configuration **************************/
 
-struct MyApp {
-    // Used to help detect system reboots. Gets set the first time the `check_reset` function is
-    // called
-    active_flag: Cell<bool>,
-}
-
-impl AppHandler for MyApp {
-    fn on_boot(&self, _args: Vec<String>) -> Result<(), Error> {
-        loop {
-            // Delete old database entries
-            if let Err(error) = clean_db::clean_db(TELEMETRY_AGE) {
-                error!("Error while cleaning telemetry database: {:?}", error);
-            }
-
-            // Check RAM and disk usage
-            if let Err(error) = check_mem::check_mem() {
-                error!("Error while checking memory: {:?}", error);
-            }
-
-            // Check for file system corruption
-            if let Err(error) = check_fs::check_fs() {
-                error!("Error while checking filesystem {:?}", error);
-            }
-
-            // Check for system reset
-            if let Err(error) = check_reset::check_reset(&self.active_flag) {
-                error!("Error while checking system reset: {:?}", error);
-            }
-
-            // Ping all services
-            match ping::ping_services() {
-                Ok(0) => info!("Successfully pinged all services"),
-                Ok(count) => warn!("Failed to ping {} services", count),
-                Err(error) => error!("Error while pinging the services: {:?}", error),
-            }
-
-            thread::sleep(INTERVAL);
-        }
-    }
-
-    fn on_command(&self, _args: Vec<String>) -> Result<(), Error> {
-        println!("OnCommand logic");
-        // Nice to have (todo): Add ability to manually remove more of the telemetry database entries
-        // (ex. only retain the last day's worth of data)
-        Ok(())
-    }
-}
-
 fn main() -> Result<(), Error> {
-    let app = MyApp {
-        active_flag: Cell::new(false),
-    };
-    app_main!(&app, log::LevelFilter::Info)?;
+    logging_setup!(env!("CARGO_PKG_NAME"))?;
+
+    // Delete old database entries
+    if let Err(error) = clean_db::clean_db(TELEMETRY_AGE) {
+        error!("Error while cleaning telemetry database: {:?}", error);
+    }
+
+    // Check RAM and disk usage
+    if let Err(error) = check_mem::check_mem() {
+        error!("Error while checking memory: {:?}", error);
+    }
+
+    // Check for file system corruption
+    if let Err(error) = check_fs::check_fs() {
+        error!("Error while checking filesystem {:?}", error);
+    }
+
+    // Check for system reset
+    if let Err(error) = check_reset::check_reset() {
+        error!("Error while checking system reset: {:?}", error);
+    }
+
+    // Ping all services
+    match ping::ping_services() {
+        Ok(0) => info!("Successfully pinged all services"),
+        Ok(count) => warn!("Failed to ping {} services", count),
+        Err(error) => error!("Error while pinging the services: {:?}", error),
+    }
 
     Ok(())
 }

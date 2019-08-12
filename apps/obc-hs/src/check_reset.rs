@@ -23,42 +23,37 @@
 use super::*;
 use std::process::Command;
 
-pub fn check_reset(active_flag: &Cell<bool>) -> Result<(), Error> {
-    if !active_flag.get() {
-        // If we're here, that means one of two things:
-        // 1. The system just started up
-        // 2. This app was restarted
+pub fn check_reset() -> Result<(), Error> {
+    // If we're here, that means one of two things:
+    // 1. The system just started up
+    // 2. This app was restarted
 
-        // Get the current uptime
-        let uptime = if let Ok(output) = Command::new("cat").arg("/proc/uptime").output() {
-            if !output.stderr.is_empty() {
-                bail!(
-                    "Failed to get system uptime: {}",
-                    ::std::str::from_utf8(&output.stderr).unwrap_or("n/a")
-                );
-            }
-
-            let mut slices = output.stdout.split(|&elem| elem == b' ');
-
-            // The first entry is the overall system uptime
-            let temp = slices
-                .next()
-                .ok_or_else(|| err_msg("Failed to get system uptime"))?;
-            // Convert it to a useable number
-            let uptime = ::std::str::from_utf8(&temp)?;
-            uptime.parse::<f32>()?
-        } else {
-            bail!("Failed to get system uptime");
-        };
-
-        // If the uptime is less than 30 seconds, we'll assume that the entire system was restarted,
-        // rather than just this app
-        if uptime < 30.0 {
-            error!("System reset observed");
+    // Get the current uptime
+    let uptime = if let Ok(output) = Command::new("cat").arg("/proc/uptime").output() {
+        if !output.stderr.is_empty() {
+            bail!(
+                "Failed to get system uptime: {}",
+                ::std::str::from_utf8(&output.stderr).unwrap_or("n/a")
+            );
         }
 
-        // Mark the flag as true for the next time we're here
-        active_flag.set(true);
+        let mut slices = output.stdout.split(|&elem| elem == b' ');
+
+        // The first entry is the overall system uptime
+        let temp = slices
+            .next()
+            .ok_or_else(|| err_msg("Failed to get system uptime"))?;
+        // Convert it to a useable number
+        let uptime = ::std::str::from_utf8(&temp)?;
+        uptime.parse::<f32>()?
+    } else {
+        bail!("Failed to get system uptime");
+    };
+
+    // If the uptime is less than 30 seconds, we'll assume that the entire system was restarted,
+    // rather than just this app
+    if uptime < 30.0 {
+        error!("System reset observed");
     }
 
     Ok(())
