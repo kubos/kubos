@@ -108,8 +108,8 @@ pub fn read_thread(
             // If message is abbrv. ascii message (starts with "<")
             if message[0] == 0x3c {
                 let mut ascii_message = vec![];
-                ascii_message.push(message[1].clone());
-                ascii_message.push(message[2].clone());
+                ascii_message.push(message[1]);
+                ascii_message.push(message[2]);
                 let mut ascii_char;
 
                 // Read response ASCII string byte by byte until it ends (no valid character is read)

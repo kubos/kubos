@@ -113,7 +113,7 @@ pub enum TestResults {
     Hardware(HardwareTestResults),
 }
 
-/// Response union for 'testHardware' mutation
+// Response union for 'testHardware' mutation
 graphql_union!(TestResults: () where Scalar = <S> |&self| {
     instance_resolvers: |&_| {
         &IntegrationTestResults => match *self {

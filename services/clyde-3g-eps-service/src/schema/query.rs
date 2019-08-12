@@ -238,7 +238,7 @@ graphql_object!(Telemetry: Context as "telemetry" |&self| {
 /// Top-level query root structure
 pub struct Root;
 
-/// Base GraphQL query
+// Base GraphQL query
 graphql_object!(Root: Context as "Query" |&self| {
 
     // Test query to verify service is running without

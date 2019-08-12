@@ -25,7 +25,7 @@ type Context = kubos_service::Context<()>;
 
 pub struct QueryRoot;
 
-/// Base GraphQL query model
+// Base GraphQL query model
 graphql_object!(QueryRoot: Context as "Query" |&self| {
     field ping() -> FieldResult<String>
     {
@@ -52,7 +52,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
 
 pub struct MutationRoot;
 
-/// Base GraphQL mutation model
+// Base GraphQL mutation model
 graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     field noop(&executor) -> FieldResult<()>
     {

@@ -14,6 +14,9 @@
 // limitations under the License.
 //
 
+#![deny(missing_docs)]
+#![deny(warnings)]
+
 //! Service for monitoring KubOS Linux processes, memory, and CPU usage
 //!
 //! # GraphQL Schema
