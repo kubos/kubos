@@ -57,12 +57,13 @@ const TIMEOUT: Duration = Duration::from_millis(60);
 ///
 /// let (log_send, log_recv) = sync_channel(5);
 /// let (response_send, response_recv) = sync_channel(5);
+/// let (response_abbrv_send, response_abbrv_recv) = sync_channel(5);
 ///
-/// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+/// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv, response_abbrv_recv).unwrap();
 ///
 /// let rx_conn = oem.conn.clone();
 ///
-/// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
+/// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send, &response_abbrv_send));
 /// # Ok(())
 /// # }
 /// ```
@@ -274,8 +275,10 @@ impl OEM6 {
     ///
     /// let (log_send, log_recv) = sync_channel(5);
     /// let (response_send, response_recv) = sync_channel(5);
+    /// let (response_abbrv_send, response_abbrv_recv) = sync_channel(5);
     ///
-    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv, response_abbrv_recv).unwrap();
+    ///
     /// # Ok(())
     /// # }
     /// ```
@@ -325,9 +328,10 @@ impl OEM6 {
     /// # let bus = "/dev/ttyS5";
     /// # let (log_send, log_recv) = sync_channel(5);
     /// # let (response_send, response_recv) = sync_channel(5);
-    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    /// # let (response_abbrv_send, response_abbrv_recv) = sync_channel(5);
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv, response_abbrv_recv).unwrap();
     /// let rx_conn = oem.conn.clone();
-    /// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
+    /// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send, &response_abbrv_send));
     ///
     /// oem.request_version()?;
     ///
@@ -400,9 +404,11 @@ impl OEM6 {
     /// # let bus = "/dev/ttyS5";
     /// # let (log_send, log_recv) = sync_channel(5);
     /// # let (response_send, response_recv) = sync_channel(5);
-    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    /// # let (response_abbrv_send, response_abbrv_recv) = sync_channel(5);
+    ///
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv, response_abbrv_recv).unwrap();
     /// let rx_conn = oem.conn.clone();
-    /// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
+    /// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send, &response_abbrv_send));
     ///
     /// oem.request_position(1.0, 0.0, false)?;
     ///
@@ -469,7 +475,8 @@ impl OEM6 {
     /// # let bus = "/dev/ttyS5";
     /// # let (log_send, log_recv) = sync_channel(5);
     /// # let (response_send, response_recv) = sync_channel(5);
-    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    /// # let (response_abbrv_send, response_abbrv_recv) = sync_channel(5);
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv, response_abbrv_recv).unwrap();
     ///
     /// oem.request_errors(false)?;
     /// # Ok(())
@@ -513,7 +520,8 @@ impl OEM6 {
     /// # let bus = "/dev/ttyS5";
     /// # let (log_send, log_recv) = sync_channel(5);
     /// # let (response_send, response_recv) = sync_channel(5);
-    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    /// # let (response_abbrv_send, response_abbrv_recv) = sync_channel(5);
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv, response_abbrv_recv).unwrap();
     ///
     /// oem.request_unlog(MessageID::BestXYZ)?;
     /// # Ok(())
@@ -550,7 +558,8 @@ impl OEM6 {
     /// # let bus = "/dev/ttyS5";
     /// # let (log_send, log_recv) = sync_channel(5);
     /// # let (response_send, response_recv) = sync_channel(5);
-    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    /// # let (response_abbrv_send, response_abbrv_recv) = sync_channel(5);
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv, response_abbrv_recv).unwrap();
     ///
     /// // Request position information every second and prevent unlogging with unlog_all()
     /// oem.request_position(1.0, 0.0, true)?;
@@ -570,7 +579,8 @@ impl OEM6 {
     /// # let bus = "/dev/ttyS5";
     /// # let (log_send, log_recv) = sync_channel(5);
     /// # let (response_send, response_recv) = sync_channel(5);
-    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    /// # let (response_abbrv_send, response_abbrv_recv) = sync_channel(5);
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv, response_abbrv_recv).unwrap();
     ///
     /// // Request position information every second and prevent unlogging with unlog_all()
     /// oem.request_position(1.0, 0.0, true)?;
@@ -613,7 +623,8 @@ impl OEM6 {
     /// # let bus = "/dev/ttyS5";
     /// # let (log_send, log_recv) = sync_channel(5);
     /// # let (response_send, response_recv) = sync_channel(5);
-    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    /// # let (response_abbrv_send, response_abbrv_recv) = sync_channel(5);
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv, response_abbrv_recv).unwrap();
     ///
     /// let packet: [u8; 6] = [0, 1, 2, 3, 4, 5];
     /// oem.passthrough(&packet)?;
@@ -773,9 +784,10 @@ impl OEM6 {
     /// # let bus = "/dev/ttyS5";
     /// # let (log_send, log_recv) = sync_channel(5);
     /// # let (response_send, response_recv) = sync_channel(5);
-    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv).unwrap();
+    /// # let (response_abbrv_send, response_abbrv_recv) = sync_channel(5);
+    /// let oem = OEM6::new(bus, BaudRate::Baud9600, log_recv, response_recv, response_abbrv_recv).unwrap();
     /// let rx_conn = oem.conn.clone();
-    /// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send));
+    /// thread::spawn(move || read_thread(&rx_conn, &log_send, &response_send, &response_abbrv_send));
     ///
     /// let entry = oem.get_log()?;
     ///

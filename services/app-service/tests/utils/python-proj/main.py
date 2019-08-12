@@ -10,6 +10,7 @@ import logging
 from sub import sub
 import sys
 
+
 def on_boot():
     
     sub.test_func()
@@ -20,6 +21,7 @@ def on_command(args):
     parser = argparse.ArgumentParser()
     
     parser.add_argument('-t', '--test', nargs=1)
+    parser.add_argument('-e', '--error', action='store_true')
     parser.add_argument('-f', '--flag', action='store_true')
     parser.add_argument('positional', nargs='?')
     
@@ -27,9 +29,12 @@ def on_command(args):
     
     success = False
     
+    if matches.error:
+      sys.exit(123)
+
     if matches.flag:
         success = True
-        
+
     if matches.test is not None and matches.test[0] == "test":
         success = True
         
@@ -52,10 +57,21 @@ def main():
         nargs=1,
         help='Determines run behavior. Either "OnBoot" or "OnCommand"',
         required=True)
+    parser.add_argument(
+        '-c',
+        '--config',
+        nargs=1,
+        help='Specifies the location of a non-default configuration file')
     parser.add_argument('cmd_args', nargs='*')
     
     args = parser.parse_args()
     
+    if args.config is not None:
+        global SERVICES
+        SERVICES = app_api.Services(args.config[0])
+    else:
+        SERVICES = app_api.Services()
+
     if args.run[0] == 'OnBoot':
         on_boot()
     elif args.run[0] == 'OnCommand':

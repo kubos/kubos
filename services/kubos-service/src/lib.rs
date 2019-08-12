@@ -30,7 +30,7 @@
 //! ## In Services
 //!
 //! Services should only link to the `kubos_service` crate if they have a
-//! hardware device they want to expose over the service interface (currently GraphQL/UDP).
+//! hardware device they want to expose over the service interface (currently GraphQL/HTTP).
 //!
 //! ## Configuration
 //!
@@ -69,7 +69,7 @@
 //! use schema::{MutationRoot, QueryRoot};
 //!
 //! Service::new(
-//!     Config::new("service-name"),
+//!     Config::new("service-name").unwrap(),
 //!     Subsystem::new(),
 //!     QueryRoot,
 //!     MutationRoot,
@@ -83,7 +83,7 @@
 //! use model::Subsystem;
 //! use schema::{MutationRoot, QueryRoot};
 //!
-//! let config = Config::new("example-service");
+//! let config = Config::new("example-service").unwrap();
 //! let subsystem = Subsystem { bus = config["bus"] ) };
 //! Service::new(
 //!     config,

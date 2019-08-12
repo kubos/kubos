@@ -109,17 +109,17 @@ If you are working inside of the SDK VM, then the native target is x86 Linux.
 
 The SDK also provides cross-compiling toolchains for several different targets:
 
-+------------+-----------------------------------------------+---------------------------------------------------+
-| Vendor     | Toolchain                                     | Description                                       |
-+============+===============================================+===================================================+
-| ISIS       | /usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc | ISIS-OBC                                          |
-+------------+-----------------------------------------------+---------------------------------------------------+
-| Pumpkin    | /usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc  | Pumpkin Motherboard Module 2                      |
-+------------+-----------------------------------------------+---------------------------------------------------+
-| Beaglebone | /usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc  | Beaglebone Black, Rev. C                          |
-+------------+-----------------------------------------------+---------------------------------------------------+
-| (Vagrant)  | /usr/bin/gcc                                  | Native x86 Linux                                  |
-+------------+-----------------------------------------------+---------------------------------------------------+
++------------+-----------------------------------------------+------------------------------+
+| Vendor     | Toolchain                                     | Description                  |
++============+===============================================+==============================+
+| ISIS       | /usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc | ISIS-OBC                     |
++------------+-----------------------------------------------+------------------------------+
+| Pumpkin    | /usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc  | Pumpkin Motherboard Module 2 |
++------------+-----------------------------------------------+------------------------------+
+| Beaglebone | /usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc  | Beaglebone Black, Rev. C     |
++------------+-----------------------------------------------+------------------------------+
+| (Vagrant)  | /usr/bin/gcc                                  | Native x86 Linux             |
++------------+-----------------------------------------------+------------------------------+
 
 If you would like to cross-compile for one of the supported embedded boards, then
 CMake will need to be informed about which cross-compiling toolchain to use. CMake
@@ -135,8 +135,8 @@ For example::
 
 .. _c-transfer:
 
-Flashing
---------
+Transferring
+------------
 
 Executables generated from C projects can be transferred to the target OBC :ref:`via a supported file
 transfer method <file-transfer>`.

@@ -9,8 +9,8 @@ struct MyApp;
 
 impl AppHandler for MyApp {
     fn on_boot(&self, _args: Vec<String>) -> Result<(), Error> {
-        let monitor_service = ServiceConfig::new("monitor-service");
-        let telemetry_service = ServiceConfig::new("telemetry-service");
+        let monitor_service = ServiceConfig::new("monitor-service")?;
+        let telemetry_service = ServiceConfig::new("telemetry-service")?;
 
         loop {
             thread::sleep(Duration::from_secs(3));
@@ -71,22 +71,21 @@ impl AppHandler for MyApp {
     fn on_command(&self, args: Vec<String>) -> Result<(), Error> {
         let mut opts = Options::new();
 
-        opts.optflagopt(
-            "r",
-            "run",
-            "Run level which should be executed",
-            "RUN_LEVEL",
-        );
         opts.optflagopt("s", "cmd_string", "Subcommand", "CMD_STR");
         opts.optflagopt("t", "cmd_sleep", "Safe-mode sleep time", "CMD_INT");
 
-        // Parse the command args (skip the first arg with the application name)
-        let matches = match opts.parse(&args[1..]) {
+        info!("OnCommand logic called");
+
+        if args.len() == 0 {
+            // No subcommand options were given, so we're done here
+            return Ok(());
+        }
+
+        // Parse the command args
+        let matches = match opts.parse(args) {
             Ok(r) => r,
             Err(f) => panic!(f.to_string()),
         };
-
-        info!("OnCommand logic called");
 
         let subcommand = matches.opt_str("s").unwrap_or_else(|| "".to_owned());
 
@@ -112,7 +111,6 @@ impl AppHandler for MyApp {
                     apps {
                         active,
                         app {
-                            uuid,
                             name,
                             version,
                             author
@@ -121,7 +119,7 @@ impl AppHandler for MyApp {
                 }"#;
 
                 match query(
-                    &ServiceConfig::new("app-service"),
+                    &ServiceConfig::new("app-service")?,
                     request,
                     Some(Duration::from_secs(1)),
                 ) {

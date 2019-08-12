@@ -32,7 +32,7 @@ fn callback_test() {
 
     let sim = TestCommand::new(
         "nos_engine_server_standalone",
-        vec!["-f", "test/integration/nosengine-rust/sim_config1.json"],
+        vec!["-f", "sim_config1.json"],
     );
     sim.spawn();
 
@@ -56,7 +56,7 @@ fn request_message_test() {
 
     let sim = TestCommand::new(
         "nos_engine_server_standalone",
-        vec!["-f", "test/integration/nosengine-rust/sim_config2.json"],
+        vec!["-f", "sim_config2.json"],
     );
     sim.spawn();
 
@@ -81,7 +81,7 @@ fn expect_error() {
 
     let sim = TestCommand::new(
         "nos_engine_server_standalone",
-        vec!["-f", "test/integration/nosengine-rust/sim_config3.json"],
+        vec!["-f", "sim_config3.json"],
     );
     sim.spawn();
 
@@ -110,7 +110,7 @@ fn spi_test() {
 
     let sim = TestCommand::new(
         "nos_engine_server_standalone",
-        vec!["-f", "test/integration/nosengine-rust/sim_config4.json"],
+        vec!["-f", "sim_config4.json"],
     );
     sim.spawn();
 

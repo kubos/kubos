@@ -229,8 +229,12 @@ macro_rules! test {
 
 macro_rules! service_new {
     ($mock:ident) => {{
+        let config = r#"
+            [isis-ants-service.addr]
+            ip = "127.0.0.1"
+            port = 9999"#;
         Service::new(
-            Config::new("isis-ants-service"),
+            Config::new_from_str("isis-ants-service", &config).unwrap(),
             Subsystem {
                 ants: Box::new($mock),
                 count: 4,

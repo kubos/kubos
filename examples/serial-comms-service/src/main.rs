@@ -96,7 +96,7 @@ fn log_init() -> SerialServiceResult<()> {
 fn main() -> SerialServiceResult<()> {
     log_init()?;
 
-    let service_config = Config::new("serial-comms-service");
+    let service_config = Config::new("serial-comms-service")?;
 
     let bus = service_config
         .get("bus")

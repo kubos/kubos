@@ -28,7 +28,7 @@ macro_rules! test_mutation_query_results {
         let port: u16 = 8110 + $port_offset;
         let udp: u16 = 8210 + $port_offset;
 
-        let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
+        let (handle, sender) = setup(db, Some(port), Some(udp), None);
         let mutation_expected = json!($mutation_expected);
         let mutation_result = do_query(Some(port), $mutation);
         let query_expected = json!($query_expected);

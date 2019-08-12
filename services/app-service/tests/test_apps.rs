@@ -92,7 +92,7 @@ macro_rules! test_query {
             let result = panic::catch_unwind(|| {
                 let test: &Fn(Vec<serde_json::Value>) = &$test_closure;
                 test(apps_query(
-                    ServiceConfig::new_from_path("app-service", config.to_owned()),
+                    ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
                     $query,
                 ));
             });

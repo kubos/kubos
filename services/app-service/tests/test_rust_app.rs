@@ -47,6 +47,13 @@ fn setup_app(registry_dir: &Path) {
     // Copy our test file to make sure we can access it later
     fs::copy("tests/utils/rust-proj/testfile", app_dir.join("testfile")).unwrap();
 
+    // Copy our config file to make sure we can access it later
+    fs::copy(
+        "tests/utils/rust-proj/config.toml",
+        app_dir.join("config.toml"),
+    )
+    .unwrap();
+
     // Create our manifest file
     let toml = format!(
         r#"
@@ -78,7 +85,8 @@ fn app_no_args() {
                 .join("config.toml")
                 .to_string_lossy()
         ),
-    );
+    )
+    .unwrap();
 
     setup_app(&fixture.registry_dir.path());
 
@@ -112,7 +120,8 @@ fn app_single_pos_arg() {
                 .join("config.toml")
                 .to_string_lossy()
         ),
-    );
+    )
+    .unwrap();
 
     setup_app(&fixture.registry_dir.path());
 
@@ -146,7 +155,8 @@ fn app_single_flag() {
                 .join("config.toml")
                 .to_string_lossy()
         ),
-    );
+    )
+    .unwrap();
 
     setup_app(&fixture.registry_dir.path());
 
@@ -180,7 +190,8 @@ fn app_flag_arg() {
                 .join("config.toml")
                 .to_string_lossy()
         ),
-    );
+    )
+    .unwrap();
 
     setup_app(&fixture.registry_dir.path());
 
@@ -190,6 +201,41 @@ fn app_flag_arg() {
         config,
         r#"mutation {
             startApp(name: "rust-proj", runLevel: "OnCommand", args: ["-t", "test"]) {
+                errors,
+                success
+            }
+        }"#,
+    );
+
+    fixture.teardown();
+
+    assert!(result["startApp"]["success"].as_bool().unwrap());
+}
+
+#[test]
+fn app_custom_config() {
+    let mut fixture = AppServiceFixture::setup();
+    let config = ServiceConfig::new_from_path(
+        "app-service",
+        format!(
+            "{}",
+            fixture
+                .registry_dir
+                .path()
+                .join("config.toml")
+                .to_string_lossy()
+        ),
+    )
+    .unwrap();
+
+    setup_app(&fixture.registry_dir.path());
+
+    fixture.start_service(true);
+
+    let result = send_query(
+        config,
+        r#"mutation {
+            startApp(name: "rust-proj", runLevel: "OnCommand", config: "config.toml") {
                 errors,
                 success
             }

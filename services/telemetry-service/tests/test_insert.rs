@@ -31,7 +31,7 @@ fn test_insert_auto_timestamp() {
     let port = 8111;
     let udp = 8121;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
+    let (handle, sender) = setup(db, Some(port), Some(udp), None);
 
     let mutation = r#"mutation {
             insert(subsystem: "test2", parameter: "voltage", value: "4.0") {
@@ -82,7 +82,7 @@ fn test_insert_custom_timestamp() {
     let port = 8112;
     let udp = 8122;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
+    let (handle, sender) = setup(db, Some(port), Some(udp), None);
 
     let mutation = r#"mutation {
             insert(timestamp: 5, subsystem: "test2", parameter: "voltage", value: "4.0") {
@@ -135,7 +135,7 @@ fn test_insert_multi_auto() {
     let port = 8113;
     let udp = 8123;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
+    let (handle, sender) = setup(db, Some(port), Some(udp), None);
 
     let mutation_expected = json!({
         "data": {
@@ -221,7 +221,7 @@ fn test_insert_current_timestamp() {
     let port = 8114;
     let udp = 8124;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
+    let (handle, sender) = setup(db, Some(port), Some(udp), None);
 
     let time = time::now_utc().to_timespec();
     let now = time.sec as f64 + (time.nsec as f64 / 1000000000.0);

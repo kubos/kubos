@@ -113,7 +113,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
         })
     }
 
-    field start_app(&executor, name: String, run_level: String, args: Option<Vec<String>>) -> FieldResult<StartResponse>
+    field start_app(&executor, name: String, run_level: String, config: Option<String>, args: Option<Vec<String>>) -> FieldResult<StartResponse>
         as "Start App"
     {
         let run_level_o = {
@@ -133,7 +133,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
             None
         };
 
-        Ok(match executor.context().subsystem().start_app(&name, &run_level_o, args) {
+        Ok(match executor.context().subsystem().start_app(&name, &run_level_o, config, args) {
             Ok(num) => StartResponse { success: true, errors: "".to_owned(), pid: Some(num as i32)},
             Err(error) => StartResponse { success: false, errors: error.to_string(), pid: None },
         })
