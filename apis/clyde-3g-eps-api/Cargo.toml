@@ -4,9 +4,6 @@ version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>"]
 edition = "2018"
 
-[features]
-nos3 = ["rust-i2c/nos3"]
-
 [dependencies]
 bitflags = "1.0"
 eps-api = { path = "../eps-api" }
