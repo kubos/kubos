@@ -591,6 +591,21 @@ impl AppRegistry {
             warn!("Failed to set cwd before executing {}: {:?}", app_name, err);
         }
 
+        // Check if app is already running
+        let run_level_str = format!("{}", run_level);
+        let running_status = find_entry(&self.monitoring, app_name, &run_level_str);
+        if running_status == Ok(true) {
+            return Err(AppError::StartError {
+                err: format!("Instance of {} already running {}", app_name, run_level_str),
+            });
+        } else if let Err(err) = running_status {
+            // The only way this happens is if the monitoring registry mutex gets poisoned.
+            // In that case, we want to crash this service so that it can be restarted in a
+            // good state.
+            error!("Crashing service: {:?}", err);
+            panic!("{:?}", err);
+        }
+
         let mut cmd = Command::new(app_path);
 
         cmd.arg("-r").arg(format!("{}", run_level));
@@ -649,22 +664,7 @@ impl AppRegistry {
             Ok(None) => {
                 let name = app_name.to_owned();
                 let pid = child.id() as i32;
-                let run_level_str = format!("{}", run_level);
                 let registry = self.monitoring.clone();
-
-                // Check if app is already running
-                let running_status = find_entry(&registry, app_name, &run_level_str);
-                if running_status == Ok(true) {
-                    return Err(AppError::StartError {
-                        err: format!("Instance of {} already running {}", app_name, run_level_str),
-                    });
-                } else if let Err(err) = running_status {
-                    // The only way this happens is if the monitoring registry mutex gets poisoned.
-                    // In that case, we want to crash this service so that it can be restarted in a
-                    // good state.
-                    error!("Crashing service: {:?}", err);
-                    panic!("{:?}", err);
-                }
 
                 // Spawn monitor thread
                 thread::spawn(move || {

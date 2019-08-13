@@ -213,8 +213,9 @@ The mutation returns three fields:
 
     - ``success`` - Indicating the overall result of the operation
     - ``errors`` - Any errors which were encountered while starting the application
-    - ``pid`` - The PID of the started application. This will be empty if any errors are encountered,
-      or if the application immediately finishes
+    - ``pid`` - The PID of the started application. This will be empty if the application
+      immediately finishes, since the PID will already have been freed by the system and is no
+      longer meaningful
 
 Our request should look like this::
 

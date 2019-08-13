@@ -234,7 +234,8 @@ fn monitor_existing_good() {
         }"#,
     );
 
-    // If we try to start the app a second time, it should fail
+    // If we try to start the app a second time, it should pass, because we're starting with the
+    // other run level
     let result = send_query(
         config.clone(),
         r#"mutation {
