@@ -41,7 +41,7 @@ RUN rm -r kubos
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH "$PATH:/root/.cargo/bin"
 RUN rustup toolchain uninstall stable-x86_64-unknown-linux-gnu
-RUN rustup default 1.32.0
+RUN rustup default 1.36.0
 RUN rustup target install arm-unknown-linux-gnueabihf
 RUN rustup target install armv5te-unknown-linux-gnueabi
 RUN rustup component add clippy

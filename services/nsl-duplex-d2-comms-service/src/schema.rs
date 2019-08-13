@@ -275,7 +275,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
 
 pub struct MutationRoot;
 
-/// Base GraphQL mutation model
+// Base GraphQL mutation model
 graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // Execute a trivial command against the system
     //

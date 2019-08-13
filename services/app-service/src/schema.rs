@@ -25,7 +25,7 @@ type Context = kubos_service::Context<AppRegistry>;
 ///
 pub struct QueryRoot;
 
-/// Base GraphQL query model
+// Base GraphQL query model
 graphql_object!(QueryRoot : Context as "Query" |&self| {
     // Test query to verify service is running without
     // attempting to execute an actual logic
@@ -71,7 +71,7 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
 ///
 pub struct MutationRoot;
 
-/// Base GraphQL mutation model
+// Base GraphQL mutation model
 graphql_object!(MutationRoot : Context as "Mutation" |&self| {
 
     field register(&executor, path: String) -> FieldResult<RegisterResponse>

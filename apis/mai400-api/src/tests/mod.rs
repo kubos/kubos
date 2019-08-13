@@ -18,6 +18,7 @@ use super::*;
 use rust_uart::mock::*;
 use rust_uart::*;
 
+/// Helper macro for generating mock mai objects
 #[macro_export]
 macro_rules! mock_new {
     ($mock:ident) => {{

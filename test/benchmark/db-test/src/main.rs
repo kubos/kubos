@@ -97,7 +97,7 @@ impl DbTest {
         let mut times: Vec<i64> = Vec::new();
 
         for _ in 0..self.iterations {
-            let timestamp: f64 = thread_rng().gen_range(0.0, 99999999999999999.9);
+            let timestamp: f64 = thread_rng().gen_range(0.0, 100_000_000_000_000_000.0);
 
             let start = PreciseTime::now();
             if db
@@ -129,7 +129,7 @@ impl DbTest {
         let mut entries: Vec<Entry> = Vec::new();
 
         for _ in 0..self.iterations {
-            let timestamp: f64 = thread_rng().gen_range(0.0, 99999999999999999.9);
+            let timestamp: f64 = thread_rng().gen_range(0.0, 100_000_000_000_000_000.0);
 
             entries.push(Entry {
                 timestamp,
