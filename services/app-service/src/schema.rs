@@ -64,12 +64,16 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
     }
 
     field running_apps(&executor,
-        name: Option<String>)
+        name: Option<String>,
+        version: Option<String>)
         -> FieldResult<Vec<MonitorEntry>> as "Running Apps Query"
     {
         let entries = executor.context().subsystem().monitoring.lock()?;
         let result = entries.iter().filter(|e| {
             if name.is_some() && &e.name != name.as_ref().unwrap() {
+                return false;
+            }
+            if version.is_some() && &e.version != version.as_ref().unwrap() {
                 return false;
             }
             true

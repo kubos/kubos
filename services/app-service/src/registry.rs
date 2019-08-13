@@ -668,7 +668,7 @@ impl AppRegistry {
 
                 // Spawn monitor thread
                 thread::spawn(move || {
-                    monitor_app(
+                    let result = monitor_app(
                         registry,
                         child,
                         MonitorEntry {
@@ -680,7 +680,11 @@ impl AppRegistry {
                             args,
                             config,
                         },
-                    )
+                    );
+
+                    if let Err(error) = result {
+                        error!("{:?}", error);
+                    }
                 });
 
                 Ok(Some(pid))
