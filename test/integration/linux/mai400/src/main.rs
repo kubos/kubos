@@ -301,7 +301,7 @@ fn reset(mai: &MAI400, logger: &Logger) -> u8 {
     }
 }
 
-#[allow(clippy::cyclomatic_complexity)]
+#[allow(clippy::cognitive_complexity)]
 fn read(mai: &MAI400, logger: &Logger) -> u8 {
     let mut rc = 0;
 

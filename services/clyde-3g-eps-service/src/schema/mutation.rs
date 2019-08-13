@@ -24,11 +24,11 @@ use juniper::FieldResult;
 /// Top-level mutation root structure
 pub struct Root;
 
-/// Base GraphQL mutation model
+// Base GraphQL mutation model
 graphql_object!(Root: Context as "Mutation" |&self| {
 
     // Execute a trivial command against the system
-    // 
+    //
     //  mutation {
     //      noop {
     //          success: Boolean!
@@ -43,7 +43,7 @@ graphql_object!(Root: Context as "Mutation" |&self| {
     }
 
     //  Manually reset the EPS
-    // 
+    //
     //  mutation {
     //      manualReset {
     //          success: Boolean!
@@ -58,7 +58,7 @@ graphql_object!(Root: Context as "Mutation" |&self| {
     }
 
     //  Reset the communications watchdog timer
-    // 
+    //
     //  mutation {
     //      resetWatchdog {
     //          success: Boolean!
@@ -73,9 +73,9 @@ graphql_object!(Root: Context as "Mutation" |&self| {
     }
 
     //  Set the communications watchdog timeout period
-    // 
+    //
     //  - period: New timeout period, in minutes
-    // 
+    //
     //  mutation {
     //      setWatchdogPeriod(period: Int!) {
     //          success: Boolean!
@@ -90,10 +90,10 @@ graphql_object!(Root: Context as "Mutation" |&self| {
     }
 
     //  Pass a custom command through to the system
-    // 
+    //
     //  - command: Decimal value of the command byte to send
     //  - data: Decimal values of the command parameters to send. Should be `[0]` if there are no additional parameters required.
-    // 
+    //
     //  mutation {
     //      issueRawCommand(command: Int!, data: [Int!]) {
     //          success: Boolean!
@@ -111,7 +111,7 @@ graphql_object!(Root: Context as "Mutation" |&self| {
     // Perform a system test
     //
     // - test: Specific test to perform. Should be `HARDWARE`
-    // 
+    //
     //  mutation {
     //      testHardware(test: TestType) {
     //          success: Boolean!

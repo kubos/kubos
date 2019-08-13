@@ -19,6 +19,7 @@ use mai400_api::mock::*;
 use mai400_api::*;
 use std::sync::mpsc::channel;
 
+/// Generate new mock MAI service
 #[macro_export]
 macro_rules! service_new {
     ($mock:ident) => {{
@@ -71,6 +72,7 @@ macro_rules! service_new {
     }};
 }
 
+/// Generate new mock MAI service with read thread
 #[macro_export]
 macro_rules! service_new_with_read {
     ($mock:ident, $data:ident) => {{

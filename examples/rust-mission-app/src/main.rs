@@ -76,7 +76,7 @@ impl AppHandler for MyApp {
 
         info!("OnCommand logic called");
 
-        if args.len() == 0 {
+        if args.is_empty() {
             // No subcommand options were given, so we're done here
             return Ok(());
         }

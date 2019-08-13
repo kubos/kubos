@@ -22,6 +22,7 @@ use simplelog::*;
 use std::path::Path;
 use std::time::Duration;
 
+#[allow(clippy::too_many_arguments)]
 fn upload(
     host_ip: &str,
     host_port: u16,
@@ -62,6 +63,7 @@ fn upload(
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 fn download(
     host_ip: &str,
     host_port: u16,
