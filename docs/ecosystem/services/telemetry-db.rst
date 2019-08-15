@@ -213,7 +213,7 @@ This UDP port is configured with the ``direct_port`` value in the system's ``con
 
 Insert requests should be sent as individual UDP messages in JSON format.
 
-The requests have the following schema::
+Individual requests have the following schema::
 
     {
         "timestamp": Float,
@@ -231,6 +231,18 @@ For example::
         "parameter": "voltage",
         "value": "3.5"
     }
+
+Bulk inserts are also supported, with or without timestamps, as long as they fit in a UDP packet::
+
+  [
+      {
+          "timestamp": Float,
+          "subsystem": String!,
+          "parameter": String!,
+          "value": String!,
+      },
+      ...
+  ]
 
 Limitations
 ~~~~~~~~~~~
