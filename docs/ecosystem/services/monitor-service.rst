@@ -104,7 +104,7 @@ The response from the service might look like this::
 MemInfo Query
 -------------
 
-The ``memInfo`` query can be used to get information about the memory availablity and usage of the
+The ``memInfo`` query can be used to get information about the memory availability and usage of the
 system as a whole. It works by reading and parsing the `/proc/meminfo` file.
 
 It has the following schema::
@@ -130,3 +130,20 @@ The query has the following response fields:
 
     Not all response fields are available on all systems.
     They will be omitted from the response if they are not available.
+
+Monit Query
+-----------
+
+The ``monit`` query can be used to get information from monit about the current state of :ref:`monitored processes <../linux-docs/monitoring>`.
+
+It has the following schema::
+
+    {
+        monit {
+            status: String
+        }
+    }
+
+The query has the following response fields:
+
+    - ``status`` - A textual representation of monit's status output

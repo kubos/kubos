@@ -38,6 +38,10 @@ type MemInfo {
     lowFree: Int
 }
 
+type Monit {
+    status: String!
+}
+
 type ProcInfo {
     pid: Int!
     uid: Int

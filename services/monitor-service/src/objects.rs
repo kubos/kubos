@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 use crate::meminfo::MemInfo;
+use crate::monit::MonitStatus;
 use crate::process::ProcStat;
 use crate::userinfo::UserInfo;
 
@@ -36,6 +37,16 @@ graphql_object!(MemInfoResponse: () |&self| {
 
     field low_free() -> Option<i32> {
         self.info.low_free().map(|v| v as i32)
+    }
+});
+
+pub struct MonitStatusResponse {
+    pub status: MonitStatus,
+}
+
+graphql_object!(MonitStatusResponse: () |&self| {
+    field status() -> String {
+        self.status.status
     }
 });
 

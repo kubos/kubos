@@ -23,7 +23,7 @@ This behavior is controlled by the init system and is defined in ``/etc/inittab`
 Monitoring Status
 -----------------
 
-The current status of everything Monit is monitoring can be viewed in one of two ways.
+The current status of everything Monit is monitoring can be viewed in three ways.
 
 First, the information can be viewed by executing ``monit status`` from the OBC's command line.
 All status will then be printed to `stdout`.
@@ -61,13 +61,15 @@ The output will look something like this::
       boot time                    Thu, 01 Jan 1970 00:00:00
       data collected               Thu, 01 Jan 1970 03:13:34
 
-Alternatively, the status info can be viewed by opening a web browser on a *host machine*
+Second, the status info can be viewed by opening a web browser on a *host machine*
 (not the OBC) and opening up a connection to port 7000 on the OBC.
 A login dialog will be presented; the login credentials are **kubos/Kubos123**.
 
 This will create a graphical display of the same information returned by ``monit status``:
 
 .. image:: ../../images/monit.png
+
+Third, the status can be queried from the :ref:`monitor-service <../services/monitor-service>`.
 
 Configuration
 -------------

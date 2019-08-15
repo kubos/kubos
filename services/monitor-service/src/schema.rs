@@ -18,6 +18,7 @@ use juniper::{self, FieldError, FieldResult};
 use kubos_service;
 
 use crate::meminfo;
+use crate::monit;
 use crate::objects::*;
 use crate::process;
 
@@ -36,6 +37,12 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
 
         meminfo::MemInfo::from_proc()
             .map(|info| MemInfoResponse { info })
+            .map_err(|err| FieldError::new(err, juniper::Value::null()))
+    }
+
+    field monit(&executor) -> FieldResult<MonitStatusResponse> {
+        monit::Monit::get()
+            .map(|status| MonitStatusResponse { status })
             .map_err(|err| FieldError::new(err, juniper::Value::null()))
     }
 
