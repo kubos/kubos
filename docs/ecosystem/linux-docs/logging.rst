@@ -48,6 +48,8 @@ For each of these naming schemes, the following files may be created:
 - ``*-info.log`` - Records log messages with a priority of ``info`` or higher
 - ``*-warn.log`` - Records log messages with a priority of ``warn`` or higher
 
+On the SDK, logs can be found in ``/var/log/syslog``.
+
 .. _log-rotation:
 
 Log Rotation
