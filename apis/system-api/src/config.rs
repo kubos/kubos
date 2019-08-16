@@ -150,17 +150,14 @@ fn get_config_path() -> Result<String, Error> {
     // number of additional command arguments
     let mut args = env::args();
 
-    let config_arg_pos = args
-        .position(|arg| arg == "-c")
-        .and_then(|pos| Some(pos + 1));
+    // Navigate to the "-c" option
+    let config_arg_pos = args.position(|arg| arg == "-c");
 
-    if let Some(pos) = config_arg_pos {
-        let mut args_vec: Vec<String> = args.collect();
-        if pos < args_vec.len() {
-            let config_arg = args_vec.remove(pos);
-            return Ok(config_arg);
-        } else {
-            bail!("The '-c' arg was specified, but no path value was provided");
+    if let Some(_pos) = config_arg_pos {
+        // The config path will be the arg immediately after "-c"
+        match args.next() {
+            Some(path) => Ok(path),
+            None => bail!("The '-c' arg was specified, but no path value was provided"),
         }
     } else {
         // The "-c" arg wasn't specified, so we can go ahead with the default
