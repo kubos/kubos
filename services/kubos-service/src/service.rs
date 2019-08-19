@@ -163,7 +163,7 @@ impl Service {
         let hosturl = self
             .config
             .hosturl()
-            .ok_or({
+            .ok_or_else(|| {
                 log::error!("Failed to load service URL");
                 "Failed to load service URL"
             })

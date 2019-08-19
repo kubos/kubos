@@ -94,13 +94,13 @@ fn main() -> LocalCommsServiceResult<()> {
 
     let gateway_ip = service_config
         .get("gateway_ip")
-        .ok_or({
+        .ok_or_else(|| {
             error!("No 'gateway_ip' parameter in config");
             "No 'gateway_ip' parameter in config"
         })
         .unwrap()
         .as_str()
-        .ok_or({
+        .ok_or_else(|| {
             error!("Failed to parse 'gateway_ip' config value");
             "Failed to parse 'gateway_ip' config value"
         })
@@ -109,13 +109,13 @@ fn main() -> LocalCommsServiceResult<()> {
 
     let gateway_port = service_config
         .get("gateway_port")
-        .ok_or({
+        .ok_or_else(|| {
             error!("No 'gateway_port' parameter in config");
             "No 'gateway_port' parameter in config"
         })
         .unwrap()
         .as_integer()
-        .ok_or({
+        .ok_or_else(|| {
             error!("Failed to parse 'gateway_port' config value");
             "Failed to parse 'gateway_port' config value"
         })
@@ -123,13 +123,13 @@ fn main() -> LocalCommsServiceResult<()> {
 
     let listening_ip = service_config
         .get("listening_ip")
-        .ok_or({
+        .ok_or_else(|| {
             error!("No 'listening_ip' parameter in config");
             "No 'listening_ip' parameter in config"
         })
         .unwrap()
         .as_str()
-        .ok_or({
+        .ok_or_else(|| {
             error!("Failed to parse 'listening_ip' config value");
             "Failed to parse 'listening_ip' config value"
         })
@@ -138,13 +138,13 @@ fn main() -> LocalCommsServiceResult<()> {
 
     let listening_port = service_config
         .get("listening_port")
-        .ok_or({
+        .ok_or_else(|| {
             error!("No 'listening_port' parameter in config");
             "No 'listening_port' parameter in config"
         })
         .unwrap()
         .as_integer()
-        .ok_or({
+        .ok_or_else(|| {
             error!("Failed to parse 'listening_port' config value");
             "Failed to parse 'listening_port' config value"
         })

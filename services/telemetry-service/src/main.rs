@@ -231,14 +231,14 @@ fn main() {
 
     let db_path = config
         .get("database")
-        .ok_or({
+        .ok_or_else(|| {
             error!("No database path found in config file");
             "No database path found in config file"
         })
         .unwrap();
     let db_path = db_path
         .as_str()
-        .ok_or({
+        .ok_or_else(|| {
             error!("Failed to parse 'database' config value");
             "Failed to parse 'database' config value"
         })
@@ -250,7 +250,7 @@ fn main() {
     let direct_udp = config.get("direct_port").map(|port| {
         let host = config
             .hosturl()
-            .ok_or({
+            .ok_or_else(|| {
                 error!("Failed to load service URL");
                 "Failed to load service URL"
             })
@@ -258,7 +258,7 @@ fn main() {
         let mut host_parts = host.split(':').map(|val| val.to_owned());
         let host_ip = host_parts
             .next()
-            .ok_or({
+            .ok_or_else(|| {
                 error!("Failed to parse service IP address");
                 "Failed to parse service IP address"
             })
