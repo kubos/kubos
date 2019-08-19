@@ -383,7 +383,7 @@ fn main() -> AntSResult<()> {
 
     let bus = config
         .get("bus")
-        .ok_or({
+        .ok_or_else(|| {
             error!("Failed to load 'bus' config value");
             format_err!("Failed to load 'bus' config value")
         })
@@ -392,7 +392,7 @@ fn main() -> AntSResult<()> {
 
     let primary = config
         .get("primary")
-        .ok_or({
+        .ok_or_else(|| {
             error!("No 'primary' value found in 'isis-ants-service' section of config");
             format_err!("No 'primary' value found in 'isis-ants-service' section of config")
         })
@@ -406,7 +406,7 @@ fn main() -> AntSResult<()> {
 
     let secondary = config
         .get("secondary")
-        .ok_or({
+        .ok_or_else(|| {
             error!("No 'secondary' value found in 'isis-ants-service' section of config");
             format_err!("No 'secondary' value found in 'isis-ants-service' section of config")
         })
@@ -420,7 +420,7 @@ fn main() -> AntSResult<()> {
 
     let antennas = config
         .get("antennas")
-        .ok_or({
+        .ok_or_else(|| {
             error!("No 'antennas' value found in 'isis-ants-service' section of config");
             format_err!("No 'antennas' value found in 'isis-ants-service' section of config")
         })
@@ -429,7 +429,7 @@ fn main() -> AntSResult<()> {
 
     let wd_timeout = config
         .get("wd_timeout")
-        .ok_or({
+        .ok_or_else(|| {
             error!("No 'wd_timeout' value found in 'isis-ants-service' section of config");
             format_err!("No 'wd_timeout' value found in 'isis-ants-service' section of config")
         })
