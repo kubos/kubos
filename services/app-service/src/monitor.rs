@@ -24,19 +24,20 @@ use std::sync::{Arc, Mutex};
 /// Apps which have been started and are being monitored until they finish
 #[derive(Clone, Debug, GraphQLObject)]
 pub struct MonitorEntry {
-    pub start_time: DateTime<Utc>,
-    pub end_time: Option<DateTime<Utc>>,
     pub name: String,
     pub version: String,
+    pub run_level: String,
+    pub start_time: DateTime<Utc>,
+    pub end_time: Option<DateTime<Utc>>,
     pub running: bool,
     pub pid: Option<i32>,
     pub last_rc: Option<i32>,
     pub last_signal: Option<i32>,
-    pub run_level: String,
     pub args: Option<Vec<String>>,
     pub config: String,
 }
 
+// Check if any version of the application is running with the requested run level
 pub fn check_running(
     registry: &Arc<Mutex<Vec<MonitorEntry>>>,
     name: &str,
@@ -68,6 +69,7 @@ pub fn monitor_app(
     finish_entry(&registry, &name, &version, &run_level, status)
 }
 
+// Update/add an entry to denote the start of a new execution of an app
 pub fn start_entry(
     registry: &Arc<Mutex<Vec<MonitorEntry>>>,
     new_entry: &MonitorEntry,
@@ -99,6 +101,7 @@ pub fn start_entry(
     Ok(())
 }
 
+// An app has finished running. Update its entry with the end time and RC or signal
 pub fn finish_entry(
     registry: &Arc<Mutex<Vec<MonitorEntry>>>,
     name: &str,

@@ -65,7 +65,8 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
 
     field app_status(&executor,
         name: Option<String>,
-        version: Option<String>)
+        version: Option<String>,
+        running: Option<bool>)
         -> FieldResult<Vec<MonitorEntry>> as "App Status Query"
     {
         let entries = executor.context().subsystem().monitoring.lock()?;
@@ -74,6 +75,9 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
                 return false;
             }
             if version.is_some() && &e.version != version.as_ref().unwrap() {
+                return false;
+            }
+            if running.is_some() && &e.running != running.as_ref().unwrap() {
                 return false;
             }
             true
