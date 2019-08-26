@@ -16,100 +16,28 @@
 
 use crate::error::*;
 use chrono::{DateTime, Utc};
-use failure::Error;
 use log::*;
 use std::os::unix::process::ExitStatusExt;
-use std::process::Child;
+use std::process::{Child, ExitStatus};
 use std::sync::{Arc, Mutex};
 
 /// Apps which have been started and are being monitored until they finish
 #[derive(Clone, Debug, GraphQLObject)]
 pub struct MonitorEntry {
     pub start_time: DateTime<Utc>,
+    pub end_time: Option<DateTime<Utc>>,
     pub name: String,
     pub version: String,
-    pub pid: i32,
+    pub running: bool,
+    pub pid: Option<i32>,
+    pub last_rc: Option<i32>,
+    pub last_signal: Option<i32>,
     pub run_level: String,
     pub args: Option<Vec<String>>,
     pub config: String,
 }
 
-pub fn monitor_app(
-    registry: Arc<Mutex<Vec<MonitorEntry>>>,
-    mut process_handle: Child,
-    app: MonitorEntry,
-) -> Result<(), Error> {
-    // Add the app information to our monitoring registry
-    insert_entry(registry.clone(), &app)?;
-
-    // Wait for the application to finish running
-    let status = process_handle
-        .wait()
-        .map_err(|err| AppError::MonitorError {
-            err: format!("Failed to wait for {} to finish: {:?}", app.name, err),
-        })?;
-
-    // Parse and log the result
-    if status.success() {
-        info!("App {} completed successfully", app.name);
-    } else if let Some(code) = status.code() {
-        error!("App {} failed. RC: {}", app.name, code);
-    } else if let Some(signal) = status.signal() {
-        warn!("App {} terminated by signal {}", app.name, signal);
-    } else {
-        warn!("App {} terminated for unknown reasons", app.name);
-    }
-
-    // Remove the app from our monitoring registry
-    remove_entry(registry, &app.name, &app.run_level)
-}
-
-fn insert_entry(
-    registry: Arc<Mutex<Vec<MonitorEntry>>>,
-    entry: &MonitorEntry,
-) -> Result<(), Error> {
-    registry
-        .lock()
-        .map_err(|err| AppError::MonitorError {
-            err: format!(
-                "Failed to add {} to monitoring. Couldn't get entries mutex: {:?}",
-                entry.name, err
-            ),
-        })?
-        .push(entry.clone());
-
-    Ok(())
-}
-
-fn remove_entry(
-    registry: Arc<Mutex<Vec<MonitorEntry>>>,
-    name: &str,
-    run_level: &str,
-) -> Result<(), Error> {
-    let mut entries = registry.lock().map_err(|err| AppError::MonitorError {
-        err: format!(
-            "Failed to remove {} from monitoring. Couldn't get entries mutex: {:?}",
-            name, err
-        ),
-    })?;
-    if let Some(index) = entries
-        .iter()
-        .position(|ref e| e.name == name && e.run_level == run_level)
-    {
-        entries.remove(index);
-    } else {
-        // This would only happen if we were somehow trying to doubly free a monitor entry,
-        // which shouldn't ever happen
-        return Err(AppError::MonitorError {
-            err: format!("Failed to unmonitor {}", name),
-        }
-        .into());
-    }
-
-    Ok(())
-}
-
-pub fn find_entry(
+pub fn check_running(
     registry: &Arc<Mutex<Vec<MonitorEntry>>>,
     name: &str,
     run_level: &str,
@@ -120,5 +48,149 @@ pub fn find_entry(
 
     Ok(entries
         .iter()
-        .any(|entry| entry.name == name && entry.run_level == run_level))
+        .any(|entry| entry.name == name && entry.run_level == run_level && entry.running))
+}
+
+pub fn monitor_app(
+    registry: Arc<Mutex<Vec<MonitorEntry>>>,
+    mut process_handle: Child,
+    name: &str,
+    version: &str,
+    run_level: &str,
+) -> Result<(), AppError> {
+    // Wait for the application to finish running
+    let status = process_handle
+        .wait()
+        .map_err(|err| AppError::MonitorError {
+            err: format!("Failed to wait for {} to finish: {:?}", name, err),
+        })?;
+
+    finish_entry(&registry, &name, &version, &run_level, status)
+}
+
+pub fn start_entry(
+    registry: &Arc<Mutex<Vec<MonitorEntry>>>,
+    new_entry: &MonitorEntry,
+) -> Result<(), AppError> {
+    let mut entries = registry.lock().map_err(|err| AppError::MonitorError {
+        err: format!(
+            "Failed to add {} to monitoring. Couldn't get entries mutex: {:?}",
+            new_entry.name, err
+        ),
+    })?;
+
+    // If an entry already exists for this name/version/run_level combo, update it
+    // Otherwise, add the entry to the registry
+    if let Some(index) = entries.iter().position(|ref e| {
+        e.name == new_entry.name
+            && e.version == new_entry.version
+            && e.run_level == new_entry.run_level
+    }) {
+        debug!(
+            "Updating existing entry for {} {} {}",
+            new_entry.name, new_entry.version, new_entry.run_level
+        );
+        entries[index] = (*new_entry).clone();
+    } else {
+        debug!("Adding new entry: {:?}", new_entry);
+        entries.push((*new_entry).clone());
+    }
+
+    Ok(())
+}
+
+pub fn finish_entry(
+    registry: &Arc<Mutex<Vec<MonitorEntry>>>,
+    name: &str,
+    version: &str,
+    run_level: &str,
+    status: ExitStatus,
+) -> Result<(), AppError> {
+    let mut last_rc = None;
+    let mut last_signal = None;
+    let end_time = Utc::now();
+
+    // Parse and log the result
+    if status.success() {
+        info!("App {} completed successfully", name);
+        last_rc = Some(0);
+    } else if let Some(code) = status.code() {
+        error!("App {} failed. RC: {}", name, code);
+        last_rc = Some(code);
+    } else if let Some(signal) = status.signal() {
+        warn!("App {} terminated by signal {}", name, signal);
+        last_signal = Some(signal);
+    } else {
+        warn!("App {} terminated for unknown reasons", name);
+    }
+
+    let mut entries = registry.lock().map_err(|err| AppError::MonitorError {
+        err: format!(
+            "Failed to remove {} from monitoring. Couldn't get entries mutex: {:?}",
+            name, err
+        ),
+    })?;
+
+    // Find the monitoring entry and update it with the return code/exit signal and the end time
+    if let Some(index) = entries
+        .iter()
+        .position(|ref e| e.name == name && e.version == version && e.run_level == run_level)
+    {
+        entries[index].running = false;
+        entries[index].last_rc = last_rc;
+        entries[index].last_signal = last_signal;
+        entries[index].pid = None;
+        entries[index].end_time = Some(end_time);
+    } else {
+        warn!(
+            "Unable to find entry for {} {} {}",
+            name, version, run_level
+        );
+    }
+
+    Ok(())
+}
+
+// Remove an entry from the monitoring registry
+// Used when uninstalling a version of an application from the master app registry
+pub fn remove_entry(
+    registry: &Arc<Mutex<Vec<MonitorEntry>>>,
+    name: &str,
+    version: &str,
+    run_level: &str,
+) -> Result<(), AppError> {
+    let mut entries = registry.lock().map_err(|err| AppError::MonitorError {
+        err: format!(
+            "Failed to remove {} from monitoring. Couldn't get entries mutex: {:?}",
+            name, err
+        ),
+    })?;
+    if let Some(index) = entries
+        .iter()
+        .position(|ref e| e.name == name && e.version == version && e.run_level == run_level)
+    {
+        entries.remove(index);
+    }
+
+    Ok(())
+}
+
+// Remove all entries corresponding to a particular app from the monitoring registry
+// Used when uninstalling an entire application from the master app registry
+pub fn remove_entries(
+    registry: &Arc<Mutex<Vec<MonitorEntry>>>,
+    name: &str,
+) -> Result<(), AppError> {
+    let mut entries = registry.lock().map_err(|err| AppError::MonitorError {
+        err: format!(
+            "Failed to remove {} from monitoring. Couldn't get entries mutex: {:?}",
+            name, err
+        ),
+    })?;
+
+    // `drain_filter` is currently a nightly-only function, so instead we'll just keep
+    // the apps that don't have the name we're trying to remove...
+    entries.retain(|entry| entry.name != name);
+
+    Ok(())
 }

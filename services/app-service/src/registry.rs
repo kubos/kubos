@@ -25,7 +25,6 @@ use log::*;
 use std::fs;
 use std::io::Read;
 use std::os::unix;
-use std::os::unix::process::ExitStatusExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::{Arc, Mutex};
@@ -360,13 +359,13 @@ impl AppRegistry {
     /// ```
     ///
     pub fn uninstall(&self, app_name: &str, version: &str) -> Result<bool, AppError> {
-        let mut errors = None;
+        let mut errors: Vec<String> = vec![];
 
         // Delete the application files
         let app_dir = format!("{}/{}/{}", self.apps_dir, app_name, version);
 
         if let Err(error) = fs::remove_dir_all(app_dir) {
-            errors = Some(format!("Failed to remove app directory: {}", error));
+            errors.push(format!("Failed to remove app directory: {}", error));
         }
 
         // If that was the last version, also remove the parent directory.
@@ -375,7 +374,7 @@ impl AppRegistry {
         if fs::remove_dir(format!("{}/{}", self.apps_dir, app_name)).is_ok() {
             // That worked, so we also want to remove the active version symlink
             if let Err(error) = fs::remove_file(format!("{}/active/{}", self.apps_dir, app_name)) {
-                errors = Some(format!(
+                errors.push(format!(
                     "{}. Failed to remove active symlink for {}: {}",
                     error, app_name, error
                 ));
@@ -398,23 +397,27 @@ impl AppRegistry {
                 entries.remove(index);
             }
             None => {
-                if let Some(error) = errors {
-                    errors = Some(format!(
-                        "{}. {} version {} not found in registry",
-                        error, app_name, version
-                    ));
-                } else {
-                    errors = Some(format!(
-                        "{} version {} not found in registry",
-                        app_name, version
-                    ));
-                }
+                errors.push(format!(
+                    "{} version {} not found in registry",
+                    app_name, version
+                ));
             }
         }
 
-        match errors {
-            Some(err) => Err(AppError::UninstallError { err }),
-            None => Ok(true),
+        // Remove the app entry from the monitoring list
+        // Note: If the app was never run, then no entry will be present
+        if let Err(new_error) = remove_entry(&self.monitoring, app_name, version, "OnBoot") {
+            errors.push(new_error.to_string());
+        }
+        if let Err(new_error) = remove_entry(&self.monitoring, app_name, version, "OnCommand") {
+            errors.push(new_error.to_string());
+        }
+
+        if errors.is_empty() {
+            Ok(true)
+        } else {
+            let err: String = errors.join(". ");
+            Err(AppError::UninstallError { err })
         }
     }
 
@@ -458,6 +461,11 @@ impl AppRegistry {
                 entries.retain(|entry| entry.app.name != app_name);
             }
             Err(err) => errors.push(format!("Couldn't get entries mutex: {:?}", err)),
+        }
+
+        // Remove all matching app entries from the monitoring list
+        if let Err(new_error) = remove_entries(&self.monitoring, app_name) {
+            errors.push(new_error.to_string());
         }
 
         if errors.is_empty() {
@@ -602,7 +610,7 @@ impl AppRegistry {
 
         // Check if app is already running
         let run_level_str = format!("{}", run_level);
-        let running_status = find_entry(&self.monitoring, app_name, &run_level_str);
+        let running_status = check_running(&self.monitoring, app_name, &run_level_str);
         if running_status == Ok(true) {
             return Err(AppError::StartError {
                 err: format!("Instance of {} already running {}", app_name, run_level_str),
@@ -642,6 +650,28 @@ impl AppRegistry {
             app_name, run_level, config_path, args
         );
 
+        // Add/update the monitoring registry with the new run info
+        let entry = MonitorEntry {
+            start_time,
+            end_time: None,
+            name: app.name.clone(),
+            version: app.version.clone(),
+            running: true,
+            pid: Some(child.id() as i32),
+            last_rc: None,
+            last_signal: None,
+            run_level: run_level_str.clone(),
+            args,
+            config: config_path,
+        };
+        if let Err(error) = start_entry(&self.monitoring, &entry) {
+            // The only way this happens is if the monitoring registry mutex gets poisoned.
+            // In that case, we want to crash this service so that it can be restarted in a
+            // good state.
+            error!("Crashing service: {:?}", error);
+            panic!("{:?}", error);
+        }
+
         // Give the app a moment to run
         thread::sleep(Duration::from_millis(300));
 
@@ -653,26 +683,20 @@ impl AppRegistry {
         //   - Err(err) - Something went wrong while trying to check if the app is still running.
         match child.try_wait() {
             Ok(Some(status)) => {
-                // App exited already. Check for errors and then return
-                if status.success() {
-                    info!("App {} completed successfully", app.name);
-                    // App finished successfully, so there are no errors, but also no PID
-                    Ok(None)
-                } else if let Some(code) = status.code() {
-                    error!("App {} failed. RC: {}", app.name, code);
+                finish_entry(
+                    &self.monitoring,
+                    app_name,
+                    &app.version,
+                    &run_level_str,
+                    status,
+                )?;
+
+                if !status.success() {
                     Err(AppError::StartError {
-                        err: format!("App {} failed. RC: {}", app.name, code),
-                    })
-                } else if let Some(signal) = status.signal() {
-                    warn!("App {} terminated by signal {}", app.name, signal);
-                    Err(AppError::StartError {
-                        err: format!("App {} terminated by signal {}", app.name, signal),
+                        err: format!("App returned {}", status),
                     })
                 } else {
-                    warn!("App {} terminated for unknown reasons", app.name);
-                    Err(AppError::StartError {
-                        err: format!("App {} terminated for unknown reasons", app.name),
-                    })
+                    Ok(None)
                 }
             }
             Ok(None) => {
@@ -682,19 +706,7 @@ impl AppRegistry {
 
                 // Spawn monitor thread
                 thread::spawn(move || {
-                    let result = monitor_app(
-                        registry,
-                        child,
-                        MonitorEntry {
-                            start_time,
-                            name,
-                            version: app.version,
-                            pid,
-                            run_level: run_level_str,
-                            args,
-                            config: config_path,
-                        },
-                    );
+                    let result = monitor_app(registry, child, &name, &app.version, &run_level_str);
 
                     if let Err(error) = result {
                         error!("{:?}", error);

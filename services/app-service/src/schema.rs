@@ -63,10 +63,10 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
         Ok(result)
     }
 
-    field running_apps(&executor,
+    field app_status(&executor,
         name: Option<String>,
         version: Option<String>)
-        -> FieldResult<Vec<MonitorEntry>> as "Running Apps Query"
+        -> FieldResult<Vec<MonitorEntry>> as "App Status Query"
     {
         let entries = executor.context().subsystem().monitoring.lock()?;
         let result = entries.iter().filter(|e| {
