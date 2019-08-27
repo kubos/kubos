@@ -156,30 +156,7 @@ pub trait IAntS: Send {
     fn passthrough(&self, tx: &[u8], rx_in: &mut [u8]) -> AntSResult<()>;
 }
 
-/// Helper trait to allow us to clone our subsystem object
-pub trait IAntSClone {
-    /// Helper function to allow us to clone our subsystem object
-    fn box_clone(&self) -> Box<IAntS>;
-}
-
-impl<T> IAntSClone for T
-where
-    T: 'static + IAntS + Clone,
-{
-    fn box_clone(&self) -> Box<IAntS> {
-        Box::new(self.clone())
-    }
-}
-
-#[cfg(not(feature = "nos3"))]
-impl Clone for Box<IAntS> {
-    fn clone(&self) -> Box<IAntS> {
-        self.box_clone()
-    }
-}
-
 /// Structure for interacting with an ISIS Antenna System
-#[derive(Clone)]
 #[cfg(not(feature = "nos3"))]
 pub struct AntS;
 
