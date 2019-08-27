@@ -34,11 +34,13 @@ use failure::Error;
 /// # Examples
 ///
 /// ```
+/// use kubos_app::logging_setup;
 /// // Initialize logging at default Debug level, using identifier "my_app"
 /// logging_setup!("my_app");
 /// ```
 ///
 /// ```
+/// use kubos_app::logging_setup;
 /// use log::*;
 ///
 /// // Initialize logging at Info level, using the crate name for the identifier
@@ -50,6 +52,7 @@ macro_rules! logging_setup {
         logging_setup!($name, log::LevelFilter::Debug)
     }};
     ($name:expr, $level:path) => {{
+        use kubos_app::setup_log;
         setup_log($name, $level)
     }};
 }

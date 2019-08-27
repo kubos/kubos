@@ -89,11 +89,23 @@ Our resulting project code should look like this::
     import app_api
     import sys
     
-    def on_boot(logger):
+    def main():
+    
+        logger = app_api.logging_setup("my-mission-app")
         
-        logger.info("OnBoot logic")
+        parser = argparse.ArgumentParser()
         
-    def on_command(logger):
+        parser.add_argument('--config', '-c')
+        
+        args = parser.parse_args()
+        
+        if args.config is not None:
+            global SERVICES
+            SERVICES = app_api.Services(args.config)
+        else:
+            SERVICES = app_api.Services()
+
+        args = parser.parse_args()
         
         request = '{memInfo{available}}'
         
@@ -132,32 +144,6 @@ Our resulting project code should look like this::
             sys.exit(1)
         else:
             logger.info("Telemetry insert completed successfully")
-    
-    def main():
-    
-        logger = app_api.logging_setup("my-mission-app")
-        
-        parser = argparse.ArgumentParser()
-        
-        parser.add_argument('--config', '-c')
-        
-        args = parser.parse_args()
-        
-        if args.config is not None:
-            global SERVICES
-            SERVICES = app_api.Services(args.config)
-        else:
-            SERVICES = app_api.Services()
-
-        args = parser.parse_args()
-        
-        if args.run == 'OnBoot':
-            on_boot(logger)
-        elif args.run == 'OnCommand':
-            on_command(logger)
-        else:
-            logger.error("Unknown run level specified")
-            sys.exit(1)
         
     if __name__ == "__main__":
         main()
@@ -209,7 +195,7 @@ Once the project has been transferred, we can log in to the OBC and run it::
 
     $ ssh kubos@10.0.2.20
     kubos@10.0.2.20's password: ********
-    /home/kubos # ./my-mission-app.py -r OnCommand
+    /home/kubos # ./my-mission-app.py
     my-mission-app: Current available memory: 497060 kB
     my-mission-app: Telemetry insert completed successfully
     /home/kubos # cat /var/log/app-debug.log

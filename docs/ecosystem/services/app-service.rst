@@ -158,7 +158,6 @@ It has the following schema::
         appStatus(name: String, version: String, running: Boolean) {
             name: String!,
             version: String!,
-            runLevel: String!,
             startTime: String!,
             endTime: String,
             running: Boolean!,
@@ -180,7 +179,6 @@ Queries return the following fields:
 
 - ``name``: Application name
 - ``version``: Version of the application which was/is running
-- ``runLevel``: The app's run level which was/is being executed. Either "OnBoot" or "OnCommand"
 - ``startTime``: The time at which the application was started, in
   `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations>`__ format
 - ``endTime``: If the application has finished executing, the time at which execution ended
@@ -289,17 +287,15 @@ Starting an Application
 
 To manually start an application, the ``startApp`` mutation can be used.
 
-The mutation has two required arguments: the name of the application to start and the run level which the
-app should execute with. Only one instance of an application with a particular run level may be
-executed at a time. This means that two instances of an app may be running simultaneously, one
-with the "OnBoot" logic, and one with the "OnCommand" logic.
+The mutation should specify the name of the application to start.
+Only once instance of an application may be running at a time.
 
 The optional ``config`` input argument allows a custom ``config.toml`` file to be passed to the
 application. If the file is in the app's directory when it is registered, then it may be specified
 with a relative path. Otherwise, we recommend that you use an absolute file path.
 
 The optional ``args`` input argument allows additional arguments to be passed through to the
-underlying application. These arguments will be passed behind a ``--`` separator.
+underlying application.
 
 The mutation will return three fields:
 
@@ -310,7 +306,7 @@ The mutation will return three fields:
 For example::
 
     mutation {
-        startApp(name: "mission-app", runLevel: "OnCommand", config: "/home/kubos/config.toml", args: ["-m", "safemode"]) {
+        startApp(name: "mission-app", config: "/home/kubos/config.toml", args: ["-m", "safemode"]) {
             success,
             errors,
             pid
@@ -318,14 +314,14 @@ For example::
     }
     
 Under the covers, the service receives the mutation and identifies the current active version of the
-application specified. It then calls that version's binary, passing along the run level as a command
-argument, as well as any additional arguments specified with ``args``.
+application specified.
+It then calls that version's binary, passing along any additional arguments specified with ``args``.
 
 If the application immediately fails, the ``errors`` field will contain a message with the
 application's return code.
 
-If an instance of the application with the requested run level is currently running, the ``startApp``
-request will be rejected and an error will be returned.
+If an instance of the application is currently running, the ``startApp`` request will be rejected
+and an error will be returned.
 
 Passing Additional Arguments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -335,29 +331,21 @@ To pass additional arguments to the underlying application, the ``args`` input a
 For example::
 
     mutation {
-        startApp(name: "mission-app", runLevel: "OnCommand", args: "--verbose --release") {
+        startApp(name: "mission-app", args: "--verbose --release") {
             success
         }
     }
     
 Under the covers, the application would be called like so::
 
-    mission-app -r OnCommand -- --verbose --release
+    mission-app --verbose --release
+
+.. todo::
+
+    # Automatically Starting on Boot
     
-The additional arguments are passed behind the ``--`` characters in order to indicate that they
-should be passed to the underlaying application logic, rather than being processed as high-level
-args like the run level.
-
-Automatically Starting on Boot
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-All applications will be started with the ``OnBoot`` run level automatically when the applications service is
-started during system initialization.
-
-This logic may also be triggered by manually starting the applications service with the ``-b`` flag.
-
-If an application cannot be started, or immediately fails, an error message will be written to the
-service's log with the failure reason.
+    In order for an application to be automatically started during system boot, it must be added as an
+    "OnBoot" item to the :ref:`system schedule <todo>`. 
 
 .. _kill-app:
 

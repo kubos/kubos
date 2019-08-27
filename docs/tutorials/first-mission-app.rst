@@ -1,6 +1,14 @@
 Creating Your First Mission Application
 =======================================
 
+Mission applications are user-created programs which are used to control satellite behavior and
+execute mission logic.
+
+These applications are registered with the :doc:`applications service <../ecosystem/services/app-service>`,
+which is responsible for tracking versioning and controlling application upgrades and rollbacks.
+
+.. todo:: Talk about integration with the scheduler
+
 This tutorial guides the user through the process of creating a basic mission application using
 Python3.
 
@@ -38,132 +46,20 @@ Setup
   This tutorial will use ``/home/user/my-app`` as the example development directory and will assume
   that the cloned kubos repo is in ``/home/user/kubos``.
 
-Mission Application Overview
-----------------------------
 
-Mission applications are user-created programs which are used to control satellite behavior and
-execute mission logic.
-
-These applications are registered with the :doc:`applications service <../ecosystem/services/app-service>`,
-which is responsible for tracking versioning, kicking off applications at boot time, and controlling
-application upgrades and rollbacks.
-
-Run Levels
-~~~~~~~~~~
-
-Run levels allow users the option to define differing behaviors depending on when and how their
-application is started.
-
-Each application must have a definition for each of the available run levels:
-
-    - OnBoot - Defines logic which should be executed automatically at system boot time
-    - OnCommand - Defines logic which should be executed when the :ref:`application is started manually <start-app>`
-
-When the application is first called, the requested run level will be checked,
-and then the corresponding run level function will be called.
-
-Laying Out the Framework
-------------------------
-
-We'll be creating a new file for this tutorial, ``my-mission-app.py``.
-
-In order to allow the applications service to run our mission application, we'll need to start by
-placing the following line at the top of our new file::
+- Create a new file for this tutorial, ``my-mission-app.py``.
+  In order to allow the applications service to run our mission application, you'll need to start by
+  placing the following line at the top of the new file::
 
     #!/usr/bin/env python3
     
-This allows the file to be run like a normal executable, ``./my-mission-app.py``, rather than needing
-to explicitly call the Python interpreter with ``python my-mission-app.py``.
+  This allows the file to be run like a normal executable, ``./my-mission-app.py``, rather than needing
+  to explicitly call the Python interpreter with ``python my-mission-app.py``.
 
-Since we'll be calling the file as an executable, we'll also need to update the file permissions::
+- Since you'll be calling the file as an executable, you'll also need to update the file permissions::
 
     $ chmod +x my-mission-app.py
 
-We'll then define our OnBoot and OnCommand run level functions with a basic print statement:
-
-.. code-block:: python
-
-    def on_boot():
-        
-        print("OnBoot logic")
-        
-    def on_command():
-        
-        print("OnCommand logic")
-
-And, finally, we'll define our main function which will check for an ``-r`` command line argument
-and then call the appropriate run level function based on the input:
-
-.. code-block:: python
-    
-    import argparse
-    import sys
-
-    def main():
-        parser = argparse.ArgumentParser()
-        
-        parser.add_argument('--run', '-r')
-        
-        args = parser.parse_args()
-        
-        if args.run == 'OnBoot':
-            on_boot()
-        elif args.run == 'OnCommand':
-            on_command()
-        else:
-            print("Unknown run level specified")
-            sys.exit(1)
-        
-    if __name__ == "__main__":
-        main()
-
-.. note::
-    
-    This ``-r`` argument is used by the applications service, so must be included in all
-    mission applications
-
-All together, it should look like this:
-
-.. code-block:: python
-
-    #!/usr/bin/env python3
-    
-    import argparse
-    import sys
-    
-    def on_boot():
-        
-        print("OnBoot logic")
-        
-    def on_command():
-        
-        print("OnCommand logic")
-    
-    def main():
-        parser = argparse.ArgumentParser()
-        
-        parser.add_argument('--run', '-r')
-        
-        args = parser.parse_args()
-        
-        if args.run == 'OnBoot':
-            on_boot()
-        elif args.run == 'OnCommand':
-            on_command()
-        else:
-            print("Unknown run level specified")
-            sys.exit(1)
-        
-    if __name__ == "__main__":
-        main()
-
-We'll now run the program to verify that it's working as expected::
-
-    $ ./my-mission-app.py -r OnBoot
-    OnBoot logic
-    $ ./my-mission-app.py -r OnCommand
-    OnCommand logic
-    
 Kubos Services and GraphQL
 --------------------------
 
@@ -380,12 +276,20 @@ After adding error handling, our program should look like this:
     import app_api
     import sys
     
-    def on_boot():
+    def main():
+    
+        parser = argparse.ArgumentParser()
         
-        print("OnBoot logic")
+        parser.add_argument('--config', '-c')
         
-    def on_command():
-
+        args = parser.parse_args()
+        
+        if args.config is not None:
+            global SERVICES
+            SERVICES = app_api.Services(args.config)
+        else:
+            SERVICES = app_api.services()
+        
         request = '{ ping }'
         
         try:
@@ -400,36 +304,13 @@ After adding error handling, our program should look like this:
             print("Successfully pinged monitor service")
         else:
             print("Unexpected monitor service response: %s" % data)
-    
-    def main():
-    
-        parser = argparse.ArgumentParser()
-        
-        parser.add_argument('--run', '-r')
-        parser.add_argument('--config', '-c')
-        
-        args = parser.parse_args()
-        
-        if args.config is not None:
-            global SERVICES
-            SERVICES = app_api.Services(args.config)
-        else:
-            SERVICES = app_api.services()
-        
-        if args.run == 'OnBoot':
-            on_boot()
-        elif args.run == 'OnCommand':
-            on_command()
-        else:
-            print("Unknown run level specified")
-            sys.exit(1)
         
     if __name__ == "__main__":
         main()
     
 If we run our program, the output should look like this::
 
-    $ ./my-mission-app.py -r OnCommand -c ../kubos/tools/default_config.toml
+    $ ./my-mission-app.py -c ../kubos/tools/default_config.toml
     Successfully pinged monitor service
 
 Writing Data to the Telemetry Database
@@ -501,12 +382,20 @@ With some additional error handling, our final application looks like this:
     import app_api
     import sys
     
-    def on_boot():
+    def main():
         
-        print("OnBoot logic")
+        parser = argparse.ArgumentParser()
+
+        parser.add_argument('--config', '-c')
         
-    def on_command():
+        args = parser.parse_args()
         
+        if args.config is not None:
+            global SERVICES
+            SERVICES = app_api.Services(args.config)
+        else:
+            SERVICES = app_api.Services()
+            
         request = '{ ping }'
         
         try:
@@ -549,36 +438,13 @@ With some additional error handling, our final application looks like this:
             sys.exit(1)
         else:
             print("Telemetry insert completed successfully")
-    
-    def main():
-        
-        parser = argparse.ArgumentParser()
-        
-        parser.add_argument('--run', '-r')
-        parser.add_argument('--config', '-c')
-        
-        args = parser.parse_args()
-        
-        if args.config is not None:
-            global SERVICES
-            SERVICES = app_api.Services(args.config)
-        else:
-            SERVICES = app_api.Services()
-        
-        if args.run == 'OnBoot':
-            on_boot()
-        elif args.run == 'OnCommand':
-            on_command()
-        else:
-            print("Unknown run level specified")
-            sys.exit(1)
         
     if __name__ == "__main__":
         main()
 
 If we run our program, the output should look like this::
 
-    $ ./my-mission-app.py -r OnCommand -c ../kubos/tools/default_config.toml
+    $ ./my-mission-app.py -c ../kubos/tools/default_config.toml
     Successfully pinged monitor service
     Telemetry insert completed successfully
     

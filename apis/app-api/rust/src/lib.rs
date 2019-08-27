@@ -19,7 +19,7 @@
 //!
 //! # Examples
 //!
-//! ```
+//! ```ignore
 //! use failure::{bail, Error};
 //! use kubos_app::*;
 //! use std::time::Duration;
