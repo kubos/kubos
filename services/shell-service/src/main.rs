@@ -38,7 +38,7 @@ fn main() {
 
     let hosturl = config
         .hosturl()
-        .ok_or({
+        .ok_or_else(|| {
             error!("Failed to load service URL");
             failure::format_err!("Failed to load service URL")
         })

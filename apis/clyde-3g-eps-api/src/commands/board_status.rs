@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-use bitflags::bitflags;
-use eps_api::{EpsError, EpsResult};
-use rust_i2c::Command;
-
 /// Board Status
 ///
 /// The status bytes are designed to supply operational data about the I2C Node.
@@ -25,8 +21,11 @@ use rust_i2c::Command;
 /// sent followed by 0x00. The meaning of each bit of the returned status bytes
 /// is shown below. Please note that Data[3] is the first byte returned from the
 /// EPS and Data[0] is the last.
+use bitflags::bitflags;
+use eps_api::{EpsError, EpsResult};
+use rust_i2c::Command;
 
-/// EPS Board Status Codes
+// EPS Board Status Codes
 bitflags! {
     /// EPS Board Status Codes
     #[derive(Default)]

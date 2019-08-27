@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 use failure::{bail, Error};
-use getopts::Options;
 use serde_derive::Deserialize;
 use std::env;
 use std::fs::File;
@@ -83,7 +82,7 @@ impl Config {
     /// # Arguments
     /// `name` - Category name used as a key in the config file
     pub fn new(name: &str) -> Result<Self, Error> {
-        Self::new_from_path(name, get_config_path())
+        Self::new_from_path(name, get_config_path()?)
     }
 
     /// Creates and parses configuration data from the passed in configuration
@@ -144,26 +143,25 @@ impl Config {
     }
 }
 
-fn get_config_path() -> String {
-    let args: Vec<String> = env::args().collect();
+fn get_config_path() -> Result<String, Error> {
+    // Manually check for a "-c {config-path}" command line argument specifying a custom config
+    // file path to use.
+    // Doing it this way so that entities which use this module (apps, services) can have any
+    // number of additional command arguments
+    let mut args = env::args();
 
-    let mut opts = Options::new();
-    opts.optopt("c", "config", "Path to config file", "CONFIG");
-    // This library can be used by applications, which have this additional run level arg which
-    // can be specified
-    opts.optopt(
-        "r",
-        "run",
-        "Run level which should be executed",
-        "RUN_LEVEL",
-    );
-    let matches = match opts.parse(&args[1..]) {
-        Ok(m) => m,
-        Err(f) => panic!(f.to_string()),
-    };
-    match matches.opt_str("c") {
-        Some(s) => s,
-        None => DEFAULT_PATH.to_string(),
+    // Navigate to the "-c" option
+    let config_arg_pos = args.position(|arg| arg == "-c");
+
+    if let Some(_pos) = config_arg_pos {
+        // The config path will be the arg immediately after "-c"
+        match args.next() {
+            Some(path) => Ok(path),
+            None => bail!("The '-c' arg was specified, but no path value was provided"),
+        }
+    } else {
+        // The "-c" arg wasn't specified, so we can go ahead with the default
+        return Ok(DEFAULT_PATH.to_string());
     }
 }
 

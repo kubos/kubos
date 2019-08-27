@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+#![allow(clippy::block_in_if_condition_stmt)]
+
 use channel_protocol::{ChannelMessage, ChannelProtocol};
 use failure::bail;
 use kubos_system::Config as ServiceConfig;

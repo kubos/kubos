@@ -46,6 +46,7 @@ fn main() -> Result<(), Error> {
     let mut opts = Options::new();
 
     opts.optflag("b", "onboot", "Execute OnBoot logic");
+    // This will be parsed by the system API crate during Config::new()
     opts.optopt("c", "config", "Path to config file", "CONFIG");
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
@@ -54,16 +55,10 @@ fn main() -> Result<(), Error> {
         }
     };
 
-    let config = match matches.opt_str("c") {
-        Some(file) => Config::new_from_path("app-service", file.clone()).map_err(|err| {
-            error!("Failed to load service config from {}: {:?}", file, err);
-            err
-        })?,
-        None => Config::new("app-service").map_err(|err| {
-            error!("Failed to load default service config: {:?}", err);
-            err
-        })?,
-    };
+    let config = Config::new("app-service").map_err(|err| {
+        error!("Failed to load service config: {:?}", err);
+        err
+    })?;
 
     let registry = {
         match config.get("registry-dir") {

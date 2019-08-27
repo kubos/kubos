@@ -36,8 +36,13 @@ macro_rules! make_reset_telemetry {
         )+
     ) => {
 
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
         /// Reset Telemetry Variants
+        ///
+        /// Each of these reset telemetry commands may return two bytes or four bytes,
+        /// depending on whether or not a daughterboard exists. The first two bytes
+        /// will always represent the motherboard, the second two will represent
+        /// the daughterboard. All counters roll over at 255 to 0.
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
         pub enum Type {
             $(
                 $(#[$meta])+
@@ -73,10 +78,6 @@ pub struct Data {
     pub daughterboard: Option<u8>,
 }
 
-/// Each of these reset telemetry commands may return two bytes or four bytes,
-/// depending on whether or not a daughterboard exists. The first two bytes
-/// will always represent the motherboard, the second two will represent
-/// the daughterboard. All counters roll over at 255 to 0.
 make_reset_telemetry!(
     /// Get Number of Brown-out Resets
     BrownOut => 0x31,

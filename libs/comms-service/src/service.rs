@@ -194,7 +194,7 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
         };
 
         // Validate the link packet
-        if packet.validate() != true {
+        if !packet.validate() {
             log_telemetry(&data, &TelemType::UpFailed).unwrap();
             log_error(&data, CommsServiceError::InvalidChecksum.to_string()).unwrap();
             error!("Packet checksum failed");
