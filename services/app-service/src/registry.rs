@@ -34,7 +34,8 @@ use std::time::Duration;
 use toml;
 
 /// The default application registry directory in KubOS
-pub const K_APPS_DIR: &str = "/home/system/kubos/apps";
+pub static K_APPS_DIR: &str = "/home/system/kubos/apps";
+pub static DEFAULT_CONFIG: &str = "/home/system/etc/config.toml";
 
 /// AppRegistry
 #[derive(Clone, Debug)]
@@ -247,6 +248,13 @@ impl AppRegistry {
             });
         }
 
+        // Check for a custom configuration file
+        let config = if let Some(path) = metadata.config {
+            path
+        } else {
+            DEFAULT_CONFIG.to_owned()
+        };
+
         let mut entries = self.entries.lock().map_err(|err| AppError::RegisterError {
             err: format!("Couldn't get entries mutex: {:?}", err),
         })?;
@@ -307,6 +315,7 @@ impl AppRegistry {
                 executable: format!("{}/{}", app_dir_str, app_exec),
                 version: metadata.version,
                 author: metadata.author,
+                config,
             },
             active_version: true,
         };
@@ -610,9 +619,14 @@ impl AppRegistry {
 
         cmd.arg("-r").arg(format!("{}", run_level));
 
-        if let Some(path) = config.clone() {
-            cmd.arg("-c").arg(path);
-        }
+        let config_path = match config {
+            // Use the requested config file
+            Some(path) => path,
+            // Use the config file which was set when the app was registered
+            None => app.config.clone(),
+        };
+
+        cmd.arg("-c").arg(config_path.clone());
 
         if let Some(add_args) = args.clone() {
             cmd.args(&add_args);
@@ -625,7 +639,7 @@ impl AppRegistry {
         let start_time = Utc::now();
         info!(
             "Starting {}. Run Level: {}, Config: {:?}, Args: {:?}",
-            app_name, run_level, config, args
+            app_name, run_level, config_path, args
         );
 
         // Give the app a moment to run
@@ -678,7 +692,7 @@ impl AppRegistry {
                             pid,
                             run_level: run_level_str,
                             args,
-                            config,
+                            config: config_path,
                         },
                     );
 

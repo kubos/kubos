@@ -76,6 +76,12 @@ graphql_object!(KApp: () as "App" where Scalar = <S> |&self| {
     {
         &self.0.executable
     }
+
+    field config() -> &String
+        as "Configuration File Path"
+    {
+        &self.0.config
+    }
 });
 
 pub struct KAppRegistryEntry(pub app_entry::AppRegistryEntry);

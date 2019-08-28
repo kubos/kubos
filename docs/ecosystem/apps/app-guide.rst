@@ -110,12 +110,17 @@ This file must have the following key values:
 - ``version`` - The version number of the application
 - ``author`` - The author of the application
 
-Optionally, the file may also specify the ``executable`` key value.
-This parameter allows you to specify which file should be called in order to begin execution of the
-application.
+Optionally, the file may also specify the following values:
+
+The ``executable`` key value allows you to specify which file should be called in order to begin
+execution of the application.
 If it's omitted, the value of ``name`` will be used.
 This is particularly useful for Python applications, where the name of the application might not
 match the name of the file to be called.
+
+The ``config`` key value allows you to specify a custom file which the application should use in
+order to read :doc:`service configuration <../services/service-config>` information.
+If it is omitted, the default location ``/home/system/etc/config.toml`` will be used.
 
 For example::
 
@@ -123,6 +128,7 @@ For example::
     executable = "app.py"
     version = "1.1"
     author = "Me"
+    config = "/custom/config.toml"
     
 Local Execution
 ---------------

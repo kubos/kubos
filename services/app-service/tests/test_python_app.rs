@@ -61,6 +61,7 @@ fn setup_app(registry_dir: &Path) {
             name = "python-proj"
             version = "1.0"
             author = "user"
+            config = "/home/system/etc/config.toml"
             "#,
         registry_dir.to_string_lossy(),
     );

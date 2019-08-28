@@ -34,6 +34,7 @@ pub struct MockAppBuilder {
     _author: Option<String>,
     _active: Option<bool>,
     _run_level: Option<String>,
+    _config: Option<String>,
 }
 
 impl MockAppBuilder {
@@ -45,6 +46,7 @@ impl MockAppBuilder {
             _author: None,
             _active: None,
             _run_level: None,
+            _config: None,
         }
     }
 
@@ -73,6 +75,11 @@ impl MockAppBuilder {
         self
     }
 
+    pub fn config<'a>(&'a mut self, config: &str) -> &'a mut Self {
+        self._config = Some(String::from(config));
+        self
+    }
+
     pub fn toml(&self, registry_dir: &str) -> String {
         format!(
             r#"
@@ -84,6 +91,7 @@ impl MockAppBuilder {
             name = "{name}"
             version = "{version}"
             author = "{author}"
+            config = "{config}"
             "#,
             name = self._name,
             dir = registry_dir,
@@ -92,6 +100,10 @@ impl MockAppBuilder {
             version = self._version.as_ref().unwrap_or(&String::from("0.0.1")),
             author = self._author.as_ref().unwrap_or(&String::from("unknown")),
             bin = self._bin.as_ref().unwrap_or(&self._name),
+            config = self
+                ._config
+                .as_ref()
+                .unwrap_or(&String::from("/home/system/etc/config.toml")),
         )
     }
 

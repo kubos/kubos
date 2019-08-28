@@ -67,6 +67,7 @@ fn setup_app(registry_dir: &Path) {
             name = "rust-proj"
             version = "1.0"
             author = "user"
+            config = "/home/system/etc/config.toml"
             "#,
         registry_dir.to_string_lossy(),
     );
@@ -137,8 +138,10 @@ fn monitor_good() {
     );
     assert_eq!(result["runningApps"][0]["version"].as_str().unwrap(), "1.0");
     assert_eq!(result["runningApps"][0]["pid"].as_i64().unwrap(), pid);
-    // No custom config was given, so this should be empty
-    assert_eq!(result["runningApps"][0]["config"].as_str(), None);
+    assert_eq!(
+        result["runningApps"][0]["config"].as_str().unwrap(),
+        "/home/system/etc/config.toml"
+    );
     assert_eq!(args, ["--", "-l"]);
     assert_eq!(
         result["runningApps"][0]["runLevel"].as_str().unwrap(),

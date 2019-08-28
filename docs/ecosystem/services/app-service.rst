@@ -62,7 +62,8 @@ It has the following schema::
                     name: String!,
                     executable: String!,
                     version: String!,
-                    author: String!
+                    author: String!,
+                    config: String!
                 }
             ]
         }
@@ -86,6 +87,8 @@ Queries return the following fields:
       run for this application
     - ``version``: The particular version number of this application entry
     - ``author``: The creator/owner of this application entry
+    - ``config``: The :doc:`configuration file <service-config>` which will be passed to the
+      application when it is run
 
 
 An example query requesting the name, version number, and active status of all registered
