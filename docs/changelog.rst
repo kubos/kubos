@@ -1,6 +1,29 @@
 Kubos Changelog
 ===============
 
+v1.17.0 - Aug 15 2019
+---------------------
+
+- Added `example OBC housekeeping mission app <https://github.com/kubos/kubos/tree/master/apps/obc-hs>`__
+- Updated the file transfer service to allow the downlink destination to be configurable
+- Changed service configuration behavior to fail when config values cannot be read, rather than
+  taking default values
+- Documented `UDP passthrough behavior <https://docs.kubos.com/1.17.0/ecosystem/services/comms-framework.html>`__ for the comms service framework
+- Documented `arg passthrough behavior <https://docs.kubos.com/1.17.0/ecosystem/apps/app-guide.html#additional-arguments>`__ in the app development guide
+- `Added tips for reducing Rust binary sizes <https://docs.kubos.com/master/1.17.0/getting-started/using-rust.html#making-rust-binaries-smaller>`__
+- Tweaked how C-based libraries are included in our Rust workspace to improve the ability to use
+  KubOS software in a local development environment
+- Updated all Python packages to contain accurate `requirements.txt` files
+- Updated all packages and libraries to contain Readme files
+- Upgraded Rust usage to v1.36.0
+- Upgraded base CI Docker image to Ubuntu 18.04
+- Migrated all remaining tooling to Python3
+
+Bug Fixes:
+~~~~~~~~~~
+
+- Miscellaneous fixes to support building and running KubOS from a MacOS development environment
+
 v1.16.0 - Jul 10 2019
 ---------------------
 

@@ -252,13 +252,13 @@ fn main() -> NslDuplexCommsResult<()> {
 
     let bus = service_config
         .get("bus")
-        .ok_or({
+        .ok_or_else(|| {
             error!("Failed to load 'bus' config value");
             "Failed to load 'bus' config value"
         })
         .unwrap()
         .as_str()
-        .ok_or({
+        .ok_or_else(|| {
             error!("Failed to parse 'bus' config value");
             "Failed to parse 'bus' config value"
         })
