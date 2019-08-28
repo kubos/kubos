@@ -362,14 +362,11 @@ fn uninstall_unmonitor() {
             .to_string_lossy()
     );
     let mut app = MockAppBuilder::new("dummy");
-    app.active(true)
-        .run_level("OnBoot")
-        .version("0.0.1")
-        .author("user");
+    app.active(true).version("0.0.1").author("user");
 
     app.install(&fixture.registry_dir.path());
 
-    fixture.start_service(false);
+    fixture.start_service();
 
     // Make sure our app directory exists
     assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
@@ -378,7 +375,7 @@ fn uninstall_unmonitor() {
     let result = send_query(
         ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
         r#"mutation {
-            startApp(name: "dummy", runLevel: "OnCommand") {
+            startApp(name: "dummy") {
                 success,
                 errors
             }
@@ -428,21 +425,15 @@ fn uninstall_all_unmonitor() {
             .to_string_lossy()
     );
     let mut app = MockAppBuilder::new("dummy");
-    app.active(true)
-        .run_level("OnBoot")
-        .version("0.0.1")
-        .author("user");
+    app.active(true).version("0.0.1").author("user");
 
     app.install(&fixture.registry_dir.path());
 
     let mut app = MockAppBuilder::new("dummy");
-    app.active(true)
-        .run_level("OnBoot")
-        .version("0.0.2")
-        .author("user");
+    app.active(true).version("0.0.2").author("user");
 
     app.install(&fixture.registry_dir.path());
-    fixture.start_service(false);
+    fixture.start_service();
 
     // Make sure our app directory exists
     assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
@@ -451,7 +442,7 @@ fn uninstall_all_unmonitor() {
     let result = send_query(
         ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
         r#"mutation {
-            startApp(name: "dummy", runLevel: "OnCommand") {
+            startApp(name: "dummy") {
                 success,
                 errors
             }

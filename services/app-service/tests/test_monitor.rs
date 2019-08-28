@@ -145,7 +145,7 @@ fn monitor_good() {
         "/home/system/etc/config.toml"
     );
     assert_eq!(args, ["-l"]);
-    assert!(result["runningApps"][0]["startTime"].is_string());
+    assert!(result["appStatus"][0]["startTime"].is_string());
 
     // The app has its own 2 second sleep time, so we need to wait that long for it to finish
     thread::sleep(Duration::from_secs(2));

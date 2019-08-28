@@ -429,10 +429,7 @@ impl AppRegistry {
 
         // Remove the app entry from the monitoring list
         // Note: If the app was never run, then no entry will be present
-        if let Err(new_error) = remove_entry(&self.monitoring, app_name, version, "OnBoot") {
-            errors.push(new_error.to_string());
-        }
-        if let Err(new_error) = remove_entry(&self.monitoring, app_name, version, "OnCommand") {
+        if let Err(new_error) = remove_entry(&self.monitoring, app_name, version) {
             errors.push(new_error.to_string());
         }
 
@@ -724,12 +721,7 @@ impl AppRegistry {
         //   - Err(err) - Something went wrong while trying to check if the app is still running.
         match child.try_wait() {
             Ok(Some(status)) => {
-                finish_entry(
-                    &self.monitoring,
-                    app_name,
-                    &app.version,
-                    status,
-                )?;
+                finish_entry(&self.monitoring, app_name, &app.version, status)?;
 
                 if !status.success() {
                     Err(AppError::StartError {

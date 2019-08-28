@@ -28,11 +28,9 @@ mod schema;
 mod tests;
 
 use crate::registry::AppRegistry;
-use failure::{bail, Error};
-use getopts::Options;
+use failure::Error;
 use kubos_service::{Config, Service};
 use log::error;
-use std::env;
 use syslog::Facility;
 
 fn main() -> Result<(), Error> {
@@ -42,19 +40,6 @@ fn main() -> Result<(), Error> {
         Some("kubos-app-service"),
     )
     .unwrap();
-
-    let args: Vec<String> = env::args().collect();
-    let mut opts = Options::new();
-
-    opts.optflag("b", "onboot", "Execute OnBoot logic");
-    // This will be parsed by the system API crate during Config::new()
-    opts.optopt("c", "config", "Path to config file", "CONFIG");
-    let matches = match opts.parse(&args[1..]) {
-        Ok(m) => m,
-        Err(err) => {
-            bail!("Unable to parse command options: {}", err);
-        }
-    };
 
     let config = Config::new("app-service").map_err(|err| {
         error!("Failed to load service config: {:?}", err);

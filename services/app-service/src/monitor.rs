@@ -36,10 +36,10 @@ pub struct MonitorEntry {
     pub config: String,
 }
 
-// Check if any version of the application is running with the requested run level
-pub fn find_running(
+// Check if any version of the application is running
+pub fn check_running(
     registry: &Arc<Mutex<Vec<MonitorEntry>>>,
-    name: &str
+    name: &str,
 ) -> Result<Option<MonitorEntry>, AppError> {
     let entries = registry.lock().map_err(|err| AppError::MonitorError {
         err: format!("Failed get entries mutex: {:?}", err),
@@ -58,7 +58,7 @@ pub fn monitor_app(
     registry: Arc<Mutex<Vec<MonitorEntry>>>,
     mut process_handle: Child,
     name: &str,
-    version: &str
+    version: &str,
 ) -> Result<(), AppError> {
     // Wait for the application to finish running
     let status = process_handle
@@ -82,15 +82,15 @@ pub fn start_entry(
         ),
     })?;
 
-    // If an entry already exists for this name/version/run_level combo, update it
+    // If an entry already exists for this name/version combo, update it
     // Otherwise, add the entry to the registry
-    if let Some(index) = entries.iter().position(|ref e| {
-        e.name == new_entry.name
-            && e.version == new_entry.version
-    }) {
+    if let Some(index) = entries
+        .iter()
+        .position(|ref e| e.name == new_entry.name && e.version == new_entry.version)
+    {
         debug!(
-            "Updating existing entry for {} {} {}",
-            new_entry.name, new_entry.version, new_entry.run_level
+            "Updating existing entry for {} {}",
+            new_entry.name, new_entry.version
         );
         entries[index] = (*new_entry).clone();
     } else {
@@ -144,10 +144,7 @@ pub fn finish_entry(
         entries[index].pid = None;
         entries[index].end_time = Some(end_time);
     } else {
-        warn!(
-            "Unable to find entry for {} {}",
-            name, version
-        );
+        warn!("Unable to find entry for {} {}", name, version);
     }
 
     Ok(())
@@ -158,7 +155,7 @@ pub fn finish_entry(
 pub fn remove_entry(
     registry: &Arc<Mutex<Vec<MonitorEntry>>>,
     name: &str,
-    version: &str
+    version: &str,
 ) -> Result<(), AppError> {
     let mut entries = registry.lock().map_err(|err| AppError::MonitorError {
         err: format!(
@@ -194,5 +191,4 @@ pub fn remove_entries(
     entries.retain(|entry| entry.name != name);
 
     Ok(())
-
 }
