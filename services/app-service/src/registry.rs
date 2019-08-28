@@ -25,6 +25,7 @@ use log::*;
 use std::fs;
 use std::io::Read;
 use std::os::unix;
+use std::os::unix::process::ExitStatusExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::{Arc, Mutex};
@@ -599,6 +600,21 @@ impl AppRegistry {
             warn!("Failed to set cwd before executing {}: {:?}", app_name, err);
         }
 
+        // Check if app is already running
+        let run_level_str = format!("{}", run_level);
+        let running_status = find_entry(&self.monitoring, app_name, &run_level_str);
+        if running_status == Ok(true) {
+            return Err(AppError::StartError {
+                err: format!("Instance of {} already running {}", app_name, run_level_str),
+            });
+        } else if let Err(err) = running_status {
+            // The only way this happens is if the monitoring registry mutex gets poisoned.
+            // In that case, we want to crash this service so that it can be restarted in a
+            // good state.
+            error!("Crashing service: {:?}", err);
+            panic!("{:?}", err);
+        }
+
         let mut cmd = Command::new(app_path);
 
         cmd.arg("-r").arg(format!("{}", run_level));
@@ -638,38 +654,35 @@ impl AppRegistry {
         match child.try_wait() {
             Ok(Some(status)) => {
                 // App exited already. Check for errors and then return
-                if !status.success() {
-                    Err(AppError::StartError {
-                        err: format!("App returned {}", status),
-                    })
-                } else {
+                if status.success() {
+                    info!("App {} completed successfully", app.name);
                     // App finished successfully, so there are no errors, but also no PID
                     Ok(None)
+                } else if let Some(code) = status.code() {
+                    error!("App {} failed. RC: {}", app.name, code);
+                    Err(AppError::StartError {
+                        err: format!("App {} failed. RC: {}", app.name, code),
+                    })
+                } else if let Some(signal) = status.signal() {
+                    warn!("App {} terminated by signal {}", app.name, signal);
+                    Err(AppError::StartError {
+                        err: format!("App {} terminated by signal {}", app.name, signal),
+                    })
+                } else {
+                    warn!("App {} terminated for unknown reasons", app.name);
+                    Err(AppError::StartError {
+                        err: format!("App {} terminated for unknown reasons", app.name),
+                    })
                 }
             }
             Ok(None) => {
                 let name = app_name.to_owned();
                 let pid = child.id() as i32;
-                let run_level_str = format!("{}", run_level);
                 let registry = self.monitoring.clone();
-
-                // Check if app is already running
-                let running_status = find_entry(&registry, app_name, &run_level_str);
-                if running_status == Ok(true) {
-                    return Err(AppError::StartError {
-                        err: format!("Instance of {} already running {}", app_name, run_level_str),
-                    });
-                } else if let Err(err) = running_status {
-                    // The only way this happens is if the monitoring registry mutex gets poisoned.
-                    // In that case, we want to crash this service so that it can be restarted in a
-                    // good state.
-                    error!("Crashing service: {:?}", err);
-                    panic!("{:?}", err);
-                }
 
                 // Spawn monitor thread
                 thread::spawn(move || {
-                    monitor_app(
+                    let result = monitor_app(
                         registry,
                         child,
                         MonitorEntry {
@@ -681,7 +694,11 @@ impl AppRegistry {
                             args,
                             config: config_path,
                         },
-                    )
+                    );
+
+                    if let Err(error) = result {
+                        error!("{:?}", error);
+                    }
                 });
 
                 Ok(Some(pid))

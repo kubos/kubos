@@ -30,7 +30,7 @@
 //! ## In Services
 //!
 //! Services should only link to the `kubos_service` crate if they have a
-//! hardware device they want to expose over the service interface (currently GraphQL/UDP).
+//! hardware device they want to expose over the service interface (currently GraphQL/HTTP).
 //!
 //! ## Configuration
 //!

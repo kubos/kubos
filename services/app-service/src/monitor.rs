@@ -16,6 +16,7 @@
 
 use crate::error::*;
 use chrono::{DateTime, Utc};
+use failure::Error;
 use log::*;
 use std::os::unix::process::ExitStatusExt;
 use std::process::Child;
@@ -37,17 +38,16 @@ pub fn monitor_app(
     registry: Arc<Mutex<Vec<MonitorEntry>>>,
     mut process_handle: Child,
     app: MonitorEntry,
-) {
+) -> Result<(), Error> {
     // Add the app information to our monitoring registry
-    insert_entry(registry.clone(), &app);
+    insert_entry(registry.clone(), &app)?;
 
     // Wait for the application to finish running
     let status = process_handle
         .wait()
         .map_err(|err| AppError::MonitorError {
             err: format!("Failed to wait for {} to finish: {:?}", app.name, err),
-        })
-        .unwrap();
+        })?;
 
     // Parse and log the result
     if status.success() {
@@ -61,10 +61,13 @@ pub fn monitor_app(
     }
 
     // Remove the app from our monitoring registry
-    remove_entry(registry, &app.name, &app.run_level);
+    remove_entry(registry, &app.name, &app.run_level)
 }
 
-fn insert_entry(registry: Arc<Mutex<Vec<MonitorEntry>>>, entry: &MonitorEntry) {
+fn insert_entry(
+    registry: Arc<Mutex<Vec<MonitorEntry>>>,
+    entry: &MonitorEntry,
+) -> Result<(), Error> {
     registry
         .lock()
         .map_err(|err| AppError::MonitorError {
@@ -72,21 +75,23 @@ fn insert_entry(registry: Arc<Mutex<Vec<MonitorEntry>>>, entry: &MonitorEntry) {
                 "Failed to add {} to monitoring. Couldn't get entries mutex: {:?}",
                 entry.name, err
             ),
-        })
-        .unwrap()
+        })?
         .push(entry.clone());
+
+    Ok(())
 }
 
-fn remove_entry(registry: Arc<Mutex<Vec<MonitorEntry>>>, name: &str, run_level: &str) {
-    let mut entries = registry
-        .lock()
-        .map_err(|err| AppError::MonitorError {
-            err: format!(
-                "Failed to remove {} from monitoring. Couldn't get entries mutex: {:?}",
-                name, err
-            ),
-        })
-        .unwrap();
+fn remove_entry(
+    registry: Arc<Mutex<Vec<MonitorEntry>>>,
+    name: &str,
+    run_level: &str,
+) -> Result<(), Error> {
+    let mut entries = registry.lock().map_err(|err| AppError::MonitorError {
+        err: format!(
+            "Failed to remove {} from monitoring. Couldn't get entries mutex: {:?}",
+            name, err
+        ),
+    })?;
     if let Some(index) = entries
         .iter()
         .position(|ref e| e.name == name && e.run_level == run_level)
@@ -95,8 +100,13 @@ fn remove_entry(registry: Arc<Mutex<Vec<MonitorEntry>>>, name: &str, run_level: 
     } else {
         // This would only happen if we were somehow trying to doubly free a monitor entry,
         // which shouldn't ever happen
-        error!("Failed to unmonitor {}", name);
+        return Err(AppError::MonitorError {
+            err: format!("Failed to unmonitor {}", name),
+        }
+        .into());
     }
+
+    Ok(())
 }
 
 pub fn find_entry(

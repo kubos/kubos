@@ -433,14 +433,14 @@ fn main() {
         .unwrap();
     let bus = config
         .get("bus")
-        .ok_or({
+        .ok_or_else(|| {
             error!("Failed to load 'bus' config value");
             "Failed to load 'bus' config value"
         })
         .unwrap();
     let bus = bus
         .as_str()
-        .ok_or({
+        .ok_or_else(|| {
             error!("Failed to parse 'bus' config value");
             "Failed to parse 'bus' config value"
         })

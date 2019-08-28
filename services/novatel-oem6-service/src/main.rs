@@ -349,14 +349,14 @@ fn main() -> OEMResult<()> {
         .unwrap();
     let bus = config
         .get("bus")
-        .ok_or({
+        .ok_or_else(|| {
             error!("No 'bus' value found in 'novatel-oem6-service' section of config");
             "No 'bus' value found in 'novatel-oem6-service' section of config"
         })
         .unwrap();
     let bus = bus
         .as_str()
-        .ok_or({
+        .ok_or_else(|| {
             error!("Failed to parse 'bus' config value");
             "Failed to parse 'bus' config value"
         })

@@ -219,6 +219,7 @@ fn app_flag_arg() {
 }
 
 #[test]
+#[ignore]
 fn app_failure() {
     let mut fixture = AppServiceFixture::setup();
     let config = ServiceConfig::new_from_path(

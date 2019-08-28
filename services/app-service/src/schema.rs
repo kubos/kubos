@@ -26,7 +26,7 @@ type Context = kubos_service::Context<AppRegistry>;
 ///
 pub struct QueryRoot;
 
-/// Base GraphQL query model
+// Base GraphQL query model
 graphql_object!(QueryRoot : Context as "Query" |&self| {
     // Test query to verify service is running without
     // attempting to execute an actual logic
@@ -46,9 +46,8 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
                active: Option<bool>)
         -> FieldResult<Vec<KAppRegistryEntry>> as "Kubos Apps Query"
     {
-        let mut result: Vec<KAppRegistryEntry> = Vec::new();
         let entries = executor.context().subsystem().entries.lock()?;
-        let final_iter = entries.iter().filter(|ref e| {
+        let result = entries.iter().filter(|ref e| {
             if name.is_some() && &e.app.name != name.as_ref().unwrap() {
                 return false;
             }
@@ -59,32 +58,26 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
                 return false;
             }
             true
-        });
-
-        for entry in final_iter {
-            result.push(KAppRegistryEntry(entry.clone()));
-        }
+        }).map(|entry| KAppRegistryEntry(entry.clone())).collect();
 
         Ok(result)
     }
 
     field running_apps(&executor,
-        name: Option<String>)
+        name: Option<String>,
+        version: Option<String>)
         -> FieldResult<Vec<MonitorEntry>> as "Running Apps Query"
     {
-        let mut result: Vec<MonitorEntry> = Vec::new();
         let entries = executor.context().subsystem().monitoring.lock()?;
-        let final_iter = entries.iter().filter(|e| {
+        let result = entries.iter().filter(|e| {
             if name.is_some() && &e.name != name.as_ref().unwrap() {
                 return false;
             }
+            if version.is_some() && &e.version != version.as_ref().unwrap() {
+                return false;
+            }
             true
-        });
-
-        for entry in final_iter {
-            let app = (*entry).clone();
-            result.push(app);
-        }
+        }).map(|entry_ref| (*entry_ref).clone()).collect();
 
         Ok(result)
     }
@@ -94,7 +87,7 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
 ///
 pub struct MutationRoot;
 
-/// Base GraphQL mutation model
+// Base GraphQL mutation model
 graphql_object!(MutationRoot : Context as "Mutation" |&self| {
 
     field register(&executor, path: String) -> FieldResult<RegisterResponse>

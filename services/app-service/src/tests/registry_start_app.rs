@@ -222,7 +222,7 @@ fn start_app_nonzero_rc() {
     assert_eq!(
         result.unwrap_err(),
         AppError::StartError {
-            err: "App returned exit code: 1".to_owned()
+            err: "App tiny-app failed. RC: 1".to_owned()
         }
     );
 }
