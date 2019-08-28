@@ -20,6 +20,7 @@ extern crate juniper;
 
 mod app_entry;
 mod error;
+mod monitor;
 mod objects;
 mod registry;
 mod schema;

@@ -97,7 +97,7 @@ fn set_version_good() {
     test!(service, query, expected);
 
     let app_query = r#"{ 
-        apps(name: \"dummy\") {
+        registeredApps(name: \"dummy\") {
             active,
             app {
                 name,
@@ -107,7 +107,7 @@ fn set_version_good() {
     }"#;
 
     let expected = json!({
-           "apps": [
+           "registeredApps": [
              {
                   "active": true,
                    "app": {
@@ -152,7 +152,7 @@ fn set_version_same() {
     test!(service, query, expected);
 
     let app_query = r#"{ 
-        apps(name: \"dummy\") {
+        registeredApps(name: \"dummy\") {
             active,
             app {
                 name,
@@ -162,7 +162,7 @@ fn set_version_same() {
     }"#;
 
     let expected = json!({
-           "apps": [
+           "registeredApps": [
              {
                   "active": false,
                    "app": {

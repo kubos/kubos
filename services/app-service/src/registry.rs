@@ -16,6 +16,8 @@
 
 use crate::app_entry::*;
 use crate::error::*;
+use crate::monitor::*;
+use chrono::Utc;
 use failure::format_err;
 use fs_extra;
 use kubos_app::RunLevel;
@@ -23,6 +25,7 @@ use log::*;
 use std::fs;
 use std::io::Read;
 use std::os::unix;
+use std::os::unix::process::ExitStatusExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::{Arc, Mutex};
@@ -38,6 +41,7 @@ pub const K_APPS_DIR: &str = "/home/system/kubos/apps";
 pub struct AppRegistry {
     #[doc(hidden)]
     pub entries: Arc<Mutex<Vec<AppRegistryEntry>>>,
+    pub monitoring: Arc<Mutex<Vec<MonitorEntry>>>,
     /// The managed root directory of the AppRegistry
     pub apps_dir: String,
 }
@@ -58,6 +62,7 @@ impl AppRegistry {
     pub fn new_from_dir(apps_dir: &str) -> Result<AppRegistry, AppError> {
         let registry = AppRegistry {
             entries: Arc::new(Mutex::new(Vec::new())),
+            monitoring: Arc::new(Mutex::new(Vec::new())),
             apps_dir: String::from(apps_dir),
         };
 
@@ -520,7 +525,7 @@ impl AppRegistry {
         Ok(())
     }
 
-    /// Start an application. If successful, returns the pid of the application process.
+    /// Start an application. If successful, returns the PID of the application process.
     ///
     /// # Arguments
     ///
@@ -540,7 +545,7 @@ impl AppRegistry {
         run_level: &RunLevel,
         config: Option<String>,
         args: Option<Vec<String>>,
-    ) -> Result<u32, AppError> {
+    ) -> Result<Option<i32>, AppError> {
         // Look up the active version of the requested application
         let app = {
             let entries = self.entries.lock().map_err(|err| AppError::StartError {
@@ -586,21 +591,42 @@ impl AppRegistry {
             warn!("Failed to set cwd before executing {}: {:?}", app_name, err);
         }
 
+        // Check if app is already running
+        let run_level_str = format!("{}", run_level);
+        let running_status = find_entry(&self.monitoring, app_name, &run_level_str);
+        if running_status == Ok(true) {
+            return Err(AppError::StartError {
+                err: format!("Instance of {} already running {}", app_name, run_level_str),
+            });
+        } else if let Err(err) = running_status {
+            // The only way this happens is if the monitoring registry mutex gets poisoned.
+            // In that case, we want to crash this service so that it can be restarted in a
+            // good state.
+            error!("Crashing service: {:?}", err);
+            panic!("{:?}", err);
+        }
+
         let mut cmd = Command::new(app_path);
 
         cmd.arg("-r").arg(format!("{}", run_level));
 
-        if let Some(path) = config {
+        if let Some(path) = config.clone() {
             cmd.arg("-c").arg(path);
         }
 
-        if let Some(add_args) = args {
+        if let Some(add_args) = args.clone() {
             cmd.args(&add_args);
         }
 
         let mut child = cmd.spawn().map_err(|err| AppError::StartError {
             err: format!("Failed to spawn app: {:?}", err),
         })?;
+
+        let start_time = Utc::now();
+        info!(
+            "Starting {}. Run Level: {}, Config: {:?}, Args: {:?}",
+            app_name, run_level, config, args
+        );
 
         // Give the app a moment to run
         thread::sleep(Duration::from_millis(300));
@@ -611,17 +637,64 @@ impl AppRegistry {
         //   - Ok(Some(status)) - App exited. Status is the exit code.
         //   - Ok(None) - App is still running
         //   - Err(err) - Something went wrong while trying to check if the app is still running.
-        //                We're going to go ahead and assume that it is.
-        if let Some(status) = child.try_wait().unwrap_or(None) {
-            if !status.success() {
-                Err(AppError::StartError {
-                    err: format!("App returned {}", status),
-                })
-            } else {
-                Ok(child.id())
+        match child.try_wait() {
+            Ok(Some(status)) => {
+                // App exited already. Check for errors and then return
+                if status.success() {
+                    info!("App {} completed successfully", app.name);
+                    // App finished successfully, so there are no errors, but also no PID
+                    Ok(None)
+                } else if let Some(code) = status.code() {
+                    error!("App {} failed. RC: {}", app.name, code);
+                    Err(AppError::StartError {
+                        err: format!("App {} failed. RC: {}", app.name, code),
+                    })
+                } else if let Some(signal) = status.signal() {
+                    warn!("App {} terminated by signal {}", app.name, signal);
+                    Err(AppError::StartError {
+                        err: format!("App {} terminated by signal {}", app.name, signal),
+                    })
+                } else {
+                    warn!("App {} terminated for unknown reasons", app.name);
+                    Err(AppError::StartError {
+                        err: format!("App {} terminated for unknown reasons", app.name),
+                    })
+                }
             }
-        } else {
-            Ok(child.id())
+            Ok(None) => {
+                let name = app_name.to_owned();
+                let pid = child.id() as i32;
+                let registry = self.monitoring.clone();
+
+                // Spawn monitor thread
+                thread::spawn(move || {
+                    let result = monitor_app(
+                        registry,
+                        child,
+                        MonitorEntry {
+                            start_time,
+                            name,
+                            version: app.version,
+                            pid,
+                            run_level: run_level_str,
+                            args,
+                            config,
+                        },
+                    );
+
+                    if let Err(error) = result {
+                        error!("{:?}", error);
+                    }
+                });
+
+                Ok(Some(pid))
+            }
+            Err(err) => Err(AppError::StartError {
+                err: format!(
+                    "Started app, but failed to fetch status information: {:?}",
+                    err
+                ),
+            }),
         }
     }
 

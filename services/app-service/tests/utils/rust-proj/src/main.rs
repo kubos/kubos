@@ -19,6 +19,8 @@
 use failure::{bail, Error};
 use getopts::Options;
 use kubos_app::*;
+use std::thread;
+use std::time::Duration;
 
 struct MyApp;
 
@@ -49,6 +51,7 @@ impl AppHandler for MyApp {
         let mut opts = Options::new();
         opts.optflag("f", "", "Test flag");
         opts.optopt("t", "test", "Test arg", "TEST");
+        opts.optflag("l", "", "Long running test");
         opts.optflag("h", "help", "Print this help menu");
 
         let matches = match opts.parse(&args) {
@@ -66,6 +69,14 @@ impl AppHandler for MyApp {
 
         // Check for a positional arg
         if !matches.free.is_empty() && matches.free[0] == "pos" {
+            success = true;
+        }
+        
+        if matches.opt_present("l") {
+            // We want to test the app service's ability to track an application which doesn't
+            // immediately return.
+            // Future work: Add option to return a non-zero RC
+            thread::sleep(Duration::from_secs(2));
             success = true;
         }
 

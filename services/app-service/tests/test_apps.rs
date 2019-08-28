@@ -57,7 +57,7 @@ fn setup_apps(registry_dir: &Path) {
 fn apps_query(config: ServiceConfig, query: &str) -> Vec<serde_json::Value> {
     let result = send_query(config, query);
 
-    let apps = result["apps"].clone();
+    let apps = result["registeredApps"].clone();
     assert!(apps.is_array());
 
     let mut apps_sorted = apps.as_array().unwrap().clone();
@@ -105,7 +105,7 @@ macro_rules! test_query {
 
 test_query!(
     all_apps,
-    "{ apps { active, app { name, version, author } } }",
+    "{ registeredApps { active, app { name, version, author } } }",
     |apps| {
         assert_eq!(apps.len(), 6);
         assert_eq!(
@@ -137,7 +137,7 @@ test_query!(
 
 test_query!(
     by_name_app1,
-    "{ apps(name: \"app1\") { app { name, version } } }",
+    "{ registeredApps(name: \"app1\") { app { name, version } } }",
     |apps| {
         assert_eq!(apps.len(), 2);
         assert_eq!(
@@ -153,7 +153,7 @@ test_query!(
 
 test_query!(
     by_name_app2,
-    "{ apps(name: \"app2\") { app { name, version } } }",
+    "{ registeredApps(name: \"app2\") { app { name, version } } }",
     |apps| {
         assert_eq!(apps.len(), 2);
         assert_eq!(
@@ -169,7 +169,7 @@ test_query!(
 
 test_query!(
     by_version_100,
-    "{ apps(version: \"1.0.0\") { app { name, version } } }",
+    "{ registeredApps(version: \"1.0.0\") { app { name, version } } }",
     |apps| {
         assert_eq!(apps.len(), 2);
         assert_eq!(
@@ -185,7 +185,7 @@ test_query!(
 
 test_query!(
     by_version_002,
-    "{ apps(version: \"0.0.2\") { app { name, version } } }",
+    "{ registeredApps(version: \"0.0.2\") { app { name, version } } }",
     |apps| {
         assert_eq!(apps.len(), 1);
         assert_eq!(
@@ -197,7 +197,7 @@ test_query!(
 
 test_query!(
     by_name_app2_version_101,
-    r#"{ apps(version: "1.0.1", name: "app2") { app { name, version } } }"#,
+    r#"{ registeredApps(version: "1.0.1", name: "app2") { app { name, version } } }"#,
     |apps| {
         assert_eq!(apps.len(), 1);
         assert_eq!(
@@ -209,7 +209,7 @@ test_query!(
 
 test_query!(
     by_active_true,
-    "{ apps(active: true) { app { name, version } } }",
+    "{ registeredApps(active: true) { app { name, version } } }",
     |apps| {
         assert_eq!(apps.len(), 3);
         assert_eq!(
@@ -230,7 +230,7 @@ test_query!(
 
 test_query!(
     by_active_false,
-    "{ apps(active: false) { app { name, version } } }",
+    "{ registeredApps(active: false) { app { name, version } } }",
     |apps| {
         assert_eq!(apps.len(), 3);
         assert_eq!(

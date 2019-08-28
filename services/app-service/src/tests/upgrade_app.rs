@@ -100,7 +100,7 @@ fn upgrade_good() {
     test!(service, upgrade_query, expected);
 
     let app_query = r#"{ 
-            apps(name: \"dummy\") {
+            registeredApps(name: \"dummy\") {
                 active,
                 app {
                     name,
@@ -111,7 +111,7 @@ fn upgrade_good() {
     "#;
 
     let expected = json!({
-               "apps": [
+               "registeredApps": [
                  {
                       "active": false,
                        "app": {
@@ -211,7 +211,7 @@ fn upgrade_bad() {
     test!(service, upgrade_query, expected);
 
     let app_query = r#"{ 
-            apps(name: \"dummy\") {
+            registeredApps(name: \"dummy\") {
                 active,
                 app {
                     name,
@@ -222,7 +222,7 @@ fn upgrade_bad() {
     "#;
 
     let expected = json!({
-               "apps": [
+               "registeredApps": [
                  {
                       "active": true,
                        "app": {
