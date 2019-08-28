@@ -5,7 +5,6 @@ The Rust application API is meant to simplify development of KubOS mission appli
 It provides the following functionality:
 
 - Initializes logging
-- Parses and triggers desired run level
 - Provides a helper function for sending GraphQL requests to services
 
 # Examples
@@ -13,14 +12,12 @@ It provides the following functionality:
 ```
 use failure::{bail, Error};
 use kubos_app::*;
-use std::time::Duration;
+use log::*;
 
-struct MyApp;
-
-impl AppHandler for MyApp {
-  fn on_boot(&self, _args: Vec<String>) -> Result<(), Error> {
-    println!("OnBoot logic");
-
+fn main() -> Result<(), Error> {
+    // Initialize logging
+    logging_setup!("my-rust-app");
+    
     // GraphQL request to turn on the radio
     let request = r#"mutation {
             power(state: ON) {
@@ -47,21 +44,6 @@ impl AppHandler for MyApp {
             }
         }
     }
-
-    Ok(())
-  }
-  fn on_command(&self, _args: Vec<String>) -> Result<(), Error> {
-    println!("OnCommand logic");
-    Ok(())
-  }
-}
-
-fn main() -> Result<(), Error> {
-    let app = MyApp { };
-    // Initialize logging and then enter either the `on_boot` or
-    // `on_command` function, depending on what run level was
-    // requested by the user
-    app_main!(&app)?;
     Ok(())
 }
 ```
