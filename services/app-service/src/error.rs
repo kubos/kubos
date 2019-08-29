@@ -76,6 +76,12 @@ pub enum AppError {
         /// Underlying error encountered
         err: String,
     },
+    /// An error was encountered while killing an application
+    #[fail(display = "Failed to kill app: {}", err)]
+    KillError {
+        /// Underlying error encountered
+        err: String,
+    },
 }
 
 impl From<::std::io::Error> for AppError {

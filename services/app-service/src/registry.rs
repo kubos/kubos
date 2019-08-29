@@ -22,6 +22,8 @@ use failure::format_err;
 use fs_extra;
 use kubos_app::RunLevel;
 use log::*;
+use nix::sys::signal;
+use nix::unistd::Pid;
 use std::fs;
 use std::io::Read;
 use std::os::unix;
@@ -610,17 +612,21 @@ impl AppRegistry {
 
         // Check if app is already running
         let run_level_str = format!("{}", run_level);
-        let running_status = check_running(&self.monitoring, app_name, &run_level_str);
-        if running_status == Ok(true) {
-            return Err(AppError::StartError {
-                err: format!("Instance of {} already running {}", app_name, run_level_str),
-            });
-        } else if let Err(err) = running_status {
-            // The only way this happens is if the monitoring registry mutex gets poisoned.
-            // In that case, we want to crash this service so that it can be restarted in a
-            // good state.
-            error!("Crashing service: {:?}", err);
-            panic!("{:?}", err);
+        let running_status = find_running(&self.monitoring, app_name, &run_level_str);
+        match running_status {
+            Ok(None) => {}
+            Ok(Some(_)) => {
+                return Err(AppError::StartError {
+                    err: format!("Instance of {} already running {}", app_name, run_level_str),
+                });
+            }
+            Err(err) => {
+                // The only way this happens is if the monitoring registry mutex gets poisoned.
+                // In that case, we want to crash this service so that it can be restarted in a
+                // good state.
+                error!("Crashing service: {:?}", err);
+                panic!("{:?}", err);
+            }
         }
 
         let mut cmd = Command::new(app_path);
@@ -772,5 +778,44 @@ impl AppRegistry {
         }
 
         Ok(())
+    }
+
+    pub fn kill_app(
+        &self,
+        name: Option<String>,
+        run_level: Option<String>,
+        pid: Option<i32>,
+        signal: Option<i32>,
+    ) -> Result<(), AppError> {
+        // Lookup the app in the monitoring registry
+        // - If we're given the name/run level, then we need to get the PID
+        // - If we're given the PID, we want to ensure that we're killing a known app, not just a
+        //   random process
+        let app = if name.is_some() && run_level.is_some() {
+            find_running(&self.monitoring, &name.unwrap(), &run_level.unwrap())?.ok_or(
+                AppError::KillError {
+                    err: "No matching monitoring entry found".to_owned(),
+                },
+            )?
+        } else if pid.is_some() {
+            find_by_pid(&self.monitoring, pid.unwrap())?.ok_or(AppError::KillError {
+                err: "No matching monitoring entry found".to_owned(),
+            })?
+        } else {
+            return Err(AppError::KillError {
+                err: "Invalid input parameters".to_owned(),
+            });
+        };
+        let pid = app.pid.ok_or(AppError::KillError {
+            err: "No active PID found in registry".to_owned(),
+        })?;
+
+        let pid = Pid::from_raw(pid);
+        let sig = signal::Signal::from_c_int(signal.unwrap_or(9) as i32)
+            .unwrap_or(signal::Signal::SIGKILL);
+
+        signal::kill(pid, sig).map_err(|err| AppError::KillError {
+            err: err.to_string(),
+        })
     }
 }
