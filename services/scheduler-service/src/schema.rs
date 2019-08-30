@@ -18,7 +18,6 @@ use crate::objects::{GenericResponse, Schedule};
 use crate::scheduler::Scheduler;
 use juniper::FieldResult;
 use kubos_service;
-use log::info;
 
 type Context = kubos_service::Context<Scheduler>;
 
@@ -120,7 +119,23 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     field activate(&executor, name: String) -> FieldResult<GenericResponse> {
         Ok(match executor.context().subsystem().activate_schedule(&name) {
             Ok(_) => {
-                info!("Activated schedule {}", name);
+                GenericResponse { success: true, errors: "".to_owned() }
+            },
+            Err(error) => GenericResponse { success: false, errors: error.to_string() }
+        })
+    }
+
+    // Removes a schedule
+    //
+    // mutation {
+    //     remove(name: String!): {
+    //         errors: String,
+    //         success: Boolean
+    //    }
+    // }
+    field remove(&executor, name: String) -> FieldResult<GenericResponse> {
+        Ok(match executor.context().subsystem().remove_schedule(&name) {
+            Ok(_) => {
                 GenericResponse { success: true, errors: "".to_owned() }
             },
             Err(error) => GenericResponse { success: false, errors: error.to_string() }
