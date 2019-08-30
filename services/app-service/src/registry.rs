@@ -406,6 +406,28 @@ impl AppRegistry {
             }
         }
 
+        // Kill any instances of this version of the app which are still running
+        if let Ok(Some(entry)) = find_running(&self.monitoring, app_name, "OnBoot") {
+            if entry.version == version {
+                if let Some(pid) = entry.pid {
+                    let pid = Pid::from_raw(pid);
+                    if let Err(err) = signal::kill(pid, signal::Signal::SIGKILL) {
+                        errors.push(format!("Failed to kill {} OnBoot: {:?}", app_name, err));
+                    }
+                }
+            }
+        }
+        if let Ok(Some(entry)) = find_running(&self.monitoring, app_name, "OnCommand") {
+            if entry.version == version {
+                if let Some(pid) = entry.pid {
+                    let pid = Pid::from_raw(pid);
+                    if let Err(err) = signal::kill(pid, signal::Signal::SIGKILL) {
+                        errors.push(format!("Failed to kill {} OnBoot: {:?}", app_name, err));
+                    }
+                }
+            }
+        }
+
         // Remove the app entry from the monitoring list
         // Note: If the app was never run, then no entry will be present
         if let Err(new_error) = remove_entry(&self.monitoring, app_name, version, "OnBoot") {
@@ -463,6 +485,24 @@ impl AppRegistry {
                 entries.retain(|entry| entry.app.name != app_name);
             }
             Err(err) => errors.push(format!("Couldn't get entries mutex: {:?}", err)),
+        }
+
+        // Kill any instances of the app which are still running
+        if let Ok(Some(entry)) = find_running(&self.monitoring, app_name, "OnBoot") {
+            if let Some(pid) = entry.pid {
+                let pid = Pid::from_raw(pid);
+                if let Err(err) = signal::kill(pid, signal::Signal::SIGKILL) {
+                    errors.push(format!("Failed to kill {} OnBoot: {:?}", app_name, err));
+                }
+            }
+        }
+        if let Ok(Some(entry)) = find_running(&self.monitoring, app_name, "OnCommand") {
+            if let Some(pid) = entry.pid {
+                let pid = Pid::from_raw(pid);
+                if let Err(err) = signal::kill(pid, signal::Signal::SIGKILL) {
+                    errors.push(format!("Failed to kill {} OnBoot: {:?}", app_name, err));
+                }
+            }
         }
 
         // Remove all matching app entries from the monitoring list

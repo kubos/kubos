@@ -16,13 +16,66 @@
 #![deny(warnings)]
 
 use kubos_app::ServiceConfig;
+use nix::sys::signal;
+use nix::unistd::Pid;
 use std::fs;
 use std::panic;
+use std::path::Path;
+use std::process::Command;
 
 use tempfile::TempDir;
 
 mod utils;
 pub use crate::utils::*;
+
+fn setup_app(registry_dir: &Path) {
+    // Build our test project
+    Command::new("cargo")
+        .arg("build")
+        .current_dir("tests/utils/rust-proj")
+        .status()
+        .unwrap();
+
+    // Add our project to the app registry
+    let app_dir = registry_dir.join("rust-proj/1.0");
+
+    fs::create_dir_all(app_dir.clone()).unwrap();
+
+    // Copy our app executable into our app registry
+    fs::copy(
+        "tests/utils/rust-proj/target/debug/rust-proj",
+        app_dir.join("rust-proj"),
+    )
+    .unwrap();
+
+    // Copy our test file to make sure we can access it later
+    fs::copy("tests/utils/rust-proj/testfile", app_dir.join("testfile")).unwrap();
+
+    // Copy our config file to make sure we can access it later
+    fs::copy(
+        "tests/utils/rust-proj/config.toml",
+        app_dir.join("config.toml"),
+    )
+    .unwrap();
+
+    // Create our manifest file
+    let toml = format!(
+        r#"
+            active_version = true
+            run_level = "onCommand"
+
+            [app]
+            executable = "{}/rust-proj/1.0/rust-proj"
+            name = "rust-proj"
+            version = "1.0"
+            author = "user"
+            config = "/home/system/etc/config.toml"
+            "#,
+        registry_dir.to_string_lossy(),
+    );
+
+    fs::write(app_dir.join("app.toml"), toml).unwrap();
+}
 
 #[test]
 fn uninstall_last_app() {
@@ -474,4 +527,124 @@ fn uninstall_all_unmonitor() {
 
     fixture.teardown();
     assert!(result.is_ok());
+}
+
+#[test]
+fn uninstall_running() {
+    let mut fixture = AppServiceFixture::setup();
+    let config = ServiceConfig::new_from_path(
+        "app-service",
+        format!(
+            "{}",
+            fixture
+                .registry_dir
+                .path()
+                .join("config.toml")
+                .to_string_lossy()
+        ),
+    )
+    .unwrap();
+
+    setup_app(&fixture.registry_dir.path());
+
+    fixture.start_service(false);
+
+    // Run the app so that a monitoring entry will be created
+    let result = send_query(
+        config.clone(),
+        r#"mutation {
+            startApp(name: "rust-proj", runLevel: "OnCommand", args: "-l") {
+                pid
+            }
+        }"#,
+    );
+
+    let pid = result["startApp"]["pid"].as_i64().unwrap();
+
+    let result = panic::catch_unwind(|| {
+        let result = send_query(
+            config.clone(),
+            r#"mutation {
+            uninstall(name: "rust-proj", version: "1.0") {
+                errors,
+                success
+            }
+        }"#,
+        );
+
+        assert!(
+            result["uninstall"]["success"].as_bool().unwrap(),
+            "Result: {:?}",
+            result
+        );
+    });
+
+    fixture.teardown();
+
+    assert!(result.is_ok());
+
+    // App should no longer be running (ESRCH = PID not found)
+    let pid = Pid::from_raw(pid as i32);
+    let result = signal::kill(pid, signal::Signal::SIGINT);
+    assert_eq!(result, Err(nix::Error::Sys(nix::errno::Errno::ESRCH)));
+}
+
+#[test]
+fn uninstall_all_running() {
+    let mut fixture = AppServiceFixture::setup();
+    let config = ServiceConfig::new_from_path(
+        "app-service",
+        format!(
+            "{}",
+            fixture
+                .registry_dir
+                .path()
+                .join("config.toml")
+                .to_string_lossy()
+        ),
+    )
+    .unwrap();
+
+    setup_app(&fixture.registry_dir.path());
+
+    fixture.start_service(false);
+
+    // Run the app so that a monitoring entry will be created
+    let result = send_query(
+        config.clone(),
+        r#"mutation {
+            startApp(name: "rust-proj", runLevel: "OnCommand", args: "-l") {
+                pid
+            }
+        }"#,
+    );
+
+    let pid = result["startApp"]["pid"].as_i64().unwrap();
+
+    let result = panic::catch_unwind(|| {
+        let result = send_query(
+            config.clone(),
+            r#"mutation {
+            uninstall(name: "rust-proj") {
+                errors,
+                success
+            }
+        }"#,
+        );
+
+        assert!(
+            result["uninstall"]["success"].as_bool().unwrap(),
+            "Result: {:?}",
+            result
+        );
+    });
+
+    fixture.teardown();
+
+    assert!(result.is_ok());
+
+    // App should no longer be running (ESRCH = PID not found)
+    let pid = Pid::from_raw(pid as i32);
+    let result = signal::kill(pid, signal::Signal::SIGINT);
+    assert_eq!(result, Err(nix::Error::Sys(nix::errno::Errno::ESRCH)));
 }
