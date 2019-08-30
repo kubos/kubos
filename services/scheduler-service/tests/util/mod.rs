@@ -54,3 +54,12 @@ pub fn activate_schedule(name: &str, ip: &str, port: u16) -> serde_json::Value {
 
     service_query(&mutation, ip, port)
 }
+
+pub fn remove_schedule(name: &str, ip: &str, port: u16) -> serde_json::Value {
+    let mutation = format!(
+        r#"mutation {{ remove(name: "{}") {{ errors, success }} }}"#,
+        name
+    );
+
+    service_query(&mutation, ip, port)
+}
