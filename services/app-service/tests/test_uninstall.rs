@@ -320,3 +320,158 @@ fn uninstall_new_app() {
     fixture.teardown();
     assert!(result.is_ok());
 }
+
+#[test]
+fn uninstall_unmonitor() {
+    let mut fixture = AppServiceFixture::setup();
+    let config = format!(
+        "{}",
+        fixture
+            .registry_dir
+            .path()
+            .join("config.toml")
+            .to_string_lossy()
+    );
+    let mut app = MockAppBuilder::new("dummy");
+    app.active(true)
+        .run_level("OnBoot")
+        .version("0.0.1")
+        .author("user");
+
+    app.install(&fixture.registry_dir.path());
+
+    fixture.start_service(false);
+
+    // Make sure our app directory exists
+    assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
+
+    // Run the app so that a monitoring entry will be created
+    let result = send_query(
+        ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
+        r#"mutation {
+            startApp(name: "dummy", runLevel: "OnCommand") {
+                success,
+                errors
+            }
+        }"#,
+    );
+
+    assert_eq!(result["startApp"]["success"].as_bool().unwrap(), true);
+
+    let result = panic::catch_unwind(|| {
+        let result = send_query(
+            ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
+            r#"mutation {
+            uninstall(name: "dummy", version: "0.0.1") {
+                errors,
+                success
+            }
+        }"#,
+        );
+
+        assert!(result["uninstall"]["success"].as_bool().unwrap());
+
+        let result = send_query(
+            ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
+            r#"{
+                appStatus(name: "dummy") {
+                    name
+                }
+            }"#,
+        );
+
+        assert!(result["appStatus"].as_array().unwrap().is_empty());
+    });
+
+    fixture.teardown();
+    assert!(result.is_ok());
+}
+
+#[test]
+fn uninstall_all_unmonitor() {
+    let mut fixture = AppServiceFixture::setup();
+    let config = format!(
+        "{}",
+        fixture
+            .registry_dir
+            .path()
+            .join("config.toml")
+            .to_string_lossy()
+    );
+    let mut app = MockAppBuilder::new("dummy");
+    app.active(true)
+        .run_level("OnBoot")
+        .version("0.0.1")
+        .author("user");
+
+    app.install(&fixture.registry_dir.path());
+
+    let mut app = MockAppBuilder::new("dummy");
+    app.active(true)
+        .run_level("OnBoot")
+        .version("0.0.2")
+        .author("user");
+
+    app.install(&fixture.registry_dir.path());
+    fixture.start_service(false);
+
+    // Make sure our app directory exists
+    assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
+
+    // Run the app so that a monitoring entry will be created
+    let result = send_query(
+        ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
+        r#"mutation {
+            startApp(name: "dummy", runLevel: "OnCommand") {
+                success,
+                errors
+            }
+        }"#,
+    );
+
+    assert_eq!(result["startApp"]["success"].as_bool().unwrap(), true);
+
+    let result = panic::catch_unwind(|| {
+        let result = send_query(
+            ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
+            r#"mutation {
+            uninstall(name: "dummy") {
+                errors,
+                success
+            }
+        }"#,
+        );
+
+        assert!(result["uninstall"]["success"].as_bool().unwrap());
+
+        let result = send_query(
+            ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
+            "{ registeredApps { active } }",
+        );
+
+        assert_eq!(
+            result["registeredApps"]
+                .as_array()
+                .expect("Not an array")
+                .len(),
+            0
+        );
+
+        let result = send_query(
+            ServiceConfig::new_from_path("app-service", config.to_owned()).unwrap(),
+            r#"{
+                appStatus(name: "dummy") {
+                    name
+                }
+            }"#,
+        );
+
+        assert!(result["appStatus"].as_array().unwrap().is_empty());
+    });
+
+    // Our app directory should now no longer exist
+    assert_eq!(fixture.registry_dir.path().join("dummy").exists(), false);
+
+    fixture.teardown();
+    assert!(result.is_ok());
+}

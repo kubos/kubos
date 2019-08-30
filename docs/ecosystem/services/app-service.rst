@@ -146,41 +146,60 @@ For example::
 
 .. _running-apps:
     
-Running Applications
-~~~~~~~~~~~~~~~~~~~~
+Application Execution Status
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A list of all actively running applications which were previously started by the applications service
-can be generated using the ``runningApps`` query.
+The ``appStatus`` query can be used to fetch information about currently running applications, as
+well as information about the last time an application was run.
 
 It has the following schema::
 
     {
-        runningApps {
+        appStatus(name: String, version: String, running: Boolean) {
             name: String!,
             version: String!,
-            startTime: String!,
-            pid: Int!,
             runLevel: String!,
+            startTime: String!,
+            endTime: String,
+            running: Boolean!,
+            pid: Int,
+            lastRc: Int,
+            lastSignal: Int,
             args: Vec<String>,
             config: String
         }
     }
+    
+The applications can be filtered by using the input parameters:
+
+- ``name``: Returns app entries which have the specified application name
+- ``version``: Returns app entries which have the specified version number
+- ``running``: Returns app entries which are/aren't actively running
 
 Queries return the following fields:
 
 - ``name``: Application name
-- ``version``: Version of the application which is running
+- ``version``: Version of the application which was/is running
+- ``runLevel``: The app's run level which was/is being executed. Either "OnBoot" or "OnCommand"
 - ``startTime``: The time at which the application was started, in
   `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601#Combined_date_and_time_representations>`__ format
-- ``pid``: The process ID assigned to the running application
-- ``runLevel``: The app's run level which is being executed. Either "OnBoot" or "OnCommand"
+- ``endTime``: If the application has finished executing, the time at which execution ended
+- ``running``: Indicates if the application is currently executing
+- ``pid``: If the application is still running, the process ID assigned to the running application
+- ``lastRc``: If the application has finished executing, the return code emitted by the application.
+  Mutually exclusive with ``lastSignal``
+- ``lastSignal``: If the application has finished executing and was stopped by a signal, the signal
+  which was sent to the application. Mutually exlusive with ``lastRc``
 - ``args``: Any command-line arguments which were passed to the application executable. If no
   arguments were given, this field will not be returned
 - ``config``: The non-default service configuration file which will be referenced by the application.
   If the default configuration is being used, this field will not be returned
 
-Note: Once an application finished running, it will automatically be removed from the application
-service's list of running apps, so will no longer be returned by the ``runningApps`` query.
+One app entry may exist per unique name/version/run-level combination.
+
+If a particular app entry is currently executing the ``pid`` field will be available.
+If the entry has finished executing, then the ``endTime`` and ``lastRc``/``lastSignal`` fields will
+be available.
 
 .. _register-app:
 

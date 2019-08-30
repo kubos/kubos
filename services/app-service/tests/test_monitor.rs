@@ -93,7 +93,7 @@ fn monitor_good() {
 
     setup_app(&fixture.registry_dir.path());
 
-    fixture.start_service(true);
+    fixture.start_service(false);
 
     let result = send_query(
         config.clone(),
@@ -113,10 +113,11 @@ fn monitor_good() {
     let result = send_query(
         config.clone(),
         r#"{
-            runningApps(name: "rust-proj") {
+            appStatus(name: "rust-proj") {
                 name,
                 version,
                 pid,
+                running,
                 config,
                 args,
                 runLevel,
@@ -125,48 +126,65 @@ fn monitor_good() {
         }"#,
     );
 
+    eprintln!("Result: {:?}", result);
+
     // Make sure our app info matches what we'd expect
-    let args: Vec<&str> = result["runningApps"][0]["args"]
+    let args: Vec<&str> = result["appStatus"][0]["args"]
         .as_array()
         .unwrap()
         .iter()
         .map(|val| val.as_str().unwrap())
         .collect();
     assert_eq!(
-        result["runningApps"][0]["name"].as_str().unwrap(),
+        result["appStatus"][0]["name"].as_str().unwrap(),
         "rust-proj"
     );
-    assert_eq!(result["runningApps"][0]["version"].as_str().unwrap(), "1.0");
-    assert_eq!(result["runningApps"][0]["pid"].as_i64().unwrap(), pid);
+    assert_eq!(result["appStatus"][0]["version"].as_str().unwrap(), "1.0");
+    assert_eq!(result["appStatus"][0]["running"].as_bool().unwrap(), true);
+    assert_eq!(result["appStatus"][0]["pid"].as_i64().unwrap(), pid);
     assert_eq!(
-        result["runningApps"][0]["config"].as_str().unwrap(),
+        result["appStatus"][0]["config"].as_str().unwrap(),
         "/home/system/etc/config.toml"
     );
     assert_eq!(args, ["--", "-l"]);
     assert_eq!(
-        result["runningApps"][0]["runLevel"].as_str().unwrap(),
+        result["appStatus"][0]["runLevel"].as_str().unwrap(),
         "OnCommand"
     );
-    assert!(result["runningApps"][0]["startTime"].is_string());
+    assert!(result["appStatus"][0]["startTime"].is_string());
 
     // The app has its own 2 second sleep time, so we need to wait that long for it to finish
     thread::sleep(Duration::from_secs(2));
 
-    // The `runningApps` query should now return an empty array
+    // The monitoring entry should now show that the app has stopped with a good last RC
     let result = send_query(
         config,
         r#"{
-            runningApps(name: "rust-proj") {
-                name
+            appStatus(name: "rust-proj") {
+                name,
+                pid,
+                running,
+                lastRc,
+                lastSignal,
+                endTime
             }
         }"#,
     );
 
     fixture.teardown();
 
-    let array = result["runningApps"].as_array().unwrap();
-
-    assert!(array.is_empty());
+    assert_eq!(
+        result["appStatus"][0]["name"].as_str().unwrap(),
+        "rust-proj"
+    );
+    assert_eq!(result["appStatus"][0]["running"].as_bool().unwrap(), false);
+    assert_eq!(result["appStatus"][0]["pid"], serde_json::Value::Null);
+    assert_eq!(result["appStatus"][0]["lastRc"].as_i64().unwrap(), 0);
+    assert_eq!(
+        result["appStatus"][0]["lastSignal"],
+        serde_json::Value::Null
+    );
+    assert!(result["appStatus"][0]["endTime"].is_string());
 }
 
 #[test]

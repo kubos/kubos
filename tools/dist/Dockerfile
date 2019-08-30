@@ -10,7 +10,7 @@ RUN apt-get upgrade --no-install-recommends -y python3.5
 RUN apt-get install --no-install-recommends -y pkg-config build-essential git cmake unzip wget sqlite3 libsqlite3-dev libssl-dev curl git ssh
 
 # Linux build dependencies
-RUN apt-get install --no-install-recommends -y bc cpio ncurses-dev libc6-i386 lib32stdc++6 lib32z1
+RUN apt-get install --no-install-recommends -y python file rsync bc cpio ncurses-dev libc6-i386 lib32stdc++6 lib32z1
 
 #Tools to generate docs
 RUN apt-get install --no-install-recommends -y doxygen graphviz plantuml
