@@ -41,7 +41,7 @@ impl Scheduler {
     }
 
     pub fn register_schedule(&self, path: &str, name: &str) -> Result<(), String> {
-        info!("Registering new schedule {}:{}", path, name);
+        info!("Registering new schedule '{}': {}", name, path);
         let schedule_dest = format!("{}/{}.json", self.scheduler_dir, name);
         fs::copy(path, schedule_dest).map_err(|e| format!("Schedule copy failed: {}", e))?;
         Ok(())
@@ -63,6 +63,18 @@ impl Scheduler {
 
         symlink(sched_path, active_path)
             .map_err(|e| format!("Failed to create active symlink: {}", e))?;
+        info!("Activated schedule {}", name);
+        Ok(())
+    }
+
+    pub fn remove_schedule(&self, name: &str) -> Result<(), String> {
+        info!("Removing schedule {}", name);
+        let sched_path = format!("{}/{}.json", self.scheduler_dir, name);
+
+        fs::remove_file(&sched_path)
+            .map_err(|e| format!("Failed to remove schedule {}.json: {}", name, e))?;
+
+        info!("Removed schedule {}", name);
         Ok(())
     }
 }
