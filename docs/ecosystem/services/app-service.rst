@@ -277,6 +277,11 @@ version first.
 If the active version is not changed, then the system will not know which version to use the next
 time the application is started.
 
+If the version of the application being uninstalled is currently running, it will be automatically
+stopped using the ``SIGKILL`` signal.
+We recommend using the :ref:`killApp <kill-app>` mutation to gracefully stop the application prior
+to making an ``uninstall`` request.
+
 .. _start-app:
     
 Starting an Application
@@ -353,6 +358,49 @@ This logic may also be triggered by manually starting the applications service w
 
 If an application cannot be started, or immediately fails, an error message will be written to the
 service's log with the failure reason.
+
+.. _kill-app:
+
+Stopping an Application
+-----------------------
+
+Any application which has been started by the app service may be stopped with the ``killApp``
+mutation.
+
+Two instances of an app may be running simultaneously, one with the "OnBoot" logic, and one with the
+"OnCommand" logic.
+As a result, the ``killApp`` mutation has two required input arguments: the name and run level
+associated with the app which should be stopped.
+
+Users may optionally specify the `signal value <http://man7.org/linux/man-pages/man7/signal.7.html>`__
+which should be sent to the application.
+By default, the app service sends ``SIGTERM`` (signal value 15).
+This is the default when running Linux's ``kill`` command, and allows the application to do any
+necessary cleanup before gracefully shutting down.
+
+The mutation returns two fields:
+
+    - ``success`` - Indicating the overall result of the kill operation
+    - ``errors`` - Any errors which were encountered during the kill process
+
+For example::
+
+    mutation {
+        killApp(name: "main-mission", runLevel: "OnBoot", signal: 2) {
+            success,
+            errors
+        }
+    }
+
+.. note::
+
+    If you have any long-running applications which you expect will be stopped with the ``killApp``
+    mutation, we recommend that you program logic to catch the SIGTERM signal and then do all
+    necessary cleanup before safely exitting.
+    
+As long as the application does not explicitly handle the signal, its execution will end and the
+``lastSignal`` value in the corresponding :ref:`app monitoring entry <running-apps>` will be updated
+with the signal value.
 
 Upgrading
 ---------

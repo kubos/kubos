@@ -15,7 +15,6 @@
  */
 
 // Test ability to kill running app
-// Note: Negative test cases are in `src/tests/kill_app`
 
 use kubos_app::ServiceConfig;
 use serde_json::json;
@@ -158,7 +157,7 @@ fn kill_good() {
     );
     assert_eq!(result["appStatus"][0]["running"].as_bool().unwrap(), false);
     assert_eq!(result["appStatus"][0]["lastRc"], serde_json::Value::Null);
-    // The default kill signal value is 9
+    // The default kill signal value is 15 (SIGTERM)
     assert_eq!(result["appStatus"][0]["lastSignal"].as_i64().unwrap(), 15);
 }
 
