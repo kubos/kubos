@@ -17,7 +17,7 @@
 use crate::monitor::MonitorEntry;
 use crate::objects::*;
 use crate::registry::AppRegistry;
-use juniper::{FieldError, FieldResult};
+use juniper::FieldResult;
 use kubos_app::RunLevel;
 use kubos_service;
 
@@ -159,31 +159,10 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
         })
     }
 
-    field kill_app(&executor, name: Option<String>, run_level: Option<String>, pid: Option<i32>, signal: Option<i32>) -> FieldResult<GenericResponse>
+    field kill_app(&executor, name: String, run_level: String, signal: Option<i32>) -> FieldResult<GenericResponse>
         as "Kill Running App"
     {
-        if pid.is_some() && (name.is_some() || run_level.is_some()) {
-            return Err(FieldError::new(
-                "Bad input arguments",
-                graphql_value!({"Bad request": "`pid` is mutually exclusive with `name` and `runLevel`"})
-            ));
-        }
-
-        if name.is_some() != run_level.is_some() {
-            return Err(FieldError::new(
-                "Bad input arguments",
-                graphql_value!({"Bad request": "`name` and `runLevel` must both be specified"})
-            ));
-        }
-
-        if pid.is_none() && name.is_none() {
-            return Err(FieldError::new(
-                "Bad input arguments",
-                graphql_value!({"Bad request": "`name`/`runLevel` or `pid` must be specified"})
-            ));
-        }
-
-        Ok(match executor.context().subsystem().kill_app(name, run_level, pid, signal) {
+        Ok(match executor.context().subsystem().kill_app(&name, &run_level, signal) {
             Ok(pid) => GenericResponse { success: true, errors: "".to_owned() },
             Err(error) => GenericResponse { success: false, errors: error.to_string() },
         })

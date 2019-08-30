@@ -56,24 +56,6 @@ pub fn find_running(
     }))
 }
 
-// Find a monitoring registry entry by its PID
-pub fn find_by_pid(
-    registry: &Arc<Mutex<Vec<MonitorEntry>>>,
-    pid: i32,
-) -> Result<Option<MonitorEntry>, AppError> {
-    let entries = registry.lock().map_err(|err| AppError::MonitorError {
-        err: format!("Failed to get entries mutex: {:?}", err),
-    })?;
-
-    Ok(entries.iter().find_map(|entry| {
-        if entry.pid == Some(pid) {
-            Some(entry.clone())
-        } else {
-            None
-        }
-    }))
-}
-
 pub fn monitor_app(
     registry: Arc<Mutex<Vec<MonitorEntry>>>,
     mut process_handle: Child,

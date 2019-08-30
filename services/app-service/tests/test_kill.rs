@@ -18,6 +18,7 @@
 // Note: Negative test cases are in `src/tests/kill_app`
 
 use kubos_app::ServiceConfig;
+use serde_json::json;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -77,7 +78,7 @@ fn setup_app(registry_dir: &Path) {
 }
 
 #[test]
-fn kill_by_name() {
+fn kill_good() {
     let mut fixture = AppServiceFixture::setup();
     let config = ServiceConfig::new_from_path(
         "app-service",
@@ -158,11 +159,50 @@ fn kill_by_name() {
     assert_eq!(result["appStatus"][0]["running"].as_bool().unwrap(), false);
     assert_eq!(result["appStatus"][0]["lastRc"], serde_json::Value::Null);
     // The default kill signal value is 9
-    assert_eq!(result["appStatus"][0]["lastSignal"].as_i64().unwrap(), 9);
+    assert_eq!(result["appStatus"][0]["lastSignal"].as_i64().unwrap(), 15);
 }
 
 #[test]
-fn kill_by_pid() {
+fn kill_app_bad_name() {
+    let mut fixture = AppServiceFixture::setup();
+    let config = ServiceConfig::new_from_path(
+        "app-service",
+        format!(
+            "{}",
+            fixture
+                .registry_dir
+                .path()
+                .join("config.toml")
+                .to_string_lossy()
+        ),
+    )
+    .unwrap();
+    fixture.start_service(false);
+
+    let result = send_query(
+        config,
+        r#"mutation {
+            killApp(name: "dummy", runLevel: "OnBoot") {
+                errors,
+                success
+            }
+        }"#,
+    );
+
+    let expected = json!({
+       "killApp": {
+           "errors": "Failed to kill app: No matching monitoring entry found",
+           "success": false
+        }
+    });
+
+    fixture.teardown();
+
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn kill_app_not_running() {
     let mut fixture = AppServiceFixture::setup();
     let config = ServiceConfig::new_from_path(
         "app-service",
@@ -181,74 +221,37 @@ fn kill_by_pid() {
 
     fixture.start_service(false);
 
-    let result = send_query(
+    let _ = send_query(
         config.clone(),
         r#"mutation {
-            startApp(name: "rust-proj", runLevel: "OnCommand", args: "-l") {
+            startApp(name: "rust-proj", runLevel: "OnBoot") {
                 errors,
-                success,
-                pid
+                success
             }
         }"#,
     );
-
-    // This should be non-null since the app is still running
-    let pid = result["startApp"]["pid"].as_i64().unwrap();
-
-    // Query the app service to make sure the app is still running
-    let result = send_query(
-        config.clone(),
-        r#"{
-            appStatus(name: "rust-proj") {
-                running
-            }
-        }"#,
-    );
-
-    assert_eq!(result["appStatus"][0]["running"].as_bool().unwrap(), true);
 
     // Kill the app
     let result = send_query(
         config.clone(),
-        &format!(
-            r#"mutation {{
-            killApp(pid: {}) {{
+        r#"mutation {
+            killApp(name: "rust-proj", runLevel: "OnBoot") {
                 errors,
                 success
-            }}
-        }}"#,
-            pid
-        ),
-    );
-
-    assert_eq!(result["killApp"]["success"].as_bool().unwrap(), true);
-
-    // Give the service just a sec to figure out the app has stopped
-    thread::sleep(Duration::from_millis(10));
-
-    // The monitoring entry should now show that the app has stopped with a good last RC
-    let result = send_query(
-        config,
-        r#"{
-            appStatus(name: "rust-proj") {
-                name,
-                running,
-                lastRc,
-                lastSignal
             }
         }"#,
     );
 
+    let expected = json!({
+        "killApp": {
+           "errors": "Failed to kill app: No matching monitoring entry found",
+           "success": false
+        }
+    });
+
     fixture.teardown();
 
-    assert_eq!(
-        result["appStatus"][0]["name"].as_str().unwrap(),
-        "rust-proj"
-    );
-    assert_eq!(result["appStatus"][0]["running"].as_bool().unwrap(), false);
-    assert_eq!(result["appStatus"][0]["lastRc"], serde_json::Value::Null);
-    // The default kill signal value is 9
-    assert_eq!(result["appStatus"][0]["lastSignal"].as_i64().unwrap(), 9);
+    assert_eq!(result, expected);
 }
 
 #[test]
@@ -282,8 +285,7 @@ fn kill_custom_signal() {
         }"#,
     );
 
-    // This should be non-null since the app is still running
-    let pid = result["startApp"]["pid"].as_i64().unwrap();
+    assert_eq!(result["startApp"]["success"].as_bool().unwrap(), true);
 
     // Query the app service to make sure the app is still running
     let result = send_query(
@@ -300,15 +302,12 @@ fn kill_custom_signal() {
     // Kill the app
     let result = send_query(
         config.clone(),
-        &format!(
-            r#"mutation {{
-            killApp(pid: {}, signal: 2) {{
+        r#"mutation {
+            killApp(name: "rust-proj", runLevel: "OnCommand", signal: 2) {
                 errors,
                 success
-            }}
-        }}"#,
-            pid
-        ),
+            }
+        }"#,
     );
 
     assert_eq!(result["killApp"]["success"].as_bool().unwrap(), true);

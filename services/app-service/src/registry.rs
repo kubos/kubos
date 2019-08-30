@@ -782,37 +782,22 @@ impl AppRegistry {
 
     pub fn kill_app(
         &self,
-        name: Option<String>,
-        run_level: Option<String>,
-        pid: Option<i32>,
+        name: &str,
+        run_level: &str,
         signal: Option<i32>,
     ) -> Result<(), AppError> {
-        // Lookup the app in the monitoring registry
-        // - If we're given the name/run level, then we need to get the PID
-        // - If we're given the PID, we want to ensure that we're killing a known app, not just a
-        //   random process
-        let app = if name.is_some() && run_level.is_some() {
-            find_running(&self.monitoring, &name.unwrap(), &run_level.unwrap())?.ok_or(
-                AppError::KillError {
-                    err: "No matching monitoring entry found".to_owned(),
-                },
-            )?
-        } else if pid.is_some() {
-            find_by_pid(&self.monitoring, pid.unwrap())?.ok_or(AppError::KillError {
-                err: "No matching monitoring entry found".to_owned(),
-            })?
-        } else {
-            return Err(AppError::KillError {
-                err: "Invalid input parameters".to_owned(),
-            });
-        };
+        // Lookup the app in the monitoring registry to get the PID to kill
+        let app = find_running(&self.monitoring, name, run_level)?.ok_or(AppError::KillError {
+            err: "No matching monitoring entry found".to_owned(),
+        })?;
+
         let pid = app.pid.ok_or(AppError::KillError {
             err: "No active PID found in registry".to_owned(),
         })?;
 
         let pid = Pid::from_raw(pid);
-        let sig = signal::Signal::from_c_int(signal.unwrap_or(9) as i32)
-            .unwrap_or(signal::Signal::SIGKILL);
+        let sig = signal::Signal::from_c_int(signal.unwrap_or(15) as i32)
+            .unwrap_or(signal::Signal::SIGTERM);
 
         signal::kill(pid, sig).map_err(|err| AppError::KillError {
             err: err.to_string(),

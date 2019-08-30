@@ -64,7 +64,6 @@ macro_rules! test {
     }};
 }
 
-mod kill_app;
 mod register_app;
 mod registry_onboot;
 mod registry_start_app;
