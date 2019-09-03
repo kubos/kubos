@@ -1,4 +1,4 @@
-# kubos/kubos-dev:1.17.1
+# kubos/kubos-dev:1.18.0
 
 FROM ubuntu:18.04
 
@@ -6,7 +6,7 @@ MAINTAINER catherine@kubos.com, ryan@kubos.com
 
 RUN apt-get update -y
 
-RUN apt-get upgrade --no-install-recommends -y python3.5
+RUN apt-get upgrade --no-install-recommends -y python3.7
 RUN apt-get install --no-install-recommends -y pkg-config build-essential git cmake unzip wget sqlite3 libsqlite3-dev libssl-dev curl git ssh
 
 # Linux build dependencies
