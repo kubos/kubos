@@ -40,7 +40,7 @@ After fetching the KubOS source repo, we suggest installing the Python ``app-api
     
 We also suggest installing the Python ``kubos-service`` library, which is used in developing Python-based services::
  
-    $ pushd kubos/libs/kubos-service && pip3 install . -- user && popd
+    $ pushd kubos/libs/kubos-service && pip3 install . --user && popd
 
 After installing all of these dependencies, we suggest running the following script
 from the base of the kubos repo to verify everything is installed correctly and working::
