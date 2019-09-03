@@ -211,7 +211,7 @@ If you would like to add many entries to the database quickly, and don't care ab
 was successful, the service's direct UDP port may be used.
 This UDP port is configured with the ``direct_port`` value in the system's ``config.toml`` file.
 
-Insert requests should be sent as individual UDP messages in JSON format.
+Individual or bulk insert requests should be sent as single UDP messages in JSON format.
 
 Individual requests have the following schema::
 
@@ -232,7 +232,8 @@ For example::
         "value": "3.5"
     }
 
-Bulk inserts are also supported, with or without timestamps, as long as they fit in a UDP packet::
+If the top-level is a JSON array, the request is a bulk insert. Timestamps are again optional. Be sure to verify that the JSON
+message will fit in a single UDP packet. (The default UDP payload size limit is 4096 bytes.) Here is a bulk insert example::
 
   [
       {
