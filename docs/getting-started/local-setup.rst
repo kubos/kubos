@@ -25,7 +25,7 @@ and using Homebrew on macOS.
 - gcc
 - pkg-config
 - libssl-dev or openssl-dev (or openssl in macOS)
-- sqlite, libsqlite3-dev (libsqlite3-dev is not needed in macOS)
+- sqlite **and** libsqlite3-dev (libsqlite3-dev is not needed in macOS)
 - Python3.7
 - pip3
 - The Python3 libraries toml, mock, and responses (``pip3 install toml mock responses``)

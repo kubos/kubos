@@ -217,3 +217,14 @@ in the KubOS source repo. The service can be started like so::
 
 The service will look for the given ``config.toml`` file in order to get the
 needed configuration options.
+
+Communicating with the File Service
+-----------------------------------
+
+Users should establish a ground-side client which implements the :doc:`file protocol <../../deep-dive/protocols/file-protocol>`
+in order to transfer files over their communications device.
+
+Kubos provides an example `file transfer client <https://github.com/kubos/kubos/tree/master/clients/kubos-file-client>`__
+to allow users to learn and experiment with the file transfer service prior to the formal file
+transfer client being developed.
+For more information, please refer to the :doc:`file transfer <../../tutorials/file-transfer>` tutorial.

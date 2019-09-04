@@ -52,3 +52,13 @@ in the KubOS source repo. The service can be started like so::
 
 The service will look for the given ``config.toml`` file in order to get the
 needed configuration options.
+
+Communicating with the Shell Service
+------------------------------------
+
+Users should establish a ground-side client which implements the :doc:`shell protocol <../../deep-dive/protocols/shell-protocol>`
+in order to access the OBC's shell over their communications device.
+
+Kubos provides an example `shell client <https://github.com/kubos/kubos/tree/master/clients/kubos-shell-client>`__
+to allow users to learn and experiment with the shell service prior to the formal shell client being developed.
+For more information, please refer to the :doc:`shell connection <../../tutorials/shell>` tutorial.
