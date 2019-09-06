@@ -25,7 +25,7 @@ and using Homebrew on macOS.
 - gcc
 - pkg-config
 - libssl-dev or openssl-dev (or openssl in macOS)
-- sqlite, libsqlite3-dev (libsqlite3-dev is not needed in macOS)
+- sqlite **and** libsqlite3-dev (libsqlite3-dev is not needed in macOS)
 - Python3.7
 - pip3
 - The Python3 libraries toml, mock, and responses (``pip3 install toml mock responses``)
@@ -40,7 +40,7 @@ After fetching the KubOS source repo, we suggest installing the Python ``app-api
     
 We also suggest installing the Python ``kubos-service`` library, which is used in developing Python-based services::
  
-    $ pushd kubos/libs/kubos-service && pip3 install . -- user && popd
+    $ pushd kubos/libs/kubos-service && pip3 install . --user && popd
 
 After installing all of these dependencies, we suggest running the following script
 from the base of the kubos repo to verify everything is installed correctly and working::

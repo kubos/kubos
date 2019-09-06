@@ -16,12 +16,20 @@
 
 use kubos_telemetry_db::Database;
 use log::{error, info};
-use serde_json::{self, Value};
+use serde::Deserialize;
 use std::net::{SocketAddr, UdpSocket};
 use std::sync::{Arc, Mutex};
 
 pub struct DirectUdp {
     db: Arc<Mutex<Database>>,
+}
+
+#[derive(Debug, Deserialize)]
+struct DataPoint {
+    timestamp: Option<f64>,
+    subsystem: String,
+    parameter: String,
+    value: String,
 }
 
 impl DirectUdp {
@@ -55,33 +63,34 @@ impl DirectUdp {
                 .map_err(|err| format!("Failed to receive a message: {}", err))
                 .unwrap();
 
-            if let Ok(msg) = serde_json::from_slice(&buf[0..(size)]) {
-                // Go process the request
-                let _res = self.process(msg);
+            if let Ok(val) = serde_json::from_slice::<DataPoint>(&buf[0..(size)]) {
+                if let Err(err) = self.process(&val) {
+                    error!("Error {:?} storing message {:?}", err, val);
+                }
+            } else if let Ok(vec) = serde_json::from_slice::<Vec<DataPoint>>(&buf[0..(size)]) {
+                for val in vec.iter() {
+                    if let Err(err) = self.process(&val) {
+                        error!("Error {:?} storing message {:?}", err, val);
+                    }
+                }
+            } else {
+                error!(
+                    "Couldn't deserialize JSON object or object array from {:?}",
+                    String::from_utf8_lossy(&buf[0..(size)].to_vec())
+                );
             }
         }
     }
 
-    fn process(&self, message: Value) -> Result<(), String> {
-        let timestamp = serde_json::from_value::<f64>(message["timestamp"].clone()).ok();
-
-        let subsystem = serde_json::from_value::<String>(message["subsystem"].clone())
-            .map_err(|err| format!("Failed to parse subsystem parameter: {}", err))?;
-
-        let param = serde_json::from_value::<String>(message["parameter"].clone())
-            .map_err(|err| format!("Failed to parse parameter parameter: {}", err))?;
-
-        let value = serde_json::from_value::<String>(message["value"].clone())
-            .map_err(|err| format!("Failed to parse value parameter: {}", err))?;
-
-        if let Some(time) = timestamp {
+    fn process(&self, message: &DataPoint) -> Result<(), String> {
+        if let Some(time) = message.timestamp {
             self.db
                 .lock()
                 .map_err(|err| {
                     error!("udp - Failed to get lock on database: {}", err);
                     format!("{}", err)
                 })?
-                .insert(time, &subsystem, &param, &value)
+                .insert(time, &message.subsystem, &message.parameter, &message.value)
                 .map_err(|err| {
                     error!("udp - Failed to get lock on database: {}", err);
                     format!("{}", err)
@@ -93,7 +102,7 @@ impl DirectUdp {
                     error!("udp - Failed to get lock on database: {}", err);
                     format!("{}", err)
                 })?
-                .insert_systime(&subsystem, &param, &value)
+                .insert_systime(&message.subsystem, &message.parameter, &message.value)
                 .map_err(|err| {
                     error!("udp - Failed to get lock on database: {}", err);
                     format!("{}", err)
