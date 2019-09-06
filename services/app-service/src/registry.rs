@@ -22,6 +22,8 @@ use failure::format_err;
 use fs_extra;
 use kubos_app::RunLevel;
 use log::*;
+use nix::sys::signal;
+use nix::unistd::Pid;
 use std::fs;
 use std::io::Read;
 use std::os::unix;
@@ -404,6 +406,28 @@ impl AppRegistry {
             }
         }
 
+        // Kill any instances of this version of the app which are still running
+        if let Ok(Some(entry)) = find_running(&self.monitoring, app_name, "OnBoot") {
+            if entry.version == version {
+                if let Some(pid) = entry.pid {
+                    let pid = Pid::from_raw(pid);
+                    if let Err(err) = signal::kill(pid, signal::Signal::SIGKILL) {
+                        errors.push(format!("Failed to kill {} OnBoot: {:?}", app_name, err));
+                    }
+                }
+            }
+        }
+        if let Ok(Some(entry)) = find_running(&self.monitoring, app_name, "OnCommand") {
+            if entry.version == version {
+                if let Some(pid) = entry.pid {
+                    let pid = Pid::from_raw(pid);
+                    if let Err(err) = signal::kill(pid, signal::Signal::SIGKILL) {
+                        errors.push(format!("Failed to kill {} OnBoot: {:?}", app_name, err));
+                    }
+                }
+            }
+        }
+
         // Remove the app entry from the monitoring list
         // Note: If the app was never run, then no entry will be present
         if let Err(new_error) = remove_entry(&self.monitoring, app_name, version, "OnBoot") {
@@ -461,6 +485,24 @@ impl AppRegistry {
                 entries.retain(|entry| entry.app.name != app_name);
             }
             Err(err) => errors.push(format!("Couldn't get entries mutex: {:?}", err)),
+        }
+
+        // Kill any instances of the app which are still running
+        if let Ok(Some(entry)) = find_running(&self.monitoring, app_name, "OnBoot") {
+            if let Some(pid) = entry.pid {
+                let pid = Pid::from_raw(pid);
+                if let Err(err) = signal::kill(pid, signal::Signal::SIGKILL) {
+                    errors.push(format!("Failed to kill {} OnBoot: {:?}", app_name, err));
+                }
+            }
+        }
+        if let Ok(Some(entry)) = find_running(&self.monitoring, app_name, "OnCommand") {
+            if let Some(pid) = entry.pid {
+                let pid = Pid::from_raw(pid);
+                if let Err(err) = signal::kill(pid, signal::Signal::SIGKILL) {
+                    errors.push(format!("Failed to kill {} OnBoot: {:?}", app_name, err));
+                }
+            }
         }
 
         // Remove all matching app entries from the monitoring list
@@ -610,17 +652,21 @@ impl AppRegistry {
 
         // Check if app is already running
         let run_level_str = format!("{}", run_level);
-        let running_status = check_running(&self.monitoring, app_name, &run_level_str);
-        if running_status == Ok(true) {
-            return Err(AppError::StartError {
-                err: format!("Instance of {} already running {}", app_name, run_level_str),
-            });
-        } else if let Err(err) = running_status {
-            // The only way this happens is if the monitoring registry mutex gets poisoned.
-            // In that case, we want to crash this service so that it can be restarted in a
-            // good state.
-            error!("Crashing service: {:?}", err);
-            panic!("{:?}", err);
+        let running_status = find_running(&self.monitoring, app_name, &run_level_str);
+        match running_status {
+            Ok(None) => {}
+            Ok(Some(_)) => {
+                return Err(AppError::StartError {
+                    err: format!("Instance of {} already running {}", app_name, run_level_str),
+                });
+            }
+            Err(err) => {
+                // The only way this happens is if the monitoring registry mutex gets poisoned.
+                // In that case, we want to crash this service so that it can be restarted in a
+                // good state.
+                error!("Crashing service: {:?}", err);
+                panic!("{:?}", err);
+            }
         }
 
         let mut cmd = Command::new(app_path);
@@ -772,5 +818,29 @@ impl AppRegistry {
         }
 
         Ok(())
+    }
+
+    pub fn kill_app(
+        &self,
+        name: &str,
+        run_level: &str,
+        signal: Option<i32>,
+    ) -> Result<(), AppError> {
+        // Lookup the app in the monitoring registry to get the PID to kill
+        let app = find_running(&self.monitoring, name, run_level)?.ok_or(AppError::KillError {
+            err: "No matching monitoring entry found".to_owned(),
+        })?;
+
+        let pid = app.pid.ok_or(AppError::KillError {
+            err: "No active PID found in registry".to_owned(),
+        })?;
+
+        let pid = Pid::from_raw(pid);
+        let sig = signal::Signal::from_c_int(signal.unwrap_or(15) as i32)
+            .unwrap_or(signal::Signal::SIGTERM);
+
+        signal::kill(pid, sig).map_err(|err| AppError::KillError {
+            err: err.to_string(),
+        })
     }
 }

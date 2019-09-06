@@ -158,4 +158,13 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
             Err(error) => StartResponse { success: false, errors: error.to_string(), pid: None },
         })
     }
+
+    field kill_app(&executor, name: String, run_level: String, signal: Option<i32>) -> FieldResult<GenericResponse>
+        as "Kill Running App"
+    {
+        Ok(match executor.context().subsystem().kill_app(&name, &run_level, signal) {
+            Ok(pid) => GenericResponse { success: true, errors: "".to_owned() },
+            Err(error) => GenericResponse { success: false, errors: error.to_string() },
+        })
+    }
 });

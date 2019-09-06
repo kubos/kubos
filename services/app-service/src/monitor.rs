@@ -38,18 +38,22 @@ pub struct MonitorEntry {
 }
 
 // Check if any version of the application is running with the requested run level
-pub fn check_running(
+pub fn find_running(
     registry: &Arc<Mutex<Vec<MonitorEntry>>>,
     name: &str,
     run_level: &str,
-) -> Result<bool, AppError> {
+) -> Result<Option<MonitorEntry>, AppError> {
     let entries = registry.lock().map_err(|err| AppError::MonitorError {
         err: format!("Failed get entries mutex: {:?}", err),
     })?;
 
-    Ok(entries
-        .iter()
-        .any(|entry| entry.name == name && entry.run_level == run_level && entry.running))
+    Ok(entries.iter().find_map(|entry| {
+        if entry.name == name && entry.run_level == run_level && entry.running {
+            Some(entry.clone())
+        } else {
+            None
+        }
+    }))
 }
 
 pub fn monitor_app(
