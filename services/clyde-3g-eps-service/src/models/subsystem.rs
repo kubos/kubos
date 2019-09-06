@@ -44,7 +44,7 @@ pub enum Mutations {
     TestHardware,
 }
 
-fn watchdog_thread(eps: Arc<Mutex<Box<Clyde3gEps + Send>>>) {
+fn watchdog_thread(eps: Arc<Mutex<Box<dyn Clyde3gEps + Send>>>) {
     loop {
         thread::sleep(Duration::from_secs(60));
         let _res_ = eps.lock().unwrap().reset_comms_watchdog();
@@ -55,7 +55,7 @@ fn watchdog_thread(eps: Arc<Mutex<Box<Clyde3gEps + Send>>>) {
 #[derive(Clone)]
 pub struct Subsystem {
     /// Underlying EPS object
-    pub eps: Arc<Mutex<Box<Clyde3gEps + Send>>>,
+    pub eps: Arc<Mutex<Box<dyn Clyde3gEps + Send>>>,
     /// Last mutation executed
     pub last_mutation: Arc<RwLock<Mutations>>,
     /// Errors accumulated over all queries and mutations
@@ -68,7 +68,7 @@ pub struct Subsystem {
 
 impl Subsystem {
     /// Create a new subsystem instance for the service to use
-    pub fn new(eps: Box<Clyde3gEps + Send>) -> EpsResult<Self> {
+    pub fn new(eps: Box<dyn Clyde3gEps + Send>) -> EpsResult<Self> {
         let eps = Arc::new(Mutex::new(eps));
         let thread_eps = eps.clone();
         let watchdog = thread::spawn(move || watchdog_thread(thread_eps));
@@ -84,7 +84,7 @@ impl Subsystem {
 
     /// Create the underlying EPS object and then create a new subsystem which will use it
     pub fn from_path(bus: &str) -> EpsResult<Self> {
-        let clyde_eps: Box<Clyde3gEps + Send> =
+        let clyde_eps: Box<dyn Clyde3gEps + Send> =
             Box::new(Eps::new(Connection::from_path(bus, 0x2B)));
         Subsystem::new(clyde_eps)
     }

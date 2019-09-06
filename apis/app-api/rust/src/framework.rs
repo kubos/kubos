@@ -100,7 +100,7 @@ macro_rules! app_main {
 /// The entry point for all KubOS applications. The preferred way to use this application
 /// is through the `app_main!` macro
 pub fn app_start(
-    handler: &AppHandler,
+    handler: &dyn AppHandler,
     name: &str,
     log_level: log::LevelFilter,
 ) -> Result<(), Error> {
