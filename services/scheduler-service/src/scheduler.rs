@@ -61,7 +61,17 @@ impl Scheduler {
         if let Some(init) = active_config.init {
             for (name, task) in init {
                 let task_app_url = apps_service_url.clone();
-                info!("Scheduling {} - {:#?}", name, task);
+                info!("Scheduling init {} - {:#?}", name, task);
+                if let Err(e) = task.schedule(task_app_url) {
+                    error!("Failed to schedule task {}: {:?}", name, e);
+                }
+            }
+        }
+
+        if let Some(onetime) = active_config.one_time {
+            for (name, task) in onetime {
+                let task_app_url = apps_service_url.clone();
+                info!("Scheduling onetime {} - {:#?}", name, task);
                 if let Err(e) = task.schedule(task_app_url) {
                     error!("Failed to schedule task {}: {:?}", name, e);
                 }

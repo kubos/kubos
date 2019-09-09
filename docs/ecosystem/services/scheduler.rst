@@ -10,7 +10,7 @@ Behavior
 Upon boot, or service start, the scheduler will read the active schedule file and
 load the schedule into memory. The default active schedule file will be found at
 ``/home/system/etc/schedules/active.json``. Any ``init`` tasks will be performed
-immediately. All other ``one-time`` or ``recurring`` tasks will be scheduled
+immediately. All other ``one_time`` or ``recurring`` tasks will be scheduled
 to run at their designated times.
 
 By default the scheduler will have two schedules: ``operational`` and ``safemode``. These
@@ -27,7 +27,7 @@ Schedules will be specified in files in the `json` format. Each schedule file wi
 all of the necessary information for that specific schedule. Different schedules, such as
 operational, safe mode, etc, will each have their own schedule files.
 
-Schedules consist of three sections: ``init``, ``one-time``, and ``recurring``. Each section
+Schedules consist of three sections: ``init``, ``one_time``, and ``recurring``. Each section
 represents a different type of scheduled task. Each specified task in a section
 represents the future scheduled execution of an app by the app service.
 
@@ -50,7 +50,7 @@ Each task in this section will be specified like so:
         }
     }
 
-Tasks in the ``one-time`` section will be executed once at a set time. Each task
+Tasks in the ``one_time`` section will be executed once at a set time. Each task
 in this section will be specified like so:
 
 .. code-block:: json
@@ -97,7 +97,7 @@ An example schedule file:
                 }
             }
         },
-        "one-time": {
+        "one_time": {
             "deploy-solar": {
                 "time": "2019-08-11 15:20:10",
                 "app": {

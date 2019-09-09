@@ -16,7 +16,7 @@
 
 use crate::util::service_query;
 use chrono::{DateTime, Utc};
-use log::info;
+use log::{error, info};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
@@ -24,6 +24,7 @@ use std::path::Path;
 use std::time::{Duration, Instant};
 use tokio::prelude::*;
 use tokio::timer::Delay;
+use chrono::prelude::*;
 
 // Generic GraphQL Response
 #[derive(GraphQLObject)]
@@ -43,7 +44,13 @@ pub struct ScheduleApp {
 // Configuration used to schedule app execution
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ScheduleTask {
-    pub delay: String,
+    // Start delay specified in HH:mm:ss format
+    // Used by init and recurring tasks
+    pub delay: Option<String>,
+    // Start time specified in yyyy-mm-dd hh:mm:ss format
+    // Used by onetime tasks
+    pub time: Option<String>,
+    // Details of the app to be executed
     pub app: ScheduleApp,
 }
 
@@ -51,13 +58,38 @@ impl ScheduleTask {
     pub fn schedule(&self, app_service_url: String) -> Result<(), String> {
         let service_url = app_service_url.clone();
         let delay = self.delay.clone();
+        let time = self.time.clone();
         let name = self.app.name.clone();
         std::thread::spawn(move || {
-            let mut task_delay: Vec<&str> = delay.split(':').collect();
-            let delay_s: u64 = task_delay.pop().unwrap_or("").parse().unwrap_or(0);
-            let delay_m: u64 = task_delay.pop().unwrap_or("").parse().unwrap_or(0) * 60;
-            let delay_h: u64 = task_delay.pop().unwrap_or("").parse().unwrap_or(0) * 3600;
-            let when = Instant::now() + Duration::from_secs(delay_s + delay_m + delay_h);
+            let when = if let Some(delay) = delay {
+                let mut task_delay: Vec<&str> = delay.split(':').collect();
+                let delay_s: u64 = task_delay.pop().unwrap_or("").parse().unwrap_or(0);
+                let delay_m: u64 = task_delay.pop().unwrap_or("").parse().unwrap_or(0) * 60;
+                let delay_h: u64 = task_delay.pop().unwrap_or("").parse().unwrap_or(0) * 3600;
+                Instant::now() + Duration::from_secs(delay_s + delay_m + delay_h)
+            } else if let Some(time) = time {
+                let dt = match Utc.datetime_from_str(&time, "%Y-%m-%d %H:%M:%S") {
+                    Ok(dt) => dt,
+                    Err(e) => {
+                        error!("Failed to parse one_time starttime: {:?}", e);
+                        return;
+                    }
+                };
+                let now: chrono::DateTime<Utc> = chrono::Utc::now();
+                info!("Scheduling onetime task for {:?}", dt);
+                let diff = match (dt - now).to_std() {
+                    Ok(diff) => diff,
+                    Err(e) => {
+                        error!("Failed to create one_time time diff: {:?}", e);
+                        return;
+                    }
+                };
+                info!("Time diff {:?}", diff);
+                Instant::now() + diff
+            } else {
+                error!("No delay or start time defined");
+                return;
+            };
 
             let task = Delay::new(when)
                 .and_then(move |_| {
@@ -79,6 +111,7 @@ impl ScheduleTask {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ScheduleConfig {
     pub init: Option<HashMap<String, ScheduleTask>>,
+    pub one_time: Option<HashMap<String, ScheduleTask>>,
 }
 
 // Descriptive information about a Schedule File
