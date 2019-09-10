@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-//! Service for interacting with a [Clyde Space 3G EPS](https://www.clyde.space/products/5-3rd-generation-3u-eps)
+//! Service for interacting with a [Clyde Space 3G EPS](https://www.aac-clyde.space/satellite-bits/eps)
 //!
 //! # Configuration
 //!
