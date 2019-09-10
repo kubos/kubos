@@ -72,7 +72,7 @@ All supported devices have a :doc:`device API <deep-dive/apis/device-api/index>`
 +-----------------------------------------------------------+---------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+
 | `Adcole Maryland Aerospace <https://www.adcolemai.com>`__ | `MAI-400 <https://www.adcolemai.com/wp-content/uploads/2019/02/AMA-MAI-400-Datasheet.pdf>`__                  | |MAI-400|                                                                                    |
 +-----------------------------------------------------------+---------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+
-| `Clyde Space <https://www.clyde.space>`__                 | `3G 1U EPS <https://www.clyde.space/products/18-3rd-generation-1u-eps>`__                                     | |Clydespace-EPS|                                                                             |
+| `Clyde Space <https://www.aac-clyde.space/>`__            | `Starbuck Nano (formerly 3G EPS) <https://www.aac-clyde.space/satellite-bits/eps>`__                          | |Clydespace-EPS|                                                                             |
 +-----------------------------------------------------------+---------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+
 | `GOMspace <https://www.gomspace.com>`__                   | `NanoPower P31u <https://gomspace.com/shop/subsystems/power-supplies/nanopower-p31u.aspx>`__                  | No                                                                                           |
 +-----------------------------------------------------------+---------------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------+
@@ -104,7 +104,7 @@ or bugs, see what you can work on, and to give feedback.
     :hidden:
 
     KubOS Design <kubos-design>
-    
+
 .. toctree::
    :hidden:
    :titlesonly:
@@ -113,7 +113,7 @@ or bugs, see what you can work on, and to give feedback.
 
 .. toctree::
     :hidden:
-    
+
     Tutorials <tutorials/index>
     Working with an OBC <obc-docs/index>
     Mission Development <mission-dev/index>
