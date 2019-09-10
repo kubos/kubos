@@ -19,6 +19,7 @@
 //!
 
 use crate::file::*;
+use crate::mode::*;
 use crate::scheduler::Scheduler;
 use juniper::FieldResult;
 use kubos_service;
@@ -49,36 +50,36 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
         Ok(String::from("pong"))
     }
 
-    // Returns information on the currently active schedule file
+    // Returns information on the currently active mode
     // {
-    //     activeSchedule: {
-    //         contents: String,
-    //         path: String,
+    //     activeMode: {
     //         name: String,
-    //         timeImported: String,
+    //         path: String,
+    //         lastRevised: String,
+    //         schedules: [ScheduleConfigFile],
     //         active: Boolean
     //     }
     // }
-    field active_schedule(&executor) -> FieldResult<Option<ScheduleFile>> as "Current Schedule File"
+    field active_mode(&executor) -> FieldResult<ScheduleMode> as "Active Mode"
     {
-        Ok(get_active_schedule(&executor.context().subsystem().scheduler_dir))
+        Ok(get_active_mode(&executor.context().subsystem().scheduler_dir)?)
     }
 
-    // Returns a list of information on currently available schedules
+    // Returns a list of information on currently available modes
     // {
-    //     availableSchedules: [
+    //     availableModes: [
     //         {
-    //             contents: String,
-    //             path: String,
     //             name: String,
-    //             timeImported: String,
+    //             path: String,
+    //             lastRevised: String,
+    //             schedules: [ScheduleConfigFile],
     //             active: Boolean
     //         }
     //     ]
     // }
-    field available_schedules(&executor, name: Option<String>) -> FieldResult<Vec<ScheduleFile>> as "Available Schedule Files"
+    field available_modes(&executor, name: Option<String>) -> FieldResult<Vec<ScheduleMode>> as "Available Modes"
     {
-        Ok(get_available_schedules(&executor.context().subsystem().scheduler_dir, name)?)
+        Ok(get_available_modes(&executor.context().subsystem().scheduler_dir, name)?)
     }
 });
 
@@ -87,32 +88,50 @@ pub struct MutationRoot;
 // Base GraphQL mutation model
 graphql_object!(MutationRoot: Context as "Mutation" |&self| {
 
-    // Imports a new schedule
+    // Creates a new mode
     //
     // mutation {
-    //     import(path: String!, name: String!): {
+    //     createMode(name: String!): {
     //         errors: String,
     //         success: Boolean
     //    }
     // }
-    // TODO: Maybe change to import?
-    field import(&executor, path: String, name: String) -> FieldResult<GenericResponse> {
-        Ok(match import_schedule(&executor.context().subsystem().scheduler_dir, &path, &name) {
-            Ok(_) => GenericResponse { success: true, errors: "".to_owned() },
+    field create_mode(&executor, name: String) -> FieldResult<GenericResponse> {
+        Ok(match create_mode(&executor.context().subsystem().scheduler_dir, &name) {
+            Ok(_) => {
+                GenericResponse { success: true, errors: "".to_owned() }
+            },
             Err(error) => GenericResponse { success: false, errors: error.to_string() }
         })
     }
 
-    // Activates a schedule
+    // Removes an existing mode
     //
     // mutation {
-    //     activate(name: String!): {
+    //     removeMode(name: String!): {
     //         errors: String,
     //         success: Boolean
     //    }
     // }
-    field activate(&executor, name: String) -> FieldResult<GenericResponse> {
-        Ok(match activate_schedule(&executor.context().subsystem().scheduler_dir, &name)
+    field remove_mode(&executor, name: String) -> FieldResult<GenericResponse> {
+        Ok(match remove_mode(&executor.context().subsystem().scheduler_dir, &name) {
+            Ok(_) => {
+                GenericResponse { success: true, errors: "".to_owned() }
+            },
+            Err(error) => GenericResponse { success: false, errors: error.to_string() }
+        })
+    }
+
+    // Activates a mode
+    //
+    // mutation {
+    //     activateMode(name: String!): {
+    //         errors: String,
+    //         success: Boolean
+    //    }
+    // }
+    field activate_mode(&executor, name: String) -> FieldResult<GenericResponse> {
+        Ok(match activate_mode(&executor.context().subsystem().scheduler_dir, &name)
         .and_then(|_| executor.context().subsystem().stop())
         .and_then(|_| executor.context().subsystem().start()) {
             Ok(_) => {
@@ -122,16 +141,50 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
         })
     }
 
-    // Removes a schedule
+    // Activates the safe mode
     //
     // mutation {
-    //     remove(name: String!): {
+    //     safeMode(): {
     //         errors: String,
     //         success: Boolean
     //    }
     // }
-    field remove(&executor, name: String) -> FieldResult<GenericResponse> {
-        Ok(match remove_schedule(&executor.context().subsystem().scheduler_dir, &name) {
+    field safe_mode(&executor) -> FieldResult<GenericResponse> {
+        Ok(match activate_mode(&executor.context().subsystem().scheduler_dir, "safe")
+        .and_then(|_| executor.context().subsystem().stop())
+        .and_then(|_| executor.context().subsystem().start()) {
+            Ok(_) => {
+                GenericResponse { success: true, errors: "".to_owned() }
+            },
+            Err(error) => GenericResponse { success: false, errors: error.to_string() }
+        })
+    }
+
+    // Imports a new schedule config into a mode
+    //
+    // mutation {
+    //     importConfig(path: String!, name: String!, mode: String!): {
+    //         errors: String,
+    //         success: Boolean
+    //    }
+    // }
+    field import_config(&executor, path: String, name: String, mode: String) -> FieldResult<GenericResponse> {
+        Ok(match import_config(&executor.context().subsystem().scheduler_dir, &path, &name, &mode) {
+            Ok(_) => GenericResponse { success: true, errors: "".to_owned() },
+            Err(error) => GenericResponse { success: false, errors: error.to_string() }
+        })
+    }
+
+    // Removes a schedule config from a mode
+    //
+    // mutation {
+    //     removeConfig(name: String!, mode:String!): {
+    //         errors: String,
+    //         success: Boolean
+    //    }
+    // }
+    field remove_config(&executor, name: String, mode: String) -> FieldResult<GenericResponse> {
+        Ok(match remove_config(&executor.context().subsystem().scheduler_dir, &name, &mode) {
             Ok(_) => {
                 GenericResponse { success: true, errors: "".to_owned() }
             },

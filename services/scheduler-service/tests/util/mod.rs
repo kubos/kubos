@@ -71,7 +71,7 @@ impl SchedulerFixture {
         thread::sleep(Duration::from_millis(1000));
     }
 
-    pub fn create(&self, contents: Option<String>) -> String {
+    pub fn create_config(&self, contents: Option<String>) -> String {
         let mut schedule = NamedTempFile::new().unwrap();
 
         if let Some(c) = contents {
@@ -85,10 +85,40 @@ impl SchedulerFixture {
         path
     }
 
-    pub fn register(&self, name: &str, path: &str) -> serde_json::Value {
+    // Sends createMode mutation to service under test
+    pub fn create_mode(&self, name: &str) -> serde_json::Value {
         let mutation = format!(
-            r#"mutation {{ import(name: "{}", path: "{}") {{ errors, success }} }}"#,
-            name, path
+            r#"mutation {{ createMode(name: "{}") {{ errors, success }} }}"#,
+            name
+        );
+
+        service_query(&mutation, &self.ip, self.port)
+    }
+
+    // Sends createMode mutation to service under test
+    pub fn remove_mode(&self, name: &str) -> serde_json::Value {
+        let mutation = format!(
+            r#"mutation {{ removeMode(name: "{}") {{ errors, success }} }}"#,
+            name
+        );
+
+        service_query(&mutation, &self.ip, self.port)
+    }
+
+    // Sends activateMode mutation to service under test
+    pub fn activate_mode(&self, name: &str) -> serde_json::Value {
+        let mutation = format!(
+            r#"mutation {{ activateMode(name: "{}") {{ errors, success }} }}"#,
+            name
+        );
+
+        service_query(&mutation, &self.ip, self.port)
+    }
+
+    pub fn import_config(&self, name: &str, path: &str, mode: &str) -> serde_json::Value {
+        let mutation = format!(
+            r#"mutation {{ importConfig(name: "{}", path: "{}", mode: "{}") {{ errors, success }} }}"#,
+            name, path, mode
         );
 
         service_query(&mutation, &self.ip, self.port)
@@ -103,10 +133,10 @@ impl SchedulerFixture {
         service_query(&mutation, &self.ip, self.port)
     }
 
-    pub fn remove(&self, name: &str) -> serde_json::Value {
+    pub fn remove_config(&self, name: &str, mode: &str) -> serde_json::Value {
         let mutation = format!(
-            r#"mutation {{ remove(name: "{}") {{ errors, success }} }}"#,
-            name
+            r#"mutation {{ removeConfig(name: "{}", mode: "{}") {{ errors, success }} }}"#,
+            name, mode
         );
 
         service_query(&mutation, &self.ip, self.port)

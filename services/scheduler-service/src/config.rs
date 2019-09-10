@@ -18,12 +18,12 @@
 //! Definitions and parsing instructions for Schedule Configurations
 //!
 
+use log::error;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::time::Duration;
 
 // Configuration used for execution of an app
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, GraphQLObject, Serialize, Deserialize)]
 pub struct ScheduleApp {
     pub name: String,
     pub args: Option<Vec<String>>,
@@ -32,8 +32,10 @@ pub struct ScheduleApp {
 }
 
 // Configuration used to schedule app execution
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, GraphQLObject, Serialize, Deserialize)]
 pub struct ScheduleTask {
+    // Descriptive name of task
+    pub name: String,
     // Start delay specified in HH:mm:ss format
     // Used by init and recurring tasks
     pub delay: Option<String>,
@@ -45,11 +47,31 @@ impl ScheduleTask {
     // Parse delay duration from delay field
     pub fn get_duration(&self) -> Result<Duration, String> {
         if let Some(delay) = &self.delay {
-            let mut task_delay: Vec<&str> = delay.split(':').collect();
-            let delay_s: u64 = task_delay.pop().unwrap_or("").parse().unwrap_or(0);
-            let delay_m: u64 = task_delay.pop().unwrap_or("").parse().unwrap_or(0) * 60;
-            let delay_h: u64 = task_delay.pop().unwrap_or("").parse().unwrap_or(0) * 3600;
-            Ok(Duration::from_secs(delay_s + delay_m + delay_h))
+            let delay_parts: Vec<String> = delay.split(' ').map(|s| s.to_owned()).collect();
+            let mut task_delay: u64 = 0;
+            for mut delay in delay_parts {
+                let unit: Option<char> = delay.pop();
+                let num: Result<u64, _> = delay.parse();
+                if let Ok(num) = num {
+                    match unit {
+                        Some('s') => {
+                            task_delay += num;
+                        }
+                        Some('m') => {
+                            task_delay += num * 60;
+                        }
+                        Some('h') => {
+                            task_delay += num * 60 * 60;
+                        }
+                        _ => {
+                            error!("Failed to parse delay for task");
+                            return Err("Failed to parse delay for task".to_owned());
+                        }
+                    }
+                }
+            }
+            dbg!(task_delay);
+            Ok(Duration::from_secs(task_delay))
         } else {
             Err("No delay defined for task".to_owned())
         }
@@ -57,8 +79,8 @@ impl ScheduleTask {
 }
 
 // Schedule configuration information - the guts of the actual schedule
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, GraphQLObject, Serialize, Deserialize)]
 pub struct ScheduleConfig {
-    pub init: Option<HashMap<String, ScheduleTask>>,
-    pub one_time: Option<HashMap<String, ScheduleTask>>,
+    pub init: Option<Vec<ScheduleTask>>,
+    pub one_time: Option<Vec<ScheduleTask>>,
 }

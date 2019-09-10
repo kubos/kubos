@@ -38,20 +38,23 @@ fn run_init_single_no_delay() {
     let listener = ServiceListener::spawn("127.0.0.1", 9021);
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8021);
 
-    // Register some schedule with an init task
+    fixture.create_mode("init");
+
+    // Create some schedule with an init task
     let schedule = json!({
-        "init": {
-            "basic-task": {
-                "delay": "00:00:00",
+        "init": [
+            {
+                "name": "basic-task",
+                "delay": "0s",
                 "app": {
                     "name": "basic-app"
                 }
             }
-        }
+        ]
     });
-    let schedule_path = fixture.create(Some(schedule.to_string()));
-    fixture.register("imaging", &schedule_path);
-    fixture.activate("imaging");
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+    fixture.import_config("imaging", &schedule_path, "init");
+    fixture.activate_mode("init");
 
     // Wait for the service to restart the scheduler
     thread::sleep(Duration::from_millis(100));
@@ -66,24 +69,30 @@ fn run_init_single_no_delay() {
 fn run_init_single_with_delay() {
     let listener = ServiceListener::spawn("127.0.0.1", 9022);
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8022);
+    fixture.create_mode("init");
 
-    // Register some schedule with an init task
+    // Create some schedule with an init task
     let schedule = json!({
-        "init": {
-            "basic-task": {
-                "delay": "00:00:01",
+        "init": [
+            {
+                "name": "basic-task",
+                "delay": "1s",
                 "app": {
                     "name": "basic-app"
                 }
             }
-        }
+        ]
     });
-    let schedule_path = fixture.create(Some(schedule.to_string()));
-    fixture.register("imaging", &schedule_path);
-    fixture.activate("imaging");
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+    fixture.import_config("imaging", &schedule_path, "init");
+    fixture.activate_mode("init");
 
-    // Wait for service to restart scheduler and run task
-    thread::sleep(Duration::from_millis(1100));
+    // This task should not have run immediately
+    thread::sleep(Duration::from_millis(100));
+    assert_eq!(listener.get_request(), None);
+
+    // Wait for service to run the task
+    thread::sleep(Duration::from_millis(1000));
 
     let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"basic-app\") { success, errors } }"}"#;
 
@@ -95,27 +104,30 @@ fn run_init_single_with_delay() {
 fn run_init_two_tasks() {
     let listener = ServiceListener::spawn("127.0.0.1", 9023);
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8023);
+    fixture.create_mode("init");
 
-    // Register some schedule with an init task
+    // Create some schedule with an init task
     let schedule = json!({
-        "init": {
-            "second-task": {
-                "delay": "00:00:01",
+        "init": [
+            {
+                "name": "second-task",
+                "delay": "1s",
                 "app": {
                     "name": "other-app"
                 }
             },
-            "basic-task": {
-                "delay": "00:00:00",
+            {
+                "name": "basic-task",
+                "delay": "0s",
                 "app": {
                     "name": "basic-app"
                 }
             }
-        }
+        ]
     });
-    let schedule_path = fixture.create(Some(schedule.to_string()));
-    fixture.register("two", &schedule_path);
-    fixture.activate("two");
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+    fixture.import_config("two", &schedule_path, "init");
+    fixture.activate_mode("init");
 
     // Wait for service to restart scheduler and run tasks
     thread::sleep(Duration::from_millis(1100));
@@ -133,22 +145,24 @@ fn run_init_two_tasks() {
 fn run_init_single_args() {
     let listener = ServiceListener::spawn("127.0.0.1", 9024);
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8024);
+    fixture.create_mode("init");
 
-    // Register some schedule with an init task
+    // Create some schedule with an init task
     let schedule = json!({
-        "init": {
-            "basic-task": {
-                "delay": "00:00:00",
+        "init": [
+            {
+                "name": "basic-task",
+                "delay": "0s",
                 "app": {
                     "name": "basic-app",
                     "args": ["-l", "-h"]
                 }
             }
-        }
+        ]
     });
-    let schedule_path = fixture.create(Some(schedule.to_string()));
-    fixture.register("imaging", &schedule_path);
-    fixture.activate("imaging");
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+    fixture.import_config("imaging", &schedule_path, "init");
+    fixture.activate_mode("init");
 
     // Wait for service to restart scheduler and run task
     thread::sleep(Duration::from_millis(100));
@@ -163,22 +177,24 @@ fn run_init_single_args() {
 fn run_init_single_custom_config() {
     let listener = ServiceListener::spawn("127.0.0.1", 9025);
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8025);
+    fixture.create_mode("init");
 
-    // Register some schedule with an init task
+    // Create some schedule with an init task
     let schedule = json!({
-        "init": {
-            "basic-task": {
-                "delay": "00:00:00",
+        "init": [
+            {
+                "name": "basic-task",
+                "delay": "0s",
                 "app": {
                     "name": "basic-app",
                     "config": "path/to/custom.toml"
                 }
             }
-        }
+        ]
     });
-    let schedule_path = fixture.create(Some(schedule.to_string()));
-    fixture.register("imaging", &schedule_path);
-    fixture.activate("imaging");
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+    fixture.import_config("imaging", &schedule_path, "init");
+    fixture.activate_mode("init");
 
     // Wait for service to restart scheduler and run task
     thread::sleep(Duration::from_millis(100));
@@ -193,22 +209,24 @@ fn run_init_single_custom_config() {
 fn run_init_single_custom_runlevel() {
     let listener = ServiceListener::spawn("127.0.0.1", 9026);
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8026);
+    fixture.create_mode("init");
 
-    // Register some schedule with an init task
+    // Create some schedule with an init task
     let schedule = json!({
-        "init": {
-            "basic-task": {
-                "delay": "00:00:00",
+        "init": [
+            {
+                "name": "basic-task",
+                "delay": "0s",
                 "app": {
                     "name": "basic-app",
                     "run_level": "onCommand",
                 }
             }
-        }
+        ]
     });
-    let schedule_path = fixture.create(Some(schedule.to_string()));
-    fixture.register("imaging", &schedule_path);
-    fixture.activate("imaging");
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+    fixture.import_config("imaging", &schedule_path, "init");
+    fixture.activate_mode("init");
 
     // Wait for service to restart scheduler and run task
     thread::sleep(Duration::from_millis(100));
@@ -220,46 +238,93 @@ fn run_init_single_custom_runlevel() {
 }
 
 #[test]
-fn run_init_two_schedules() {
+fn run_init_two_schedules_one_mode() {
     let listener = ServiceListener::spawn("127.0.0.1", 9027);
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8027);
+    fixture.create_mode("init");
 
-    // Register first schedule with an init task
+    // Create first schedule with an init task
     let schedule = json!({
-        "init": {
-            "basic-task": {
-                "delay": "00:00:00",
+        "init": [
+            {
+                "name": "basic-task",
+                "delay": "0s",
                 "app": {
                     "name": "first-app"
                 }
-            },
-            "delay-task": {
-                "delay": "00:00:01",
-                "app": {
-                    "name": "delay-app"
-                }
             }
-        }
+        ]
     });
-    let schedule_path = fixture.create(Some(schedule.to_string()));
-    fixture.register("first", &schedule_path);
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+    fixture.import_config("first", &schedule_path, "init");
 
-    // Register second schedule with an init task
+    // Create second schedule with an init task
     let schedule = json!({
-        "init": {
-            "basic-task": {
-                "delay": "00:00:00",
+        "init": [
+            {
+                "name": "basic-task",
+                "delay": "1s",
                 "app": {
                     "name": "second-app"
                 }
             }
-        }
+        ]
     });
-    let schedule_path = fixture.create(Some(schedule.to_string()));
-    fixture.register("second", &schedule_path);
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+    fixture.import_config("second", &schedule_path, "init");
 
     // Activate first schedule, wait for task to run
-    fixture.activate("first");
+    fixture.activate_mode("init");
+    thread::sleep(Duration::from_millis(1100));
+
+    // Check if the task ran
+    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"first-app\") { success, errors } }"}"#;
+    assert_eq!(listener.get_request(), Some(query.to_owned()));
+
+    // Check if the task ran
+    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"second-app\") { success, errors } }"}"#;
+    assert_eq!(listener.get_request(), Some(query.to_owned()))
+}
+
+#[test]
+fn run_init_two_modes() {
+    let listener = ServiceListener::spawn("127.0.0.1", 9028);
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8028);
+    fixture.create_mode("init");
+    fixture.create_mode("secondary");
+
+    // Create first schedule with an init task
+    let schedule = json!({
+        "init": [
+            {
+                "name": "basic-task",
+                "delay": "0s",
+                "app": {
+                    "name": "first-app"
+                }
+            }
+        ]
+    });
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+    fixture.import_config("first", &schedule_path, "init");
+
+    // Create second schedule with an init task
+    let schedule = json!({
+        "init": [
+            {
+                "name": "basic-task",
+                "delay": "0s",
+                "app": {
+                    "name": "second-app"
+                }
+            }
+        ]
+    });
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+    fixture.import_config("second", &schedule_path, "secondary");
+
+    // Activate first schedule, wait for task to run
+    fixture.activate_mode("init");
     thread::sleep(Duration::from_millis(100));
 
     // Check if the task ran
@@ -267,7 +332,7 @@ fn run_init_two_schedules() {
     assert_eq!(listener.get_request(), Some(query.to_owned()));
 
     // Activate second schedule, wait for task to run
-    fixture.activate("second");
+    fixture.activate_mode("secondary");
     thread::sleep(Duration::from_millis(100));
 
     // Check if the task ran
@@ -276,44 +341,48 @@ fn run_init_two_schedules() {
 }
 
 #[test]
-fn run_init_two_schedules_check_stop() {
-    let listener = ServiceListener::spawn("127.0.0.1", 9028);
-    let fixture = SchedulerFixture::spawn("127.0.0.1", 8028);
+fn run_init_two_modes_check_stop() {
+    let listener = ServiceListener::spawn("127.0.0.1", 9029);
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8029);
+    fixture.create_mode("init");
+    fixture.create_mode("secondary");
 
     // Register first schedule with an init task
     let schedule = json!({
-        "init": {
-            "delay-task": {
-                "delay": "00:00:01",
+        "init": [
+            {
+                "name": "basic-task",
+                "delay": "1s",
                 "app": {
                     "name": "delay-app"
                 }
             }
-        }
+        ]
     });
-    let schedule_path = fixture.create(Some(schedule.to_string()));
-    fixture.register("first", &schedule_path);
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+    fixture.import_config("first", &schedule_path, "init");
 
     // Register second schedule with an init task
     let schedule = json!({
-        "init": {
-            "basic-task": {
-                "delay": "00:00:00",
+        "init": [
+            {
+                "name": "basic-task",
+                "delay": "0s",
                 "app": {
                     "name": "second-app"
                 }
             }
-        }
+        ]
     });
-    let schedule_path = fixture.create(Some(schedule.to_string()));
-    fixture.register("second", &schedule_path);
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+    fixture.import_config("second", &schedule_path, "secondary");
 
     // Activate first schedule, wait for task to run
-    fixture.activate("first");
+    fixture.activate_mode("init");
     thread::sleep(Duration::from_millis(100));
 
     // Activate second schedule, wait for task to run
-    fixture.activate("second");
+    fixture.activate_mode("secondary");
     thread::sleep(Duration::from_millis(100));
 
     // Check if the task ran

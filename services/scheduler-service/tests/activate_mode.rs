@@ -20,15 +20,14 @@ use serde_json::json;
 use util::SchedulerFixture;
 
 #[test]
-fn activate_existing_schedule() {
+fn activate_existing_mode() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8020);
 
-    let schedule_path = fixture.create(Some("{}".to_owned()));
     assert_eq!(
-        fixture.register("imaging", &schedule_path),
+        fixture.create_mode("operational"),
         json!({
             "data" : {
-                "import": {
+                "createMode": {
                     "errors": "",
                     "success": true
                 }
@@ -37,10 +36,10 @@ fn activate_existing_schedule() {
     );
 
     assert_eq!(
-        fixture.activate("imaging"),
+        fixture.activate_mode("operational"),
         json!({
             "data" : {
-                "activate": {
+                "activateMode": {
                     "errors": "",
                     "success": true
                 }
@@ -49,24 +48,15 @@ fn activate_existing_schedule() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ activeSchedule { name } }"#),
+        fixture.query(r#"{ availableModes { name, active } }"#),
         json!({
             "data": {
-                "activeSchedule": {
-                    "name": "imaging"
-                }
-            }
-        })
-    );
-
-    assert_eq!(
-        fixture.query(r#"{ availableSchedules { name, active } }"#),
-        json!({
-            "data": {
-                "availableSchedules": [{
-                    "name": "imaging",
-                    "active": true
-                }]
+                "availableModes": [
+                    {
+                        "name": "operational",
+                        "active": true
+                    }
+                ]
             }
         })
     );
@@ -77,43 +67,45 @@ fn activate_non_existent_schedule() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8021);
 
     assert_eq!(
-        fixture.activate("operational"),
+        fixture.activate_mode("operational"),
         json!({
             "data" : {
-                "activate": {
-                    "errors": "Schedule operational.json not found",
+                "activateMode": {
+                    "errors": "Mode operational not found",
                     "success": false
                 }
             }
-        }
-        )
+        })
     );
 
     assert_eq!(
-        fixture.query(r#"{ activeSchedule { name } }"#),
+        fixture.query(r#"{ activeMode { name } }"#),
         json!({
-            "data": {
-                "activeSchedule": serde_json::Value::Null
-            }
+            "data": serde_json::Value::Null,
+            "errors": [{
+                "locations": [{
+                    "column": 3,
+                    "line": 1
+                }],
+                "message": "Failed to read active mode link: No such file or directory (os error 2)",
+                "path": ["activeMode"]
+            }]
         })
     );
 }
 
 #[test]
-fn activate_two_schedules() {
+fn activate_two_modes() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8022);
 
-    let schedule_one_path = fixture.create(Some("{}".to_owned()));
-    let schedule_two_path = fixture.create(Some("{}".to_owned()));
-
-    fixture.register("imaging", &schedule_one_path);
-    fixture.register("operational", &schedule_two_path);
+    fixture.create_mode("first");
+    fixture.create_mode("second");
 
     assert_eq!(
-        fixture.activate("imaging"),
+        fixture.activate_mode("first"),
         json!({
             "data" : {
-                "activate": {
+                "activateMode": {
                     "errors": "",
                     "success": true
                 }
@@ -122,14 +114,14 @@ fn activate_two_schedules() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ availableSchedules { name, active } }"#),
+        fixture.query(r#"{ availableModes { name, active } }"#),
         json!({
             "data": {
-                "availableSchedules": [{
-                    "name": "imaging",
+                "availableModes": [{
+                    "name": "first",
                     "active": true
                 }, {
-                    "name": "operational",
+                    "name": "second",
                     "active": false
                 }]
             }
@@ -137,10 +129,10 @@ fn activate_two_schedules() {
     );
 
     assert_eq!(
-        fixture.activate("operational"),
+        fixture.activate_mode("second"),
         json!({
             "data" : {
-                "activate": {
+                "activateMode": {
                     "errors": "",
                     "success": true
                 }
@@ -149,25 +141,14 @@ fn activate_two_schedules() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ activeSchedule { name } }"#),
+        fixture.query(r#"{ availableModes { name, active } }"#),
         json!({
             "data": {
-                "activeSchedule": {
-                    "name": "operational"
-                }
-            }
-        })
-    );
-
-    assert_eq!(
-        fixture.query(r#"{ availableSchedules { name, active } }"#),
-        json!({
-            "data": {
-                "availableSchedules": [{
-                    "name": "imaging",
+                "availableModes": [{
+                    "name": "first",
                     "active": false
                 }, {
-                    "name": "operational",
+                    "name": "second",
                     "active": true
                 }]
             }
