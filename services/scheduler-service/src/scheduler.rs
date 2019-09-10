@@ -18,8 +18,9 @@
 //! Structures and functions concerning the actual running of a schedule
 //!
 
-use crate::config::{ScheduleConfig, ScheduleTask};
-use crate::file::get_active_schedule;
+use crate::config::ScheduleTask;
+use crate::file::get_mode_schedules;
+use crate::mode::get_active_mode;
 use crate::schema::GenericResponse;
 use kubos_service::Config;
 use log::{error, info};
@@ -32,12 +33,12 @@ use std::path::Path;
 use std::sync::mpsc::{channel, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::time::Duration;
 use std::time::Instant;
 use tokio::prelude::future::lazy;
 use tokio::prelude::*;
 use tokio::runtime::Runtime;
 use tokio::timer::Delay;
-use std::time::Duration;
 
 pub static DEFAULT_SCHEDULES_DIR: &str = "/home/system/etc/schedules";
 
@@ -181,27 +182,37 @@ impl Scheduler {
             .hosturl()
             .ok_or_else(|| "Failed to fetch app service url".to_owned())?;
 
-        let active_schedule = get_active_schedule(&self.scheduler_dir)
-            .ok_or_else(|| "Failed to fetch active schedule".to_owned())?;
-        let active_config: ScheduleConfig = serde_json::from_str(&active_schedule.contents)
-            .map_err(|e| format!("Failed to parse config: {}", e))?;
+        let active_mode = get_active_mode(&self.scheduler_dir)?;
 
         let (tx, rx) = channel::<()>();
         let handle = thread::spawn(move || {
-            let mut runner = Runtime::new().unwrap();
-            runner.spawn(lazy(move || {
-                if let Some(init) = active_config.init {
-                    for (name, task) in init {
-                        let task_app_url = apps_service_url.clone();
-                        info!("Scheduling {}", name);
-                        tokio::spawn(schedule_task(&task, task_app_url));
+            let mut runner = Runtime::new().unwrap_or_else(|e| {
+                error!("Failed to create timer runtime: {}", e);
+                panic!("Failed to create timer runtime: {}", e);
+            });
+
+            for sched in get_mode_schedules(&active_mode.path).unwrap() {
+                let task_app_url = apps_service_url.clone();
+                runner.spawn(lazy(move || {
+                    if let Some(init) = sched.config.init {
+                        for task in init {
+                            info!("Scheduling {}", &task.name);
+                            tokio::spawn(schedule_task(&task, task_app_url.clone()));
+                        }
                     }
-                }
-                Ok(())
-            }));
+                    Ok(())
+                }));
+            }
+
             // Wait on the stop message before ending the runtime
-            rx.recv().unwrap();
-            runner.shutdown_now().wait().unwrap();
+            rx.recv().unwrap_or_else(|e| {
+                error!("Failed to received thread stop: {:?}", e);
+                panic!("Failed to received thread stop: {:?}", e);
+            });
+            runner.shutdown_now().wait().unwrap_or_else(|e| {
+                error!("Failed to wait on runtime shutdown: {:?}", e);
+                panic!("Failed to wait on runtime shutdown: {:?}", e);
+            })
         });
 
         let mut my_handle = self.scheduler_thread.lock().unwrap();

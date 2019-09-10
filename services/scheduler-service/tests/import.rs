@@ -16,19 +16,25 @@
 
 mod util;
 
+use chrono::Utc;
 use serde_json::json;
+use std::thread;
+use std::time::Duration;
 use util::SchedulerFixture;
 
 #[test]
-fn register_new_schedule() {
+fn import_new_schedule() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8020);
 
-    let schedule_path = fixture.create(None);
+    fixture.create_mode("operational");
+
+    let schedule = json!({ "init": [ ] });
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
     assert_eq!(
-        fixture.register("operational", &schedule_path),
+        fixture.import_config("first", &schedule_path, "operational"),
         json!({
             "data" : {
-                "import": {
+                "importConfig": {
                     "errors": "",
                     "success": true
                 }
@@ -37,13 +43,18 @@ fn register_new_schedule() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ availableSchedules { name, active } }"#),
+        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
         json!({
             "data": {
-                "availableSchedules": [
+                "availableModes": [
                     {
                         "name": "operational",
-                        "active": false
+                        "active": false,
+                        "schedules": [
+                            {
+                                "name": "first"
+                            }
+                        ]
                     }
                 ]
             }
@@ -52,28 +63,32 @@ fn register_new_schedule() {
 }
 
 #[test]
-fn register_new_schedule_nonexistant_file() {
+fn import_new_schedule_nonexistant_file() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8021);
+    fixture.create_mode("operational");
 
     assert_eq!(
-        fixture.register("operational", ""),
+        fixture.import_config("first", "", ""),
         json!({
             "data" : {
-                "import": {
+                "importConfig": {
                     "errors": "Schedule copy failed: No such file or directory (os error 2)",
                     "success": false
                 }
             }
-        }
-        )
+        })
     );
 
     assert_eq!(
-        fixture.query(r#"{ availableSchedules { name, active } }"#),
+        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
         json!({
             "data": {
-                "availableSchedules": [
-
+                "availableModes": [
+                    {
+                        "name": "operational",
+                        "active": false,
+                        "schedules": [ ]
+                    }
                 ]
             }
         })
@@ -81,77 +96,38 @@ fn register_new_schedule_nonexistant_file() {
 }
 
 #[test]
-fn register_duplicate_schedule() {
+fn import_new_schedule_nonexistant_mode() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8022);
 
-    let schedule_one_path = fixture.create(None);
-    let schedule_two_path = fixture.create(None);
-
+    let schedule = json!({ "init": [ ] });
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
     assert_eq!(
-        fixture.register("operational", &schedule_one_path),
+        fixture.import_config("first", &schedule_path, "operational"),
         json!({
             "data" : {
-                "import": {
-                    "errors": "",
-                    "success": true
+                "importConfig": {
+                    "errors": "Schedule copy failed: No such file or directory (os error 2)",
+                    "success": false
                 }
-            }
-        })
-    );
-
-    assert_eq!(
-        fixture.query(r#"{ availableSchedules { name, active } }"#),
-        json!({
-            "data": {
-                "availableSchedules": [
-                    {
-                        "name": "operational",
-                        "active": false
-                    }
-                ]
-            }
-        })
-    );
-
-    assert_eq!(
-        fixture.register("operational", &schedule_two_path),
-        json!({
-            "data" : {
-                "import": {
-                    "errors": "",
-                    "success": true
-                }
-            }
-        })
-    );
-
-    assert_eq!(
-        fixture.query(r#"{ availableSchedules { name, active } }"#),
-        json!({
-            "data": {
-                "availableSchedules": [
-                    {
-                        "name": "operational",
-                        "active": false
-                    }
-                ]
             }
         })
     );
 }
 
 #[test]
-fn register_two_schedules() {
+fn import_duplicate_schedule() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8023);
+    fixture.create_mode("operational");
 
-    let schedule_one_path = fixture.create(None);
-    let schedule_two_path = fixture.create(None);
+    let schedule = json!({ "init": [ ] });
+    let schedule_one_path = fixture.create_config(Some(schedule.to_string()));
+    let schedule_two_path = fixture.create_config(Some(schedule.to_string()));
 
     assert_eq!(
-        fixture.register("operational", &schedule_one_path),
+        fixture.import_config("imager", &schedule_one_path, "operational"),
         json!({
             "data" : {
-                "import": {
+                "importConfig": {
                     "errors": "",
                     "success": true
                 }
@@ -160,41 +136,49 @@ fn register_two_schedules() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ availableSchedules { name, active } }"#),
+        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
         json!({
             "data": {
-                "availableSchedules": [{
-                    "name": "operational",
-                    "active": false
-                }]
-            }
-        })
-    );
-
-    assert_eq!(
-        fixture.register("imaging", &schedule_two_path),
-        json!({
-            "data" : {
-                "import": {
-                    "errors": "",
-                    "success": true
-                }
-            }
-        })
-    );
-
-    assert_eq!(
-        fixture.query(r#"{ availableSchedules { name, active } }"#),
-        json!({
-            "data": {
-                "availableSchedules": [
-                    {
-                        "name": "imaging",
-                        "active": false
-                    },
+                "availableModes": [
                     {
                         "name": "operational",
-                        "active": false
+                        "active": false,
+                        "schedules": [
+                            {
+                                "name": "imager"
+                            }
+                        ]
+                    }
+                ]
+            }
+        })
+    );
+
+    assert_eq!(
+        fixture.import_config("imager", &schedule_two_path, "operational"),
+        json!({
+            "data" : {
+                "importConfig": {
+                    "errors": "",
+                    "success": true
+                }
+            }
+        })
+    );
+
+    assert_eq!(
+        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
+        json!({
+            "data": {
+                "availableModes": [
+                    {
+                        "name": "operational",
+                        "active": false,
+                        "schedules": [
+                            {
+                                "name": "imager"
+                            }
+                        ]
                     }
                 ]
             }
@@ -203,37 +187,124 @@ fn register_two_schedules() {
 }
 
 #[test]
-fn register_two_schedules_filter_query() {
+fn import_two_schedules() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8024);
+    fixture.create_mode("flight");
 
-    let schedule_one_path = fixture.create(None);
-    let schedule_two_path = fixture.create(None);
-
-    fixture.register("operational", &schedule_one_path);
-    fixture.register("imaging", &schedule_two_path);
+    let schedule = json!({ "init": [ ] });
+    let schedule_one_path = fixture.create_config(Some(schedule.to_string()));
+    let schedule_two_path = fixture.create_config(Some(schedule.to_string()));
 
     assert_eq!(
-        fixture.query(r#"{ availableSchedules(name: "imaging") { name, active } }"#),
+        fixture.import_config("solar", &schedule_one_path, "flight"),
+        json!({
+            "data" : {
+                "importConfig": {
+                    "errors": "",
+                    "success": true
+                }
+            }
+        })
+    );
+
+    assert_eq!(
+        fixture.import_config("imaging", &schedule_two_path, "flight"),
+        json!({
+            "data" : {
+                "importConfig": {
+                    "errors": "",
+                    "success": true
+                }
+            }
+        })
+    );
+
+    assert_eq!(
+        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
         json!({
             "data": {
-                "availableSchedules": [
+                "availableModes": [
                     {
-                        "name": "imaging",
-                        "active": false
+                        "name": "flight",
+                        "active": false,
+                        "schedules": [
+                            {
+                                "name": "imaging"
+                            },
+                            {
+                                "name": "solar"
+                            }
+                        ]
+                    }
+                ]
+            }
+        })
+    );
+}
+
+#[test]
+fn import_two_schedules_check_revised() {
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8025);
+    fixture.create_mode("flight");
+
+    let schedule = json!({ "init": [ ] });
+    let schedule_one_path = fixture.create_config(Some(schedule.to_string()));
+    let schedule_two_path = fixture.create_config(Some(schedule.to_string()));
+
+    let sched_one_time = Utc::now();
+    let sched_one_time = sched_one_time.format("%Y-%m-%d %H:%M:%S").to_string();
+    fixture.import_config("solar", &schedule_one_path, "flight");
+
+    assert_eq!(
+        fixture.query(
+            r#"{ availableModes { name, active, lastRevised, schedules { name, timeImported } } }"#
+        ),
+        json!({
+            "data": {
+                "availableModes": [
+                    {
+                        "name": "flight",
+                        "active": false,
+                        "lastRevised": sched_one_time,
+                        "schedules": [
+                            {
+                                "name": "solar",
+                                "timeImported": sched_one_time
+                            }
+                        ]
                     }
                 ]
             }
         })
     );
 
+    thread::sleep(Duration::from_secs(1));
+
+    let sched_two_time = Utc::now();
+    let sched_two_time = sched_two_time.format("%Y-%m-%d %H:%M:%S").to_string();
+    fixture.import_config("imaging", &schedule_two_path, "flight");
+
     assert_eq!(
-        fixture.query(r#"{ availableSchedules(name: "operational") { name, active } }"#),
+        fixture.query(
+            r#"{ availableModes { name, active, lastRevised, schedules { name, timeImported } } }"#
+        ),
         json!({
             "data": {
-                "availableSchedules": [
+                "availableModes": [
                     {
-                        "name": "operational",
-                        "active": false
+                        "name": "flight",
+                        "active": false,
+                        "lastRevised": sched_two_time,
+                        "schedules": [
+                            {
+                                "name": "imaging",
+                                "timeImported": sched_two_time
+                            },
+                            {
+                                "name": "solar",
+                                "timeImported": sched_one_time
+                            }
+                        ]
                     }
                 ]
             }

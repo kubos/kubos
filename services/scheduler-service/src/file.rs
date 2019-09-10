@@ -18,20 +18,19 @@
 //! Definitions and functions concerning the manipulation of schedule files
 //!
 
+use crate::config::ScheduleConfig;
 use chrono::{DateTime, Utc};
-use log::{info, warn};
+use log::info;
 use std::fs;
-use std::os::unix::fs::symlink;
 use std::path::{Path, PathBuf};
 
 // Descriptive information about a Schedule File
 #[derive(Debug, GraphQLObject)]
 pub struct ScheduleFile {
-    pub contents: String,
+    pub config: ScheduleConfig,
     pub path: String,
     pub name: String,
-    pub time_registered: String,
-    pub active: bool,
+    pub time_imported: String,
 }
 
 impl ScheduleFile {
@@ -45,11 +44,11 @@ impl ScheduleFile {
             .metadata()
             .map_err(|e| format!("Failed to read file metadata: {}", e))?;
 
-        let time_registered: DateTime<Utc> = data
+        let time_imported: DateTime<Utc> = data
             .modified()
             .map_err(|e| format!("Failed to get modified time: {}", e))?
             .into();
-        let time_registered = time_registered.format("%Y-%m-%d %H:%M:%S").to_string();
+        let time_imported = time_imported.format("%Y-%m-%d %H:%M:%S").to_string();
 
         let name = path_obj
             .file_stem()
@@ -57,119 +56,75 @@ impl ScheduleFile {
             .ok_or_else(|| "Failed to read schedule name".to_owned())?
             .to_owned();
 
-        let contents = fs::read_to_string(&path_obj)
+        let config = fs::read_to_string(&path_obj)
             .map_err(|e| format!("Failed to read schedule contents: {}", e))?;
+
+        let config: ScheduleConfig = serde_json::from_str(&config)
+            .map_err(|e| format!("Failed to parse schedule config: {}", e))?;
 
         Ok(ScheduleFile {
             path,
             name,
-            contents,
-            time_registered,
-            active: false,
+            config,
+            time_imported,
         })
     }
 }
 
-// Copy a new schedule file into the schedules directory
-pub fn import_schedule(scheduler_dir: &str, path: &str, name: &str) -> Result<(), String> {
-    info!("Importing new schedule '{}': {}", name, path);
-    let schedule_dest = format!("{}/{}.json", scheduler_dir, name);
+// Copy a new schedule config into a mode directory
+pub fn import_config(
+    scheduler_dir: &str,
+    path: &str,
+    name: &str,
+    mode: &str,
+) -> Result<(), String> {
+    info!(
+        "Importing new config '{}': {} into mode '{}'",
+        name, path, mode
+    );
+    let schedule_dest = format!("{}/{}/{}.json", scheduler_dir, mode, name);
     fs::copy(path, schedule_dest).map_err(|e| format!("Schedule copy failed: {}", e))?;
     Ok(())
 }
 
-// Make an existing schedule file the active schedule file
-// TODO: Should this kill the schedule and rerun scheduler.start()?
-// TODO: What if this is the active schedule?? What would happen?
-pub fn activate_schedule(scheduler_dir: &str, name: &str) -> Result<(), String> {
-    info!("Activating schedule {}", name);
-    let sched_path = format!("{}/{}.json", scheduler_dir, name);
-    let active_path = format!("{}/active.json", scheduler_dir);
-    let new_active_path = format!("{}/new_active.json", scheduler_dir);
+// Remove an existing schedule config from the mode's directory
+pub fn remove_config(scheduler_dir: &str, name: &str, mode: &str) -> Result<(), String> {
+    info!("Removing config {}", name);
+    let sched_path = format!("{}/{}/{}.json", scheduler_dir, mode, name);
+
+    if !Path::new(&format!("{}/{}", scheduler_dir, mode)).is_dir() {
+        return Err(format!("Mode {} not found", mode));
+    }
 
     if !Path::new(&sched_path).is_file() {
-        return Err(format!("Schedule {}.json not found", name));
+        return Err(format!("Config file {}.json not found", name));
     }
-    symlink(sched_path, &new_active_path)
-        .map_err(|e| format!("Failed to create active symlink: {}", e))?;
-
-    fs::rename(&new_active_path, &active_path)
-        .map_err(|e| format!("Failed to copy over new active symlink: {}", e))?;
-
-    info!("Activated schedule {}", name);
-    Ok(())
-}
-
-// Remove an existing schedule file from the schedules directory
-// TODO: What happens if this is the active schedule?
-pub fn remove_schedule(scheduler_dir: &str, name: &str) -> Result<(), String> {
-    info!("Removing schedule {}", name);
-    let sched_path = format!("{}/{}.json", scheduler_dir, name);
 
     fs::remove_file(&sched_path)
-        .map_err(|e| format!("Failed to remove schedule {}.json: {}", name, e))?;
+        .map_err(|e| format!("Failed to remove config {}.json: {}", name, e))?;
 
-    info!("Removed schedule {}", name);
+    info!("Removed config {}", name);
     Ok(())
 }
 
-// Retrieve information on the active schedule file
-pub fn get_active_schedule(scheduler_dir: &str) -> Option<ScheduleFile> {
-    let active_path = fs::read_link(format!("{}/active.json", scheduler_dir)).ok()?;
+// Get all the schedules in a mode's directory
+pub fn get_mode_schedules(mode_path: &str) -> Result<Vec<ScheduleFile>, String> {
+    let mut schedules = vec![];
 
-    match ScheduleFile::from_path(&active_path) {
-        Ok(mut s) => {
-            s.active = true;
-            Some(s)
-        }
-        Err(e) => {
-            warn!("Failed to parse active schedule: {}", e);
-            None
-        }
-    }
-}
-
-// Retrieve information on all schedule files in the schedules directory
-pub fn get_available_schedules(
-    scheduler_dir: &str,
-    name: Option<String>,
-) -> Result<Vec<ScheduleFile>, String> {
-    let mut schedules: Vec<ScheduleFile> = vec![];
-
-    let active_path: Option<PathBuf> = fs::read_link(format!("{}/active.json", scheduler_dir)).ok();
-
-    for path in fs::read_dir(scheduler_dir)
-        .map_err(|e| format!("Failed to read schedules dir: {}", e))?
+    let mut files_list: Vec<PathBuf> = fs::read_dir(mode_path)
+        .map_err(|e| format!("Failed to read mode dir: {}", e))?
         // Filter out invalid entries
         .filter_map(|x| x.ok())
         // Convert DirEntry -> PathBuf
         .map(|entry| entry.path())
-        // Filter out non-files
+        // Filter out non-directories
         .filter(|entry| entry.is_file())
-        // Filter out active.json
-        .filter(|path| !path.ends_with("active.json"))
-        // Filter on name if specified
-        .filter(|path| {
-            if let Some(name_str) = &name {
-                path.ends_with(format!("{}.json", name_str))
-            } else {
-                true
-            }
-        })
-    {
-        let active = if let Some(active_sched) = active_path.clone() {
-            active_sched == path
-        } else {
-            false
-        };
+        .collect();
+    // Sort into predictable order
+    files_list.sort();
 
-        match ScheduleFile::from_path(&path) {
-            Ok(mut sched) => {
-                sched.active = active;
-                schedules.push(sched);
-            }
-            Err(e) => warn!("Error loading schedule: {}", e),
-        }
+    for path in files_list {
+        schedules.push(ScheduleFile::from_path(&path)?);
     }
 
     Ok(schedules)
