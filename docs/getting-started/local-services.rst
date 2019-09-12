@@ -6,8 +6,8 @@ services locally. All of the KubOS core services are capable of being run within
 your local development environment. This will allow you to get up and running with
 KubOS before you have an OBC in hand.
 
-A prerequisite for following this document is having your 
-:doc:`local environment setup <local-setup>` and having a copy of the 
+A prerequisite for following this document is having your
+:doc:`local environment setup <local-setup>` and having a copy of the
 `KubOS repo <https://github.com/kubos/kubos>`__ cloned locally.
 
 Configuring Services
@@ -21,7 +21,7 @@ will exist, so we will need to create a custom config file and then
 manually pass it to the service.
 
 This central configuration file is in the ``toml`` format and contains a section
-for each service. Here is a `default config <https://github.com/kubos/kubos/blob/master/tools/default_config.toml>`__  
+for each service. Here is a `default config <https://github.com/kubos/kubos/blob/master/tools/default_config.toml>`__
 you can use when running the core services. It can be found at ``tools/default_config.toml``
 in the Kubos repo folder.
 
@@ -31,7 +31,7 @@ for the service will go in a section named after the service::
     [service-name]
     config_option = "value"
 
-Any service which exposes a GraphQL interface will have a separate section for 
+Any service which exposes a GraphQL interface will have a separate section for
 configuring the GraphQL server::
 
     [service-name.addr]
