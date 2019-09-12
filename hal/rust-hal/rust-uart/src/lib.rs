@@ -38,12 +38,12 @@ use std::{sync, thread, time::Instant};
 /// Wrapper for UART stream
 pub struct Connection {
     /// Any boxed stream that allows for communication over serial ports
-    pub stream: Box<Stream>,
+    pub stream: Box<dyn Stream>,
 }
 
 impl Connection {
     /// Constructor to creation connection with provided stream
-    pub fn new(stream: Box<Stream>) -> Connection {
+    pub fn new(stream: Box<dyn Stream>) -> Connection {
         Connection { stream }
     }
 

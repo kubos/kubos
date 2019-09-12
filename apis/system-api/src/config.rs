@@ -161,7 +161,7 @@ fn get_config_path() -> Result<String, Error> {
         }
     } else {
         // The "-c" arg wasn't specified, so we can go ahead with the default
-        return Ok(DEFAULT_PATH.to_string());
+        Ok(DEFAULT_PATH.to_string())
     }
 }
 
