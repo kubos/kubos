@@ -80,7 +80,7 @@ impl Database {
                 info!("Telemetry table not found. Creating table.");
                 match sql_query(
                     "CREATE TABLE telemetry (
-                    timestamp INTEGER NOT NULL,
+                    timestamp DOUBLE NOT NULL,
                     subsystem VARCHAR(255) NOT NULL,
                     parameter VARCHAR(255) NOT NULL,
                     value VARCHAR(255) NOT NULL,
@@ -105,13 +105,11 @@ impl Database {
         parameter: &'a str,
         value: &'a str,
     ) -> QueryResult<usize> {
-        use self::telemetry;
-
-        let new_entry = NewEntry {
+        let new_entry = Entry {
             timestamp,
-            subsystem,
-            parameter,
-            value,
+            subsystem: String::from(subsystem),
+            parameter: String::from(parameter),
+            value: String::from(value),
         };
 
         insert_into(telemetry::table)
@@ -128,6 +126,12 @@ impl Database {
         let time = time::now_utc().to_timespec();
         let timestamp = time.sec as f64 + (f64::from(time.nsec) / 1_000_000_000.0);
         self.insert(timestamp, subsystem, parameter, value)
+    }
+
+    pub fn insert_bulk(&self, entries: Vec<Entry>) -> QueryResult<usize> {
+        insert_into(telemetry::table)
+            .values(&entries)
+            .execute(&self.connection)
     }
 }
 

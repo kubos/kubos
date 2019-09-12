@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+use failure::{bail, Error};
 use kubos_app::ServiceConfig;
-use std::io::{self, Write};
+use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -32,6 +34,7 @@ pub struct MockAppBuilder {
     _author: Option<String>,
     _active: Option<bool>,
     _run_level: Option<String>,
+    _config: Option<String>,
 }
 
 impl MockAppBuilder {
@@ -43,6 +46,7 @@ impl MockAppBuilder {
             _author: None,
             _active: None,
             _run_level: None,
+            _config: None,
         }
     }
 
@@ -71,6 +75,11 @@ impl MockAppBuilder {
         self
     }
 
+    pub fn config<'a>(&'a mut self, config: &str) -> &'a mut Self {
+        self._config = Some(String::from(config));
+        self
+    }
+
     pub fn toml(&self, registry_dir: &str) -> String {
         format!(
             r#"
@@ -82,6 +91,7 @@ impl MockAppBuilder {
             name = "{name}"
             version = "{version}"
             author = "{author}"
+            config = "{config}"
             "#,
             name = self._name,
             dir = registry_dir,
@@ -90,6 +100,10 @@ impl MockAppBuilder {
             version = self._version.as_ref().unwrap_or(&String::from("0.0.1")),
             author = self._author.as_ref().unwrap_or(&String::from("unknown")),
             bin = self._bin.as_ref().unwrap_or(&self._name),
+            config = self
+                ._config
+                .as_ref()
+                .unwrap_or(&String::from("/home/system/etc/config.toml")),
         )
     }
 
@@ -160,12 +174,27 @@ pub struct AppServiceFixture {
 }
 
 impl AppServiceFixture {
-    fn service_port() -> io::Result<u16> {
+    fn service_port() -> Result<u16, Error> {
         use std::net::{Ipv4Addr, SocketAddrV4, TcpListener};
         let port = {
             let loopback = Ipv4Addr::new(127, 0, 0, 1);
-            let socket = SocketAddrV4::new(loopback, 0);
-            let listener = TcpListener::bind(socket)?;
+            // Every now and again we get port collisions, so we'll retry a couple times to set up
+            // a socket for our service
+            let mut counter = 0;
+            let listener = loop {
+                let socket = SocketAddrV4::new(loopback, 0);
+
+                match TcpListener::bind(socket) {
+                    Ok(obj) => break obj,
+                    Err(error) => {
+                        if counter == 2 {
+                            bail!("Failed to bind socket: {:?}", error);
+                        }
+                    }
+                }
+
+                counter += 1;
+            };
             listener.local_addr()?.port()
         };
         Ok(port)
@@ -269,7 +298,7 @@ impl AppServiceFixture {
 pub fn send_query(config: ServiceConfig, query: &str) -> serde_json::Value {
     let client = reqwest::Client::new();
 
-    let uri = format!("http://{}", config.hosturl());
+    let uri = format!("http://{}", config.hosturl().unwrap());
 
     let mut map = ::std::collections::HashMap::new();
     map.insert("query", query);
@@ -282,7 +311,9 @@ pub fn send_query(config: ServiceConfig, query: &str) -> serde_json::Value {
         .json()
         .expect("Couldn't deserialize response");
 
-    let data = response.get("data").unwrap();
-
-    data.clone()
+    if let Some(data) = response.get("data") {
+        return data.clone();
+    } else {
+        panic!("Bad query response: {:?}", response);
+    }
 }

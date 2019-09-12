@@ -29,7 +29,7 @@ macro_rules! mock_service {
         );
 
         Service::new(
-            Config::new_from_str("app-service", &config),
+            Config::new_from_str("app-service", &config).unwrap(),
             registry,
             schema::QueryRoot,
             schema::MutationRoot,
@@ -70,3 +70,25 @@ mod registry_start_app;
 mod registry_test;
 mod set_version;
 mod upgrade_app;
+
+use crate::registry::*;
+use crate::schema;
+use kubos_service::{Config, Service};
+use serde_json::json;
+use tempfile::TempDir;
+
+#[test]
+fn ping() {
+    let registry_dir = TempDir::new().unwrap();
+    let service = mock_service!(registry_dir);
+
+    let query = r#"{
+            ping
+        }"#;
+
+    let expected = json!({
+            "ping": "pong"
+    });
+
+    test!(service, query, expected);
+}

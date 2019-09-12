@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Kubos Corporation
+ * Copyright (C) 2019 Kubos Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ extern crate juniper;
 
 mod app_entry;
 mod error;
+mod monitor;
 mod objects;
 mod registry;
 mod schema;
@@ -46,6 +47,7 @@ fn main() -> Result<(), Error> {
     let mut opts = Options::new();
 
     opts.optflag("b", "onboot", "Execute OnBoot logic");
+    // This will be parsed by the system API crate during Config::new()
     opts.optopt("c", "config", "Path to config file", "CONFIG");
     let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
@@ -54,15 +56,25 @@ fn main() -> Result<(), Error> {
         }
     };
 
-    let config = match matches.opt_str("c") {
-        Some(file) => Config::new_from_path("app-service", file),
-        None => Config::new("app-service"),
-    };
+    let config = Config::new("app-service").map_err(|err| {
+        error!("Failed to load service config: {:?}", err);
+        err
+    })?;
 
     let registry = {
         match config.get("registry-dir") {
-            Some(dir) => AppRegistry::new_from_dir(dir.as_str().unwrap())?,
-            None => AppRegistry::new()?,
+            Some(dir) => AppRegistry::new_from_dir(dir.as_str().unwrap()).map_err(|err| {
+                error!(
+                    "Failed to create app registry at {}: {:?}",
+                    dir.as_str().unwrap(),
+                    err
+                );
+                err
+            })?,
+            None => AppRegistry::new().map_err(|err| {
+                error!("Failed to create default app registry: {:?}", err);
+                err
+            })?,
         }
     };
 

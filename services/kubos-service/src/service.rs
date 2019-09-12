@@ -160,7 +160,21 @@ impl Service {
     /// cannot be bound (like if they are already in use), or if for some reason the socket fails
     /// to receive a message.
     pub fn start(self) {
-        let addr = self.config.hosturl().parse::<SocketAddr>().unwrap();
+        let hosturl = self
+            .config
+            .hosturl()
+            .ok_or_else(|| {
+                log::error!("Failed to load service URL");
+                "Failed to load service URL"
+            })
+            .unwrap();
+        let addr = hosturl
+            .parse::<SocketAddr>()
+            .map_err(|err| {
+                log::error!("Failed to parse SocketAddr: {:?}", err);
+                err
+            })
+            .unwrap();
         info!("Listening on: {}", addr);
 
         warp::serve(self.filter).run(addr);

@@ -31,7 +31,7 @@ fn test_udp_timestamp() {
     let port = 8111;
     let udp = 8121;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
+    let (handle, sender) = setup(db, Some(port), Some(udp), None);
 
     let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
     let service = format!("0.0.0.0:{}", udp);
@@ -98,7 +98,7 @@ fn test_udp_no_timestamp() {
     let port = 8112;
     let udp = 8122;
 
-    let (handle, sender) = setup(Some(db), Some(port), Some(udp), None);
+    let (handle, sender) = setup(db, Some(port), Some(udp), None);
 
     let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
     let service = format!("0.0.0.0:{}", udp);
@@ -135,6 +135,122 @@ fn test_udp_no_timestamp() {
         .unwrap();
     socket
         .send_to(&ser::to_vec(&entry4).unwrap(), &service)
+        .unwrap();
+
+    // Give the service time to process the messages, since we're not actually waiting
+    // for a response
+    ::std::thread::sleep(Duration::from_secs(1));
+
+    let res = do_query(Some(port), "{telemetry{subsystem,parameter,value}}");
+    teardown(handle, sender);
+    assert_eq!(
+        res,
+        json!({
+            "data": {
+                "telemetry":[
+                    {"subsystem":"test4","parameter":"current","value":"2.2"},
+                    {"subsystem":"test3","parameter":"current","value":"2.1"},
+                    {"subsystem":"test2","parameter":"current","value":"2.3"},
+                    {"subsystem":"test1","parameter":"current","value":"2.0"},
+                ]
+            }
+        })
+    );
+}
+
+#[test]
+fn test_udp_bulk_timestamp() {
+    let db_dir = TempDir::new().unwrap();
+    let db_path = db_dir.path().join("test.db");
+
+    let db = db_path.to_str().unwrap();
+    let port = 8113;
+    let udp = 8123;
+
+    let (handle, sender) = setup(db, Some(port), Some(udp), None);
+
+    let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
+    let service = format!("0.0.0.0:{}", udp);
+
+    let entries = json!([{
+            "timestamp": 1000,
+            "subsystem": "eps",
+            "parameter": "voltage",
+            "value": "3.3"
+    }, {
+            "timestamp": 1001,
+            "subsystem": "eps",
+            "parameter": "voltage",
+            "value": "3.4"
+    }, {
+            "timestamp": 1002,
+            "subsystem": "eps",
+            "parameter": "voltage",
+            "value": "3.2"
+    }]);
+
+    socket
+        .send_to(&ser::to_vec(&entries).unwrap(), &service)
+        .unwrap();
+
+    // Give the service time to process the messages, since we're not actually waiting
+    // for a response
+    ::std::thread::sleep(Duration::from_secs(1));
+
+    let res = do_query(
+        Some(port),
+        "{telemetry{timestamp,subsystem,parameter,value}}",
+    );
+    teardown(handle, sender);
+    assert_eq!(
+        res,
+        json!({
+            "data": {
+                "telemetry":[
+                    {"timestamp":1002.0,"subsystem":"eps","parameter":"voltage","value":"3.2"},
+                    {"timestamp":1001.0,"subsystem":"eps","parameter":"voltage","value":"3.4"},
+                    {"timestamp":1000.0,"subsystem":"eps","parameter":"voltage","value":"3.3"},
+                ]
+            }
+        })
+    );
+}
+
+#[test]
+fn test_udp_bulk_no_timestamp() {
+    let db_dir = TempDir::new().unwrap();
+    let db_path = db_dir.path().join("test.db");
+
+    let db = db_path.to_str().unwrap();
+
+    let port = 8114;
+    let udp = 8124;
+
+    let (handle, sender) = setup(db, Some(port), Some(udp), None);
+
+    let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
+    let service = format!("0.0.0.0:{}", udp);
+
+    let entries = json!([{
+            "subsystem": "test1",
+            "parameter": "current",
+            "value": "2.0"
+    }, {
+            "subsystem": "test2",
+            "parameter": "current",
+            "value": "2.3"
+    }, {
+            "subsystem": "test3",
+            "parameter": "current",
+            "value": "2.1"
+    }, {
+            "subsystem": "test4",
+            "parameter": "current",
+            "value": "2.2"
+    }]);
+
+    socket
+        .send_to(&ser::to_vec(&entries).unwrap(), &service)
         .unwrap();
 
     // Give the service time to process the messages, since we're not actually waiting

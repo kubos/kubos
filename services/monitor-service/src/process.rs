@@ -87,6 +87,7 @@ pub fn root_dir() -> PathBuf {
     PathBuf::from("/")
 }
 
+/// Generates a path from parts starting at `/`
 #[macro_export]
 macro_rules! root_path {
     ( $( $x:expr ),* ) => {

@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-use getopts::Options;
+use failure::{bail, Error};
 use serde_derive::Deserialize;
 use std::env;
 use std::fs::File;
@@ -22,41 +22,25 @@ use std::io::prelude::*;
 use toml;
 use toml::Value;
 
-/// The default conifguration file path
+/// The default configuration file path
 pub static DEFAULT_PATH: &str = "/home/system/etc/config.toml";
-/// The default IP address for service bindings
-pub static DEFAULT_IP: &str = "127.0.0.1";
-/// The default port for service bindings
-pub const DEFAULT_PORT: u16 = 8080;
 
 #[derive(Clone, Debug, Deserialize)]
 /// A simple address consisting of an IP address and port number
 pub struct Address {
-    ip: Option<String>,
-    port: Option<u16>,
-}
-
-impl Default for Address {
-    fn default() -> Self {
-        Address {
-            ip: Some(DEFAULT_IP.to_string()),
-            port: Some(DEFAULT_PORT),
-        }
-    }
+    ip: String,
+    port: u16,
 }
 
 impl Address {
-    /// Returns the IP portion of this address, or "127.0.0.1" if one was not provided.
+    /// Returns the IP portion of this address
     pub fn ip(&self) -> &str {
-        match self.ip.as_ref() {
-            Some(ref ip) => ip,
-            None => DEFAULT_IP,
-        }
+        &self.ip
     }
 
-    /// Returns the port of this address, or 8080 if one was not provided.
+    /// Returns the port of this address
     pub fn port(&self) -> u16 {
-        self.port.unwrap_or(DEFAULT_PORT)
+        self.port
     }
 }
 
@@ -75,18 +59,16 @@ impl Address {
 /// port = 8181
 /// ```
 ///
-/// When `addr`, `addr.ip`, or `addr.port` are not provided in the config file, the default IP
-/// `"127.0.0.1"` and default port `8080` are used instead.
 #[derive(Clone, Debug)]
 pub struct Config {
-    addr: Address,
+    addr: Option<Address>,
     raw: Value,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Config {
-            addr: Address::default(),
+            addr: None,
             raw: Value::String("".to_string()),
         }
     }
@@ -99,8 +81,8 @@ impl Config {
     ///
     /// # Arguments
     /// `name` - Category name used as a key in the config file
-    pub fn new(name: &str) -> Self {
-        Self::new_from_path(name, get_config_path())
+    pub fn new(name: &str) -> Result<Self, Error> {
+        Self::new_from_path(name, get_config_path()?)
     }
 
     /// Creates and parses configuration data from the passed in configuration
@@ -108,8 +90,8 @@ impl Config {
     /// # Arguments
     /// `name` - Category name used as a key in the config file
     /// `path` - Path to configuration file
-    pub fn new_from_path(name: &str, path: String) -> Self {
-        parse_config_file(name, path).unwrap_or_default()
+    pub fn new_from_path(name: &str, path: String) -> Result<Self, Error> {
+        parse_config_file(name, path)
     }
 
     /// Creates and parses configuration data from the passed in configuration
@@ -117,14 +99,18 @@ impl Config {
     /// # Arguments
     /// `name` - Category name used as a key in the config
     /// `config` - Config data as a string
-    pub fn new_from_str(name: &str, config: &str) -> Self {
-        parse_config_str(name, config).unwrap_or_default()
+    pub fn new_from_str(name: &str, config: &str) -> Result<Self, Error> {
+        parse_config_str(name, config)
     }
 
     /// Returns the configured hosturl string in the following
     /// format (using IPv4 addresses) - 0.0.0.0:0000
-    pub fn hosturl(&self) -> String {
-        format!("{}:{}", self.addr.ip(), self.addr.port())
+    pub fn hosturl(&self) -> Option<String> {
+        if let Some(addr) = &self.addr {
+            Some(format!("{}:{}", addr.ip(), addr.port()))
+        } else {
+            None
+        }
     }
 
     /// Returns the category's configuration information
@@ -137,7 +123,7 @@ impl Config {
     /// ```rust,no_run
     /// use kubos_system::Config;
     ///
-    /// let config = Config::new("example-service");
+    /// let config = Config::new("example-service").unwrap();
     /// let raw = config.raw();
     /// let bus = raw["bus"].as_str();
     /// ```
@@ -157,21 +143,25 @@ impl Config {
     }
 }
 
-fn get_config_path() -> String {
-    let args: Vec<String> = env::args().collect();
+fn get_config_path() -> Result<String, Error> {
+    // Manually check for a "-c {config-path}" command line argument specifying a custom config
+    // file path to use.
+    // Doing it this way so that entities which use this module (apps, services) can have any
+    // number of additional command arguments
+    let mut args = env::args();
 
-    let mut opts = Options::new();
-    opts.optopt("c", "config", "Path to config file", "CONFIG");
-    let matches = match opts.parse(&args[1..]) {
-        Ok(m) => m,
-        Err(_) => {
-            // suppress errors so applications using Config can have their own Options
-            return DEFAULT_PATH.to_string();
+    // Navigate to the "-c" option
+    let config_arg_pos = args.position(|arg| arg == "-c");
+
+    if let Some(_pos) = config_arg_pos {
+        // The config path will be the arg immediately after "-c"
+        match args.next() {
+            Some(path) => Ok(path),
+            None => bail!("The '-c' arg was specified, but no path value was provided"),
         }
-    };
-    match matches.opt_str("c") {
-        Some(s) => s,
-        None => DEFAULT_PATH.to_string(),
+    } else {
+        // The "-c" arg wasn't specified, so we can go ahead with the default
+        return Ok(DEFAULT_PATH.to_string());
     }
 }
 
@@ -182,20 +172,22 @@ fn get_file_data(path: String) -> Result<String, io::Error> {
     Ok(contents)
 }
 
-fn parse_config_file(name: &str, path: String) -> Result<Config, toml::de::Error> {
-    let contents = get_file_data(path).unwrap_or_else(|_| "".to_string());
+fn parse_config_file(name: &str, path: String) -> Result<Config, Error> {
+    let contents = get_file_data(path)?;
     parse_config_str(name, &contents)
 }
 
-fn parse_config_str(name: &str, contents: &str) -> Result<Config, toml::de::Error> {
+fn parse_config_str(name: &str, contents: &str) -> Result<Config, Error> {
     let data: Value = toml::from_str(&contents)?;
     let mut config = Config::default();
 
     if let Some(data) = data.get(name) {
         if let Some(address) = data.get("addr") {
-            config.addr = address.clone().try_into()?;
+            config.addr = Some(address.clone().try_into()?);
         }
         config.raw = data.clone();
+    } else {
+        bail!("Failed to find {} in config", name);
     }
 
     Ok(config)

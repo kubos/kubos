@@ -1,3 +1,19 @@
+//
+// Copyright (C) 2019 Kubos Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License")
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 use clap::{App, AppSettings, Arg, SubCommand};
 use failure::bail;
 use file_protocol::{FileProtocol, FileProtocolConfig, State};
@@ -6,8 +22,10 @@ use simplelog::*;
 use std::path::Path;
 use std::time::Duration;
 
+#[allow(clippy::too_many_arguments)]
 fn upload(
     host_ip: &str,
+    host_port: u16,
     remote_addr: &str,
     source_path: &str,
     target_path: &str,
@@ -16,7 +34,8 @@ fn upload(
     hold_count: u16,
 ) -> Result<(), failure::Error> {
     let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     info!(
         "Uploading local:{} to remote:{}",
@@ -44,8 +63,10 @@ fn upload(
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 fn download(
     host_ip: &str,
+    host_port: u16,
     remote_addr: &str,
     source_path: &str,
     target_path: &str,
@@ -54,7 +75,8 @@ fn download(
     hold_count: u16,
 ) -> Result<(), failure::Error> {
     let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     info!(
         "Downloading remote: {} to local: {}",
@@ -90,6 +112,7 @@ fn download(
 
 fn cleanup(
     host_ip: &str,
+    host_port: u16,
     remote_addr: &str,
     hash: Option<String>,
     prefix: Option<String>,
@@ -102,7 +125,8 @@ fn cleanup(
     }
 
     let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
-    let f_protocol = FileProtocol::new(host_ip, remote_addr, f_config);
+    let f_protocol =
+        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     // Generate channel ID for transaction
     let channel = f_protocol.generate_channel()?;
@@ -164,19 +188,28 @@ fn main() {
         )
         .arg(
             Arg::with_name("host_ip")
-                .short("h")
+                .short("-h")
+                .help("IP address of the local host to use")
                 .takes_value(true)
                 .default_value("0.0.0.0"),
         )
         .arg(
+            Arg::with_name("host_port")
+                .short("-P")
+                .help("UDP port that the file transfer service will send responses to")
+                .takes_value(true),
+        )
+        .arg(
             Arg::with_name("remote_ip")
                 .short("-r")
+                .help("IP address of the file transfer service to connect to")
                 .takes_value(true)
                 .default_value("0.0.0.0"),
         )
         .arg(
             Arg::with_name("remote_port")
                 .short("-p")
+                .help("UDP port of the file transfer service to connect to")
                 .takes_value(true)
                 .default_value("7000"),
         )
@@ -203,6 +236,7 @@ fn main() {
         .get_matches();
 
     let host_ip = args.value_of("host_ip").unwrap();
+    let host_port: u16 = args.value_of("host_port").unwrap().parse().unwrap();
     let remote_addr = format!(
         "{}:{}",
         args.value_of("remote_ip").unwrap(),
@@ -227,6 +261,7 @@ fn main() {
 
             upload(
                 host_ip,
+                host_port,
                 &remote_addr,
                 &source_path,
                 &target_path,
@@ -249,6 +284,7 @@ fn main() {
 
             download(
                 host_ip,
+                host_port,
                 &remote_addr,
                 &source_path,
                 &target_path,
@@ -266,6 +302,7 @@ fn main() {
                 .map(|v| v.to_owned());
             cleanup(
                 host_ip,
+                host_port,
                 &remote_addr,
                 hash,
                 Some(storage_prefix),

@@ -80,10 +80,9 @@ fn query_db(
     timestamp_ge: Option<f64>,
     timestamp_le: Option<f64>,
     subsystem: Option<String>,
-    parameter: Option<String>,
+    parameters: Option<Vec<String>>,
     limit: Option<i32>,
 ) -> FieldResult<Vec<Entry>> {
-    use diesel::sqlite::SqliteConnection;
     use kubos_telemetry_db::telemetry;
     use kubos_telemetry_db::telemetry::dsl;
 
@@ -93,8 +92,8 @@ fn query_db(
         query = query.filter(dsl::subsystem.eq(sub));
     }
 
-    if let Some(param) = parameter {
-        query = query.filter(dsl::parameter.eq(param));
+    if let Some(params) = parameters {
+        query = query.filter(dsl::parameter.eq_any(params));
     }
 
     if let Some(time_ge) = timestamp_ge {
@@ -137,17 +136,38 @@ fn query_db(
 pub struct QueryRoot;
 
 graphql_object!(QueryRoot: Context |&self| {
+    // Test query to verify service is running without
+    // attempting to execute any actual logic
+    //
+    // {
+    //    ping: "pong"
+    // }
+    field ping() -> FieldResult<String>
+        as "Test service query"
+    {
+        Ok(String::from("pong"))
+    }
+
     field telemetry(
         &executor,
         timestamp_ge: Option<f64>,
         timestamp_le: Option<f64>,
         subsystem: Option<String>,
         parameter: Option<String>,
+        parameters: Option<Vec<String>>,
         limit: Option<i32>,
     ) -> FieldResult<Vec<Entry>>
         as "Telemetry entries in database"
     {
-        query_db(&executor.context().subsystem().database, timestamp_ge, timestamp_le, subsystem, parameter, limit)
+        if parameter.is_some() && parameters.is_some() {
+            return Err(FieldError::new("The `parameter` and `parameters` input fields are mutually exclusive", Value::null()));
+        }
+
+        if let Some(param) = parameter {
+            query_db(&executor.context().subsystem().database, timestamp_ge, timestamp_le, subsystem, Some(vec!(param)), limit)
+        } else {
+            query_db(&executor.context().subsystem().database, timestamp_ge, timestamp_le, subsystem, parameters, limit)
+        }
     }
     field routed_telemetry(
         &executor,
@@ -155,13 +175,23 @@ graphql_object!(QueryRoot: Context |&self| {
         timestamp_le: Option<f64>,
         subsystem: Option<String>,
         parameter: Option<String>,
+        parameters: Option<Vec<String>>,
         limit: Option<i32>,
         output: String,
         compress = true: bool,
     ) -> FieldResult<String>
         as "Telemetry entries in database"
     {
-        let entries = query_db(&executor.context().subsystem().database, timestamp_ge, timestamp_le, subsystem, parameter, limit)?;
+        if parameter.is_some() && parameters.is_some() {
+            return Err(FieldError::new("The `parameter` and `parameters` input fields are mutually exclusive", Value::null()));
+        }
+
+        let entries = if let Some(param) = parameter {
+            query_db(&executor.context().subsystem().database, timestamp_ge, timestamp_le, subsystem, Some(vec!(param)), limit)?
+        } else {
+            query_db(&executor.context().subsystem().database, timestamp_ge, timestamp_le, subsystem, parameters, limit)?
+        };
+
         let entries = serde_json::to_vec(&entries)?;
 
         let output_str = output.clone();
@@ -212,6 +242,14 @@ struct DeleteResponse {
     entries_deleted: Option<i32>,
 }
 
+#[derive(GraphQLInputObject)]
+struct InsertEntry {
+    timestamp: Option<f64>,
+    subsystem: String,
+    parameter: String,
+    value: String,
+}
+
 graphql_object!(MutationRoot: Context | &self | {
     field insert(&executor, timestamp: Option<f64>, subsystem: String, parameter: String, value: String) -> FieldResult<InsertResponse> {
         let result = match timestamp {
@@ -226,6 +264,41 @@ graphql_object!(MutationRoot: Context | &self | {
                 })?
             .insert_systime(&subsystem, &parameter, &value),
         };
+
+        Ok(InsertResponse {
+            success: result.is_ok(),
+            errors: match result {
+                Ok(_) => "".to_owned(),
+                Err(err) => format!("{}", err),
+            },
+        })
+    }
+
+    field insert_bulk(
+        &executor,
+        timestamp: Option<f64>,
+        entries: Vec<InsertEntry>
+    ) -> FieldResult<InsertResponse>
+    {
+        let time = time::now_utc().to_timespec();
+        let systime = time.sec as f64 + (f64::from(time.nsec) / 1_000_000_000.0);
+
+        let mut new_entries: Vec<kubos_telemetry_db::Entry> = Vec::new();
+        for entry in entries {
+            let ts = entry.timestamp.or(timestamp).unwrap_or(systime);
+
+            new_entries.push(kubos_telemetry_db::Entry {
+                timestamp: ts,
+                subsystem: entry.subsystem,
+                parameter: entry.parameter,
+                value: entry.value,
+            });
+        }
+
+        let result = executor.context().subsystem().database.lock().or_else(|err| {
+            log::error!("insert_bulk - Failed to get lock on database: {:?}", err);
+            Err(err)
+        })?.insert_bulk(new_entries);
 
         Ok(InsertResponse {
             success: result.is_ok(),

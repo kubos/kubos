@@ -1,13 +1,25 @@
 Kubos SDK Docs
 ==============
 
-The "Kubos SDK" is a term used to describe all of the components used
-to build Kubos projects:
+While the majority of KubOS development can be done locally on a host machine, we also provide a
+standalone SDK which can be used to assist with the development process.
 
--  Vagrant box - The VM that contains the "ready to run" Kubos development
+The "Kubos SDK" is a term used to describe all of the components used
+to build KubOS projects:
+
+-  `Vagrant <https://www.vagrantup.com/>`__ box - The VM that contains the "ready to run" Kubos development
    environment
--  Kubos source modules - The underlying libraries on which Kubos projects
+-  Kubos source modules - The underlying libraries on which KubOS projects
    are built
+
+Internally, we use this SDK in order to build KubOS releases and to host our CI tests.
+
+Externally, the SDK is most useful for:
+
+- Windows users
+- Users who do not want to muddle their host systems with all of the dependencies required to build
+  and execute KubOS projects
+- Users who want to build a :ref:`custom KubOS image <custom-klb>`
 
 .. uml::
 
@@ -48,21 +60,17 @@ to build Kubos projects:
 
 This documentation section contains the various guides related to using the Kubos SDK:
 
-    - :doc:`../installation-docs/sdk-installing` - How to install the SDK onto your host machine
-    - :doc:`sdk-examples` - A list of example projects using the SDK
+    - :doc:`sdk-installing` - How to install the SDK onto your host machine
     - :doc:`sdk-c` - A guide to using C with the Kubos SDK
     - :doc:`sdk-rust` - How to develop and run Kubos projects using Rust
     - :doc:`sdk-python` - How to develop and run Kubos projects using Python
-    - :doc:`windows-dev-environment` - How to develop Kubos projects from a Windows-based host computer
     - :doc:`sdk-upgrading` - How to upgrade to the latest version of the Kubos SDK
 
 .. toctree::
     :hidden:
 
-    ../installation-docs/sdk-installing
-    sdk-examples
-    sdk-c
+    sdk-installing
     sdk-rust
     sdk-python
-    windows-dev-environment
-    Upgrading Kubos SDK <sdk-upgrading>
+    sdk-c
+    Upgrading the Kubos SDK <sdk-upgrading>

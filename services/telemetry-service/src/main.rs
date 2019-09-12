@@ -61,8 +61,9 @@
 //!   value: Float!
 //! }
 //!
-//! query telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String): Entry
-//! query routedTelemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, output: String!, compress: Boolean = true): String!
+//! query ping: "pong"
+//! query telemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, parameters: [String]): Entry
+//! query routedTelemetry(timestampGe: Integer, timestampLe: Integer, subsystem: String, parameter: String, parameters: [String], output: String!, compress: Boolean = true): String!
 //!
 //! mutation insert(timestamp: Integer, subsystem: String!, parameter: String!, value: String!):{ success: Boolean!, errors: String! }
 //! ```
@@ -93,10 +94,22 @@
 //! }
 //! ```
 //!
-//! ## Select all attributes of all telemetry entries for the voltage parametereter of the eps subsystem
+//! ## Select all attributes of all telemetry entries for the voltage parameter of the eps subsystem
 //! ```graphql
 //! {
 //!   telemetry(subsystem: "eps", parameter: "voltage") {
+//!     timestamp,
+//!     subsystem,
+//!     parameter,
+//!     value
+//!   }
+//! }
+//! ```
+//!
+//! ## Select all attributes of all telemetry entries for the voltage and current parameters of the eps subsystem
+//! ```graphql
+//! {
+//!   telemetry(subsystem: "eps", parameters: ["voltage", "current"]) {
 //!     timestamp,
 //!     subsystem,
 //!     parameter,
@@ -198,6 +211,7 @@ mod udp;
 use crate::schema::{MutationRoot, QueryRoot, Subsystem};
 use kubos_service::{Config, Service};
 use kubos_telemetry_db::Database;
+use log::error;
 use syslog::Facility;
 
 fn main() {
@@ -208,20 +222,47 @@ fn main() {
     )
     .unwrap();
 
-    let config = Config::new("telemetry-service");
+    let config = Config::new("telemetry-service")
+        .map_err(|err| {
+            error!("Failed to load service config: {:?}", err);
+            err
+        })
+        .unwrap();
 
     let db_path = config
         .get("database")
-        .expect("No database path found in config file");
-    let db_path = db_path.as_str().unwrap_or("");
+        .ok_or_else(|| {
+            error!("No database path found in config file");
+            "No database path found in config file"
+        })
+        .unwrap();
+    let db_path = db_path
+        .as_str()
+        .ok_or_else(|| {
+            error!("Failed to parse 'database' config value");
+            "Failed to parse 'database' config value"
+        })
+        .unwrap();
 
     let db = Database::new(&db_path);
     db.setup();
 
     let direct_udp = config.get("direct_port").map(|port| {
-        let host = config.hosturl();
+        let host = config
+            .hosturl()
+            .ok_or_else(|| {
+                error!("Failed to load service URL");
+                "Failed to load service URL"
+            })
+            .unwrap();
         let mut host_parts = host.split(':').map(|val| val.to_owned());
-        let host_ip = host_parts.next().unwrap();
+        let host_ip = host_parts
+            .next()
+            .ok_or_else(|| {
+                error!("Failed to parse service IP address");
+                "Failed to parse service IP address"
+            })
+            .unwrap();
 
         format!("{}:{}", host_ip, port)
     });

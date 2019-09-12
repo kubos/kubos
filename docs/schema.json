@@ -1,9 +1,0 @@
-{
-    "system": {
-        "initAfterFlash": "boolean",
-        "initAtBoot": "boolean",
-        "runLevel": "number",
-        "destDir": "file location",
-        "password": "string"
-    },
-}

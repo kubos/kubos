@@ -47,6 +47,7 @@
 //!
 //! ```json
 //! query {
+//!     ping: "pong",
 //! 	supervisor: {
 //! 		version: {
 //! 			dummy,
@@ -110,7 +111,12 @@ fn main() {
     .unwrap();
 
     Service::new(
-        Config::new("iobc-supervisor-service"),
+        Config::new("iobc-supervisor-service")
+            .map_err(|err| {
+                log::error!("Failed to load service config: {:?}", err);
+                err
+            })
+            .unwrap(),
         Supervisor::new(),
         QueryRoot,
         MutationRoot,

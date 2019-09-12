@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright 2018 Kubos Corporation
 # Licensed under the Apache License, Version 2.0
@@ -13,7 +13,7 @@ service, but can be run directly from the command line as well.
 
 NOTE: Mission application service will NOT run Python mission apps
 without the environment indicator at the top of the file:
-"#!/usr/bin/env python"
+"#!/usr/bin/env python3"
 """
 
 import argparse
@@ -21,8 +21,6 @@ import app_api
 import sys
 import time
 import toml
-
-SERVICES = app_api.Services()
 
 # On-boot logic which will be called at boottime if this app is registered with
 # the applications service
@@ -76,22 +74,36 @@ def on_boot(logger):
 def on_command(logger, cmd_args):
 
     logger.info("OnCommand logic")
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-m',
+        '--mode',
+        help='System mode',
+        required=False)
+    parser.add_argument(
+        '-t',
+        '--time',
+        type=int,
+        help='Safemode time (in seconds)',
+        required=False)
+    
+    args = parser.parse_args(cmd_args)
 
-    if cmd_args.cmd_string == 'safemode':
-        if cmd_args.cmd_int > 0:
-            with open(LOGFILE, 'a+') as file:
-                logger.info(
-                    "Going into safemode for {} seconds".format(
-                        cmd_args.cmd_int))
-                logger.info("Sending commands to hardware to go into safemode")
-                time.sleep(cmd_args.cmd_int)
-                logger.info("Sending commands to hardware to normal operation")
+    if args.mode == 'safemode':
+        if args.time > 0:
+            logger.info(
+                "Going into safemode for {} seconds".format(
+                    args.time))
+            logger.info("Sending commands to hardware to go into safemode")
+            time.sleep(args.time)
+            logger.info("Sending commands to hardware to normal operation")
         else:
             raise ValueError("Command Integer must be positive and non-zero")
             sys.exit(1)
                     
     else:
-        query = '{ apps { active, app { uuid, name, version, author } } }'
+        query = '{ apps { active, app { name, version, author } } }'
         try:
             logger.info("Querying for active applications")
             logger.info("Query: {}".format(query))
@@ -116,26 +128,28 @@ def main():
         nargs=1,
         help='Determines run behavior. Either "OnBoot" or "OnCommand"',
         required=True)
-    
-    # Other optional arguments
+    # The -c argument should be present if you would like to be able to specify a non-default
+    # configuration file
     parser.add_argument(
-        '-s',
-        '--cmd_string',
-        help='Command Argument String passed into OnCommand behavior',
-        required=False)
-    parser.add_argument(
-        '-i',
-        '--cmd_int',
-        type=int,
-        help='Command Argument Integer passed into OnCommand behavior',
-        required=False)
+        '-c',
+        '--config',
+        nargs=1,
+        help='Specifies the location of a non-default configuration file')
+    # Other optional arguments which will be passed through to the underlying logic
+    parser.add_argument('cmd_args', nargs='*')
 
     args = parser.parse_args()
+    
+    if args.config is not None:
+        global SERVICES
+        SERVICES = app_api.Services(args.config[0])
+    else:
+        SERVICES = app_api.Services()
 
     if args.run[0] == 'OnBoot':
         on_boot(logger)
     elif args.run[0] == 'OnCommand':
-        on_command(logger, args)
+        on_command(logger, args.cmd_args)
     else:
         logger.error("Unknown run level specified")
         sys.exit(1)

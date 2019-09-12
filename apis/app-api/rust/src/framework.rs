@@ -149,6 +149,13 @@ pub fn app_start(
         "Run level which should be executed",
         "RUN_LEVEL",
     );
+    // This option will be processed by the system-api crate when a service query is run
+    opts.optflagopt(
+        "c",
+        "config",
+        "System config file which should be used",
+        "CONFIG",
+    );
     opts.optflag("h", "help", "Print this help menu");
 
     let matches = match opts.parse(&args[1..]) {
@@ -167,8 +174,8 @@ pub fn app_start(
         .unwrap_or_else(|| "OnCommand".to_owned());
 
     match run_level.as_ref() {
-        "OnBoot" => handler.on_boot(args),
-        "OnCommand" => handler.on_command(args),
+        "OnBoot" => handler.on_boot(matches.free),
+        "OnCommand" => handler.on_command(matches.free),
         level => {
             bail!(
                 "Error: Unknown run level was requested - {}. Available run levels: OnBoot, OnCommand", level

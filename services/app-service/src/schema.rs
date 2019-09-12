@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+use crate::monitor::MonitorEntry;
 use crate::objects::*;
 use crate::registry::AppRegistry;
 use juniper::FieldResult;
@@ -25,17 +26,28 @@ type Context = kubos_service::Context<AppRegistry>;
 ///
 pub struct QueryRoot;
 
-/// Base GraphQL query model
+// Base GraphQL query model
 graphql_object!(QueryRoot : Context as "Query" |&self| {
-    field apps(&executor,
+    // Test query to verify service is running without
+    // attempting to execute an actual logic
+    //
+    // {
+    //    ping: "pong"
+    // }
+    field ping() -> FieldResult<String>
+        as "Test service query"
+    {
+        Ok(String::from("pong"))
+    }
+
+    field registered_apps(&executor,
                name: Option<String>,
                version: Option<String>,
                active: Option<bool>)
         -> FieldResult<Vec<KAppRegistryEntry>> as "Kubos Apps Query"
     {
-        let mut result: Vec<KAppRegistryEntry> = Vec::new();
         let entries = executor.context().subsystem().entries.lock()?;
-        let final_iter = entries.iter().filter(|ref e| {
+        let result = entries.iter().filter(|ref e| {
             if name.is_some() && &e.app.name != name.as_ref().unwrap() {
                 return false;
             }
@@ -46,20 +58,40 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
                 return false;
             }
             true
-        });
-
-        for entry in final_iter {
-            result.push(KAppRegistryEntry(entry.clone()));
-        }
+        }).map(|entry| KAppRegistryEntry(entry.clone())).collect();
 
         Ok(result)
     }
+
+    field app_status(&executor,
+        name: Option<String>,
+        version: Option<String>,
+        running: Option<bool>)
+        -> FieldResult<Vec<MonitorEntry>> as "App Status Query"
+    {
+        let entries = executor.context().subsystem().monitoring.lock()?;
+        let result = entries.iter().filter(|e| {
+            if name.is_some() && &e.name != name.as_ref().unwrap() {
+                return false;
+            }
+            if version.is_some() && &e.version != version.as_ref().unwrap() {
+                return false;
+            }
+            if running.is_some() && &e.running != running.as_ref().unwrap() {
+                return false;
+            }
+            true
+        }).map(|entry_ref| (*entry_ref).clone()).collect();
+
+        Ok(result)
+    }
+
 });
 
 ///
 pub struct MutationRoot;
 
-/// Base GraphQL mutation model
+// Base GraphQL mutation model
 graphql_object!(MutationRoot : Context as "Mutation" |&self| {
 
     field register(&executor, path: String) -> FieldResult<RegisterResponse>
@@ -101,7 +133,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
         })
     }
 
-    field start_app(&executor, name: String, run_level: String, args: Option<Vec<String>>) -> FieldResult<StartResponse>
+    field start_app(&executor, name: String, run_level: String, config: Option<String>, args: Option<Vec<String>>) -> FieldResult<StartResponse>
         as "Start App"
     {
         let run_level_o = {
@@ -111,9 +143,28 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
             }
         };
 
-        Ok(match executor.context().subsystem().start_app(&name, &run_level_o, args) {
-            Ok(num) => StartResponse { success: true, errors: "".to_owned(), pid: Some(num as i32)},
+        let args = if let Some(mut params) = args {
+            // Add '--' to our list of args so that the app framework passes them successfully to
+            // the underlying app
+            let mut temp = vec!["--".to_owned()];
+            temp.append(&mut params);
+            Some(temp)
+        } else {
+            None
+        };
+
+        Ok(match executor.context().subsystem().start_app(&name, &run_level_o, config, args) {
+            Ok(pid) => StartResponse { success: true, errors: "".to_owned(), pid},
             Err(error) => StartResponse { success: false, errors: error.to_string(), pid: None },
+        })
+    }
+
+    field kill_app(&executor, name: String, run_level: String, signal: Option<i32>) -> FieldResult<GenericResponse>
+        as "Kill Running App"
+    {
+        Ok(match executor.context().subsystem().kill_app(&name, &run_level, signal) {
+            Ok(pid) => GenericResponse { success: true, errors: "".to_owned() },
+            Err(error) => GenericResponse { success: false, errors: error.to_string() },
         })
     }
 });

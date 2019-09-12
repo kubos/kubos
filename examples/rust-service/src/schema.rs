@@ -21,7 +21,7 @@ use log::info;
 
 type Context = kubos_service::Context<Subsystem>;
 
-/// GraphQL model for Subsystem
+// GraphQL model for Subsystem
 graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     description: "Service subsystem"
 
@@ -38,7 +38,7 @@ graphql_object!(Subsystem: Context as "Subsystem" |&self| {
     }
 });
 
-/// GraphQL model for CalibrateThermometer return
+// GraphQL model for CalibrateThermometer return
 graphql_object!(CalibrateThermometer: Context as "CalibrateThermometer" |&self| {
     description: "Calibrating thermometer return"
 
@@ -47,7 +47,7 @@ graphql_object!(CalibrateThermometer: Context as "CalibrateThermometer" |&self| 
     }
 });
 
-/// GraphQL model for ResetUptime return
+// GraphQL model for ResetUptime return
 graphql_object!(ResetUptime: Context as "ResetUptime" |&self| {
     description: "Reset uptime return"
 
@@ -56,7 +56,7 @@ graphql_object!(ResetUptime: Context as "ResetUptime" |&self| {
     }
 });
 
-/// GraphQL model for SetPower return
+// GraphQL model for SetPower return
 graphql_object!(SetPower: Context as "SetPower" |&self| {
     description: "Enable Power Return"
 
@@ -67,7 +67,7 @@ graphql_object!(SetPower: Context as "SetPower" |&self| {
 
 pub struct QueryRoot;
 
-/// Base GraphQL query model
+// Base GraphQL query model
 graphql_object!(QueryRoot : Context as "Query" |&self| {
     field subsystem(&executor) -> FieldResult<&Subsystem>
         as "Subsystem query"
@@ -82,7 +82,7 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
 
 pub struct MutationRoot;
 
-/// Base GraphQL mutation model
+// Base GraphQL mutation model
 graphql_object!(MutationRoot : Context as "Mutation" |&self| {
 
     // Each field represents functionality available

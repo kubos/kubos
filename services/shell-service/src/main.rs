@@ -29,9 +29,22 @@ fn main() {
     )
     .unwrap();
 
-    let config = ServiceConfig::new("shell-service");
+    let config = ServiceConfig::new("shell-service")
+        .map_err(|err| {
+            error!("Failed to load service config: {:?}", err);
+            err
+        })
+        .unwrap();
 
-    info!("Starting shell service at {}", config.hosturl());
+    let hosturl = config
+        .hosturl()
+        .ok_or_else(|| {
+            error!("Failed to load service URL");
+            failure::format_err!("Failed to load service URL")
+        })
+        .unwrap();
+
+    info!("Starting shell service at {}", hosturl);
 
     match recv_loop(&config) {
         Ok(()) => warn!("Service listener loop exited successfully?"),

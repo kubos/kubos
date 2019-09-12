@@ -19,6 +19,7 @@ use mai400_api::mock::*;
 use mai400_api::*;
 use std::sync::mpsc::channel;
 
+/// Generate new mock MAI service
 #[macro_export]
 macro_rules! service_new {
     ($mock:ident) => {{
@@ -51,8 +52,13 @@ macro_rules! service_new {
             thread::sleep(Duration::from_secs(2))
         });
 
+        let config = r#"
+            [mai400-service.addr]
+            ip = "127.0.0.1"
+            port = 9999"#;
+
         Service::new(
-            Config::new("mai400-service"),
+            Config::new_from_str("mai400-service", &config).unwrap(),
             Subsystem {
                 mai,
                 last_cmd: Arc::new(RwLock::new(AckCommand::None)),
@@ -66,6 +72,7 @@ macro_rules! service_new {
     }};
 }
 
+/// Generate new mock MAI service with read thread
 #[macro_export]
 macro_rules! service_new_with_read {
     ($mock:ident, $data:ident) => {{
@@ -87,8 +94,13 @@ macro_rules! service_new_with_read {
 
         thread::spawn(move || read_thread(mai_ref, data_ref, sender));
 
+        let config = r#"
+            [mai400-service.addr]
+            ip = "127.0.0.1"
+            port = 9999"#;
+
         Service::new(
-            Config::new("mai400-service"),
+            Config::new_from_str("mai400-service", &config).unwrap(),
             Subsystem {
                 mai,
                 last_cmd: Arc::new(RwLock::new(AckCommand::None)),

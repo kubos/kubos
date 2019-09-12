@@ -59,6 +59,7 @@ fn start_app_good() {
                 name = "tiny-app"
                 version = "1.0"
                 author = "user"
+                config = "/custom/config.toml"
                 "#,
             registry_dir.path().to_string_lossy(),
         );
@@ -69,7 +70,7 @@ fn start_app_good() {
     // Create the registry
     let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
 
-    let result = registry.start_app("tiny-app", &RunLevel::OnCommand, None);
+    let result = registry.start_app("tiny-app", &RunLevel::OnCommand, None, None);
 
     // Small sleep to prevent tiny-app from being destroyed before
     // the system finishes calling it
@@ -104,6 +105,7 @@ fn start_app_fail() {
                 name = "tiny-app"
                 version = "1.0"
                 author = "user"
+                config = "/custom/config.toml"
                 "#,
             registry_dir.path().to_string_lossy(),
         );
@@ -114,7 +116,7 @@ fn start_app_fail() {
     // Create the registry
     let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
 
-    let result = registry.start_app("tiny-app", &RunLevel::OnCommand, None);
+    let result = registry.start_app("tiny-app", &RunLevel::OnCommand, None, None);
 
     assert_eq!(
         result.unwrap_err(),
@@ -144,6 +146,7 @@ fn start_app_bad() {
             name = "tiny-app"
             version = "1.0"
             author = "user"
+            config = "/custom/config.toml"
             "#,
         registry_dir.path().to_string_lossy(),
     );
@@ -153,7 +156,7 @@ fn start_app_bad() {
     // Create the registry
     let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
 
-    let result = registry.start_app("tiny-app", &RunLevel::OnCommand, None);
+    let result = registry.start_app("tiny-app", &RunLevel::OnCommand, None, None);
 
     match result.unwrap_err() {
         AppError::StartError { err } => {
@@ -199,6 +202,7 @@ fn start_app_nonzero_rc() {
                 name = "tiny-app"
                 version = "1.0"
                 author = "user"
+                config = "/custom/config.toml"
                 "#,
             registry_dir.path().to_string_lossy(),
         );
@@ -209,7 +213,7 @@ fn start_app_nonzero_rc() {
     // Create the registry
     let registry = AppRegistry::new_from_dir(&registry_dir.path().to_string_lossy()).unwrap();
 
-    let result = registry.start_app("tiny-app", &RunLevel::OnCommand, None);
+    let result = registry.start_app("tiny-app", &RunLevel::OnCommand, None, None);
 
     // Small sleep to prevent tiny-app from being destroyed before
     // the system finishes calling it

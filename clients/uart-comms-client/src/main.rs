@@ -13,81 +13,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Example UDP client "radio" over UART program
+// Example client "radio" over UART program
 //
-// Wraps the user's data in a UDP packet and then sends it over the UART port
+// Wraps the user's data in a SpacePacket and then sends it over the UART port
 // The example communication service, `uart-comms-service`, should be running and listening for
 // these messages.
 // The service will forward the message on to the requested destination port and then return the
 // response once the request has completed.
 //
+// Note: Currently this client can only be used to send/receive GraphQL requests
+//
 // Packets can be additionally encapsulated using the KISS protocol to simulate additional
-// radio-specific framing. Resulting packet is `KISS<UDP<payload>>`.
+// radio-specific framing. Resulting packet is `KISS<HTTP<graphql-payload>>`.
 
 mod comms;
 mod kiss;
 
-use byteorder::{BigEndian, ByteOrder};
 use clap::{App, Arg};
+use comms_service::{LinkPacket, PayloadType, SpacePacket};
 use failure::{bail, Error};
-use pnet::packet::udp::{ipv4_checksum, UdpPacket};
 use std::fs::File;
 use std::io::Read;
-use std::net::Ipv4Addr;
-use std::ops::Range;
 use std::time::Duration;
-
-// Default UDP connection information
-// Note: This MUST MATCH what the communications service is expecting.
-// It's used to verify the checksum of all incoming packets, so if the IP addresses are different,
-// then the checksum is different and the message is rejected.
-const SOURCE_PORT: u16 = 1000;
-const SOURCE_IP: &str = "192.168.0.1";
-const DEST_IP: &str = "0.0.0.0";
-
-// UDP header length.
-const HEADER_LEN: u16 = 8;
-// Checksum location in UDP packet.
-const CHKSUM_RNG: Range<usize> = 6..8;
 
 // Return type for this service.
 type ClientResult<T> = Result<T, Error>;
-
-// Takes the payload and then wraps it into a UDP packet.
-fn build_packet(
-    payload: &[u8],
-    length: u16,
-    source_ip: Ipv4Addr,
-    source_port: u16,
-    dest_ip: Ipv4Addr,
-    dest_port: u16,
-) -> Vec<u8> {
-    // Create a new UDP packet.
-    let mut header = [0; HEADER_LEN as usize];
-    let fields = [source_port, dest_port, length + HEADER_LEN, 0];
-    BigEndian::write_u16_into(&fields, &mut header);
-    let mut packet = header.to_vec();
-    packet.append(&mut payload.to_vec());
-
-    // Calculate the checksum for the UDP packet.
-    let packet_without_checksum = match UdpPacket::owned(packet.clone()) {
-        Some(bytes) => bytes,
-        None => panic!(),
-    };
-    let mut checksum = [0; 2];
-    println!(
-        "Source: {}:{}, Destination: {}:{}",
-        source_ip, source_port, dest_ip, dest_port
-    );
-    BigEndian::write_u16(
-        &mut checksum,
-        ipv4_checksum(&packet_without_checksum, &source_ip, &dest_ip),
-    );
-
-    // Splice the checksum back into UDP packet.
-    packet.splice(CHKSUM_RNG, checksum.iter().cloned());
-    packet
-}
 
 fn main() -> ClientResult<()> {
     let args = App::new("UART Comms Client")
@@ -97,20 +47,6 @@ fn main() -> ClientResult<()> {
                 .short("b")
                 .takes_value(true)
                 .required(true),
-        )
-        .arg(
-            Arg::with_name("source_ip")
-                .help("Source IP address")
-                .short("s")
-                .takes_value(true)
-                .default_value(SOURCE_IP),
-        )
-        .arg(
-            Arg::with_name("dest_ip")
-                .help("Destination IP address")
-                .short("d")
-                .takes_value(true)
-                .default_value(DEST_IP),
         )
         .arg(
             Arg::with_name("port")
@@ -141,8 +77,6 @@ fn main() -> ClientResult<()> {
         .get_matches();
 
     let bus = args.value_of("bus").unwrap();
-    let source_ip = args.value_of("source_ip").unwrap().parse()?;
-    let dest_ip = args.value_of("dest_ip").unwrap().parse()?;
     let dest_port = args.value_of("port").unwrap().parse()?;
 
     let query = if let Some(file) = args.value_of("file") {
@@ -153,17 +87,17 @@ fn main() -> ClientResult<()> {
         args.value_of("data").unwrap().to_string()
     };
 
-    println!("Request: {}", query);
+    let mut map = ::std::collections::HashMap::new();
+    map.insert("query", query);
 
-    // Wrap the request in a UDP packet
-    let packet = build_packet(
-        query.as_bytes(),
-        query.len() as u16,
-        source_ip,
-        SOURCE_PORT,
-        dest_ip,
+    // Build SpacePacket around payload message
+    let packet = SpacePacket::build(
+        0,
+        PayloadType::GraphQL,
         dest_port,
-    );
+        &serde_json::to_vec(&map)?,
+    )
+    .and_then(|packet| packet.to_bytes())?;
 
     let packet = if args.is_present("kiss") {
         // Add KISS framing
@@ -188,23 +122,10 @@ fn main() -> ClientResult<()> {
         msg
     };
 
-    // Parse a UDP packet from the received information.
-    let packet = match UdpPacket::owned(msg.clone()) {
-        Some(packet) => packet,
-        None => {
-            bail!("Failed to parse UDP packet");
-        }
-    };
+    // Parse the returned SpacePacket
+    let response = String::from_utf8(SpacePacket::parse(&msg)?.payload())?;
 
-    // Verify checksum of the UDP Packet.
-    let calc = ipv4_checksum(&packet, &dest_ip, &source_ip);
-    if packet.get_checksum() != calc {
-        eprintln!("Checksum mismatch");
-    } else {
-        let msg = ::std::str::from_utf8(&msg[8..])?;
-
-        println!("Response: {}", msg);
-    }
+    println!("Response: {}", response);
 
     Ok(())
 }

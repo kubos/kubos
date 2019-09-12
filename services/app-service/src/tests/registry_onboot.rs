@@ -168,6 +168,7 @@ fn registry_onboot_preexisting() {
                 name = "tiny-app"
                 version = "1.0"
                 author = "user"
+                config = "/custom/config.toml"
                 "#,
             registry_dir.path().to_string_lossy(),
         );

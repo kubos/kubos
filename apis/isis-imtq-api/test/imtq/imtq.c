@@ -627,7 +627,7 @@ static void test_watchdog(void ** arg)
 
     start_ret = k_imtq_watchdog_start();
 
-    const struct timespec delay = {.tv_sec = 0, .tv_nsec = 2000001 };
+    const struct timespec delay = {.tv_sec = 0, .tv_nsec = 20000001 };
 
     nanosleep(&delay, NULL);
 
@@ -649,7 +649,7 @@ static void test_watchdog_twice(void ** arg)
 
     start_ret = k_imtq_watchdog_start();
 
-    const struct timespec delay = {.tv_sec = 0, .tv_nsec = 2000001 };
+    const struct timespec delay = {.tv_sec = 0, .tv_nsec = 20000001 };
 
     nanosleep(&delay, NULL);
 

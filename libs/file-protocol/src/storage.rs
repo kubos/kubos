@@ -370,7 +370,7 @@ pub fn finalize_file(
     // Double check that all the chunks of the file are present and the hash matches up
     let (result, _) = validate_file(prefix, hash, None)?;
 
-    if result != true {
+    if !result {
         return Err(ProtocolError::FinalizeError {
             cause: "file missing chunks".to_owned(),
         });

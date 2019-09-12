@@ -57,6 +57,7 @@ impl MockComms {
 
     // Push data into the radio's read buffer
     // "Ground has sent a packet to be read"
+    #[allow(dead_code)]
     pub fn push_read(&self, data: &[u8]) {
         let mut buffer = self.read_buff.borrow_mut();
         buffer.push(data.to_vec());
@@ -91,22 +92,16 @@ pub fn write(socket: &Arc<Mutex<MockComms>>, data: &[u8]) -> CommsResult<()> {
 }
 
 // Convenience config generator
-pub fn comms_config(
-    sat_ip: &str,
-    ground_ip: &str,
-    ground_port: u16,
-    downlink_port: u16,
-) -> CommsConfig {
+pub fn comms_config(sat_ip: &str, downlink_port: u16) -> CommsConfig {
     CommsConfig {
         max_num_handlers: Some(10),
         downlink_ports: Some(vec![downlink_port]),
         timeout: Some(1000),
-        ground_ip: ground_ip.to_owned(),
-        ground_port: Some(ground_port),
-        satellite_ip: sat_ip.to_owned(),
+        ip: sat_ip.to_owned(),
     }
 }
 
+#[allow(dead_code)]
 pub fn spawn_http_server(
     payload: Vec<u8>,
     thread_data: Arc<Mutex<Vec<u8>>>,

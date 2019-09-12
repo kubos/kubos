@@ -20,7 +20,6 @@ use crate::common::*;
 use file_protocol::ProtocolError;
 use file_service::recv_loop;
 use kubos_system::Config as ServiceConfig;
-use rand::{thread_rng, Rng};
 use std::fs;
 use std::thread;
 use std::time::Duration;
@@ -40,19 +39,22 @@ fn upload_single() {
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
     let service_port = 7000;
+    let downlink_port = 6000;
 
     let contents = "upload_single".as_bytes();
 
-    create_test_file(&source, &contents);
+    let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, 4096);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     let result = upload(
         "127.0.0.1",
+        downlink_port,
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
 
@@ -60,12 +62,17 @@ fn upload_single() {
         println!("Error: {}", err);
     }
 
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
 
     assert_eq!(&contents[..], dest_contents.as_slice());
+
+    // Cleanup the temporary files so that the test can be repeatable
+    // The client folder is cleaned up by the protocol as a result
+    // of the hash mismatch
+    let _ = fs::remove_dir_all(format!("service/storage/{}", hash));
 }
 
 // Upload multi-chunk file from scratch
@@ -76,27 +83,35 @@ fn upload_multi_clean() {
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
     let service_port = 7001;
+    let downlink_port = 6001;
 
     let contents = [1; 5000];
 
-    create_test_file(&source, &contents);
+    let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, 4096);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     let result = upload(
         "127.0.0.1",
+        downlink_port,
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
 
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
     assert_eq!(&contents[..], dest_contents.as_slice());
+
+    // Cleanup the temporary files so that the test can be repeatable
+    // The client folder is cleaned up by the protocol as a result
+    // of the hash mismatch
+    let _ = fs::remove_dir_all(format!("service/storage/{}", hash));
 }
 
 // Upload multi-chunk file which we already have 1 chunk for
@@ -107,20 +122,23 @@ fn upload_multi_resume() {
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
     let service_port = 7002;
+    let downlink_port = 6002;
 
     let contents = [2; 5000];
 
-    create_test_file(&source, &contents);
+    let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, 4096);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     // Upload a partial version of the file
     let result = upload_partial(
         "127.0.0.1",
+        downlink_port,
         "127.0.0.1:7002",
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
     assert!(result.is_err());
@@ -128,17 +146,23 @@ fn upload_multi_resume() {
     // Upload the whole file this time
     let result = upload(
         "127.0.0.1",
+        downlink_port,
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
     assert_eq!(&contents[..], dest_contents.as_slice());
+
+    // Cleanup the temporary files so that the test can be repeatable
+    // The client folder is cleaned up by the protocol as a result
+    // of the hash mismatch
+    let _ = fs::remove_dir_all(format!("service/storage/{}", hash));
 }
 
 // Upload multi-chunk file which we already have all chunks for
@@ -149,38 +173,47 @@ fn upload_multi_complete() {
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
     let service_port = 7005;
+    let downlink_port = 6005;
 
     let contents = [3; 5000];
 
-    create_test_file(&source, &contents);
+    let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, 4096);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     // Upload the file once (clean upload)
     let result = upload(
         "127.0.0.1",
+        downlink_port,
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Upload the file again
     let result = upload(
         "127.0.0.1",
+        downlink_port,
         "127.0.0.1:7005",
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
     assert_eq!(&contents[..], dest_contents.as_slice());
+
+    // Cleanup the temporary files so that the test can be repeatable
+    // The client folder is cleaned up by the protocol as a result
+    // of the hash mismatch
+    let _ = fs::remove_dir_all(format!("service/storage/{}", hash));
 }
 
 // Upload. Create hash mismatch.
@@ -191,20 +224,23 @@ fn upload_bad_hash() {
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
     let service_port = 7003;
+    let downlink_port = 6003;
 
     let contents = "upload_bad_hash".as_bytes();
 
-    create_test_file(&source, &contents);
+    let _ = create_test_file(&source, &contents);
 
-    service_new!(service_port, 4096);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     // Upload the file so we can mess with the temporary storage
     let result = upload(
         "127.0.0.1",
+        downlink_port,
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
     assert!(result.is_ok());
@@ -214,15 +250,20 @@ fn upload_bad_hash() {
     thread::sleep(Duration::from_millis(10));
 
     // Create temp folder with bad chunk so that future hash calculation will fail
-    fs::create_dir(format!("service/storage/{}", hash)).unwrap();
-    fs::write(format!("service/storage/{}/0", hash), "bad data".as_bytes()).unwrap();
+    fs::create_dir(format!("{}/service/storage/{}", test_dir_str, hash)).unwrap();
+    fs::write(
+        format!("{}/service/storage/{}/0", test_dir_str, hash),
+        "bad data".as_bytes(),
+    )
+    .unwrap();
 
     let result = upload(
         "127.0.0.1",
+        downlink_port,
         "127.0.0.1:7003",
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
 
@@ -240,52 +281,7 @@ fn upload_bad_hash() {
     // Cleanup the temporary files so that the test can be repeatable
     // The service storage folder is deleted by the protocol as a
     // result of the hash mismatch
-    fs::remove_dir_all(format!("client/storage/{}", hash)).unwrap();
-}
-
-// Upload a single file in 5 simultaneous client instances
-#[test]
-fn upload_multi_client() {
-    let service_port = 7004;
-
-    // Spawn our single service
-    service_new!(service_port, 4096);
-
-    let mut thread_handles = vec![];
-
-    // Spawn 4 simultaneous clients
-    for _num in 0..4 {
-        thread_handles.push(thread::spawn(move || {
-            let test_dir = TempDir::new().expect("Failed to create test dir");
-            let test_dir_str = test_dir.path().to_str().unwrap();
-            let source = format!("{}/source", test_dir_str);
-            let dest = format!("{}/dest", test_dir_str);
-
-            let mut contents = [0u8; 10_000];
-            thread_rng().fill(&mut contents[..]);
-
-            create_test_file(&source, &contents);
-
-            let result = upload(
-                "127.0.0.1",
-                &format!("127.0.0.1:{}", service_port),
-                &source,
-                &dest,
-                Some("client".to_owned()),
-                4096,
-            );
-            assert!(result.is_ok());
-
-            // Verify the final file's contents
-            let dest_contents = fs::read(dest).unwrap();
-            assert_eq!(&contents[..], dest_contents.as_slice());
-        }));
-    }
-
-    for entry in thread_handles {
-        // Check for any thread failures
-        assert!(entry.join().is_ok());
-    }
+    let _ = fs::remove_dir_all(format!("client/storage/{}", hash));
 }
 
 // Verify an upload still works after the server has
@@ -299,12 +295,14 @@ fn upload_single_after_bad_input() {
     let source = format!("{}/source", test_dir_str);
     let dest = format!("{}/dest", test_dir_str);
     let service_port = 7007;
+    let downlink_port = 6007;
 
     let contents = "upload_single_after_bad_input".as_bytes();
 
-    create_test_file(&source, &contents);
+    let hash = create_test_file(&source, &contents);
 
-    service_new!(service_port, 4096);
+    let storage_dir = format!("{}/service", test_dir_str);
+    service_new!(service_port, downlink_port, 4096, storage_dir);
 
     {
         let send_socket = UdpSocket::bind("127.0.0.1:0").unwrap();
@@ -314,10 +312,11 @@ fn upload_single_after_bad_input() {
 
     let result = upload(
         "127.0.0.1",
+        downlink_port,
         &format!("127.0.0.1:{}", service_port),
         &source,
         &dest,
-        Some("client".to_owned()),
+        Some(format!("{}/client", test_dir_str)),
         4096,
     );
 
@@ -325,9 +324,14 @@ fn upload_single_after_bad_input() {
         println!("Error: {}", err);
     }
 
-    assert!(result.is_ok());
+    result.unwrap();
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
     assert_eq!(&contents[..], dest_contents.as_slice());
+
+    // Cleanup the temporary files so that the test can be repeatable
+    // The client folder is cleaned up by the protocol as a result
+    // of the hash mismatch
+    let _ = fs::remove_dir_all(format!("service/storage/{}", hash));
 }
