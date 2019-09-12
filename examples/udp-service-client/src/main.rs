@@ -151,7 +151,6 @@ fn main() {
         }
         Err(err) => {
             println!("Read error: {}", err);
-            return;
         }
     }
 }

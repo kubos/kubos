@@ -61,11 +61,6 @@ Using C
 If you would like to develop in C, we highly recommend you :doc:`install the SDK <../sdk-docs/sdk-installing>`
 and then refer to :doc:`../sdk-docs/sdk-c`.
 
-Running Services
-~~~~~~~~~~~~~~~~
-
-The KubOS core services provide the base functionality that all KubOS systems rely on and interact with. The :doc:`local services guide <local-services>` will help you get the core services up and running in your development environment.
-
 Learn more about KubOS
 ----------------------
 
@@ -95,6 +90,9 @@ Services
 Interested in learning more about the services which make KubOS go? Check out the :doc:`core services guide <../ecosystem/services/core-services>`.
 
 Ready to begin developing your own service? Check out the :doc:`service development guide <../ecosystem/services/service-dev>`.
+
+The KubOS core services provide the base functionality that all KubOS systems rely on and interact with.
+The :doc:`local services guide <local-services>` will help you get the core services up and running in your development environment.
 
 Something Missing?
 ------------------

@@ -123,5 +123,4 @@ We recommend that you look at the following documents next:
 
 - :doc:`using-python`
 - :doc:`using-rust`
-- :doc:`local-services`
 - :doc:`../tutorials/index`

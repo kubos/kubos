@@ -46,3 +46,14 @@ After installing all of these dependencies, we suggest running the following scr
 from the base of the kubos repo to verify everything is installed correctly and working::
 
     $ ./tools/kubos_verify.sh
+
+Next Steps
+----------
+
+Now that your environment is set up, you can get started developing your first KubOS project.
+
+We recommend that you look at the following documents next:
+
+- :doc:`using-python`
+- :doc:`using-rust`
+- :doc:`../tutorials/index`
