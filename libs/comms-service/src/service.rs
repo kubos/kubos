@@ -29,9 +29,10 @@ use std::thread;
 use std::time::Duration;
 
 /// Type definition for a "read" function pointer.
-pub type ReadFn<Connection> = Fn(&Connection) -> CommsResult<Vec<u8>> + Send + Sync + 'static;
+pub type ReadFn<Connection> = dyn Fn(&Connection) -> CommsResult<Vec<u8>> + Send + Sync + 'static;
 /// Type definition for a "write" function pointer.
-pub type WriteFn<Connection> = Fn(&Connection, &[u8]) -> CommsResult<()> + Send + Sync + 'static;
+pub type WriteFn<Connection> =
+    dyn Fn(&Connection, &[u8]) -> CommsResult<()> + Send + Sync + 'static;
 
 /// Struct that holds configuration data to allow users to set up a Communication Service.
 #[derive(Clone)]

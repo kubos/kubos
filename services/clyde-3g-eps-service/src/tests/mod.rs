@@ -75,7 +75,7 @@ impl Clyde3gEps for MockBadEps {
     }
 }
 
-fn gen_mock_bad_eps() -> Box<Clyde3gEps + Send> {
+fn gen_mock_bad_eps() -> Box<dyn Clyde3gEps + Send> {
     Box::new(MockBadEps {
         checksum: Arc::new(Mutex::new(clyde_3g_eps_api::Checksum {
             motherboard: 5,
@@ -159,7 +159,7 @@ impl Clyde3gEps for MockGoodEps {
     }
 }
 
-fn gen_mock_good_eps() -> Box<Clyde3gEps + Send> {
+fn gen_mock_good_eps() -> Box<dyn Clyde3gEps + Send> {
     Box::new(MockGoodEps {})
 }
 
