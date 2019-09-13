@@ -11,7 +11,7 @@ Supported devices:
 
   - Clyde Space
 
-    - `Clyde Space 3rd Generation 1U EPS <https://www.clyde.space/products/18-3rd-generation-1u-eps>`__
+    - `Clyde Space STARBUCK-NANO (formerly 3G EPS) <https://www.aac-clyde.space/satellite-bits/eps>`__
 
   - GOMspace
 

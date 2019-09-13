@@ -1,6 +1,6 @@
 # Clyde Space 3G EPS Service
 
-Service for interacting with a [Clyde Space 3G EPS](https://www.clyde.space/products/5-3rd-generation-3u-eps)
+Service for interacting with a [Clyde Space STARBUCK-NANO](https://www.aac-clyde.space/satellite-bits/eps)
 
 # Configuration
 
