@@ -16,8 +16,8 @@ If the system has failed to boot twice already, then the custom Kubos recovery c
 If the Kubos recovery steps fail, then the system attempts to boot into an alternate operating
 system instead.
 If that fails, then the system is likely in a non-operational state.
-It will enter a state of attempting to boot, failing, then rebooting, to allow for the chance that
-a reboot might correct whatever problem has occurred.
+It will enter a state of attempting to boot the alternate OS, failing, then rebooting, to allow for
+the chance that a reboot might correct whatever problem has occurred.
 
 If, for some reason, the internal counter cannot be increased, the recovery system simply fails to
 take any action.
@@ -51,13 +51,22 @@ located in the `U-Boot repo <https://github.com/kubos/uboot>`__ under the 'inclu
 Boot Processing Diagram
 -----------------------
 
-.. figure:: ../../images/kubos_linux_recovery.png
+.. figure:: ../../images/uboot_boot.png
    :alt: Boot Processing Diagram
 
    Boot Processing Diagram
+   
+.. figure:: ../../images/kubos_linux_boot.png
+   :alt: Linux Boot Verification Diagram
+   :scale: 75
+   
+   Boot Verification Diagram
 
 Kubos Recovery
 --------------
+
+.. figure:: ../../images/kubos_linux_recovery.png
+   :alt: Recovery Process Diagram
 
 The Kubos recovery process has three main components:
 
