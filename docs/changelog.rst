@@ -1,6 +1,16 @@
 Kubos Changelog
 ===============
 
+v1.18.0 - Sept 12 2019
+----------------------
+
+- `Added initial app monitoring capabilities <https://docs.kubos.com/1.18.0/ecosystem/services/app-service.html#application-execution-status>`__
+- `Added ability to stop currently running applications <https://docs.kubos.com/1.18.0/ecosystem/services/app-service.html#stopping-an-application>`__
+- `Added ability to do bulk telemetry database inserts asychronously <https://docs.kubos.com/1.18.0/ecosystem/services/telemetry-db.html#adding-entries-to-the-database-asynchronously>`__
+- Updated Docker and Vagrant configurations to use Python3.7
+- Upgraded Rust usage to v1.37.0
+- Miscellanous doc improvements
+
 v1.17.0 - Aug 15 2019
 ---------------------
 
