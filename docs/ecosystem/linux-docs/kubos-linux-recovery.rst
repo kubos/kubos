@@ -15,8 +15,9 @@ custom init script will reset this internal counter.
 If the system has failed to boot twice already, then the custom Kubos recovery code is attempted.
 If the Kubos recovery steps fail, then the system attempts to boot into an alternate operating
 system instead.
-If that fails, then the system will stop attempting to load an OS and will instead just present the
-U-Boot CLI.
+If that fails, then the system is likely in a non-operational state.
+It will enter a state of attempting to boot the alternate OS, failing, then rebooting, to allow for
+the chance that a reboot might correct whatever problem has occurred.
 
 If, for some reason, the internal counter cannot be increased, the recovery system simply fails to
 take any action.
@@ -50,13 +51,22 @@ located in the `U-Boot repo <https://github.com/kubos/uboot>`__ under the 'inclu
 Boot Processing Diagram
 -----------------------
 
-.. figure:: ../../images/kubos_linux_recovery.png
+.. figure:: ../../images/uboot_boot.png
    :alt: Boot Processing Diagram
 
    Boot Processing Diagram
+   
+.. figure:: ../../images/kubos_linux_boot.png
+   :alt: Linux Boot Verification Diagram
+   :scale: 75
+   
+   Boot Verification Diagram
 
 Kubos Recovery
 --------------
+
+.. figure:: ../../images/kubos_linux_recovery.png
+   :alt: Recovery Process Diagram
 
 The Kubos recovery process has three main components:
 
@@ -128,42 +138,15 @@ Alternate Boot
 
 If the system has failed to boot more times than the 'bootlimit' value allows, the system will
 attempt to boot using the 'altbootcmd' environment variable.
-This variable contains all of the commands required to sanitize the current boot environment and
-then, if it has been set up, boot into an alternate operating system.
+This variable contains all of the commands required to boot into an alternate operating system.
 Due to the low-portability of any commands that deal with memory, the exact format will change
 between boards (and potentially between missions), but should follow this rough format:
 
--  Set the 'recovery\_available' variable to 0 (if we succesfully boot into an alternate OS, it
-   should reset this back to 1. If we fail to boot into the alternate OS, then we should not keep
-   attempting.)
--  Clear the 'bootcmd' variable. If 'recovery\_available' is 0 and 'bootcmd' is NULL, then the
-   system won't attempt to boot into anything and will instead just go to the U-Boot CLI. The hope
-   is that from here some manual troubleshooting and recovery can occur.
--  Save the U-Boot envars. The ``saveenv`` command saves any local environment variables changes to
-   persistent storage.
--  If an alternate OS has been setup on the board:
+-  Copy the alternate OS from persistent storage into SDRAM.
+-  Run the alternate OS from SDRAM.
 
-  -  Copy the alternate OS from persistent storage into SDRAM.
-  -  Run the alternate OS from SDRAM.
-
--  Otherwise, continue to the U-Boot CLI
-
-This is the default alternate boot value:
-
-::
-
-    altbootcmd=setenv recovery_available 0; setenv bootcmd; saveenv
-
-.. warning::
-
-    The system enters the alternate boot behavior when it cannot successfully boot into Linux.
-    The default behavior is to then stop attempting to boot. This means that there will be no chance
-    of your flight software running once this logic has been entered. If you think that your FSW may
-    spontaneously recover at some later point and do not have an alternate environment to boot into,
-    we recommend that you update this default behavior to simply keep attempting to boot like so::
-    
-        altbootcmd=setenv recovery_available 0; saveenv
-        
+By default, 'altbootcmd' is setup to simply retry the normal boot commands.
+It should be updated once a plan for the secondary boot logic has been established.
 
 Generic Alternate OS Setup
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -184,9 +167,9 @@ The updated altbootcmd might look something like this:
 
 ::
 
-    altbootcmd=setenv recovery_available 0; setenv bootcmd; saveenv; cp.b 0x10080000 0x20000000 0x70000; go 0x20000000
+    altbootcmd=cp.b 0x10080000 0x20000000 0x70000; go 0x20000000
 
-This command will go through the default alternate boot commands and then:
+This command will do the following:
 
   - Copy 0x7000 bytes from address 0x10080000 (a permanent storage location) to address 0x20000000
     (the beginning of SDRAM)
