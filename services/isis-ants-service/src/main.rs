@@ -346,6 +346,7 @@
 //!
 
 #![deny(missing_docs)]
+#![deny(warnings)]
 #![recursion_limit = "256"]
 
 #[macro_use]

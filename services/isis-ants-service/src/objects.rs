@@ -14,8 +14,11 @@
 // limitations under the License.
 //
 
-use isis_ants_api::{AntsTelemetry, DeployStatus};
+use failure::Error;
+use isis_ants_api::{AntsTelemetry, DeployStatus, IAntS, KANTSAnt};
 use juniper::FieldResult;
+use kubos_service::{process_errors, push_err, run};
+use std::sync::{Arc, Mutex, RwLock};
 
 /// Common response fields structure for requests
 /// which don't return any specific data
@@ -265,7 +268,7 @@ pub enum TestResults {
     Hardware(HardwareTestResults),
 }
 
-/// Response union for 'testHardware' mutation
+// Response union for 'testHardware' mutation
 graphql_union!(TestResults: () where Scalar = <S> |&self| {
     instance_resolvers: |&_| {
         &IntegrationTestResults => match *self { TestResults::Integration(ref i) => Some(i), _ => None},
@@ -412,6 +415,20 @@ pub struct AntennaStats {
     pub act_count: u8,
     /// Cummulative amount of time, in 50ms steps, which has been spent deploying the antenna
     pub act_time: u16,
+}
+
+/// Get status data for a particular antenna
+pub fn get_stats(
+    ants_ref: &Arc<Mutex<Box<dyn IAntS>>>,
+    errors: &Arc<RwLock<Vec<String>>>,
+    antenna: KANTSAnt,
+) -> AntennaStats {
+    let ants = ants_ref.lock().unwrap();
+
+    AntennaStats {
+        act_count: run!(ants.get_activation_count(antenna.clone()), errors).unwrap_or_default(),
+        act_time: run!(ants.get_activation_time(antenna), errors).unwrap_or_default(),
+    }
 }
 
 graphql_object!(TelemetryDebug: () where Scalar = <S> |&self| {

@@ -23,7 +23,7 @@ type Context = kubos_service::Context<Subsystem>;
 
 pub struct QueryRoot;
 
-/// Base GraphQL query model
+// Base GraphQL query model
 graphql_object!(QueryRoot: Context as "Query" |&self| {
 
     // Test query to verify service is running without attempting
@@ -193,7 +193,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
 
 pub struct MutationRoot;
 
-/// Base GraphQL mutation model
+// Base GraphQL mutation model
 graphql_object!(MutationRoot: Context as "Mutation" |&self| {
 
     // Get all errors encountered while processing this GraphQL request
