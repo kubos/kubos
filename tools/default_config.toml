@@ -26,3 +26,14 @@ port = 8004
 [shell-service.addr]
 ip = "127.0.0.1"
 port = 8005
+
+[isis-ants-service.addr]
+ip = "0.0.0.0"
+port = 8007
+
+[isis-ants-service]
+bus = "/dev/i2c-0"
+primary = "0x31"
+secondary = "0x32"
+antennas = 4
+wd_timeout = 10

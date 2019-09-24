@@ -19,13 +19,13 @@ use isis_ants_api::*;
 use kubos_service::{process_errors, push_err, run};
 use log::info;
 use std::str;
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc, Mutex, RwLock};
 
 use crate::objects::*;
 
 #[derive(Clone)]
 pub struct Subsystem {
-    pub ants: Box<IAntS>,
+    pub ants: Arc<Mutex<Box<dyn IAntS>>>,
     pub count: u8,
     pub controller: Arc<RwLock<ConfigureController>>,
     pub errors: Arc<RwLock<Vec<String>>>,
@@ -40,7 +40,9 @@ impl Subsystem {
         count: u8,
         timeout: u32,
     ) -> AntSResult<Subsystem> {
-        let ants = Box::new(AntS::new(bus, primary, secondary, count, timeout)?);
+        let ants: Arc<Mutex<Box<dyn IAntS>>> = Arc::new(Mutex::new(Box::new(AntS::new(
+            bus, primary, secondary, count, timeout,
+        )?)));
 
         info!("Kubos antenna systems service started");
 
@@ -66,7 +68,7 @@ impl Subsystem {
     }
 
     pub fn get_arm_status(&self) -> AntSResult<ArmStatus> {
-        let result = run!(self.ants.get_deploy(), self.errors);
+        let result = run!(self.ants.lock().unwrap().get_deploy(), self.errors);
         let armed = result.unwrap_or_default().sys_armed;
 
         Ok(if armed {
@@ -77,7 +79,7 @@ impl Subsystem {
     }
 
     pub fn get_deploy_status(&self) -> AntSResult<GetDeployResponse> {
-        let result = run!(self.ants.get_deploy(), self.errors);
+        let result = run!(self.ants.lock().unwrap().get_deploy(), self.errors);
 
         let mut status = DeploymentStatus::Error;
 
@@ -145,7 +147,7 @@ impl Subsystem {
     }
 
     pub fn get_power(&self) -> AntSResult<GetPowerResponse> {
-        let result = run!(self.ants.get_uptime(), self.errors);
+        let result = run!(self.ants.lock().unwrap().get_uptime(), self.errors);
         let uptime = result.unwrap_or_default();
 
         let state = match uptime {
@@ -157,33 +159,17 @@ impl Subsystem {
     }
 
     pub fn get_telemetry(&self) -> AntSResult<Telemetry> {
-        let nominal = run!(self.ants.get_system_telemetry(), self.errors).unwrap_or_default();
+        let nominal = run!(
+            self.ants.lock().unwrap().get_system_telemetry(),
+            self.errors
+        )
+        .unwrap_or_default();
 
         let debug = TelemetryDebug {
-            ant1: AntennaStats {
-                act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant1), self.errors)
-                    .unwrap_or_default(),
-                act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant1), self.errors)
-                    .unwrap_or_default(),
-            },
-            ant2: AntennaStats {
-                act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant2), self.errors)
-                    .unwrap_or_default(),
-                act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant2), self.errors)
-                    .unwrap_or_default(),
-            },
-            ant3: AntennaStats {
-                act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant3), self.errors)
-                    .unwrap_or_default(),
-                act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant3), self.errors)
-                    .unwrap_or_default(),
-            },
-            ant4: AntennaStats {
-                act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant4), self.errors)
-                    .unwrap_or_default(),
-                act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant4), self.errors)
-                    .unwrap_or_default(),
-            },
+            ant1: get_stats(&self.ants, &self.errors, KANTSAnt::Ant1),
+            ant2: get_stats(&self.ants, &self.errors, KANTSAnt::Ant2),
+            ant3: get_stats(&self.ants, &self.errors, KANTSAnt::Ant3),
+            ant4: get_stats(&self.ants, &self.errors, KANTSAnt::Ant4),
         };
 
         Ok(Telemetry {
@@ -200,8 +186,8 @@ impl Subsystem {
 
     pub fn arm(&self, state: ArmState) -> AntSResult<ArmResponse> {
         let result = match state {
-            ArmState::Arm => run!(self.ants.arm(), self.errors),
-            ArmState::Disarm => run!(self.ants.disarm(), self.errors),
+            ArmState::Arm => run!(self.ants.lock().unwrap().arm(), self.errors),
+            ArmState::Disarm => run!(self.ants.lock().unwrap().disarm(), self.errors),
         };
 
         Ok(ArmResponse {
@@ -222,7 +208,7 @@ impl Subsystem {
             ConfigureController::Secondary => KANTSController::Secondary,
         };
 
-        let result = run!(self.ants.configure(conv), self.errors);
+        let result = run!(self.ants.lock().unwrap().configure(conv), self.errors);
 
         if result.is_ok() {
             let mut curr_controller = self
@@ -245,7 +231,7 @@ impl Subsystem {
     pub fn control_power(&self, state: PowerState) -> AntSResult<ControlPowerResponse> {
         match state {
             PowerState::Reset => {
-                let result = run!(self.ants.reset(), self.errors);
+                let result = run!(self.ants.lock().unwrap().reset(), self.errors);
 
                 Ok(ControlPowerResponse {
                     power: state,
@@ -272,19 +258,35 @@ impl Subsystem {
         let conv = if time > 255 { 255 } else { time as u8 };
 
         let result = match ant {
-            DeployType::All => run!(self.ants.auto_deploy(conv), self.errors),
-            DeployType::Antenna1 => {
-                run!(self.ants.deploy(KANTSAnt::Ant1, force, conv), self.errors)
-            }
-            DeployType::Antenna2 => {
-                run!(self.ants.deploy(KANTSAnt::Ant2, force, conv), self.errors)
-            }
-            DeployType::Antenna3 => {
-                run!(self.ants.deploy(KANTSAnt::Ant3, force, conv), self.errors)
-            }
-            DeployType::Antenna4 => {
-                run!(self.ants.deploy(KANTSAnt::Ant4, force, conv), self.errors)
-            }
+            DeployType::All => run!(self.ants.lock().unwrap().auto_deploy(conv), self.errors),
+            DeployType::Antenna1 => run!(
+                self.ants
+                    .lock()
+                    .unwrap()
+                    .deploy(KANTSAnt::Ant1, force, conv),
+                self.errors
+            ),
+            DeployType::Antenna2 => run!(
+                self.ants
+                    .lock()
+                    .unwrap()
+                    .deploy(KANTSAnt::Ant2, force, conv),
+                self.errors
+            ),
+            DeployType::Antenna3 => run!(
+                self.ants
+                    .lock()
+                    .unwrap()
+                    .deploy(KANTSAnt::Ant3, force, conv),
+                self.errors
+            ),
+            DeployType::Antenna4 => run!(
+                self.ants
+                    .lock()
+                    .unwrap()
+                    .deploy(KANTSAnt::Ant4, force, conv),
+                self.errors
+            ),
         };
 
         Ok(DeployResponse {
@@ -297,38 +299,22 @@ impl Subsystem {
     }
 
     pub fn integration_test(&self) -> AntSResult<IntegrationTestResults> {
-        let nom_result = run!(self.ants.get_system_telemetry(), self.errors);
+        let nom_result = run!(
+            self.ants.lock().unwrap().get_system_telemetry(),
+            self.errors
+        );
 
-        let debug_errors: RwLock<Vec<String>> = RwLock::new(vec![]);
+        let debug_errors: Arc<RwLock<Vec<String>>> = Arc::new(RwLock::new(vec![]));
 
         let debug = TelemetryDebug {
-            ant1: AntennaStats {
-                act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant1), debug_errors)
-                    .unwrap_or_default(),
-                act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant1), debug_errors)
-                    .unwrap_or_default(),
-            },
-            ant2: AntennaStats {
-                act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant2), debug_errors)
-                    .unwrap_or_default(),
-                act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant2), debug_errors)
-                    .unwrap_or_default(),
-            },
-            ant3: AntennaStats {
-                act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant3), debug_errors)
-                    .unwrap_or_default(),
-                act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant3), debug_errors)
-                    .unwrap_or_default(),
-            },
-            ant4: AntennaStats {
-                act_count: run!(self.ants.get_activation_count(KANTSAnt::Ant4), debug_errors)
-                    .unwrap_or_default(),
-                act_time: run!(self.ants.get_activation_time(KANTSAnt::Ant4), debug_errors)
-                    .unwrap_or_default(),
-            },
+            ant1: get_stats(&self.ants, &debug_errors, KANTSAnt::Ant1),
+            ant2: get_stats(&self.ants, &debug_errors, KANTSAnt::Ant2),
+            ant3: get_stats(&self.ants, &debug_errors, KANTSAnt::Ant3),
+            ant4: get_stats(&self.ants, &debug_errors, KANTSAnt::Ant4),
         };
 
-        let debug_errors = debug_errors
+        let debug_errors = Arc::try_unwrap(debug_errors)
+            .map_err(|_| AntsError::GenericError)?
             .into_inner()
             .map_err(|_| AntsError::GenericError)?;
 
@@ -361,7 +347,7 @@ impl Subsystem {
     }
 
     pub fn noop(&self) -> AntSResult<NoopResponse> {
-        let result = run!(self.ants.watchdog_kick(), self.errors);
+        let result = run!(self.ants.lock().unwrap().watchdog_kick(), self.errors);
 
         Ok(NoopResponse {
             success: result.is_ok(),
@@ -384,7 +370,10 @@ impl Subsystem {
         let mut rx: Vec<u8> = vec![0; rx_len as usize];
 
         let result = run!(
-            self.ants.passthrough(tx.as_slice(), rx.as_mut_slice()),
+            self.ants
+                .lock()
+                .unwrap()
+                .passthrough(tx.as_slice(), rx.as_mut_slice()),
             self.errors
         );
 

@@ -158,7 +158,7 @@ fn deploy_status_deployed_2_antennas() {
     let service = Service::new(
         Config::new_from_str("isis-ants-service", &config).unwrap(),
         Subsystem {
-            ants: Box::new(mock),
+            ants: Arc::new(Mutex::new(Box::new(mock))),
             controller: Arc::new(RwLock::new(ConfigureController::Primary)),
             errors: Arc::new(RwLock::new(vec![])),
             last_cmd: Arc::new(RwLock::new(AckCommand::None)),
@@ -233,7 +233,7 @@ fn deploy_status_stowed_2_antennas() {
     let service = Service::new(
         Config::new_from_str("isis-ants-service", &config).unwrap(),
         Subsystem {
-            ants: Box::new(mock),
+            ants: Arc::new(Mutex::new(Box::new(mock))),
             controller: Arc::new(RwLock::new(ConfigureController::Primary)),
             errors: Arc::new(RwLock::new(vec![])),
             last_cmd: Arc::new(RwLock::new(AckCommand::None)),

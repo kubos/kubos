@@ -35,7 +35,7 @@ pub enum AntsError {
 pub type AntSResult<T> = Result<T, AntsError>;
 
 /// Trait used to represent the AntS object. Allows for mock objects to be created for unit tests
-pub trait IAntS: IAntSClone + Sync + Send {
+pub trait IAntS: Send {
     /// Construct a new AntS instance
     fn new(bus: &str, primary: u8, secondary: u8, ant_count: u8, timeout: u32) -> AntSResult<Self>
     where
@@ -74,29 +74,7 @@ pub trait IAntS: IAntSClone + Sync + Send {
     fn passthrough(&self, tx: &[u8], rx_in: &mut [u8]) -> AntSResult<()>;
 }
 
-/// Helper trait to allow us to clone our subsystem object
-pub trait IAntSClone {
-    /// Helper function to allow us to clone our subsystem object
-    fn box_clone(&self) -> Box<IAntS>;
-}
-
-impl<T> IAntSClone for T
-where
-    T: 'static + IAntS + Clone,
-{
-    fn box_clone(&self) -> Box<IAntS> {
-        Box::new(self.clone())
-    }
-}
-
-impl Clone for Box<IAntS> {
-    fn clone(&self) -> Box<IAntS> {
-        self.box_clone()
-    }
-}
-
 /// Structure for interacting with an ISIS Antenna System
-#[derive(Clone)]
 pub struct AntS;
 
 impl IAntS for AntS {

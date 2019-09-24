@@ -147,14 +147,14 @@ fn integration_test_bad() {
 
     let expected = json!({
         "testHardware": {
-            "errors": "Nominal: Generic error; Debug: get_activation_count (services/isis-ants-service/src/model.rs:306): Generic error, \
-                get_activation_time (services/isis-ants-service/src/model.rs:308): Generic error, \
-                get_activation_count (services/isis-ants-service/src/model.rs:312): Generic error, \
-                get_activation_time (services/isis-ants-service/src/model.rs:314): Generic error, \
-                get_activation_count (services/isis-ants-service/src/model.rs:318): Generic error, \
-                get_activation_time (services/isis-ants-service/src/model.rs:320): Generic error, \
-                get_activation_count (services/isis-ants-service/src/model.rs:324): Generic error, \
-                get_activation_time (services/isis-ants-service/src/model.rs:326): Generic error",
+            "errors": "Nominal: Generic error; Debug: get_activation_count (services/isis-ants-service/src/objects.rs:429): Generic error, \
+                get_activation_time (services/isis-ants-service/src/objects.rs:430): Generic error, \
+                get_activation_count (services/isis-ants-service/src/objects.rs:429): Generic error, \
+                get_activation_time (services/isis-ants-service/src/objects.rs:430): Generic error, \
+                get_activation_count (services/isis-ants-service/src/objects.rs:429): Generic error, \
+                get_activation_time (services/isis-ants-service/src/objects.rs:430): Generic error, \
+                get_activation_count (services/isis-ants-service/src/objects.rs:429): Generic error, \
+                get_activation_time (services/isis-ants-service/src/objects.rs:430): Generic error",
             "success": false,
             "telemetryDebug": {
                  "ant1ActivationCount": 0,

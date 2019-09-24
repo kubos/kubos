@@ -20,13 +20,14 @@ use crate::schema::*;
 use isis_ants_api::*;
 use kubos_service::{Config, Service};
 use serde_json::json;
-use std::sync::{Arc, RwLock};
+use std::cell::Cell;
+use std::sync::{Arc, Mutex, RwLock};
 
 /// Structure for interacting with an ISIS Antenna System
-#[derive(Clone)]
 pub struct MockAntS {
     pub state: bool,
     pub deploy_status: DeployStatus,
+    pub watchdog_thread: Cell<bool>,
 }
 
 impl IAntS for MockAntS {
@@ -40,6 +41,7 @@ impl IAntS for MockAntS {
         Ok(MockAntS {
             state: true,
             deploy_status: DeployStatus::default(),
+            watchdog_thread: Cell::new(true),
         })
     }
 
@@ -176,6 +178,12 @@ impl IAntS for MockAntS {
 
     fn watchdog_stop(&self) -> AntSResult<()> {
         if self.state == true {
+            assert_eq!(
+                self.watchdog_thread.get(),
+                true,
+                "Trying to re-stop watchdog thread"
+            );
+            self.watchdog_thread.set(false);
             Ok(())
         } else {
             Err(AntsError::ConfigError)
@@ -191,6 +199,13 @@ impl IAntS for MockAntS {
         } else {
             Err(AntsError::ConfigError)
         }
+    }
+}
+
+impl Drop for MockAntS {
+    fn drop(&mut self) {
+        eprintln!("Dropping AntS");
+        let _ = self.watchdog_stop();
     }
 }
 
@@ -236,7 +251,7 @@ macro_rules! service_new {
         Service::new(
             Config::new_from_str("isis-ants-service", &config).unwrap(),
             Subsystem {
-                ants: Box::new($mock),
+                ants: Arc::new(Mutex::new(Box::new($mock))),
                 count: 4,
                 controller: Arc::new(RwLock::new(ConfigureController::Primary)),
                 errors: Arc::new(RwLock::new(vec![])),
@@ -266,5 +281,6 @@ fn ping() {
             "ping": "pong"
     });
 
+    test!(service, query, expected);
     test!(service, query, expected);
 }

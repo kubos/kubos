@@ -1009,10 +1009,9 @@ name = "isis-ants"
 version = "0.1.0"
 dependencies = [
  "isis-ants-api 0.1.0",
- "slog 2.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "slog-async 2.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "slog-stream 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "slog-term 2.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "log 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "log4rs 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "log4rs-syslog 3.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
