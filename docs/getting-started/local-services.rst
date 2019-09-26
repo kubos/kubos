@@ -15,7 +15,7 @@ Configuring Services
 
 The KubOS core services all rely on a central file for run-time configuration information.
 In a standard Kubos Linux system, that file will be located at
-``/home/system/etc/config.toml``. As a result, this is the default location
+``/etc/kubos-config.toml``. As a result, this is the default location
 where services will check. When running locally, it is unlikely that file location
 will exist, so we will need to create a custom config file and then
 manually pass it to the service.

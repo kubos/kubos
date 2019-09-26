@@ -4,7 +4,7 @@ Kubos Service for interacting with an [Adcole Maryland Aerospace MAI-400](https:
 
 # Configuration
 
-The service can be configured in the `/home/system/etc/config.toml` with the following fields:
+The service can be configured in the `/etc/kubos-config.toml` with the following fields:
 
 ```toml
 [mai400-service.addr]
@@ -24,7 +24,7 @@ Kubos MAI-400 service started
 Listening on: 10.63.1.20:8082
 ```
 
-If no config file is specified, then the service will look at `/home/system/etc/config.toml`.
+If no config file is specified, then the service will look at `/etc/kubos-config.toml`.
 An alternative config file may be specified on the command line at run time:
 
 ```bash

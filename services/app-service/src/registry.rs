@@ -35,7 +35,7 @@ use toml;
 
 /// The default application registry directory in KubOS
 pub static K_APPS_DIR: &str = "/home/system/kubos/apps";
-pub static DEFAULT_CONFIG: &str = "/home/system/etc/config.toml";
+pub static DEFAULT_CONFIG: &str = "/etc/kubos-config.toml";
 
 /// AppRegistry
 #[derive(Clone, Debug)]

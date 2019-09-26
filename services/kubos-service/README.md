@@ -28,7 +28,7 @@ hardware device they want to expose over the service interface (currently GraphQ
 
 Services which use this crate have the option of using a local configuration file
 or falling back on default config values. The service will search for the configuration
-file at this location `/home/system/etc/config.toml` unless otherwise specified with
+file at this location `/etc/kubos-config.toml` unless otherwise specified with
 the `-c` flag at run time.
 
 The service configuration file uses the Toml format and is expected to use the
@@ -85,7 +85,7 @@ Service::new(
 ).start();
 ```
 
-# Running a service with the default config file (`/home/system/etc/config.toml`).
+# Running a service with the default config file (`/etc/kubos-config.toml`).
 
 ```bash
 $ ./example-service

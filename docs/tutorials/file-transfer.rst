@@ -73,7 +73,7 @@ on. By default, this is port 8008.
 
 We will also need to specify the port that the file transfer service will be sending data
 back on. There is no default value, so in this tutorial we will use port 8028. You will need
-to modify the file ``/home/system/etc/config.toml`` on-board the OBC and add the 
+to modify the file ``/etc/kubos-config.toml`` on-board the OBC and add the 
 following line under the ``[file-transfer-service]`` section::
 
     downlink_port = 8028

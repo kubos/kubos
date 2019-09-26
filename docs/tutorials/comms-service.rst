@@ -821,7 +821,7 @@ check the following:
     - OBC's UART port is correctly wired to the user's PC
     - Destination IP given to the client matches the ``ip`` parameter in the service
     - Port given to the client matches the port of the telemetry service (this is defined in
-      the systems ``config.toml`` file. The default location is ``/home/system/etc/config.toml``)
+      the systems ``config.toml`` file. The default location is ``/etc/kubos-config.toml``)
 
 GraphQL
 -------

@@ -13,7 +13,7 @@ Currently only implements integration testing for hardware services.
 import app_api
 import socket
 
-DEFAULT_CONFIG_PATH = "/home/system/etc/config.toml"
+DEFAULT_CONFIG_PATH = "/etc/kubos-config.toml"
 SERVICE_MUTATION = (
     'mutation {test(test:NOOP){success,errors,results}}')
 QUERY_TIMEOUT = 1.0  # Seconds

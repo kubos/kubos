@@ -4,7 +4,7 @@ Service for interacting with a [Clyde Space STARBUCK-NANO](https://www.aac-clyde
 
 # Configuration
 
-The service can be configured in the `/home/system/etc/config.toml` with the following fields:
+The service can be configured in the `/etc/kubos-config.toml` with the following fields:
 
 ```toml
 [clyde-3g-eps-service]
@@ -28,7 +28,7 @@ $ clyde-3g-eps-service
 Listening on: 127.0.0.1:8089
 ```
 
-If no config file is specified, then the service will look at `/home/system/etc/config.toml`.
+If no config file is specified, then the service will look at `/etc/kubos-config.toml`.
 An alternative config file may be specified on the command line at run time:
 
 ```bash

@@ -71,7 +71,7 @@ match the name of the file to be called.
 
 The ``config`` key value allows you to specify a custom file which the application should use in
 order to read :doc:`service configuration <../services/service-config>` information.
-If it is omitted, the default location ``/home/system/etc/config.toml`` will be used.
+If it is omitted, the default location ``/etc/kubos-config.toml`` will be used.
 
 For example::
 

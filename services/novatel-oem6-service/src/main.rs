@@ -21,7 +21,7 @@
 //!
 //! # Configuration
 //!
-//! The service can be configured in the `/home/system/etc/config.toml` with the following fields:
+//! The service can be configured in the `/etc/kubos-config.toml` with the following fields:
 //!
 //! - `bus` - Specifies the UART bus the OEM6 is connected to
 //! - `ip` - Specifies the service's IP address

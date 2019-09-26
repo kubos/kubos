@@ -48,7 +48,7 @@ pub const DOWNLINK_PORT: u16 = 14011;
 // General options:
 
 // Location of the systems configuration file
-pub const CONFIG_PATH: &str = "/home/system/etc/config.toml";
+pub const CONFIG_PATH: &str = "/etc/kubos-config.toml";
 
 // Maximum telemetry entry age. Default: 1 week (60*60*24*7)
 pub const TELEMETRY_AGE: f64 = 604_800.0;

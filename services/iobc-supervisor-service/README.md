@@ -4,7 +4,7 @@ Kubos Service for interacting with the ISIS-OBC Supervisor
 
 # Configuration
 
-The service must be configured in `/home/system/etc/config.toml` with the following fields:
+The service must be configured in `/etc/kubos-config.toml` with the following fields:
 
 - `[iobc-supervisor-service.addr]`
 
@@ -29,7 +29,7 @@ Kubos antenna systems service started
 Listening on: 0.0.0.0:8006
 ```
 
-If no config file is specified, then the service will look at `/home/system/etc/config.toml`.
+If no config file is specified, then the service will look at `/etc/kubos-config.toml`.
 An alternative config file may be specified on the command line at run time:
 
 ```bash

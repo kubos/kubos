@@ -4,7 +4,7 @@ Configuring Services in KubOS
 All Kubos services rely on a configuration file to determine certain runtime settings,
 referred to as the ``config.toml`` file.
 
-By default, this file lives in ``/home/system/etc/config.toml``.
+By default, this file lives in ``/etc/kubos-config.toml``.
 
 Discovering Config Options
 --------------------------
@@ -145,7 +145,7 @@ Using Custom Config Files
 -------------------------
 
 By default, all services will attempt to read their configuration options from
-``/home/system/etc/config.toml``.
+``/etc/kubos-config.toml``.
 
 A custom file location may be provided by specifying the path in the ``-c`` option when starting
 the service.

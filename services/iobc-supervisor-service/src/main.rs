@@ -18,7 +18,7 @@
 //!
 //! # Configuration
 //!
-//! The service must be configured in `/home/system/etc/config.toml` with the following fields:
+//! The service must be configured in `/etc/kubos-config.toml` with the following fields:
 //!
 //! - `[iobc-supervisor-service.addr]`
 //!
