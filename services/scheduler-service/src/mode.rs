@@ -86,6 +86,14 @@ pub fn get_active_mode(scheduler_dir: &str) -> Result<ScheduleMode, String> {
     Ok(active_mode)
 }
 
+pub fn is_mode_active(scheduler_dir: &str, name: &str) -> bool {
+    if let Ok(active_mode) = get_active_mode(scheduler_dir) {
+        name == active_mode.name
+    } else {
+        false
+    }
+}
+
 pub fn get_available_modes(
     scheduler_dir: &str,
     name: Option<String>,

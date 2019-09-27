@@ -170,7 +170,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //    }
     // }
     field import_config(&executor, path: String, name: String, mode: String) -> FieldResult<GenericResponse> {
-        Ok(match import_config(&executor.context().subsystem().scheduler_dir, &path, &name, &mode) {
+        Ok(match import_config(&executor.context().subsystem().scheduler_dir, &path, &name, &mode).and_then(|_| executor.context().subsystem().check_start_config_tasks(&name, &mode)) {
             Ok(_) => GenericResponse { success: true, errors: "".to_owned() },
             Err(error) => GenericResponse { success: false, errors: error.to_string() }
         })
@@ -185,7 +185,8 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //    }
     // }
     field remove_config(&executor, name: String, mode: String) -> FieldResult<GenericResponse> {
-        Ok(match remove_config(&executor.context().subsystem().scheduler_dir, &name, &mode) {
+        Ok(match remove_config(&executor.context().subsystem().scheduler_dir, &name, &mode)
+        .and_then(|_| executor.context().subsystem().check_stop_config_tasks(&name, &mode)) {
             Ok(_) => {
                 GenericResponse { success: true, errors: "".to_owned() }
             },

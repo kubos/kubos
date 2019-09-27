@@ -395,3 +395,75 @@ fn run_init_two_modes_check_stop() {
     // Check if the task ran
     assert_eq!(listener.get_request(), None)
 }
+
+#[test]
+fn run_init_after_import() {
+    let listener = ServiceListener::spawn("127.0.0.1", 9030);
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8030);
+    fixture.create_mode("init");
+
+    // Register first schedule with an init task
+    let schedule = json!({
+        "tasks": [
+            {
+                "name": "basic-task",
+                "delay": "0s",
+                "app": {
+                    "name": "first-app"
+                }
+            }
+        ]
+    });
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+
+    // Activate mode
+    fixture.activate_mode("init");
+    thread::sleep(Duration::from_millis(100));
+
+    // Mode is empty, so no task should have run
+    assert_eq!(listener.get_request(), None);
+
+    // Import config then confirm task is run afterwards
+    fixture.import_config("first", &schedule_path, "init");
+    thread::sleep(Duration::from_millis(100));
+
+    // Check if the task ran
+    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"first-app\") { success, errors } }"}"#;
+    assert_eq!(listener.get_request(), Some(query.to_owned()));
+}
+
+#[test]
+fn run_init_check_remove() {
+    let listener = ServiceListener::spawn("127.0.0.1", 9031);
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8031);
+    fixture.create_mode("init");
+
+    // Register config with a delayed task
+    let schedule = json!({
+        "tasks": [
+            {
+                "name": "basic-task",
+                "delay": "1s",
+                "app": {
+                    "name": "delay-app"
+                }
+            }
+        ]
+    });
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+    fixture.import_config("first", &schedule_path, "init");
+
+    // Activate mode
+    fixture.activate_mode("init");
+    thread::sleep(Duration::from_millis(100));
+
+    // Task is delayed so it shouldn't have run
+    assert_eq!(listener.get_request(), None);
+
+    // Remove the config
+    fixture.remove_config("first", "init");
+    thread::sleep(Duration::from_millis(1100));
+
+    // Verify task did not run
+    assert_eq!(listener.get_request(), None);
+}

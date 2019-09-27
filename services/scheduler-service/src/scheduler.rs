@@ -18,34 +18,41 @@
 //! Structures and functions concerning the actual running of a schedule
 //!
 
-use crate::config::get_mode_configs;
-use crate::mode::get_active_mode;
-use kubos_service::Config;
+use crate::config::{get_mode_configs, ScheduleConfig};
+use crate::mode::{get_active_mode, is_mode_active};
 use log::{error, info};
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
-use std::sync::mpsc::{channel, Sender};
+use std::sync::mpsc::Sender;
 use std::sync::{Arc, Mutex};
 use std::thread;
-use tokio::prelude::future::lazy;
-use tokio::prelude::*;
-use tokio::runtime::Runtime;
 
 pub static DEFAULT_SCHEDULES_DIR: &str = "/home/system/etc/schedules";
+
+// Handle to primitives controlling scheduler runtime context
+#[derive(Clone)]
+pub struct SchedulerHandle {
+    // Handle to thread running scheduler runtime
+    pub thread_handle: Arc<Mutex<thread::JoinHandle<()>>>,
+    // Sender for stopping scheduler runtime/thread
+    pub stopper: Sender<()>,
+}
 
 #[derive(Clone)]
 pub struct Scheduler {
     // Path to directory where schedules are stored
     pub scheduler_dir: String,
-    // Handle to thread running scheduler runtime
-    scheduler_thread: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
-    // Channel sender for stopping scheduler
-    scheduler_stopper: Arc<Mutex<Option<Sender<()>>>>,
+    // URL of App Service - for start app queries
+    app_service_url: String,
+    // Map of active config names and scheduler handles. This allows us to
+    // start/stop tasks associated with individual config files
+    scheduler_map: Arc<Mutex<HashMap<String, SchedulerHandle>>>,
 }
 
 impl Scheduler {
     // Create new Scheduler
-    pub fn new(sched_dir: &str) -> Scheduler {
+    pub fn new(sched_dir: &str, app_service_url: &str) -> Scheduler {
         if !Path::new(&sched_dir).is_dir() {
             if let Err(e) = fs::create_dir(&sched_dir) {
                 error!("Failed to create schedule dir: {}", e);
@@ -55,70 +62,76 @@ impl Scheduler {
 
         Scheduler {
             scheduler_dir: sched_dir.to_owned(),
-            scheduler_thread: Arc::new(Mutex::new(None)),
-            scheduler_stopper: Arc::new(Mutex::new(None)),
+            scheduler_map: Arc::new(Mutex::new(HashMap::<String, SchedulerHandle>::new())),
+            app_service_url: app_service_url.to_owned(),
         }
     }
 
-    // Iterate through the active schedule file and kick off scheduling tasks
-    pub fn start(&self) -> Result<(), String> {
-        let apps_service_config = Config::new("app-service")
-            .map_err(|err| format!("Failed to load app service config: {:?}", err))?;
+    // Checks if config is in active mode and schedules tasks if needed
+    pub fn check_start_config_tasks(&self, name: &str, mode: &str) -> Result<(), String> {
+        if is_mode_active(&self.scheduler_dir, &mode) {
+            let config_path = format!("{}/{}/{}.json", self.scheduler_dir, mode, name);
+            let config_path = Path::new(&config_path);
+            let config = ScheduleConfig::from_path(&config_path)?;
 
-        let apps_service_url = apps_service_config
-            .hosturl()
-            .ok_or_else(|| "Failed to fetch app service url".to_owned())?;
+            Ok(self.start_config_tasks(config)?)
+        } else {
+            Ok(())
+        }
+    }
 
-        let active_mode = get_active_mode(&self.scheduler_dir)?;
+    // Schedules tasks associated with config
+    fn start_config_tasks(&self, config: ScheduleConfig) -> Result<(), String> {
+        let mut schedules_map = self.scheduler_map.lock().unwrap();
 
-        let (tx, rx) = channel::<()>();
-        let handle = thread::spawn(move || {
-            let mut runner = Runtime::new().unwrap_or_else(|e| {
-                error!("Failed to create timer runtime: {}", e);
-                panic!("Failed to create timer runtime: {}", e);
-            });
+        let scheduler_handle = config.schedule_tasks(&self.app_service_url)?;
 
-            for sched in get_mode_configs(&active_mode.path).unwrap() {
-                let task_app_url = apps_service_url.clone();
-                runner.spawn(lazy(move || {
-                    for task in sched.tasks {
-                        info!("Scheduling init task: {}", &task.name);
-                        // tokio::spawn(schedule_task(&task, task_app_url.clone()));
-                        tokio::spawn(task.schedule(task_app_url.clone()));
-                    }
-                    Ok(())
-                }));
-            }
-
-            // Wait on the stop message before ending the runtime
-            rx.recv().unwrap_or_else(|e| {
-                error!("Failed to received thread stop: {:?}", e);
-                panic!("Failed to received thread stop: {:?}", e);
-            });
-            runner.shutdown_now().wait().unwrap_or_else(|e| {
-                error!("Failed to wait on runtime shutdown: {:?}", e);
-                panic!("Failed to wait on runtime shutdown: {:?}", e);
-            })
-        });
-
-        let mut my_handle = self.scheduler_thread.lock().unwrap();
-        *my_handle = Some(handle);
-
-        let mut my_stopper = self.scheduler_stopper.lock().unwrap();
-        *my_stopper = Some(tx);
+        schedules_map.insert(config.name, scheduler_handle);
 
         Ok(())
     }
 
-    // Send signal to scheduler runtime to stop
-    pub fn stop(&self) -> Result<(), String> {
-        let stopper_guard = self.scheduler_stopper.lock().unwrap();
-        if let Some(stopper) = stopper_guard.as_ref() {
-            stopper
-                .send(())
-                .map_err(|e| format!("Failed to send stop to scheduler: {}", e))?;
+    // Iterate through the active schedule file and kick off scheduling tasks
+    pub fn start(&self) -> Result<(), String> {
+        let active_mode = get_active_mode(&self.scheduler_dir)?;
+
+        for config in get_mode_configs(&active_mode.path)? {
+            self.start_config_tasks(config)?;
         }
 
+        Ok(())
+    }
+
+    // Stops all running tasks and clears of list of scheduler handles
+    pub fn stop(&self) -> Result<(), String> {
+        let mut schedules_map = self.scheduler_map.lock().unwrap();
+        for (name, handle) in schedules_map.drain().take(1) {
+            info!("Stopping {}'s tasks", name);
+            if let Err(e) = handle.stopper.send(()) {
+                error!("Failed to send stop to {}'s tasks: {}", name, e);
+            }
+        }
+        Ok(())
+    }
+
+    // Checks if a config exists in an active mode and stops scheduler if needed
+    pub fn check_stop_config_tasks(&self, name: &str, mode: &str) -> Result<(), String> {
+        if is_mode_active(&self.scheduler_dir, mode) {
+            Ok(self.stop_config_tasks(name)?)
+        } else {
+            Ok(())
+        }
+    }
+
+    // Attempts to stop scheduler associated with config
+    fn stop_config_tasks(&self, name: &str) -> Result<(), String> {
+        let mut schedules_map = self.scheduler_map.lock().unwrap();
+        if let Some(handle) = schedules_map.remove(name) {
+            info!("Stopping {}'s tasks", name);
+            if let Err(e) = handle.stopper.send(()) {
+                error!("Failed to send stop to {}'s tasks: {}", name, e);
+            }
+        }
         Ok(())
     }
 }
