@@ -38,6 +38,41 @@ For example::
     
 This tells the MAI-400 service that the device is connected to the UART bus ``ttyS5``
 
+Using Custom Config Files
+-------------------------
+
+By default, all services will attempt to read their configuration options from
+``/etc/kubos-config.toml``.
+This file is auto-generated when the KubOS image is built and lives in the root file system so that
+it can be restored during the :doc:`OS recovery process <../linux-docs/kubos-linux-recovery>`.
+
+.. warning::
+
+    Any ad-hoc config changes made to the ``/etc/kubos-config.toml`` file will be lost if the OS is
+    upgraded or restored.
+
+As a result, if you would like to add or change any configuration options outside of the
+:doc:`KubOS build process <../../deep-dive/klb/configuring-kubos>`, you should create a custom
+config file within the user data partition.
+
+This custom file location may be provided by specifying the path in the ``-c`` option when starting
+a service.
+
+For example::
+
+    $ /usr/sbin/kubos-monitor-service -c /home/kubos/my-config.toml
+    
+.. note::
+
+    When starting a Rust-based service from within the Kubos SDK, the config file should be passed
+    like so::
+    
+        $ cargo run -- -c /home/kubos/my-config.toml
+        
+    The ``--`` characters make sure that the following parameters are passed to the underlying
+    program, rather than to ``cargo``.
+    
+    
 Creating Custom Config Options
 ------------------------------
 
@@ -140,26 +175,4 @@ Rust
         data: vec![],
     };
     i2c.write(command);
-
-Using Custom Config Files
--------------------------
-
-By default, all services will attempt to read their configuration options from
-``/etc/kubos-config.toml``.
-
-A custom file location may be provided by specifying the path in the ``-c`` option when starting
-the service.
-
-For example::
-
-    $ /usr/sbin/kubos-monitor-service -c /home/kubos/my-config.toml
     
-.. note::
-
-    When starting a Rust-based service from within the Kubos SDK, the config file should be passed
-    like so::
-    
-        $ cargo run -- -c /home/kubos/my-config.toml
-        
-    The ``--`` characters make sure that the following parameters are passed to the underlying
-    program, rather than to ``cargo``.
