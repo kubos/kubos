@@ -19,7 +19,9 @@
 //!
 
 use crate::config::{get_mode_configs, ScheduleConfig};
-use crate::mode::{get_active_mode, is_mode_active};
+use crate::mode::{
+    activate_mode, create_mode, get_active_mode, get_available_modes, is_mode_active,
+};
 use log::{error, info};
 use std::collections::HashMap;
 use std::fs;
@@ -29,6 +31,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 
 pub static DEFAULT_SCHEDULES_DIR: &str = "/home/system/etc/schedules";
+pub static SAFE_MODE: &str = "SAFE";
 
 // Handle to primitives controlling scheduler runtime context
 #[derive(Clone)]
@@ -53,18 +56,28 @@ pub struct Scheduler {
 impl Scheduler {
     // Create new Scheduler
     pub fn new(sched_dir: &str, app_service_url: &str) -> Scheduler {
-        if !Path::new(&sched_dir).is_dir() {
-            if let Err(e) = fs::create_dir(&sched_dir) {
-                error!("Failed to create schedule dir: {}", e);
-                panic!("Failed to create schedule dir: {}", e)
-            }
-        }
-
         Scheduler {
             scheduler_dir: sched_dir.to_owned(),
             scheduler_map: Arc::new(Mutex::new(HashMap::<String, SchedulerHandle>::new())),
             app_service_url: app_service_url.to_owned(),
         }
+    }
+
+    // Ensure that conditions are good for starting the scheduler
+    pub fn init(&self) -> Result<(), String> {
+        if !Path::new(&self.scheduler_dir).is_dir() {
+            if let Err(e) = fs::create_dir(&self.scheduler_dir) {
+                return Err(format!("Failed to create schedules dir: {}", e));
+            }
+        }
+
+        if get_active_mode(&self.scheduler_dir)?.is_none() {
+            if get_available_modes(&self.scheduler_dir, Some(SAFE_MODE.to_owned()))?.is_empty() {
+                create_mode(&self.scheduler_dir, SAFE_MODE)?;
+            }
+            activate_mode(&self.scheduler_dir, SAFE_MODE)?;
+        }
+        Ok(())
     }
 
     // Checks if config is in active mode and schedules tasks if needed
@@ -93,13 +106,14 @@ impl Scheduler {
 
     // Iterate through the active schedule file and kick off scheduling tasks
     pub fn start(&self) -> Result<(), String> {
-        let active_mode = get_active_mode(&self.scheduler_dir)?;
-
-        for config in get_mode_configs(&active_mode.path)? {
-            self.start_config_tasks(config)?;
+        if let Some(active_mode) = get_active_mode(&self.scheduler_dir)? {
+            for config in get_mode_configs(&active_mode.path)? {
+                self.start_config_tasks(config)?;
+            }
+            Ok(())
+        } else {
+            panic!("Failed to find active mode");
         }
-
-        Ok(())
     }
 
     // Stops all running tasks and clears of list of scheduler handles

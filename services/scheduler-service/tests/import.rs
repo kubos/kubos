@@ -48,6 +48,11 @@ fn import_new_schedule() {
             "data": {
                 "availableModes": [
                     {
+                        "name": "SAFE",
+                        "active": true,
+                        "schedules": [ ]
+                    },
+                    {
                         "name": "operational",
                         "active": false,
                         "schedules": [
@@ -60,11 +65,6 @@ fn import_new_schedule() {
             }
         })
     );
-}
-
-#[test]
-fn import_broken_schedule() {
-    // assert_eq!(1, 0);
 }
 
 #[test]
@@ -85,7 +85,9 @@ fn import_new_schedule_nonexistant_file() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
+        fixture.query(
+            r#"{ availableModes(name: "operational") { name, active, schedules { name } } }"#
+        ),
         json!({
             "data": {
                 "availableModes": [
@@ -141,7 +143,9 @@ fn import_duplicate_schedule() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
+        fixture.query(
+            r#"{ availableModes(name: "operational") { name, active, schedules { name } } }"#
+        ),
         json!({
             "data": {
                 "availableModes": [
@@ -172,7 +176,9 @@ fn import_duplicate_schedule() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
+        fixture.query(
+            r#"{ availableModes(name: "operational") { name, active, schedules { name } } }"#
+        ),
         json!({
             "data": {
                 "availableModes": [
@@ -225,7 +231,7 @@ fn import_two_schedules() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
+        fixture.query(r#"{ availableModes(name: "flight") { name, active, schedules { name } } }"#),
         json!({
             "data": {
                 "availableModes": [
@@ -262,7 +268,7 @@ fn import_two_schedules_check_revised() {
 
     assert_eq!(
         fixture.query(
-            r#"{ availableModes { name, active, lastRevised, schedules { name, timeImported } } }"#
+            r#"{ availableModes(name: "flight") { name, active, lastRevised, schedules { name, timeImported } } }"#
         ),
         json!({
             "data": {
@@ -291,7 +297,7 @@ fn import_two_schedules_check_revised() {
 
     assert_eq!(
         fixture.query(
-            r#"{ availableModes { name, active, lastRevised, schedules { name, timeImported } } }"#
+            r#"{ availableModes(name: "flight") { name, active, lastRevised, schedules { name, timeImported } } }"#
         ),
         json!({
             "data": {
