@@ -31,6 +31,10 @@ fn remove_existing_mode() {
             "data": {
                 "availableModes": [
                     {
+                        "name": "SAFE",
+                        "active": true,
+                    },
+                    {
                         "name": "orbit",
                         "active": false
                     }
@@ -55,7 +59,12 @@ fn remove_existing_mode() {
         fixture.query(r#"{ availableModes { name, active } }"#),
         json!({
             "data": {
-                "availableModes": [ ]
+                "availableModes": [
+                    {
+                        "name": "SAFE",
+                        "active": true,
+                    }
+                 ]
             }
         })
     );
@@ -73,6 +82,10 @@ fn remove_active_mode() {
         json!({
             "data": {
                 "availableModes": [
+                    {
+                        "name": "SAFE",
+                        "active": false,
+                    },
                     {
                         "name": "orbit",
                         "active": true
@@ -99,6 +112,10 @@ fn remove_active_mode() {
         json!({
             "data": {
                 "availableModes": [
+                    {
+                        "name": "SAFE",
+                        "active": false,
+                    },
                     {
                         "name": "orbit",
                         "active": true
@@ -137,7 +154,9 @@ fn remove_existing_schedule() {
     fixture.import_config("first", &schedule_path, "operational");
 
     assert_eq!(
-        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
+        fixture.query(
+            r#"{ availableModes(name: "operational") { name, active, schedules { name } } }"#
+        ),
         json!({
             "data": {
                 "availableModes": [
@@ -168,7 +187,9 @@ fn remove_existing_schedule() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
+        fixture.query(
+            r#"{ availableModes(name: "operational") { name, active, schedules { name } } }"#
+        ),
         json!({
             "data": {
                 "availableModes": [
@@ -212,6 +233,23 @@ fn remove_config_nonexistant_mode() {
             "data" : {
                 "removeConfig": {
                     "errors": "Mode operational not found",
+                    "success": false
+                }
+            }
+        })
+    );
+}
+
+#[test]
+fn remove_safe_mode() {
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8026);
+
+    assert_eq!(
+        fixture.remove_mode("SAFE"),
+        json!({
+            "data" : {
+                "removeMode": {
+                    "errors": "Cannot remove SAFE mode",
                     "success": false
                 }
             }

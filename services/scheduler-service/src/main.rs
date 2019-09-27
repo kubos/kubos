@@ -16,8 +16,8 @@
 
 //! Service for scheduling tasks in the KubOS system.
 
-// #![deny(warnings)]
-// #![deny(missing_docs)]
+#![deny(warnings)]
+#![deny(missing_docs)]
 
 mod app;
 mod config;
@@ -98,6 +98,8 @@ fn main() -> Result<(), String> {
         .ok_or_else(|| "Failed to fetch app service url".to_owned())?;
 
     let scheduler = Scheduler::new(&scheduler_dir, &apps_service_url);
+
+    scheduler.init()?;
 
     info!("Starting scheduler-service - {:?}", scheduler_dir);
 

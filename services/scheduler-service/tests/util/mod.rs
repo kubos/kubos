@@ -115,19 +115,16 @@ impl SchedulerFixture {
         service_query(&mutation, &self.ip, self.port)
     }
 
-    pub fn import_config(&self, name: &str, path: &str, mode: &str) -> serde_json::Value {
-        let mutation = format!(
-            r#"mutation {{ importConfig(name: "{}", path: "{}", mode: "{}") {{ errors, success }} }}"#,
-            name, path, mode
-        );
+    pub fn activate_safe(&self) -> serde_json::Value {
+        let mutation = format!(r#"mutation {{ safeMode {{ errors, success }} }}"#,);
 
         service_query(&mutation, &self.ip, self.port)
     }
 
-    pub fn activate(&self, name: &str) -> serde_json::Value {
+    pub fn import_config(&self, name: &str, path: &str, mode: &str) -> serde_json::Value {
         let mutation = format!(
-            r#"mutation {{ activate(name: "{}") {{ errors, success }} }}"#,
-            name
+            r#"mutation {{ importConfig(name: "{}", path: "{}", mode: "{}") {{ errors, success }} }}"#,
+            name, path, mode
         );
 
         service_query(&mutation, &self.ip, self.port)

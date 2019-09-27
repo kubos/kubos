@@ -20,7 +20,7 @@
 
 use crate::config::{import_config, remove_config};
 use crate::mode::*;
-use crate::scheduler::Scheduler;
+use crate::scheduler::{Scheduler, SAFE_MODE};
 use juniper::FieldResult;
 use juniper::{graphql_object, GraphQLObject};
 use kubos_service;
@@ -61,7 +61,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //         active: Boolean
     //     }
     // }
-    field active_mode(&executor) -> FieldResult<ScheduleMode> as "Active Mode"
+    field active_mode(&executor) -> FieldResult<Option<ScheduleMode>> as "Active Mode"
     {
         Ok(get_active_mode(&executor.context().subsystem().scheduler_dir)?)
     }
@@ -132,6 +132,9 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //    }
     // }
     field activate_mode(&executor, name: String) -> FieldResult<GenericResponse> {
+        if name == SAFE_MODE {
+            return Ok(GenericResponse { success: false, errors: "Must use safeMode to activate SAFE".to_owned() });
+        }
         Ok(match activate_mode(&executor.context().subsystem().scheduler_dir, &name)
         .and_then(|_| executor.context().subsystem().stop())
         .and_then(|_| executor.context().subsystem().start()) {
@@ -151,7 +154,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //    }
     // }
     field safe_mode(&executor) -> FieldResult<GenericResponse> {
-        Ok(match activate_mode(&executor.context().subsystem().scheduler_dir, "safe")
+        Ok(match activate_mode(&executor.context().subsystem().scheduler_dir, SAFE_MODE)
         .and_then(|_| executor.context().subsystem().stop())
         .and_then(|_| executor.context().subsystem().start()) {
             Ok(_) => {

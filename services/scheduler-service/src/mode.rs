@@ -19,6 +19,7 @@
 //!
 
 use crate::config::{get_mode_configs, ScheduleConfig};
+use crate::scheduler::SAFE_MODE;
 use chrono::offset::TimeZone;
 use chrono::{DateTime, Utc};
 use juniper::GraphQLObject;
@@ -77,17 +78,22 @@ impl ScheduleMode {
 }
 
 // Retrieve information on the active scheduler mode
-pub fn get_active_mode(scheduler_dir: &str) -> Result<ScheduleMode, String> {
-    let active_path = fs::read_link(format!("{}/active", scheduler_dir))
-        .map_err(|e| format!("Failed to read active mode link: {}", e))?;
-
-    let mut active_mode = ScheduleMode::from_path(&active_path)?;
-    active_mode.active = true;
-    Ok(active_mode)
+pub fn get_active_mode(scheduler_dir: &str) -> Result<Option<ScheduleMode>, String> {
+    match fs::read_link(format!("{}/active", scheduler_dir)) {
+        Ok(active_path) => {
+            let mut active_mode = ScheduleMode::from_path(&active_path)?;
+            active_mode.active = true;
+            Ok(Some(active_mode))
+        }
+        Err(e) => {
+            warn!("Unable to read active mode link: {}", e);
+            Ok(None)
+        }
+    }
 }
 
 pub fn is_mode_active(scheduler_dir: &str, name: &str) -> bool {
-    if let Ok(active_mode) = get_active_mode(scheduler_dir) {
+    if let Ok(Some(active_mode)) = get_active_mode(scheduler_dir) {
         name == active_mode.name
     } else {
         false
@@ -148,7 +154,11 @@ pub fn create_mode(scheduler_dir: &str, name: &str) -> Result<(), String> {
 }
 
 pub fn remove_mode(scheduler_dir: &str, name: &str) -> Result<(), String> {
-    if let Ok(active_mode) = get_active_mode(&scheduler_dir) {
+    if name == SAFE_MODE {
+        return Err("Cannot remove SAFE mode".to_owned());
+    }
+
+    if let Ok(Some(active_mode)) = get_active_mode(&scheduler_dir) {
         if name == active_mode.name {
             return Err("Cannot remove active mode".to_owned());
         }
@@ -166,6 +176,8 @@ pub fn activate_mode(scheduler_dir: &str, name: &str) -> Result<(), String> {
     let new_active_path = format!("{}/new_active", scheduler_dir);
 
     if !Path::new(&sched_path).is_dir() {
+        warn!("Attempted to activate non-existant mode. Falling back to safe");
+        activate_mode(scheduler_dir, SAFE_MODE)?;
         return Err(format!("Mode {} not found", name));
     }
     symlink(sched_path, &new_active_path)

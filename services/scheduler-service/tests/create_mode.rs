@@ -41,6 +41,10 @@ fn create_new_mode() {
             "data": {
                 "availableModes": [
                     {
+                        "name": "SAFE",
+                        "active": true,
+                    },
+                    {
                         "name": "operational",
                         "active": false
                     }
@@ -112,6 +116,10 @@ fn create_two_modes() {
         json!({
             "data": {
                 "availableModes": [
+                    {
+                        "name": "SAFE",
+                        "active": true
+                    },
                     {
                         "name": "low_power",
                         "active": false

@@ -36,6 +36,24 @@ fn activate_existing_mode() {
     );
 
     assert_eq!(
+        fixture.query(r#"{ availableModes { name, active } }"#),
+        json!({
+            "data": {
+                "availableModes": [
+                    {
+                        "name": "SAFE",
+                        "active": true
+                    },
+                    {
+                        "name": "operational",
+                        "active": false
+                    }
+                ]
+            }
+        })
+    );
+
+    assert_eq!(
         fixture.activate_mode("operational"),
         json!({
             "data" : {
@@ -52,6 +70,10 @@ fn activate_existing_mode() {
         json!({
             "data": {
                 "availableModes": [
+                    {
+                        "name": "SAFE",
+                        "active": false
+                    },
                     {
                         "name": "operational",
                         "active": true
@@ -79,17 +101,14 @@ fn activate_non_existent_schedule() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ activeMode { name } }"#),
+        fixture.query(r#"{ activeMode { name, active } }"#),
         json!({
-            "data": serde_json::Value::Null,
-            "errors": [{
-                "locations": [{
-                    "column": 3,
-                    "line": 1
-                }],
-                "message": "Failed to read active mode link: No such file or directory (os error 2)",
-                "path": ["activeMode"]
-            }]
+            "data": {
+                "activeMode": {
+                    "name": "SAFE",
+                    "active": true
+                }
+            }
         })
     );
 }
@@ -118,6 +137,9 @@ fn activate_two_modes() {
         json!({
             "data": {
                 "availableModes": [{
+                    "name": "SAFE",
+                    "active": false
+                },{
                     "name": "first",
                     "active": true
                 }, {
@@ -145,12 +167,205 @@ fn activate_two_modes() {
         json!({
             "data": {
                 "availableModes": [{
+                    "name": "SAFE",
+                    "active": false
+                }, {
                     "name": "first",
                     "active": false
                 }, {
                     "name": "second",
                     "active": true
                 }]
+            }
+        })
+    );
+}
+
+#[test]
+fn switch_to_nonexistant_mode() {
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8023);
+
+    fixture.create_mode("operational");
+
+    assert_eq!(
+        fixture.query(r#"{ availableModes { name, active } }"#),
+        json!({
+            "data": {
+                "availableModes": [
+                    {
+                        "name": "SAFE",
+                        "active": true
+                    },
+                    {
+                        "name": "operational",
+                        "active": false
+                    }
+                ]
+            }
+        })
+    );
+
+    assert_eq!(
+        fixture.activate_mode("operational"),
+        json!({
+            "data" : {
+                "activateMode": {
+                    "errors": "",
+                    "success": true
+                }
+            }
+        })
+    );
+
+    assert_eq!(
+        fixture.query(r#"{ availableModes { name, active } }"#),
+        json!({
+            "data": {
+                "availableModes": [
+                    {
+                        "name": "SAFE",
+                        "active": false
+                    },
+                    {
+                        "name": "operational",
+                        "active": true
+                    }
+                ]
+            }
+        })
+    );
+
+    assert_eq!(
+        fixture.activate_mode("none"),
+        json!({
+            "data" : {
+                "activateMode": {
+                    "errors": "Mode none not found",
+                    "success": false
+                }
+            }
+        })
+    );
+
+    assert_eq!(
+        fixture.query(r#"{ availableModes { name, active } }"#),
+        json!({
+            "data": {
+                "availableModes": [
+                    {
+                        "name": "SAFE",
+                        "active": true
+                    },
+                    {
+                        "name": "operational",
+                        "active": false
+                    }
+                ]
+            }
+        })
+    );
+}
+
+#[test]
+fn switch_to_safe_mode() {
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8025);
+
+    fixture.create_mode("operational");
+
+    assert_eq!(
+        fixture.query(r#"{ availableModes { name, active } }"#),
+        json!({
+            "data": {
+                "availableModes": [
+                    {
+                        "name": "SAFE",
+                        "active": true
+                    },
+                    {
+                        "name": "operational",
+                        "active": false
+                    }
+                ]
+            }
+        })
+    );
+
+    fixture.activate_mode("operational");
+
+    assert_eq!(
+        fixture.query(r#"{ availableModes { name, active } }"#),
+        json!({
+            "data": {
+                "availableModes": [
+                    {
+                        "name": "SAFE",
+                        "active": false
+                    },
+                    {
+                        "name": "operational",
+                        "active": true
+                    }
+                ]
+            }
+        })
+    );
+
+    assert_eq!(
+        fixture.activate_mode("SAFE"),
+        json!({
+            "data" : {
+                "activateMode": {
+                    "errors": "Must use safeMode to activate SAFE",
+                    "success": false
+                }
+            }
+        })
+    );
+
+    assert_eq!(
+        fixture.query(r#"{ availableModes { name, active } }"#),
+        json!({
+            "data": {
+                "availableModes": [
+                    {
+                        "name": "SAFE",
+                        "active": false
+                    },
+                    {
+                        "name": "operational",
+                        "active": true
+                    }
+                ]
+            }
+        })
+    );
+
+    assert_eq!(
+        fixture.activate_safe(),
+        json!({
+            "data" : {
+                "safeMode": {
+                    "errors": "",
+                    "success": true
+                }
+            }
+        })
+    );
+
+    assert_eq!(
+        fixture.query(r#"{ availableModes { name, active } }"#),
+        json!({
+            "data": {
+                "availableModes": [
+                    {
+                        "name": "SAFE",
+                        "active": true
+                    },
+                    {
+                        "name": "operational",
+                        "active": false
+                    }
+                ]
             }
         })
     );
