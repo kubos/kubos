@@ -90,7 +90,14 @@ fn main() -> Result<(), String> {
         String::from(DEFAULT_SCHEDULES_DIR)
     };
 
-    let scheduler = Scheduler::new(&scheduler_dir);
+    let apps_service_config = Config::new("app-service")
+        .map_err(|err| format!("Failed to load app service config: {:?}", err))?;
+
+    let apps_service_url = apps_service_config
+        .hosturl()
+        .ok_or_else(|| "Failed to fetch app service url".to_owned())?;
+
+    let scheduler = Scheduler::new(&scheduler_dir, &apps_service_url);
 
     info!("Starting scheduler-service - {:?}", scheduler_dir);
 

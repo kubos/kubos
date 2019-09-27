@@ -31,7 +31,7 @@ use tokio::timer::Delay;
 use tokio::timer::Interval;
 
 // Configuration used to schedule app execution
-#[derive(Debug, GraphQLObject, Serialize, Deserialize)]
+#[derive(Clone, Debug, GraphQLObject, Serialize, Deserialize)]
 pub struct ScheduleTask {
     // Descriptive name of task
     pub name: String,

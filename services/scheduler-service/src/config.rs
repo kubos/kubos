@@ -18,13 +18,20 @@
 //! Definitions and functions concerning the manipulation of schedule configs
 //!
 
+use crate::scheduler::SchedulerHandle;
 use crate::task::ScheduleTask;
 use chrono::{DateTime, Utc};
 use juniper::GraphQLObject;
-use log::info;
+use log::{error, info};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::mpsc::channel;
+use std::sync::{Arc, Mutex};
+use std::thread;
+use tokio::prelude::future::lazy;
+use tokio::prelude::*;
+use tokio::runtime::Runtime;
 
 // Schedule config's contents
 #[derive(Debug, GraphQLObject, Serialize, Deserialize)]
@@ -79,6 +86,42 @@ impl ScheduleConfig {
             time_imported,
         })
     }
+
+    // Schedules tasks associated with this config
+    pub fn schedule_tasks(&self, app_service_url: &str) -> Result<SchedulerHandle, String> {
+        let (stopper, receiver) = channel::<()>();
+        let service_url = app_service_url.to_owned();
+        let tasks = self.tasks.to_vec();
+        let thread_handle = thread::spawn(move || {
+            let mut runner = Runtime::new().unwrap_or_else(|e| {
+                error!("Failed to create timer runtime: {}", e);
+                panic!("Failed to create timer runtime: {}", e);
+            });
+
+            runner.spawn(lazy(move || {
+                for task in tasks {
+                    info!("Scheduling init task: {}", &task.name);
+                    tokio::spawn(task.schedule(service_url.clone()));
+                }
+                Ok(())
+            }));
+
+            // Wait on the stop message before ending the runtime
+            receiver.recv().unwrap_or_else(|e| {
+                error!("Failed to received thread stop: {:?}", e);
+                panic!("Failed to received thread stop: {:?}", e);
+            });
+            runner.shutdown_now().wait().unwrap_or_else(|e| {
+                error!("Failed to wait on runtime shutdown: {:?}", e);
+                panic!("Failed to wait on runtime shutdown: {:?}", e);
+            })
+        });
+        let thread_handle = Arc::new(Mutex::new(thread_handle));
+        Ok(SchedulerHandle {
+            thread_handle,
+            stopper,
+        })
+    }
 }
 
 // Copy a new schedule config into a mode directory
@@ -94,6 +137,7 @@ pub fn import_config(
     );
     let schedule_dest = format!("{}/{}/{}.json", scheduler_dir, mode, name);
     fs::copy(path, schedule_dest).map_err(|e| format!("Schedule copy failed: {}", e))?;
+
     Ok(())
 }
 
