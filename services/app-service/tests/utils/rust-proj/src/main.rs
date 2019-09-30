@@ -21,6 +21,8 @@ use getopts::Options;
 use kubos_app::*;
 use std::thread;
 use std::time::Duration;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 fn main() -> Result<(), Error> {
     
@@ -61,6 +63,7 @@ fn main() -> Result<(), Error> {
     opts.optflag("f", "", "Test flag");
     opts.optopt("t", "test", "Test arg", "TEST");
     opts.optflag("l", "", "Long running test");
+    opts.optflag("s", "", "Signal test");
 
     let matches = match opts.parse(&args[1..]) {
         Ok(r) => r,
@@ -92,6 +95,22 @@ fn main() -> Result<(), Error> {
         // Future work: Add option to return a non-zero RC
         thread::sleep(Duration::from_secs(2));
         success = true;
+    }
+    
+    if matches.opt_present("s") {
+        let term = Arc::new(AtomicBool::new(false));
+        signal_hook::flag::register(signal_hook::SIGTERM, Arc::clone(&term))?;
+        while !term.load(Ordering::Relaxed) {
+            // Loop waiting for SIGTERM signal
+            thread::sleep(Duration::from_millis(500));
+        }
+        
+        eprintln!("Nice termination requested");
+        loop {
+            // Loop forever (until killed by SIGKILL signal, which is handled outside of the
+            // application)
+            thread::sleep(Duration::from_millis(500));
+        }
     }
 
     if success {
