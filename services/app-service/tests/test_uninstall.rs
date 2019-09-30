@@ -672,7 +672,7 @@ fn uninstall_kill() {
     let pid = Pid::from_raw(pid as i32);
     // App should capture initial nice signal (SIGTERM) and still be running
     assert!(signal::kill(pid, None).is_ok());
-    thread::sleep(Duration::from_secs(2));
+    thread::sleep(Duration::from_secs(3));
 
     fixture.teardown();
     // Now it should be dead

@@ -105,7 +105,6 @@ fn main() -> Result<(), Error> {
             thread::sleep(Duration::from_millis(500));
         }
         
-        eprintln!("Nice termination requested");
         loop {
             // Loop forever (until killed by SIGKILL signal, which is handled outside of the
             // application)
