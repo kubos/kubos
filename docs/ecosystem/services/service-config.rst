@@ -28,6 +28,12 @@ For example::
 
 This section defines the IP address and port to be used for receiving :doc:`graphql` requests over HTTP.
 
+In general, the ports being used follow the following convention:
+
+- Kubos core services use ports 8000-8079
+- Communications services use ports 8080-8099 for their downlink ports
+- Hardware services use ports 8100 and up
+
 Many hardware services will utilize a ``bus`` parameter which defines the particular peripheral bus
 that the subsystem is connected to.
 
