@@ -54,8 +54,8 @@
 //! ```
 //!
 
-//#![deny(missing_docs)]
-//#![deny(warnings)]
+#![deny(missing_docs)]
+#![deny(warnings)]
 
 #[cfg(test)]
 #[macro_use]

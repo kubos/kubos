@@ -406,22 +406,12 @@ impl AppRegistry {
         }
 
         // Kill any instances of this version of the app which are still running
-        if let Ok(Some(entry)) = find_running(&self.monitoring, app_name, "OnBoot") {
+        if let Ok(Some(entry)) = find_running(&self.monitoring, app_name) {
             if entry.version == version {
                 if let Some(pid) = entry.pid {
                     let pid = Pid::from_raw(pid);
                     if let Err(err) = signal::kill(pid, signal::Signal::SIGKILL) {
-                        errors.push(format!("Failed to kill {} OnBoot: {:?}", app_name, err));
-                    }
-                }
-            }
-        }
-        if let Ok(Some(entry)) = find_running(&self.monitoring, app_name, "OnCommand") {
-            if entry.version == version {
-                if let Some(pid) = entry.pid {
-                    let pid = Pid::from_raw(pid);
-                    if let Err(err) = signal::kill(pid, signal::Signal::SIGKILL) {
-                        errors.push(format!("Failed to kill {} OnBoot: {:?}", app_name, err));
+                        errors.push(format!("Failed to kill {}: {:?}", app_name, err));
                     }
                 }
             }
@@ -484,19 +474,11 @@ impl AppRegistry {
         }
 
         // Kill any instances of the app which are still running
-        if let Ok(Some(entry)) = find_running(&self.monitoring, app_name, "OnBoot") {
+        if let Ok(Some(entry)) = find_running(&self.monitoring, app_name) {
             if let Some(pid) = entry.pid {
                 let pid = Pid::from_raw(pid);
                 if let Err(err) = signal::kill(pid, signal::Signal::SIGKILL) {
-                    errors.push(format!("Failed to kill {} OnBoot: {:?}", app_name, err));
-                }
-            }
-        }
-        if let Ok(Some(entry)) = find_running(&self.monitoring, app_name, "OnCommand") {
-            if let Some(pid) = entry.pid {
-                let pid = Pid::from_raw(pid);
-                if let Err(err) = signal::kill(pid, signal::Signal::SIGKILL) {
-                    errors.push(format!("Failed to kill {} OnBoot: {:?}", app_name, err));
+                    errors.push(format!("Failed to kill {}: {:?}", app_name, err));
                 }
             }
         }
@@ -755,12 +737,8 @@ impl AppRegistry {
             }),
         }
     }
-    
-    pub fn kill_app(
-        &self,
-        name: &str,
-        signal: Option<i32>,
-    ) -> Result<(), AppError> {
+
+    pub fn kill_app(&self, name: &str, signal: Option<i32>) -> Result<(), AppError> {
         // Lookup the app in the monitoring registry to get the PID to kill
         let app = find_running(&self.monitoring, name)?.ok_or(AppError::KillError {
             err: "No matching monitoring entry found".to_owned(),

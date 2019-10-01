@@ -62,7 +62,6 @@ fn setup_app(registry_dir: &Path) {
     let toml = format!(
         r#"
             active_version = true
-            run_level = "onCommand"
 
             [app]
             executable = "{}/rust-proj/1.0/rust-proj"
@@ -514,13 +513,13 @@ fn uninstall_running() {
 
     setup_app(&fixture.registry_dir.path());
 
-    fixture.start_service(false);
+    fixture.start_service();
 
     // Run the app so that a monitoring entry will be created
     let result = send_query(
         config.clone(),
         r#"mutation {
-            startApp(name: "rust-proj", runLevel: "OnCommand", args: "-l") {
+            startApp(name: "rust-proj", args: "-l") {
                 pid
             }
         }"#,
@@ -574,13 +573,13 @@ fn uninstall_all_running() {
 
     setup_app(&fixture.registry_dir.path());
 
-    fixture.start_service(false);
+    fixture.start_service();
 
     // Run the app so that a monitoring entry will be created
     let result = send_query(
         config.clone(),
         r#"mutation {
-            startApp(name: "rust-proj", runLevel: "OnCommand", args: "-l") {
+            startApp(name: "rust-proj", args: "-l") {
                 pid
             }
         }"#,

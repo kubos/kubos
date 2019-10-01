@@ -16,12 +16,12 @@
 
 //! A simple API to make standalone Rust applications with high-level hooks
 //! for mission life-cycle management
-//#![deny(missing_docs)]
-//#![deny(warnings)]
+#![deny(missing_docs)]
+#![deny(warnings)]
 
 use failure::Error;
 
-/// Set up the logger for the program
+/// Helper macro to set up the logger for the program
 ///
 /// All log messages will be sent to rsyslog using the User facility.
 /// Additionally, they will also be echoed to ``stdout``
@@ -57,6 +57,15 @@ macro_rules! logging_setup {
     }};
 }
 
+/// Set up the logger for the program
+///
+/// All log messages will be sent to rsyslog using the User facility.
+/// Additionally, they will also be echoed to ``stdout``
+///
+/// # Arguments
+///
+/// * `name` - The application name which should be used for all log messages
+/// * `log_level` - The minimum logging level which should be recorded
 pub fn setup_log(name: &str, log_level: log::LevelFilter) -> Result<(), Error> {
     use log4rs::append::console::ConsoleAppender;
     use log4rs::encode::pattern::PatternEncoder;

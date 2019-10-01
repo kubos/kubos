@@ -37,7 +37,7 @@ pub struct MonitorEntry {
 }
 
 // Check if any version of the application is running
-pub fn check_running(
+pub fn find_running(
     registry: &Arc<Mutex<Vec<MonitorEntry>>>,
     name: &str,
 ) -> Result<Option<MonitorEntry>, AppError> {
