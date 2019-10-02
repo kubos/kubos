@@ -21,6 +21,7 @@
 mod config;
 mod uboot;
 
+pub use crate::config::DEFAULT_PATH as DEFAULT_CONFIG_PATH;
 pub use crate::config::*;
 pub use crate::uboot::UBootVars;
 

@@ -1,94 +1,36 @@
 use failure::{bail, Error};
 use getopts::Options;
 use kubos_app::*;
-use log::info;
+use log::*;
 use std::thread;
 use std::time::Duration;
 
-struct MyApp;
+fn main() -> Result<(), Error> {
+    logging_setup!("rust-mission-app")?;
+    let args: Vec<String> = ::std::env::args().collect();
+    let mut opts = Options::new();
 
-impl AppHandler for MyApp {
-    fn on_boot(&self, _args: Vec<String>) -> Result<(), Error> {
-        let monitor_service = ServiceConfig::new("monitor-service")?;
-        let telemetry_service = ServiceConfig::new("telemetry-service")?;
+    // Standard app args:
+    // This option will be processed by the system-api crate when a service query is run
+    opts.optflagopt(
+        "c",
+        "config",
+        "System config file which should be used",
+        "CONFIG",
+    );
+    opts.optflag("h", "help", "Print this help menu");
+    // App-specific args:
+    opts.optflagopt("s", "cmd_string", "Subcommand", "CMD_STR");
+    opts.optflagopt("t", "cmd_sleep", "Safe-mode sleep time", "CMD_INT");
 
-        loop {
-            thread::sleep(Duration::from_secs(3));
-            info!("OnBoot logic called");
+    // Parse the command args
+    let matches = match opts.parse(args) {
+        Ok(r) => r,
+        Err(f) => panic!(f.to_string()),
+    };
 
-            // Get the amount of memory currently available on the OBC
-            let request = "{memInfo{available}}";
-            let response = match query(&monitor_service, request, Some(Duration::from_secs(1))) {
-                Ok(msg) => msg,
-                Err(err) => {
-                    info!("Monitor service query failed: {}", err);
-                    continue;
-                }
-            };
-
-            let memory = response.get("memInfo").and_then(|msg| msg.get("available"));
-
-            // Save the amount to the telemetry database
-            if let Some(mem) = memory {
-                let request = format!(
-                    r#"
-                    mutation {{
-                        insert(subsystem: "OBC", parameter: "available_mem", value: "{}") {{
-                            success,
-                            errors
-                        }}
-                    }}
-                "#,
-                    mem
-                );
-
-                match query(&telemetry_service, &request, Some(Duration::from_secs(1))) {
-                    Ok(msg) => {
-                        let success = msg
-                            .get("insert")
-                            .and_then(|data| data.get("success").and_then(|val| val.as_bool()));
-
-                        if success == Some(true) {
-                            info!("Current memory value saved to database");
-                        } else {
-                            match msg.get("errors") {
-                                Some(errors) => {
-                                    info!("Failed to save value to database: {}", errors)
-                                }
-                                None => info!("Failed to save value to database"),
-                            };
-                        }
-                    }
-                    Err(err) => {
-                        info!("Monitor service mutation failed: {}", err);
-                        continue;
-                    }
-                }
-            }
-        }
-    }
-
-    fn on_command(&self, args: Vec<String>) -> Result<(), Error> {
-        let mut opts = Options::new();
-
-        opts.optflagopt("s", "cmd_string", "Subcommand", "CMD_STR");
-        opts.optflagopt("t", "cmd_sleep", "Safe-mode sleep time", "CMD_INT");
-
-        info!("OnCommand logic called");
-
-        if args.is_empty() {
-            // No subcommand options were given, so we're done here
-            return Ok(());
-        }
-
-        // Parse the command args
-        let matches = match opts.parse(args) {
-            Ok(r) => r,
-            Err(f) => panic!(f.to_string()),
-        };
-
-        let subcommand = matches.opt_str("s").unwrap_or_else(|| "".to_owned());
-
+    // Check for subcommand to run
+    if let Some(subcommand) = matches.opt_str("s") {
         match subcommand.as_ref() {
             "safemode" => {
                 let time: u64 = match matches.opt_get("t") {
@@ -131,14 +73,65 @@ impl AppHandler for MyApp {
                 }
             }
         }
+    } else {
+        // If there's no subcommand, we'll just go ahead and collect telemetry
+        let monitor_service = ServiceConfig::new("monitor-service")?;
+        let telemetry_service = ServiceConfig::new("telemetry-service")?;
 
-        Ok(())
+        // Get the amount of memory currently available on the OBC
+        let request = "{memInfo{available}}";
+        let response = match query(&monitor_service, request, Some(Duration::from_secs(1))) {
+            Ok(msg) => msg,
+            Err(err) => {
+                error!("Monitor service query failed: {}", err);
+                bail!("Monitor service query failed: {}", err);
+            }
+        };
+
+        let memory = response.get("memInfo").and_then(|msg| msg.get("available"));
+
+        // Save the amount to the telemetry database
+        if let Some(mem) = memory {
+            let request = format!(
+                r#"
+                mutation {{
+                    insert(subsystem: "OBC", parameter: "available_mem", value: "{}") {{
+                        success,
+                        errors
+                    }}
+                }}
+            "#,
+                mem
+            );
+
+            match query(&telemetry_service, &request, Some(Duration::from_secs(1))) {
+                Ok(msg) => {
+                    let success = msg
+                        .get("insert")
+                        .and_then(|data| data.get("success").and_then(|val| val.as_bool()));
+
+                    if success == Some(true) {
+                        info!("Current memory value saved to database");
+                    } else {
+                        match msg.get("errors") {
+                            Some(errors) => {
+                                error!("Failed to save value to database: {}", errors);
+                                bail!("Failed to save value to database: {}", errors);
+                            }
+                            None => {
+                                error!("Failed to save value to database");
+                                bail!("Failed to save value to database");
+                            }
+                        };
+                    }
+                }
+                Err(err) => {
+                    error!("Monitor service mutation failed: {}", err);
+                    bail!("Monitor service mutation failed: {}", err);
+                }
+            }
+        }
     }
-}
-
-fn main() -> Result<(), Error> {
-    let app = MyApp;
-    app_main!(&app)?;
 
     Ok(())
 }

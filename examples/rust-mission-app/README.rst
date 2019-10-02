@@ -11,18 +11,14 @@ Features:
     - Logging data to files
     - Requesting data from a service with a GraphQL query
     - Storing data into the telemetry database with a GraphQL mutation
-    - Processing additional arguments beyond just ``-r``
+    - Processing additional command-line options
 
 Usage
 -----
 
 ::
 
-    rust-mission-app -r run_level [options]
-
-Required Arguments::
-
-    -r, --run_level     The run level logic which should be executed. Must be "OnBoot" or "OnCommand"
+    rust-mission-app [options]
 
 Optional Arguments::
 

@@ -11,7 +11,6 @@ kubos-service = { path = "../kubos-service" }
 chrono = "0.4"
 failure = "0.1.2"
 fs_extra = "1.1.0"
-getopts = "0.2"
 juniper =  "0.11"
 log = "^0.4.0"
 nix = "0.11.0"

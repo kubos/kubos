@@ -9,6 +9,9 @@ changes.
 Please refer to the following 'Configuration' section for settings which should be updated for your
 particular system prior to execution.
 
+It is expected that the OBC's scheduler will be configured to run this app at a regular interval
+(recommended: every hour) in order to maintain the health of the system.
+
 Requirements
 ------------
 
@@ -36,7 +39,6 @@ A few other configuration settings are present which may be optionally updated:
   configuration file.
 - ``TELEMETRY_AGE`` - (Default: 1 week) The maximum age allowed for a telemetry entry. Once this age
   is exceeded, the entry will be removed.
-- ``INTERVAL`` - (Default: 1 hour) The frequency with which the housekeeping tasks should run
 - ``RAM_{NOMINAL|HIGH|CRITICAL}`` - (Default: 50%|70%|80%) RAM usage thresholds. Informational log
   messages will be generated based on the current RAM threhold being hit. If the usage exceeds the
   ``RAM_CRITICAL`` value, recovery actions will be executed.

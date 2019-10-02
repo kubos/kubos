@@ -18,7 +18,6 @@ use crate::monitor::MonitorEntry;
 use crate::objects::*;
 use crate::registry::AppRegistry;
 use juniper::FieldResult;
-use kubos_app::RunLevel;
 use kubos_service;
 
 type Context = kubos_service::Context<AppRegistry>;
@@ -133,36 +132,19 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
         })
     }
 
-    field start_app(&executor, name: String, run_level: String, config: Option<String>, args: Option<Vec<String>>) -> FieldResult<StartResponse>
+    field start_app(&executor, name: String, config: Option<String>, args: Option<Vec<String>>) -> FieldResult<StartResponse>
         as "Start App"
     {
-        let run_level_o = {
-            match run_level.as_ref() {
-                "OnBoot" => RunLevel::OnBoot,
-                _ => RunLevel::OnCommand
-            }
-        };
-
-        let args = if let Some(mut params) = args {
-            // Add '--' to our list of args so that the app framework passes them successfully to
-            // the underlying app
-            let mut temp = vec!["--".to_owned()];
-            temp.append(&mut params);
-            Some(temp)
-        } else {
-            None
-        };
-
-        Ok(match executor.context().subsystem().start_app(&name, &run_level_o, config, args) {
+        Ok(match executor.context().subsystem().start_app(&name, config, args) {
             Ok(pid) => StartResponse { success: true, errors: "".to_owned(), pid},
             Err(error) => StartResponse { success: false, errors: error.to_string(), pid: None },
         })
     }
 
-    field kill_app(&executor, name: String, run_level: String, signal: Option<i32>) -> FieldResult<GenericResponse>
+    field kill_app(&executor, name: String, signal: Option<i32>) -> FieldResult<GenericResponse>
         as "Kill Running App"
     {
-        Ok(match executor.context().subsystem().kill_app(&name, &run_level, signal) {
+        Ok(match executor.context().subsystem().kill_app(&name, signal) {
             Ok(pid) => GenericResponse { success: true, errors: "".to_owned() },
             Err(error) => GenericResponse { success: false, errors: error.to_string() },
         })

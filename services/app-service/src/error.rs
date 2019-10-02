@@ -64,12 +64,6 @@ pub enum AppError {
         /// Error description
         description: String,
     },
-    /// A catch-all error for the service
-    #[fail(display = "{}", err)]
-    SystemError {
-        /// Underlying error encountered
-        err: String,
-    },
     /// An error was encountered while monitoring an application
     #[fail(display = "Error while monitoring app: {}", err)]
     MonitorError {

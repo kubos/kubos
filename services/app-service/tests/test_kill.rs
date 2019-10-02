@@ -61,7 +61,6 @@ fn setup_app(registry_dir: &Path) {
     let toml = format!(
         r#"
             active_version = true
-            run_level = "onCommand"
 
             [app]
             executable = "{}/rust-proj/1.0/rust-proj"
@@ -94,12 +93,12 @@ fn kill_good() {
 
     setup_app(&fixture.registry_dir.path());
 
-    fixture.start_service(false);
+    fixture.start_service();
 
     let result = send_query(
         config.clone(),
         r#"mutation {
-            startApp(name: "rust-proj", runLevel: "OnCommand", args: "-l") {
+            startApp(name: "rust-proj", args: "-l") {
                 errors,
                 success
             }
@@ -124,7 +123,7 @@ fn kill_good() {
     let result = send_query(
         config.clone(),
         r#"mutation {
-            killApp(name: "rust-proj", runLevel: "OnCommand") {
+            killApp(name: "rust-proj") {
                 errors,
                 success
             }
@@ -176,12 +175,12 @@ fn kill_app_bad_name() {
         ),
     )
     .unwrap();
-    fixture.start_service(false);
+    fixture.start_service();
 
     let result = send_query(
         config,
         r#"mutation {
-            killApp(name: "dummy", runLevel: "OnBoot") {
+            killApp(name: "dummy") {
                 errors,
                 success
             }
@@ -218,12 +217,12 @@ fn kill_app_not_running() {
 
     setup_app(&fixture.registry_dir.path());
 
-    fixture.start_service(false);
+    fixture.start_service();
 
     let _ = send_query(
         config.clone(),
         r#"mutation {
-            startApp(name: "rust-proj", runLevel: "OnBoot") {
+            startApp(name: "rust-proj") {
                 errors,
                 success
             }
@@ -234,7 +233,7 @@ fn kill_app_not_running() {
     let result = send_query(
         config.clone(),
         r#"mutation {
-            killApp(name: "rust-proj", runLevel: "OnBoot") {
+            killApp(name: "rust-proj") {
                 errors,
                 success
             }
@@ -271,12 +270,12 @@ fn kill_custom_signal() {
 
     setup_app(&fixture.registry_dir.path());
 
-    fixture.start_service(false);
+    fixture.start_service();
 
     let result = send_query(
         config.clone(),
         r#"mutation {
-            startApp(name: "rust-proj", runLevel: "OnCommand", args: "-l") {
+            startApp(name: "rust-proj", args: "-l") {
                 errors,
                 success,
                 pid
@@ -302,7 +301,7 @@ fn kill_custom_signal() {
     let result = send_query(
         config.clone(),
         r#"mutation {
-            killApp(name: "rust-proj", runLevel: "OnCommand", signal: 2) {
+            killApp(name: "rust-proj", signal: 2) {
                 errors,
                 success
             }

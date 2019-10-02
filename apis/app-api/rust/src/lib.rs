@@ -19,22 +19,19 @@
 //!
 //! # Examples
 //!
-//! ```
+//! ```ignore
 //! use failure::{bail, Error};
 //! use kubos_app::*;
 //! use std::time::Duration;
 //!
-//! struct MyApp;
+//! fn main() -> Result<(), Error> {
+//!     logging_setup!("my-app")?;
 //!
-//! impl AppHandler for MyApp {
-//!   fn on_boot(&self, _args: Vec<String>) -> Result<(), Error> {
-//!     println!("OnBoot logic");
-//!
-//!     let request = r#"mutation {
-//!             power(state: ON) {
-//!                 success
-//!             }
-//!         }"#;
+//! 	let request = r#"mutation {
+//! 		power(state: ON) {
+//! 			success
+//! 		}
+//! 	}"#;
 //!
 //!     match query(&ServiceConfig::new("radio-service")?, request, Some(Duration::from_secs(1))) {
 //!         Err(error) => bail!("Failed to communicate with radio service: {}", error),
@@ -52,18 +49,6 @@
 //!             }
 //!         }
 //!     }
-//!
-//!     Ok(())
-//!   }
-//!   fn on_command(&self, _args: Vec<String>) -> Result<(), Error> {
-//!     println!("OnCommand logic");
-//!     Ok(())
-//!   }
-//! }
-//!
-//! fn main() -> Result<(), Error> {
-//!     let app = MyApp { };
-//!     app_main!(&app)?;
 //!     Ok(())
 //! }
 //! ```

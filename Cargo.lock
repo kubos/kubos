@@ -1160,7 +1160,6 @@ dependencies = [
  "chrono 0.4.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "fs_extra 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "getopts 0.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
  "juniper 0.11.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "kubos-app 0.1.0",
  "kubos-service 0.1.0",

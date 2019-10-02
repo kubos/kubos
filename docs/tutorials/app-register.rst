@@ -195,7 +195,7 @@ We'll go ahead and start our app now to verify it works using the ``startApp`` m
 It has the following schema::
 
     mutation {
-        startApp(name: String!, runLevel: String!, config: String, args: [String]): {
+        startApp(name: String!, config: String, args: [String]): {
             success: Bool!
             errors: String,
             pid: Int
@@ -203,8 +203,6 @@ It has the following schema::
     }
 
 The ``name`` input parameter specifies the name of the application which should be started.
-The ``runLevel`` input parameter specifies which run case should be called; it must be either
-"OnBoot" or "OnCommand".
 The ``config`` input parameter specifies a non-default configuration file which should be used.
 The ``args`` input parameter allows the user to pass additional arguments through to the underlying
 application.
@@ -220,7 +218,7 @@ The mutation returns three fields:
 Our request should look like this::
 
     mutation {
-      startApp(name: "my-mission-app", runLevel: "OnCommand", config:"/home/user/kubos/tools/default_config.toml") {
+      startApp(name: "my-mission-app", config:"/home/user/kubos/tools/default_config.toml") {
         success,
         pid
       }

@@ -22,75 +22,81 @@ use kubos_app::*;
 use std::thread;
 use std::time::Duration;
 
-struct MyApp;
+fn main() -> Result<(), Error> {
+    
+    logging_setup!("rust-proj")?;
+    
+    let mut success = false;
+    
+    let args: Vec<String> = ::std::env::args().collect();
 
-impl AppHandler for MyApp {
-    fn on_boot(&self, _args: Vec<String>) -> Result<(), Error> {
+    if args.is_empty() {
+        // Test using a custom config file
+        let service = ServiceConfig::new("test-service")?;
+        if service.hosturl() == Some("123.4.5.6:7890".to_owned()) {
+            success = true;
+        } else {
+            bail!("Service URL mismatch: {:?}", service.hosturl());
+        }
+        
         // Test that we can access a file which was packaged with this binary
         let contents = ::std::fs::read_to_string("testfile")?;
 
         assert_eq!(contents, "test string");
+    }
+    
+    let program = args[0].clone();
+    
+    let mut opts = Options::new();
+    // Standard app args:
+    // This option will be processed by the system-api crate when a service query is run
+    opts.optflagopt(
+        "c",
+        "config",
+        "System config file which should be used",
+        "CONFIG",
+    );
+    opts.optflag("h", "help", "Print this help menu");
+    // Test-specific args:
+    opts.optflag("f", "", "Test flag");
+    opts.optopt("t", "test", "Test arg", "TEST");
+    opts.optflag("l", "", "Long running test");
 
+    let matches = match opts.parse(&args[1..]) {
+        Ok(r) => r,
+        Err(f) => panic!(f.to_string()),
+    };
+
+    if matches.opt_present("h") {
+        let brief = format!("Usage: {} [options]", program);
+        print!("{}", opts.usage(&brief));
+        return Ok(());
+    }
+
+    if matches.opt_present("f") {
+        success = true;
+    }
+
+    if matches.opt_str("t") == Some("test".to_owned()) {
+        success = true;
+    }
+
+    // Check for a positional arg
+    if !matches.free.is_empty() && matches.free[0] == "pos" {
+        success = true;
+    }
+    
+    if matches.opt_present("l") {
+        // We want to test the app service's ability to track an application which doesn't
+        // immediately return.
+        // Future work: Add option to return a non-zero RC
+        thread::sleep(Duration::from_secs(2));
+        success = true;
+    }
+
+    if success {
         Ok(())
+    } else {
+        bail!("Did not receive any valid arguments");
     }
-
-    fn on_command(&self, args: Vec<String>) -> Result<(), Error> {
-        let mut success = false;
-        
-        if args.is_empty() {
-            // Test using a custom config file
-            let service = ServiceConfig::new("test-service")?;
-            if service.hosturl() == Some("123.4.5.6:7890".to_owned()) {
-                success = true;
-            } else {
-                bail!("Service URL mismatch: {:?}", service.hosturl());
-            }
-        }
-
-        // Test passing through args to this underlying app logic
-        let mut opts = Options::new();
-        opts.optflag("f", "", "Test flag");
-        opts.optopt("t", "test", "Test arg", "TEST");
-        opts.optflag("l", "", "Long running test");
-        opts.optflag("h", "help", "Print this help menu");
-
-        let matches = match opts.parse(&args) {
-            Ok(r) => r,
-            Err(f) => panic!(f.to_string()),
-        };
-
-        if matches.opt_present("f") {
-            success = true;
-        }
-
-        if matches.opt_str("t") == Some("test".to_owned()) {
-            success = true;
-        }
-
-        // Check for a positional arg
-        if !matches.free.is_empty() && matches.free[0] == "pos" {
-            success = true;
-        }
-        
-        if matches.opt_present("l") {
-            // We want to test the app service's ability to track an application which doesn't
-            // immediately return.
-            // Future work: Add option to return a non-zero RC
-            thread::sleep(Duration::from_secs(2));
-            success = true;
-        }
-
-        if success {
-            Ok(())
-        } else {
-            bail!("Did not receive any valid arguments");
-        }
-    }
-}
-
-fn main() -> Result<(), Error> {
-    let app = MyApp;
-    app_main!(&app)?;
-
-    Ok(())
 }

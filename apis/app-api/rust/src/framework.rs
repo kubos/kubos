@@ -19,91 +19,54 @@
 #![deny(missing_docs)]
 #![deny(warnings)]
 
-use failure::{bail, Error};
-use getopts::Options;
-use std::env;
-use std::fmt;
+use failure::Error;
 
-/// The different ways an application can be started
-#[derive(Clone, Debug, PartialEq)]
-pub enum RunLevel {
-    /// Logic intended to be run if the application is started at system boot time
-    OnBoot,
-    /// Logic intended to be run if the application is started manually
-    OnCommand,
-}
-
-impl fmt::Display for RunLevel {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            RunLevel::OnBoot => write!(f, "OnBoot"),
-            RunLevel::OnCommand => write!(f, "OnCommand"),
-        }
-    }
-}
-
-/// Common trait which is used to ensure handlers for all required run levels are defined
-pub trait AppHandler {
-    /// Called when the application is started at system boot time
-    fn on_boot(&self, args: Vec<String>) -> Result<(), Error>;
-
-    /// Called when the application is started on-demand through the `start_app` GraphQL mutation
-    fn on_command(&self, args: Vec<String>) -> Result<(), Error>;
-}
-
-/// A helper macro which detects the requested run level and calls the appropriate handler function.
-/// Logging will be set up automatically for the application.
-/// The log name will be taken from the package name specified in the application's `Cargo.toml` file.
-/// Note: Any hyphens will be automatically converted to underscores (`test-app` -> `test_app`)
+/// Helper macro to set up the logger for the program
+///
+/// All log messages will be sent to rsyslog using the User facility.
+/// Additionally, they will also be echoed to ``stdout``
 ///
 /// # Arguments
 ///
-/// * `handler` - A reference to an object which implements the run level handler functions
-/// * `level` - Default: `log::LevelFilter::Debug`. The minimum log level to record
+/// * `name` - The application name which should be used for all log messages
+/// * `level` - The minimum logging level which should be recorded (Default: Debug)
 ///
 /// # Examples
 ///
 /// ```
-/// use failure::Error;
-/// use kubos_app::{AppHandler, app_main};
+/// use kubos_app::logging_setup;
+/// // Initialize logging at default Debug level, using identifier "my_app"
+/// logging_setup!("my_app");
+/// ```
 ///
-/// struct MyApp;
+/// ```
+/// use kubos_app::logging_setup;
+/// use log::*;
 ///
-/// impl AppHandler for MyApp {
-///   fn on_boot(&self, _args: Vec<String>) -> Result<(), Error> {
-///     println!("OnBoot logic");
-///     Ok(())
-///   }
-///   fn on_command(&self, _args: Vec<String>) -> Result<(), Error> {
-///     println!("OnCommand logic");
-///     Ok(())
-///   }
-/// }
-///
-/// fn main() -> Result<(), Error> {
-///     let app = MyApp { };
-///     app_main!(&app)?;
-///     Ok(())
-/// }
+/// // Initialize logging at Info level, using the crate name for the identifier
+/// logging_setup!(env!("CARGO_PKG_NAME"), log::LevelFilter::Info);
 /// ```
 #[macro_export]
-macro_rules! app_main {
-    ($handler:expr) => {{
-        app_main!($handler, log::LevelFilter::Debug)
+macro_rules! logging_setup {
+    ($name:expr) => {{
+        logging_setup!($name, log::LevelFilter::Debug)
     }};
-    ($handler:expr, $level:expr) => {{
-        let name = env!("CARGO_PKG_NAME");
-        kubos_app::app_start($handler, name, $level)
+    ($name:expr, $level:path) => {{
+        use kubos_app::setup_log;
+        setup_log($name, $level)
     }};
 }
 
-/// The entry point for all KubOS applications. The preferred way to use this application
-/// is through the `app_main!` macro
-pub fn app_start(
-    handler: &dyn AppHandler,
-    name: &str,
-    log_level: log::LevelFilter,
-) -> Result<(), Error> {
+/// Set up the logger for the program
+///
+/// All log messages will be sent to rsyslog using the User facility.
+/// Additionally, they will also be echoed to ``stdout``
+///
+/// # Arguments
+///
+/// * `name` - The application name which should be used for all log messages
+/// * `log_level` - The minimum logging level which should be recorded
+pub fn setup_log(name: &str, log_level: log::LevelFilter) -> Result<(), Error> {
     use log4rs::append::console::ConsoleAppender;
     use log4rs::encode::pattern::PatternEncoder;
     use log4rs_syslog::SyslogAppender;
@@ -139,47 +102,5 @@ pub fn app_start(
     // Start the logger
     log4rs::init_config(config)?;
 
-    let args: Vec<String> = env::args().collect();
-    let program = args[0].clone();
-
-    let mut opts = Options::new();
-    opts.optflagopt(
-        "r",
-        "run",
-        "Run level which should be executed",
-        "RUN_LEVEL",
-    );
-    // This option will be processed by the system-api crate when a service query is run
-    opts.optflagopt(
-        "c",
-        "config",
-        "System config file which should be used",
-        "CONFIG",
-    );
-    opts.optflag("h", "help", "Print this help menu");
-
-    let matches = match opts.parse(&args[1..]) {
-        Ok(r) => r,
-        Err(f) => panic!(f.to_string()),
-    };
-
-    if matches.opt_present("h") {
-        let brief = format!("Usage: {} [options]", program);
-        print!("{}", opts.usage(&brief));
-        return Ok(());
-    }
-
-    let run_level = matches
-        .opt_str("r")
-        .unwrap_or_else(|| "OnCommand".to_owned());
-
-    match run_level.as_ref() {
-        "OnBoot" => handler.on_boot(matches.free),
-        "OnCommand" => handler.on_command(matches.free),
-        level => {
-            bail!(
-                "Error: Unknown run level was requested - {}. Available run levels: OnBoot, OnCommand", level
-            );
-        }
-    }
+    Ok(())
 }
