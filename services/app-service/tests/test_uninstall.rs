@@ -551,6 +551,9 @@ fn uninstall_running() {
 
     assert!(result.is_ok());
 
+    // Give everything a moment to finish
+    thread::sleep(Duration::from_millis(100));
+
     // App should no longer be running (ESRCH = PID not found)
     let pid = Pid::from_raw(pid as i32);
     let result = signal::kill(pid, signal::Signal::SIGINT);
@@ -611,6 +614,9 @@ fn uninstall_all_running() {
 
     assert!(result.is_ok());
 
+    // Give everything a moment to finish
+    thread::sleep(Duration::from_millis(100));
+
     // App should no longer be running (ESRCH = PID not found)
     let pid = Pid::from_raw(pid as i32);
     let result = signal::kill(pid, signal::Signal::SIGINT);
@@ -635,13 +641,13 @@ fn uninstall_kill() {
 
     setup_app(&fixture.registry_dir.path());
 
-    fixture.start_service(false);
+    fixture.start_service();
 
     // Run the app so that a monitoring entry will be created
     let result = send_query(
         config.clone(),
         r#"mutation {
-            startApp(name: "rust-proj", runLevel: "OnCommand", args: "-s") {
+            startApp(name: "rust-proj", args: "-s") {
                 pid
             }
         }"#,
