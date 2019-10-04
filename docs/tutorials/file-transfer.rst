@@ -71,27 +71,16 @@ OBC.
 We'll need to specify the OBC's IP address and the port that the file transfer service is listening
 on. By default, this is port 8040.
 
-We will also need to specify the IP and port that the file transfer service will be sending data
-back on. By default, the configuration is set up to return messages via the comms service, which we
-aren't currently using.
-You will need to modify the file ``/etc/kubos-config.toml`` on-board the OBC and update the
-following lines under the ``[file-transfer-service]`` section::
-
-    downlink_ip = {host IP address}
-    downlink_port = 8081
-
-After modifying ``config.toml`` it will be necessary to restart the file transfer service
-by running the following command on the OBC::
-
-    $ ./etc/init.d/S99kubos-core-file-transfer restart
+We will also need to specify the port that the file transfer service will be sending data
+back on. By default, the file transfer service sends responses to port 8080.
 
 Our transfer command should look like this::
 
-    $ kubos-file-client -r 10.0.2.20 -p 8040 -P 8081 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
+    $ kubos-file-client -r 10.0.2.20 -p 8040 -P 8080 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
     
 Or, from your local dev environment::
 
-    $ cargo run -- -r 10.0.2.20 -p 8040 -P 8081 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
+    $ cargo run -- -r 10.0.2.20 -p 8040 -P 8080 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
     
 The output from the client should look like this:
 

@@ -55,7 +55,7 @@ We'll start by creating a new shell session between our dev environment and the 
 Our command should look like this::
 
    $ kubos-shell-client -i 10.0.2.20 -p 8050 start
-   
+
 Or, from your local dev environment::
 
     $ cargo run -- -i 10.0.2.20 -p 8050 start
