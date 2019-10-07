@@ -19,6 +19,7 @@
 //!
 
 use crate::config::{get_mode_configs, ScheduleConfig};
+use crate::error::SchedulerError;
 use crate::scheduler::SAFE_MODE;
 use chrono::offset::TimeZone;
 use chrono::{DateTime, Utc};
@@ -39,16 +40,22 @@ pub struct ScheduleMode {
 }
 
 impl ScheduleMode {
-    pub fn from_path(path_obj: &Path) -> Result<ScheduleMode, String> {
+    pub fn from_path(path_obj: &Path) -> Result<ScheduleMode, SchedulerError> {
         let path = path_obj
             .to_str()
             .map(|path| path.to_owned())
-            .ok_or_else(|| "Failed to convert mode path".to_owned())?;
+            .ok_or_else(|| SchedulerError::LoadModeError {
+                err: "Failed to convert mode path".to_owned(),
+                path: "".to_owned(),
+            })?;
 
         let name = path_obj
             .file_stem()
             .and_then(|s| s.to_str())
-            .ok_or_else(|| "Failed to read mode name".to_owned())?
+            .ok_or_else(|| SchedulerError::LoadModeError {
+                err: "Failed to read mode name".to_owned(),
+                path: path.to_owned(),
+            })?
             .to_owned();
 
         let schedules = get_mode_configs(&path)?;
@@ -78,7 +85,7 @@ impl ScheduleMode {
 }
 
 // Retrieve information on the active scheduler mode
-pub fn get_active_mode(scheduler_dir: &str) -> Result<Option<ScheduleMode>, String> {
+pub fn get_active_mode(scheduler_dir: &str) -> Result<Option<ScheduleMode>, SchedulerError> {
     match fs::read_link(format!("{}/active", scheduler_dir)) {
         Ok(active_path) => {
             let mut active_mode = ScheduleMode::from_path(&active_path)?;
@@ -93,6 +100,7 @@ pub fn get_active_mode(scheduler_dir: &str) -> Result<Option<ScheduleMode>, Stri
 }
 
 pub fn is_mode_active(scheduler_dir: &str, name: &str) -> bool {
+    let name = name.to_lowercase();
     if let Ok(Some(active_mode)) = get_active_mode(scheduler_dir) {
         name == active_mode.name
     } else {
@@ -103,12 +111,15 @@ pub fn is_mode_active(scheduler_dir: &str, name: &str) -> bool {
 pub fn get_available_modes(
     scheduler_dir: &str,
     name: Option<String>,
-) -> Result<Vec<ScheduleMode>, String> {
+) -> Result<Vec<ScheduleMode>, SchedulerError> {
     let mut modes: Vec<ScheduleMode> = vec![];
 
     let active_path: Option<PathBuf> = fs::read_link(format!("{}/active", scheduler_dir)).ok();
     let mut modes_list: Vec<PathBuf> = fs::read_dir(scheduler_dir)
-        .map_err(|e| format!("Failed to read schedules dir: {}", e))?
+        .map_err(|e| SchedulerError::LoadModeError {
+            err: format!("Failed to read schedules dir: {}", e),
+            path: "".to_owned(),
+        })?
         // Filter out invalid entries
         .filter_map(|x| x.ok())
         // Convert DirEntry -> PathBuf
@@ -120,7 +131,7 @@ pub fn get_available_modes(
         // Filter on name if specified
         .filter(|path| {
             if let Some(name_str) = &name {
-                path.ends_with(name_str)
+                path.ends_with(name_str.to_lowercase())
             } else {
                 true
             }
@@ -148,43 +159,69 @@ pub fn get_available_modes(
     Ok(modes)
 }
 
-pub fn create_mode(scheduler_dir: &str, name: &str) -> Result<(), String> {
+pub fn create_mode(scheduler_dir: &str, name: &str) -> Result<(), SchedulerError> {
+    let name = name.to_lowercase();
     let mode_dir = format!("{}/{}", scheduler_dir, name);
-    Ok(fs::create_dir(mode_dir).map_err(|e| format!("Failed to create mode directory: {}", e))?)
+    Ok(
+        fs::create_dir(mode_dir).map_err(|e| SchedulerError::CreateError {
+            err: e.to_string(),
+            path: name.to_owned(),
+        })?,
+    )
 }
 
-pub fn remove_mode(scheduler_dir: &str, name: &str) -> Result<(), String> {
+pub fn remove_mode(scheduler_dir: &str, name: &str) -> Result<(), SchedulerError> {
+    let name = name.to_lowercase();
+
     if name == SAFE_MODE {
-        return Err("Cannot remove SAFE mode".to_owned());
+        return Err(SchedulerError::RemoveError {
+            err: "The safe mode cannot be removed".to_owned(),
+            name: name.to_owned(),
+        });
     }
 
     if let Ok(Some(active_mode)) = get_active_mode(&scheduler_dir) {
         if name == active_mode.name {
-            return Err("Cannot remove active mode".to_owned());
+            return Err(SchedulerError::RemoveError {
+                err: "Cannot remove active mode".to_owned(),
+                name: name.to_owned(),
+            });
         }
     }
 
     let mode_dir = format!("{}/{}", scheduler_dir, name);
-    Ok(fs::remove_dir_all(mode_dir)
-        .map_err(|e| format!("Failed to remove mode directory: {}", e))?)
+    Ok(
+        fs::remove_dir_all(mode_dir).map_err(|e| SchedulerError::RemoveError {
+            err: e.to_string(),
+            name: name.to_owned(),
+        })?,
+    )
 }
 
-pub fn activate_mode(scheduler_dir: &str, name: &str) -> Result<(), String> {
+pub fn activate_mode(scheduler_dir: &str, name: &str) -> Result<(), SchedulerError> {
+    let name = name.to_lowercase();
     info!("Activating mode {}", name);
     let sched_path = format!("{}/{}", scheduler_dir, name);
     let active_path = format!("{}/active", scheduler_dir);
     let new_active_path = format!("{}/new_active", scheduler_dir);
 
     if !Path::new(&sched_path).is_dir() {
-        warn!("Attempted to activate non-existant mode. Falling back to safe");
+        warn!("Attempted to activate non-existant mode. Falling back to safe mode.");
         activate_mode(scheduler_dir, SAFE_MODE)?;
-        return Err(format!("Mode {} not found", name));
+        return Err(SchedulerError::ActivateError {
+            err: "Mode not found".to_owned(),
+            name: name.to_owned(),
+        });
     }
-    symlink(sched_path, &new_active_path)
-        .map_err(|e| format!("Failed to create active symlink: {}", e))?;
+    symlink(sched_path, &new_active_path).map_err(|e| SchedulerError::ActivateError {
+        err: e.to_string(),
+        name: name.to_owned(),
+    })?;
 
-    fs::rename(&new_active_path, &active_path)
-        .map_err(|e| format!("Failed to copy over new active symlink: {}", e))?;
+    fs::rename(&new_active_path, &active_path).map_err(|e| SchedulerError::ActivateError {
+        err: e.to_string(),
+        name: name.to_owned(),
+    })?;
 
     info!("Activated mode {}", name);
     Ok(())

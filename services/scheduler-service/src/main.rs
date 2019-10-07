@@ -21,11 +21,13 @@
 
 mod app;
 mod config;
+mod error;
 mod mode;
 mod scheduler;
 mod schema;
 mod task;
 
+use crate::error::SchedulerError;
 use kubos_service::{Config, Service};
 use log::{error, info};
 use scheduler::{Scheduler, DEFAULT_SCHEDULES_DIR};
@@ -33,7 +35,7 @@ use schema::{MutationRoot, QueryRoot};
 
 // Initialize logging for the service
 // All messages will be routed to syslog and echoed to the console
-fn log_init() -> Result<(), String> {
+fn log_init() -> Result<(), SchedulerError> {
     use log4rs::append::console::ConsoleAppender;
     use log4rs::encode::pattern::PatternEncoder;
     use log4rs_syslog::SyslogAppender;
@@ -72,36 +74,41 @@ fn log_init() -> Result<(), String> {
     Ok(())
 }
 
-fn main() -> Result<(), String> {
+fn main() -> Result<(), SchedulerError> {
     log_init()?;
 
     let config = Config::new("scheduler-service").map_err(|err| {
         error!("Failed to load service config: {:?}", err);
-        format!("Failed to load service config: {}", err)
+        SchedulerError::StartError {
+            err: format!("Failed to load service config: {}", err),
+        }
     })?;
 
     let scheduler_dir = if let Some(s_dir) = config.get("schedules_dir") {
-        String::from(
-            s_dir
-                .as_str()
-                .ok_or_else(|| "Error parsing scheduler dir path".to_owned())?,
-        )
+        String::from(s_dir.as_str().ok_or_else(|| SchedulerError::StartError {
+            err: "Error parsing scheduler dir path".to_owned(),
+        })?)
     } else {
         String::from(DEFAULT_SCHEDULES_DIR)
     };
 
-    let apps_service_config = Config::new("app-service")
-        .map_err(|err| format!("Failed to load app service config: {:?}", err))?;
+    let apps_service_config =
+        Config::new("app-service").map_err(|err| SchedulerError::StartError {
+            err: format!("Failed to load app service config: {:?}", err),
+        })?;
 
-    let apps_service_url = apps_service_config
-        .hosturl()
-        .ok_or_else(|| "Failed to fetch app service url".to_owned())?;
+    let apps_service_url =
+        apps_service_config
+            .hosturl()
+            .ok_or_else(|| SchedulerError::StartError {
+                err: "Failed to fetch app service url".to_owned(),
+            })?;
 
     let scheduler = Scheduler::new(&scheduler_dir, &apps_service_url);
 
-    scheduler.init()?;
-
     info!("Starting scheduler-service - {:?}", scheduler_dir);
+
+    scheduler.init()?;
 
     // For now we will only kick off scheduling when the scheduler comes up
     if let Err(e) = scheduler.start() {

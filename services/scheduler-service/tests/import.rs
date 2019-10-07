@@ -48,11 +48,6 @@ fn import_new_schedule() {
             "data": {
                 "availableModes": [
                     {
-                        "name": "SAFE",
-                        "active": true,
-                        "schedules": [ ]
-                    },
-                    {
                         "name": "operational",
                         "active": false,
                         "schedules": [
@@ -60,6 +55,11 @@ fn import_new_schedule() {
                                 "name": "first"
                             }
                         ]
+                    },
+                    {
+                        "name": "safe",
+                        "active": true,
+                        "schedules": [ ]
                     }
                 ]
             }
@@ -77,7 +77,7 @@ fn import_new_schedule_nonexistant_file() {
         json!({
             "data" : {
                 "importConfig": {
-                    "errors": "Schedule copy failed: No such file or directory (os error 2)",
+                    "errors": "Failed to import 'first': No such file or directory (os error 2)",
                     "success": false
                 }
             }
@@ -113,7 +113,7 @@ fn import_new_schedule_nonexistant_mode() {
         json!({
             "data" : {
                 "importConfig": {
-                    "errors": "Schedule copy failed: No such file or directory (os error 2)",
+                    "errors": "Failed to import 'first': Mode not found",
                     "success": false
                 }
             }
@@ -291,9 +291,9 @@ fn import_two_schedules_check_revised() {
 
     thread::sleep(Duration::from_secs(1));
 
+    fixture.import_config("imaging", &schedule_two_path, "flight");
     let sched_two_time = Utc::now();
     let sched_two_time = sched_two_time.format("%Y-%m-%d %H:%M:%S").to_string();
-    fixture.import_config("imaging", &schedule_two_path, "flight");
 
     assert_eq!(
         fixture.query(
@@ -316,6 +316,91 @@ fn import_two_schedules_check_revised() {
                                 "timeImported": sched_one_time
                             }
                         ]
+                    }
+                ]
+            }
+        })
+    );
+}
+
+#[test]
+fn import_new_schedule_mixed_case_code() {
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8026);
+
+    fixture.create_mode("operational");
+
+    let schedule = json!({ "tasks": [ ] });
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+    assert_eq!(
+        fixture.import_config("FIrst", &schedule_path, "OPerational"),
+        json!({
+            "data" : {
+                "importConfig": {
+                    "errors": "",
+                    "success": true
+                }
+            }
+        })
+    );
+
+    assert_eq!(
+        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
+        json!({
+            "data": {
+                "availableModes": [
+                    {
+                        "name": "operational",
+                        "active": false,
+                        "schedules": [
+                            {
+                                "name": "first"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "safe",
+                        "active": true,
+                        "schedules": [ ]
+                    }
+                ]
+            }
+        })
+    );
+}
+
+#[test]
+fn import_invalid_schedule() {
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8027);
+
+    fixture.create_mode("operational");
+
+    let schedule_path = fixture.create_config(Some("not json".to_owned()));
+    assert_eq!(
+        fixture.import_config("firST", &schedule_path, "operational"),
+        json!({
+            "data" : {
+                "importConfig": {
+                    "errors": "Failed to import config file 'first': Failed to parse json",
+                    "success": false
+                }
+            }
+        })
+    );
+
+    assert_eq!(
+        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
+        json!({
+            "data": {
+                "availableModes": [
+                    {
+                        "name": "operational",
+                        "active": false,
+                        "schedules": [ ]
+                    },
+                    {
+                        "name": "safe",
+                        "active": true,
+                        "schedules": [ ]
                     }
                 ]
             }
