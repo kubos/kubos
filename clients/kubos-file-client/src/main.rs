@@ -211,7 +211,7 @@ fn main() {
                 .short("-p")
                 .help("UDP port of the file transfer service to connect to")
                 .takes_value(true)
-                .default_value("8070"),
+                .default_value("8040"),
         )
         .arg(
             Arg::with_name("storage_prefix")

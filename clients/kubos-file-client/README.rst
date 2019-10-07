@@ -30,4 +30,4 @@ Optional arguments:
                         and the file will be placed in the current directory of the destination.
     - ``-h {host IP}`` - Default: `0.0.0.0`. IP address of the local host to use.
     - ``-r {remote IP}`` - Default: `0.0.0.0`. IP address of the file transfer service to connect to.
-    - ``-p {remote port}`` - Default: `8070`. UDP port of the file transfer service to connect to.
+    - ``-p {remote port}`` - Default: `8040`. UDP port of the file transfer service to connect to.

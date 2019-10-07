@@ -187,7 +187,7 @@ For example::
     
     [file-transfer-service.addr]
     ip = "0.0.0.0"
-    port = 8070
+    port = 8040
     
 Future configuration options:
 

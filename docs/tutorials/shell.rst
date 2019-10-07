@@ -45,7 +45,7 @@ Required arguments:
 Optional arguments:
 
     - ``-i {remote IP}`` - Default: `0.0.0.0`. IP address of the shell service to connect to.
-    - ``-p {remote port}`` - Default: `8060`. UDP port of the shell service to connect to.
+    - ``-p {remote port}`` - Default: `8050`. UDP port of the shell service to connect to.
 
 Starting a New Shell Session
 ----------------------------
@@ -54,17 +54,17 @@ We'll start by creating a new shell session between our dev environment and the 
 
 Our command should look like this::
 
-   $ kubos-shell-client -i 10.0.2.20 -p 8060 start
+   $ kubos-shell-client -i 10.0.2.20 -p 8050 start
    
 Or, from your local dev environment::
 
-    $ cargo run -- -i 10.0.2.20 -p 8060 start
+    $ cargo run -- -i 10.0.2.20 -p 8050 start
 
 The output from the client should look like this:
 
 .. code-block:: none
 
-   Starting shell client -> 10.0.2.20:8060
+   Starting shell client -> 10.0.2.20:8050
    Starting shell session -> 672612
    Press enter to send input to the shell session
    Press Control-D to detach from the session
@@ -78,7 +78,7 @@ A simple shell session would look like this:
 
 .. code-block:: none
 
-   Starting shell client -> 10.0.2.20:8060
+   Starting shell client -> 10.0.2.20:8050
    Starting shell session -> 672612
    Press enter to send input to the shell session
    Press Control-D to detach from the session
@@ -98,14 +98,14 @@ Next we will look at listing the existing shell sessions on the OBC.
 
 Our command should look like this::
 
-   $ kubos-shell-client -i 10.0.2.20 -p 8060 list
+   $ kubos-shell-client -i 10.0.2.20 -p 8050 list
 
 The output from the client will look like this because we just
 started a session in the previous step:
 
 .. code-block:: none
 
-   Starting shell client -> 10.0.2.20:8060
+   Starting shell client -> 10.0.2.20:8050
    Fetching existing shell sessions:
        672612	{ path = '/bin/bash', pid = 24939 }
 
@@ -125,7 +125,7 @@ If no sessions exist, then the output from the client will look like this:
 
 .. code-block:: none
 
-   Starting shell client -> 10.0.2.20:8060
+   Starting shell client -> 10.0.2.20:8050
    Fetching existing shell sessions:
        No active sessions found
 
@@ -143,13 +143,13 @@ The channel ID should belong to a shell session which was previously started.
 
 To join the session started earlier, our command will look like this::
 
-   $ kubos-shell-client -i 10.0.2.20 -p 8060 join -c 672612
+   $ kubos-shell-client -i 10.0.2.20 -p 8050 join -c 672612
 
 The output from the client should look like this:
 
 .. code-block:: none
 
-   Starting shell client -> 10.0.2.20:8060
+   Starting shell client -> 10.0.2.20:8050
    Joining existing shell session 672612
    Press enter to send input to the shell session
    Press Control-D to detach from the session
@@ -172,11 +172,11 @@ specified, then ``SIGKILL`` will be sent.
 
 Our command should look like this::
 
-   $ kubos-shell-client -i 10.0.2.20 -p 8060 kill -c 672612
+   $ kubos-shell-client -i 10.0.2.20 -p 8050 kill -c 672612
 
 The output from the client should look like this:
 
 .. code-block:: none
 
-   Starting shell client -> 10.0.2.20:8060
+   Starting shell client -> 10.0.2.20:8050
    Killing existing shell session -c 672712

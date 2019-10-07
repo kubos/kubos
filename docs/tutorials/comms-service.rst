@@ -790,15 +790,15 @@ Execution
 ~~~~~~~~~
 
 To start, we'll send a simple telemetry request to the telemetry service running on the OBC.
-By default, the telemetry service uses port 8050 for GraphQL requests.
+By default, the telemetry service uses port 8020 for GraphQL requests.
 
 From the SDK, run the following command::
 
-    $ uart-comms-client "{telemetry(latest: 10){subsystem, parameter, value}" -b /dev/FTDI -p 8050
+    $ uart-comms-client "{telemetry(latest: 10){subsystem, parameter, value}" -b /dev/FTDI -p 8020
     
 Or, from your local dev environment::
 
-    $ cargo run -- "{telemetry(latest: 10){subsystem, parameter, value}" -b /dev/FTDI -p 8050
+    $ cargo run -- "{telemetry(latest: 10){subsystem, parameter, value}" -b /dev/FTDI -p 8020
 
 You should see the following output::
 

@@ -26,7 +26,7 @@ For example::
 
     [shell-service.addr]
     ip = "0.0.0.0"
-    port = 8060
+    port = 8050
 
 
 Running the Service from KubOS
