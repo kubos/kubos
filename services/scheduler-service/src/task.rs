@@ -19,10 +19,11 @@
 //!
 
 use crate::app::ScheduleApp;
+use crate::error::SchedulerError;
 use chrono::offset::TimeZone;
 use chrono::Utc;
 use juniper::GraphQLObject;
-use log::{error, info};
+use log::error;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use std::time::Instant;
@@ -50,28 +51,40 @@ pub struct ScheduleTask {
 
 impl ScheduleTask {
     // Parse timer delay duration from either delay or time fields
-    pub fn get_duration(&self) -> Result<Duration, String> {
+    pub fn get_duration(&self) -> Result<Duration, SchedulerError> {
         if let Some(delay) = &self.delay {
             Ok(parse_hms_field(delay.to_owned())?)
         } else if let Some(time) = &self.time {
             let run_time = Utc
                 .datetime_from_str(&time, "%Y-%m-%d %H:%M:%S")
-                .map_err(|e| format!("Failed to parse one_time time: {:?}", e))?;
+                .map_err(|e| SchedulerError::DurationParseError {
+                    err: e.to_string(),
+                    field: time.to_string(),
+                })?;
             let now = chrono::Utc::now();
 
             if run_time < now {
-                Err("Task scheduled for past time".to_owned())
+                Err(SchedulerError::DurationParseError {
+                    err: "Task scheduled for past time".to_owned(),
+                    field: time.to_owned(),
+                })
             } else {
                 Ok((run_time - now)
                     .to_std()
-                    .map_err(|e| format!("Failed to create time diff: {}", e))?)
+                    .map_err(|e| SchedulerError::DurationParseError {
+                        err: e.to_string(),
+                        field: time.to_string(),
+                    })?)
             }
         } else {
-            Err("No delay defined for task".to_owned())
+            Err(SchedulerError::DurationParseError {
+                err: "No delay or time defined for task".to_owned(),
+                field: "".to_owned(),
+            })
         }
     }
 
-    pub fn get_period(&self) -> Result<Option<Duration>, String> {
+    pub fn get_period(&self) -> Result<Option<Duration>, SchedulerError> {
         if let Some(period) = &self.period {
             Ok(Some(parse_hms_field(period.to_owned())?))
         } else {
@@ -80,10 +93,11 @@ impl ScheduleTask {
     }
 
     pub fn schedule(&self, service_url: String) -> Box<dyn Future<Item = (), Error = ()> + Send> {
+        let name = self.name.to_owned();
         let duration = match self.get_duration() {
             Ok(d) => d,
             Err(e) => {
-                error!("Failed to parse task delay duration: {}", e);
+                error!("Failed to parse delay duration for task '{}': {}", name, e);
                 return Box::new(future::err::<(), ()>(()));
             }
         };
@@ -95,14 +109,13 @@ impl ScheduleTask {
         match period {
             Ok(Some(period)) => Box::new(
                 Interval::new(when, period)
-                    .for_each(move |instant| {
-                        info!("fire; instant={:?}", instant);
+                    .for_each(move |_| {
                         app.execute(&service_url.clone());
                         Ok(())
                     })
-                    .map_err(|e| {
-                        error!("Recurring task interval errored: {}", e);
-                        panic!("Recurring task interval errored: {}", e)
+                    .map_err(move |e| {
+                        error!("Recurring interval errored for task '{}': {}", name, e);
+                        panic!("Recurring interval errored for task '{}': {}", name, e)
                     }),
             ),
             _ => Box::new(
@@ -111,16 +124,16 @@ impl ScheduleTask {
                         app.execute(&service_url);
                         Ok(())
                     })
-                    .map_err(|e| {
-                        error!("Task delay errored; err={:?}", e);
-                        panic!("Task delay errored; err={:?}", e)
+                    .map_err(move |e| {
+                        error!("Delay errored for task '{}': {}", name, e);
+                        panic!("Delay errored for task '{}': {}", name, e)
                     }),
             ),
         }
     }
 }
 
-fn parse_hms_field(field: String) -> Result<Duration, String> {
+fn parse_hms_field(field: String) -> Result<Duration, SchedulerError> {
     let field_parts: Vec<String> = field.split(' ').map(|s| s.to_owned()).collect();
     let mut duration: u64 = 0;
     for mut part in field_parts {
@@ -138,8 +151,11 @@ fn parse_hms_field(field: String) -> Result<Duration, String> {
                     duration += num * 60 * 60;
                 }
                 _ => {
-                    error!("Failed to parse field for duration");
-                    return Err("Failed to parse field for duration".to_owned());
+                    error!("Failed to parse hms field");
+                    return Err(SchedulerError::DurationParseError {
+                        err: "Failed to parse hms field".to_owned(),
+                        field: field.to_owned(),
+                    });
                 }
             }
         }

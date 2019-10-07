@@ -31,12 +31,12 @@ fn remove_existing_mode() {
             "data": {
                 "availableModes": [
                     {
-                        "name": "SAFE",
-                        "active": true,
-                    },
-                    {
                         "name": "orbit",
                         "active": false
+                    },
+                    {
+                        "name": "safe",
+                        "active": true,
                     }
                 ]
             }
@@ -61,7 +61,7 @@ fn remove_existing_mode() {
             "data": {
                 "availableModes": [
                     {
-                        "name": "SAFE",
+                        "name": "safe",
                         "active": true,
                     }
                  ]
@@ -83,12 +83,12 @@ fn remove_active_mode() {
             "data": {
                 "availableModes": [
                     {
-                        "name": "SAFE",
-                        "active": false,
-                    },
-                    {
                         "name": "orbit",
                         "active": true
+                    },
+                    {
+                        "name": "safe",
+                        "active": false,
                     }
                 ]
             }
@@ -100,7 +100,7 @@ fn remove_active_mode() {
         json!({
             "data" : {
                 "removeMode": {
-                    "errors": "Cannot remove active mode",
+                    "errors": "Failed to remove 'orbit': Cannot remove active mode",
                     "success": false
                 }
             }
@@ -113,12 +113,12 @@ fn remove_active_mode() {
             "data": {
                 "availableModes": [
                     {
-                        "name": "SAFE",
-                        "active": false,
-                    },
-                    {
                         "name": "orbit",
                         "active": true
+                    },
+                    {
+                        "name": "safe",
+                        "active": false,
                     }
                 ]
             }
@@ -135,7 +135,7 @@ fn remove_nonexistent_mode() {
         json!({
             "data" : {
                 "removeMode": {
-                    "errors": "Failed to remove mode directory: No such file or directory (os error 2)",
+                    "errors": "Failed to remove 'orbit': No such file or directory (os error 2)",
                     "success": false
                 }
             }
@@ -205,7 +205,7 @@ fn remove_existing_schedule() {
 }
 
 #[test]
-fn remove_nonexistant_schedule() {
+fn remove_nonexistant_config() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8024);
 
     fixture.create_mode("operational");
@@ -215,7 +215,7 @@ fn remove_nonexistant_schedule() {
         json!({
             "data" : {
                 "removeConfig": {
-                    "errors": "Config file first.json not found",
+                    "errors": "Failed to remove 'first': File not found",
                     "success": false
                 }
             }
@@ -232,7 +232,7 @@ fn remove_config_nonexistant_mode() {
         json!({
             "data" : {
                 "removeConfig": {
-                    "errors": "Mode operational not found",
+                    "errors": "Failed to remove 'first': Mode not found",
                     "success": false
                 }
             }
@@ -245,11 +245,11 @@ fn remove_safe_mode() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8026);
 
     assert_eq!(
-        fixture.remove_mode("SAFE"),
+        fixture.remove_mode("safe"),
         json!({
             "data" : {
                 "removeMode": {
-                    "errors": "Cannot remove SAFE mode",
+                    "errors": "Failed to remove 'safe': The safe mode cannot be removed",
                     "success": false
                 }
             }

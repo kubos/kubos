@@ -41,12 +41,12 @@ fn activate_existing_mode() {
             "data": {
                 "availableModes": [
                     {
-                        "name": "SAFE",
-                        "active": true
-                    },
-                    {
                         "name": "operational",
                         "active": false
+                    },
+                    {
+                        "name": "safe",
+                        "active": true
                     }
                 ]
             }
@@ -71,12 +71,12 @@ fn activate_existing_mode() {
             "data": {
                 "availableModes": [
                     {
-                        "name": "SAFE",
-                        "active": false
-                    },
-                    {
                         "name": "operational",
                         "active": true
+                    },
+                    {
+                        "name": "safe",
+                        "active": false
                     }
                 ]
             }
@@ -93,7 +93,7 @@ fn activate_non_existent_schedule() {
         json!({
             "data" : {
                 "activateMode": {
-                    "errors": "Mode operational not found",
+                    "errors": "Failed to activate 'operational': Mode not found",
                     "success": false
                 }
             }
@@ -105,7 +105,7 @@ fn activate_non_existent_schedule() {
         json!({
             "data": {
                 "activeMode": {
-                    "name": "SAFE",
+                    "name": "safe",
                     "active": true
                 }
             }
@@ -137,11 +137,11 @@ fn activate_two_modes() {
         json!({
             "data": {
                 "availableModes": [{
-                    "name": "SAFE",
-                    "active": false
-                },{
                     "name": "first",
                     "active": true
+                }, {
+                    "name": "safe",
+                    "active": false
                 }, {
                     "name": "second",
                     "active": false
@@ -167,10 +167,10 @@ fn activate_two_modes() {
         json!({
             "data": {
                 "availableModes": [{
-                    "name": "SAFE",
+                    "name": "first",
                     "active": false
                 }, {
-                    "name": "first",
+                    "name": "safe",
                     "active": false
                 }, {
                     "name": "second",
@@ -193,12 +193,12 @@ fn switch_to_nonexistant_mode() {
             "data": {
                 "availableModes": [
                     {
-                        "name": "SAFE",
-                        "active": true
-                    },
-                    {
                         "name": "operational",
                         "active": false
+                    },
+                    {
+                        "name": "safe",
+                        "active": true
                     }
                 ]
             }
@@ -223,12 +223,12 @@ fn switch_to_nonexistant_mode() {
             "data": {
                 "availableModes": [
                     {
-                        "name": "SAFE",
-                        "active": false
-                    },
-                    {
                         "name": "operational",
                         "active": true
+                    },
+                    {
+                        "name": "safe",
+                        "active": false
                     }
                 ]
             }
@@ -240,7 +240,7 @@ fn switch_to_nonexistant_mode() {
         json!({
             "data" : {
                 "activateMode": {
-                    "errors": "Mode none not found",
+                    "errors": "Failed to activate 'none': Mode not found",
                     "success": false
                 }
             }
@@ -253,12 +253,12 @@ fn switch_to_nonexistant_mode() {
             "data": {
                 "availableModes": [
                     {
-                        "name": "SAFE",
-                        "active": true
-                    },
-                    {
                         "name": "operational",
                         "active": false
+                    },
+                    {
+                        "name": "safe",
+                        "active": true
                     }
                 ]
             }
@@ -278,12 +278,12 @@ fn switch_to_safe_mode() {
             "data": {
                 "availableModes": [
                     {
-                        "name": "SAFE",
-                        "active": true
-                    },
-                    {
                         "name": "operational",
                         "active": false
+                    },
+                    {
+                        "name": "safe",
+                        "active": true
                     }
                 ]
             }
@@ -298,12 +298,12 @@ fn switch_to_safe_mode() {
             "data": {
                 "availableModes": [
                     {
-                        "name": "SAFE",
-                        "active": false
-                    },
-                    {
                         "name": "operational",
                         "active": true
+                    },
+                    {
+                        "name": "safe",
+                        "active": false
                     }
                 ]
             }
@@ -311,11 +311,11 @@ fn switch_to_safe_mode() {
     );
 
     assert_eq!(
-        fixture.activate_mode("SAFE"),
+        fixture.activate_mode("safe"),
         json!({
             "data" : {
                 "activateMode": {
-                    "errors": "Must use safeMode to activate SAFE",
+                    "errors": "Must use safeMode to activate safe",
                     "success": false
                 }
             }
@@ -328,12 +328,12 @@ fn switch_to_safe_mode() {
             "data": {
                 "availableModes": [
                     {
-                        "name": "SAFE",
-                        "active": false
-                    },
-                    {
                         "name": "operational",
                         "active": true
+                    },
+                    {
+                        "name": "safe",
+                        "active": false
                     }
                 ]
             }
@@ -358,12 +358,12 @@ fn switch_to_safe_mode() {
             "data": {
                 "availableModes": [
                     {
-                        "name": "SAFE",
-                        "active": true
-                    },
-                    {
                         "name": "operational",
                         "active": false
+                    },
+                    {
+                        "name": "safe",
+                        "active": true
                     }
                 ]
             }

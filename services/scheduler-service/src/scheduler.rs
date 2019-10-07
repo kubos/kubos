@@ -19,6 +19,7 @@
 //!
 
 use crate::config::{get_mode_configs, ScheduleConfig};
+use crate::error::SchedulerError;
 use crate::mode::{
     activate_mode, create_mode, get_active_mode, get_available_modes, is_mode_active,
 };
@@ -31,7 +32,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 
 pub static DEFAULT_SCHEDULES_DIR: &str = "/home/system/etc/schedules";
-pub static SAFE_MODE: &str = "SAFE";
+pub static SAFE_MODE: &str = "safe";
 
 // Handle to primitives controlling scheduler runtime context
 #[derive(Clone)]
@@ -64,10 +65,13 @@ impl Scheduler {
     }
 
     // Ensure that conditions are good for starting the scheduler
-    pub fn init(&self) -> Result<(), String> {
+    pub fn init(&self) -> Result<(), SchedulerError> {
         if !Path::new(&self.scheduler_dir).is_dir() {
             if let Err(e) = fs::create_dir(&self.scheduler_dir) {
-                return Err(format!("Failed to create schedules dir: {}", e));
+                return Err(SchedulerError::CreateError {
+                    err: e.to_string(),
+                    path: self.scheduler_dir.to_owned(),
+                });
             }
         }
 
@@ -81,7 +85,7 @@ impl Scheduler {
     }
 
     // Checks if config is in active mode and schedules tasks if needed
-    pub fn check_start_config_tasks(&self, name: &str, mode: &str) -> Result<(), String> {
+    pub fn check_start_config_tasks(&self, name: &str, mode: &str) -> Result<(), SchedulerError> {
         if is_mode_active(&self.scheduler_dir, &mode) {
             let config_path = format!("{}/{}/{}.json", self.scheduler_dir, mode, name);
             let config_path = Path::new(&config_path);
@@ -94,7 +98,7 @@ impl Scheduler {
     }
 
     // Schedules tasks associated with config
-    fn start_config_tasks(&self, config: ScheduleConfig) -> Result<(), String> {
+    fn start_config_tasks(&self, config: ScheduleConfig) -> Result<(), SchedulerError> {
         let mut schedules_map = self.scheduler_map.lock().unwrap();
 
         let scheduler_handle = config.schedule_tasks(&self.app_service_url)?;
@@ -105,7 +109,7 @@ impl Scheduler {
     }
 
     // Iterate through the active schedule file and kick off scheduling tasks
-    pub fn start(&self) -> Result<(), String> {
+    pub fn start(&self) -> Result<(), SchedulerError> {
         if let Some(active_mode) = get_active_mode(&self.scheduler_dir)? {
             for config in get_mode_configs(&active_mode.path)? {
                 self.start_config_tasks(config)?;
@@ -117,7 +121,7 @@ impl Scheduler {
     }
 
     // Stops all running tasks and clears of list of scheduler handles
-    pub fn stop(&self) -> Result<(), String> {
+    pub fn stop(&self) -> Result<(), SchedulerError> {
         let mut schedules_map = self.scheduler_map.lock().unwrap();
         for (name, handle) in schedules_map.drain().take(1) {
             info!("Stopping {}'s tasks", name);
@@ -129,7 +133,7 @@ impl Scheduler {
     }
 
     // Checks if a config exists in an active mode and stops scheduler if needed
-    pub fn check_stop_config_tasks(&self, name: &str, mode: &str) -> Result<(), String> {
+    pub fn check_stop_config_tasks(&self, name: &str, mode: &str) -> Result<(), SchedulerError> {
         if is_mode_active(&self.scheduler_dir, mode) {
             Ok(self.stop_config_tasks(name)?)
         } else {
@@ -138,7 +142,7 @@ impl Scheduler {
     }
 
     // Attempts to stop scheduler associated with config
-    fn stop_config_tasks(&self, name: &str) -> Result<(), String> {
+    fn stop_config_tasks(&self, name: &str) -> Result<(), SchedulerError> {
         let mut schedules_map = self.scheduler_map.lock().unwrap();
         if let Some(handle) = schedules_map.remove(name) {
             info!("Stopping {}'s tasks", name);

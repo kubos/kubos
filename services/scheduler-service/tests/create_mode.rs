@@ -41,12 +41,12 @@ fn create_new_mode() {
             "data": {
                 "availableModes": [
                     {
-                        "name": "SAFE",
-                        "active": true,
-                    },
-                    {
                         "name": "operational",
                         "active": false
+                    },
+                    {
+                        "name": "safe",
+                        "active": true,
                     }
                 ]
             }
@@ -75,7 +75,7 @@ fn create_duplicate_mode() {
         json!({
             "data" : {
                 "createMode": {
-                    "errors": "Failed to create mode directory: File exists (os error 17)",
+                    "errors": "Failed to create 'operational': File exists (os error 17)",
                     "success": false
                 }
             }
@@ -117,16 +117,16 @@ fn create_two_modes() {
             "data": {
                 "availableModes": [
                     {
-                        "name": "SAFE",
-                        "active": true
-                    },
-                    {
                         "name": "low_power",
                         "active": false
                     },
                     {
                         "name": "operational",
                         "active": false
+                    },
+                    {
+                        "name": "safe",
+                        "active": true
                     }
                 ]
             }

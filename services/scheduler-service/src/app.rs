@@ -18,6 +18,7 @@
 //! Definitions and functions for dealing with scheduled app execution
 //!
 
+use crate::error::SchedulerError;
 use crate::schema::GenericResponse;
 use juniper::GraphQLObject;
 use log::{error, info};
@@ -39,11 +40,11 @@ pub struct StartAppGraphQL {
 }
 
 // Helper function for sending query to app service
-pub fn service_query(query: &str, hosturl: &str) -> Result<StartAppGraphQL, String> {
+pub fn service_query(query: &str, hosturl: &str) -> Result<StartAppGraphQL, SchedulerError> {
     let client = Client::builder()
         .timeout(Duration::from_millis(100))
         .build()
-        .map_err(|e| format!("Failed to create client: {:?}", e))?;
+        .map_err(|e| SchedulerError::QueryError { err: e.to_string() })?;
     let mut map = HashMap::new();
     map.insert("query", query);
     let url = format!("http://{}", hosturl);
@@ -52,13 +53,13 @@ pub fn service_query(query: &str, hosturl: &str) -> Result<StartAppGraphQL, Stri
         .post(&url)
         .json(&map)
         .send()
-        .map_err(|e| format!("Failed to send query: {:?}", e))?;
+        .map_err(|e| SchedulerError::QueryError { err: e.to_string() })?;
 
     Ok(from_str(
         &res.text()
-            .map_err(|e| format!("Failed to get result text: {:?}", e))?,
+            .map_err(|e| SchedulerError::QueryError { err: e.to_string() })?,
     )
-    .map_err(|e| format!("Failed to convert http result to json: {}", e))?)
+    .map_err(|e| SchedulerError::QueryError { err: e.to_string() })?)
 }
 
 // Configuration used for execution of an app

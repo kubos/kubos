@@ -98,3 +98,85 @@ fn run_onetime_past() {
     // Verify the task did not run
     assert_eq!(listener.get_request(), None);
 }
+
+#[test]
+fn run_onetime_far_future() {
+    let listener = ServiceListener::spawn("127.0.0.1", 9023);
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8023);
+
+    fixture.create_mode("init");
+
+    let now_time: DateTime<Utc> = Utc::now()
+        .checked_add_signed(chrono::Duration::weeks(52 * 100))
+        .unwrap();
+    let now_time = now_time.format("%Y-%m-%d %H:%M:%S").to_string();
+    dbg!(&now_time);
+
+    // Create some schedule with a task starting now
+    let schedule = json!({
+        "tasks": [
+            {
+                "name": "basic-task",
+                "time": now_time,
+                "app": {
+                    "name": "basic-app"
+                }
+            }
+        ]
+    });
+    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+    fixture.import_config("imaging", &schedule_path, "init");
+    fixture.activate_mode("init");
+
+    // Wait for the service to restart the scheduler
+    thread::sleep(Duration::from_millis(1100));
+
+    // Verify task did not run
+    assert_eq!(listener.get_request(), None);
+
+    // Check if scheduler is still alive
+    assert_eq!(
+        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
+        json!({
+            "data": {
+                "availableModes": [
+                    {
+                        "name": "init",
+                        "active": true,
+                        "schedules": [ { "name" : "imaging" } ]
+                    },
+                    {
+                        "name": "safe",
+                        "active": false,
+                        "schedules": [ ]
+                    }
+                ]
+            }
+        })
+    );
+
+    // Now actually restart the scheduler
+    fixture.restart();
+    thread::sleep(Duration::from_millis(100));
+
+    // Check if scheduler is still alive
+    assert_eq!(
+        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
+        json!({
+            "data": {
+                "availableModes": [
+                    {
+                        "name": "init",
+                        "active": true,
+                        "schedules": [ { "name" : "imaging" } ]
+                    },
+                    {
+                        "name": "safe",
+                        "active": false,
+                        "schedules": [ ]
+                    }
+                ]
+            }
+        })
+    );
+}

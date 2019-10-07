@@ -133,7 +133,7 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // }
     field activate_mode(&executor, name: String) -> FieldResult<GenericResponse> {
         if name == SAFE_MODE {
-            return Ok(GenericResponse { success: false, errors: "Must use safeMode to activate SAFE".to_owned() });
+            return Ok(GenericResponse { success: false, errors: "Must use safeMode to activate safe".to_owned() });
         }
         Ok(match activate_mode(&executor.context().subsystem().scheduler_dir, &name)
         .and_then(|_| executor.context().subsystem().stop())
