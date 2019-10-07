@@ -22,7 +22,7 @@ use super::storage;
 use super::Message;
 use crate::error::ProtocolError;
 use cbor_protocol::Protocol as CborProtocol;
-use log::{info, warn};
+use log::{error, info, warn};
 use rand::{self, Rng};
 use serde_cbor::Value;
 use std::cell::Cell;
@@ -133,7 +133,15 @@ impl Protocol {
         // Set up the full connection info
         Protocol {
             cbor_proto: c_protocol,
-            remote_addr: Cell::new(remote_addr.parse::<SocketAddr>().unwrap()),
+            remote_addr: Cell::new(
+                remote_addr
+                    .parse::<SocketAddr>()
+                    .map_err(|err| {
+                        error!("Failed to parse remote_addr: {:?}", err);
+                        err
+                    })
+                    .unwrap(),
+            ),
             config,
         }
     }

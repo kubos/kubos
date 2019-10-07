@@ -25,6 +25,7 @@ mod schema;
 use crate::model::Subsystem;
 use crate::schema::{MutationRoot, QueryRoot};
 use kubos_service::{Config, Service};
+use log::error;
 use syslog::Facility;
 
 /*
@@ -62,7 +63,12 @@ fn main() {
     .unwrap();
 
     Service::new(
-        Config::new("example-service").unwrap(),
+        Config::new("example-service")
+            .map_err(|err| {
+                error!("Failed to load service config: {:?}", err);
+                err
+            })
+            .unwrap(),
         Subsystem::new(),
         QueryRoot,
         MutationRoot,
