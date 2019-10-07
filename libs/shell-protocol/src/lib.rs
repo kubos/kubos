@@ -41,4 +41,4 @@ pub use crate::protocol::Protocol as ShellProtocol;
 pub const CHUNK_SIZE: u32 = 4096;
 
 /// Default port used by shell protocol
-pub const PORT: &str = "8080";
+pub const PORT: &str = "8060";

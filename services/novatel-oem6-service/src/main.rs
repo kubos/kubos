@@ -35,7 +35,7 @@
 //!
 //! [novatel-oem6-service.addr]
 //! ip = "127.0.0.1"
-//! port = 8082
+//! port = 8130
 //! ```
 //!
 //! # Starting the Service
@@ -45,7 +45,7 @@
 //! ```toml
 //! $ novatel-oem6-service
 //! Kubos OEM6 service started
-//! Listening on: 10.63.1.20:8082
+//! Listening on: 10.63.1.20:8130
 //! ```
 //!
 //! # Queries

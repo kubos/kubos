@@ -17,7 +17,7 @@ for ease of development.
 
 .. note::
    The IP address and port used by this service is controlled by a file
-   `config.yml` found in the root `python-service` directory.
+   `config.toml` found in the root `python-service` directory.
 
 Currently this payload has a single member `powerOn`.
 

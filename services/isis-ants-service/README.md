@@ -24,7 +24,7 @@ For example:
 ```toml
 [isis-ants-service.addr]
 ip = "0.0.0.0"
-port = 8006
+port = 8110
 
 [isis-ants-service]
 bus = "/dev/i2c-0"
@@ -41,7 +41,7 @@ The service should be started automatically by its init script, but may also be 
 ```bash
 $ isis-ants-service
 Kubos antenna systems service started
-Listening on: 0.0.0.0:8006
+Listening on: 0.0.0.0:8110
 ```
 
 If no config file is specified, then the service will look at `/etc/kubos-config.toml`.

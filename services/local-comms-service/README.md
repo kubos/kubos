@@ -21,21 +21,21 @@ gateway_port = 13001
 # IP to expect gateway communications on
 listening_ip = "127.0.0.1"
 # Port to listen on for gateway messages
-listening_port = 13002
+listening_port = 8081
 
 # GraphQL configuration
 [local-comms-service.addr]
 # IP to bind GraphQL server to
 ip = "127.0.0.1"
 # Port to listen on for GraphQL queries
-port = 8012
+port = 8140
 
 # Communications service configuration
 [local-comms-service.comms]
 # Maximum number of concurrent message handlers
 max_num_handlers = 10
 # Ports to listen for local traffic on
-downlink_ports = [14011]
+downlink_ports = [8080]
 #  Timeout when listening for packet response (milliseconds)
 timeout = 1
 # IP to bind Communications service listener to

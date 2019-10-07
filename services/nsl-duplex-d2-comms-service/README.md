@@ -23,7 +23,7 @@ ping_freq = 10
 # IP to bind GraphQL server to
 ip = "127.0.0.1"
 # Port to listen on for GraphQL queries
-port = 8012
+port = 8140
 
 # Communications service configuration
 [nsl-duplex-comms-service.comms]

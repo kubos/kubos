@@ -24,7 +24,7 @@ For example::
 
     [kubos-monitor.addr]
     ip = "0.0.0.0"
-    port = 8006
+    port = 8030
 
 This section defines the IP address and port to be used for receiving :doc:`graphql` requests over HTTP.
 

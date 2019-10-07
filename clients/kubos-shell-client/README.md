@@ -22,4 +22,4 @@ Required arguments:
 Optional arguments:
 
 - `-i {remote IP}` - Default: `0.0.0.0`. IP address of the shell service to connect to.
-- `-p {remote port}` - Default: `8080`. UDP port of the shell service to connect to.
+- `-p {remote port}` - Default: `8060`. UDP port of the shell service to connect to.

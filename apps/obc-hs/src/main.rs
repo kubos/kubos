@@ -43,7 +43,7 @@ use std::time::Duration;
 // If no beacon is desired, make this value an empty string ("")
 pub const COMMS_SERVICE: &str = "local-comms-service";
 // Comms service downlink port
-pub const DOWNLINK_PORT: u16 = 14011;
+pub const DOWNLINK_PORT: u16 = 8080;
 
 // General options:
 

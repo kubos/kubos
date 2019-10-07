@@ -12,7 +12,7 @@ bus = "/dev/i2c-1"
 
 [clyde-3g-eps-service.addr]
 ip = "127.0.0.1"
-port = 8089
+port = 8100
 ```
 
 Where `bus` specifies the I2C bus the EPS is on, `ip` specifies the
@@ -25,7 +25,7 @@ The service should be started automatically by its init script, but may also be 
 
 ```bash
 $ clyde-3g-eps-service
-Listening on: 127.0.0.1:8089
+Listening on: 127.0.0.1:8100
 ```
 
 If no config file is specified, then the service will look at `/etc/kubos-config.toml`.

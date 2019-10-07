@@ -20,10 +20,10 @@ The service expects the following sections and settings to be present:
 bus = "/dev/ttyUSB0" -- Serial bus to use
 [serial-comms-service.addr] -- GraphQL configuration
 ip = "127.0.0.1" -- IP to bind GraphQL server to
-port = 8012 -- Port to listen on for GraphQL queries
+port = 8160 -- Port to listen on for GraphQL queries
 [serial-comms-service.comms] -- Communications service configuration
 max_num_handlers = 10 -- Maximum number of concurrent message handlers
-downlink_ports = [14011] -- Ports to listen for local traffic on
+downlink_ports = [8080] -- Ports to listen for local traffic on
 timeout = 1 -- Timeout when listening for packet response
 ip = "0.0.0.0" -- IP to bind Communications service listener to
 ```
@@ -33,5 +33,5 @@ When the service has started correctly it will display output like so:
 ```
 2019-01-18T13:00:32.512854973-06:00 INFO serial_comms_service - Serial Communications Service starting on /dev/ttyUSB0
 2019-01-18T13:00:32.513053752-06:00 INFO comms_service::service - Communication service started
-2019-01-18T13:00:32.513855-06:00 INFO kubos_service::service - Listening on: 127.0.0.1:8080
+2019-01-18T13:00:32.513855-06:00 INFO kubos_service::service - Listening on: 127.0.0.1:8160
 ```

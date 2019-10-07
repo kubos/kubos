@@ -16,7 +16,7 @@ For example:
 ```toml
 [iobc-supervisor-service.addr]
 ip = "0.0.0.0"
-port = 8006
+port = 8170
 ```
 
 # Starting the Service
@@ -26,7 +26,7 @@ The service should be started automatically by its init script, but may also be 
 ```bash
 $ iobc-supervisor-service
 Kubos antenna systems service started
-Listening on: 0.0.0.0:8006
+Listening on: 0.0.0.0:8170
 ```
 
 If no config file is specified, then the service will look at `/etc/kubos-config.toml`.

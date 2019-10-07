@@ -29,7 +29,7 @@ set:
 - ``COMMS_SERVICE`` - (Default: ``"local-comms-service"``) The name of the comms service which should
   be used to send an emergency beacon if the OBC's filesystem becomes unrecoverably corrupted.
   This beacon may be disabled by making this value an empty string (``""``).
-- ``DOWNLINK_PORT`` - (Default: ``14011``) The specific comms service port which the emergency
+- ``DOWNLINK_PORT`` - (Default: ``8080``) The specific comms service port which the emergency
   beacon should be sent to. This port should match what is specified in the comms service's
   configuration.
 

@@ -183,11 +183,11 @@ For example::
     storage_dir = "my/storage/directory"
     timeout = 3600
     downlink_ip = "127.0.0.1"
-    downlink_port = 8000
+    downlink_port = 8080
     
     [file-transfer-service.addr]
     ip = "0.0.0.0"
-    port = 7000
+    port = 8070
     
 Future configuration options:
 

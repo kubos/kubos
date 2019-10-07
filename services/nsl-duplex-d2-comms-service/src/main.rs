@@ -36,7 +36,7 @@
 //!
 //! [nsl-duplex-comms-service.addr]
 //! ip = "127.0.0.1"
-//! port = 8089
+//! port = 8140
 //! ```
 //!
 //! The configuration of this service is split into three parts:
