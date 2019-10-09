@@ -52,7 +52,7 @@ Optional arguments:
       placed in the current directory of the destination.
     - ``-h {host IP}`` - Default: `0.0.0.0`. IP address of the local host to use.
     - ``-r {remote IP}`` - Default: `0.0.0.0`. IP address of the file transfer service to connect to.
-    - ``-p {remote port}`` - Default: `7000`. UDP port of the file transfer service to connect to.
+    - ``-p {remote port}`` - Default: `8040`. UDP port of the file transfer service to connect to.
     - ``-s {storage_prefix}`` - Default: `file-storage`. Name of the directory which should be used
       for temporary file transfer storage.
     - ``-c {chunk_size}`` - Default: `4096`. Size, in bytes, of the individual chunks the file
@@ -69,27 +69,29 @@ For this tutorial, we'll be transferring the application file that was created a
 OBC.
 
 We'll need to specify the OBC's IP address and the port that the file transfer service is listening
-on. By default, this is port 8008.
+on. By default, this is port 8040.
 
-We will also need to specify the port that the file transfer service will be sending data
-back on. There is no default value, so in this tutorial we will use port 8028. You will need
-to modify the file ``/home/system/etc/config.toml`` on-board the OBC and add the 
-following line under the ``[file-transfer-service]`` section::
+We will also need to specify the IP and port that the file transfer service will be sending data
+back on. By default, the configuration is set up to return messages via the comms service, which we
+aren't currently using.
+You will need to modify the file ``/etc/kubos-config.toml`` on-board the OBC and update the
+following lines under the ``[file-transfer-service]`` section::
 
-    downlink_port = 8028
+    downlink_ip = {host IP address}
+    downlink_port = 8081
 
-After modifying the ``config.toml`` it will be necessary to restart the file transfer service
+After modifying ``config.toml`` it will be necessary to restart the file transfer service
 by running the following command on the OBC::
 
     $ ./etc/init.d/S99kubos-core-file-transfer restart
 
 Our transfer command should look like this::
 
-    $ kubos-file-client -r 10.0.2.20 -p 8008 -P 8028 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
+    $ kubos-file-client -r 10.0.2.20 -p 8040 -P 8081 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
     
 Or, from your local dev environment::
 
-    $ cargo run -- -r 10.0.2.20 -p 8008 -P 8028 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
+    $ cargo run -- -r 10.0.2.20 -p 8040 -P 8081 upload /home/vagrant/my-app/my-mission-app.py /home/kubos/my-mission-app.py
     
 The output from the client should look like this:
 
@@ -123,7 +125,7 @@ Receiving a File from an OBC
 
 Next, we'll request that the OBC send us the application debug log file::
 
-    $ kubos-file-client -r 10.0.2.20 -p 8008 -P 8028 download /var/log/app-debug.log
+    $ kubos-file-client -r 10.0.2.20 -p 8040 -P 8081 download /var/log/app-debug.log
     
 We're not specifying a destination file, which will result in the transferred file being saved as
 `app-debug.log` in our current directory.

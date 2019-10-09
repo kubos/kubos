@@ -66,7 +66,7 @@ fn setup_app(registry_dir: &Path) {
             name = "rust-proj"
             version = "1.0"
             author = "user"
-            config = "/home/system/etc/config.toml"
+            config = "/etc/kubos-config.toml"
             "#,
         registry_dir.to_string_lossy(),
     );
@@ -142,7 +142,7 @@ fn monitor_good() {
     assert_eq!(result["appStatus"][0]["pid"].as_i64().unwrap(), pid);
     assert_eq!(
         result["appStatus"][0]["config"].as_str().unwrap(),
-        "/home/system/etc/config.toml"
+        "/etc/kubos-config.toml"
     );
     assert_eq!(args, ["-l"]);
     assert!(result["appStatus"][0]["startTime"].is_string());

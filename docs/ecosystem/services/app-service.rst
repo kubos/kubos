@@ -42,7 +42,7 @@ The applications service uses the same HTTP+GraphQL communication scheme as the 
 
 Users will send GraphQL queries and mutations to the service's HTTP listener port.
 The port number can be found in the system's :doc:`configuration file <../services/service-config>`
-in `/home/system/etc/config.toml`
+in `/etc/kubos-config.toml`
 
 Querying
 --------
@@ -434,7 +434,7 @@ the current version.
 Customizing the Applications Service
 ------------------------------------
 
-The configuration for the applications service is saved in `/home/system/etc/config.toml`.
+The configuration for the applications service is saved in `/etc/kubos-config.toml`.
 This file can be editted to add or modify the following fields:
 
 - ``[app-service.addr]``

@@ -6,7 +6,7 @@ Note: This service may also be compatible with the OEM7 devices
 
 # Configuration
 
-The service can be configured in the `/home/system/etc/config.toml` with the following fields:
+The service can be configured in the `/etc/kubos-config.toml` with the following fields:
 
 - `bus` - Specifies the UART bus the OEM6 is connected to
 - `ip` - Specifies the service's IP address
@@ -20,7 +20,7 @@ bus = "/dev/ttyS4"
 
 [novatel-oem6-service.addr]
 ip = "127.0.0.1"
-port = 8082
+port = 8130
 ```
 
 # Starting the Service
@@ -30,10 +30,10 @@ The service should be started automatically by its init script, but may also be 
 ```bash
 $ novatel-oem6-service
 Kubos OEM6 service started
-Listening on: 10.63.1.20:8082
+Listening on: 10.63.1.20:8130
 ```
 
-If no config file is specified, then the service will look at `/home/system/etc/config.toml`.
+If no config file is specified, then the service will look at `/etc/kubos-config.toml`.
 An alternative config file may be specified on the command line at run time:
 
 ```bash

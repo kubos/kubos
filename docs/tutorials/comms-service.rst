@@ -75,7 +75,7 @@ Under this new service name, we'll be adding two sections:
 - A ``radio-service.addr`` section to define the IP and port for the GraphQL endpoint of our service
 - A ``radio-service.comms`` section to define our communications settings
 
-For the address section, we'll use the internal IP address, ``0.0.0.0``, and port 8020.
+For the address section, we'll use the internal IP address, ``0.0.0.0``, and port 8150.
 
 In the comms section, we'll define our satellite's IP address as ``0.0.0.0``, since internally our
 tutorial satellite's services all use different ports on the same IP address.
@@ -90,7 +90,7 @@ The final ``config.toml`` section should look like this::
 
     [radio-service.addr]
     ip = "0.0.0.0"
-    port = 8020
+    port = 8150
 
     [radio-service.comms]
     timeout = 1000
@@ -790,15 +790,15 @@ Execution
 ~~~~~~~~~
 
 To start, we'll send a simple telemetry request to the telemetry service running on the OBC.
-By default, the telemetry service uses port 8006 for GraphQL requests.
+By default, the telemetry service uses port 8020 for GraphQL requests.
 
 From the SDK, run the following command::
 
-    $ uart-comms-client "{telemetry(latest: 10){subsystem, parameter, value}" -b /dev/FTDI -p 8006
+    $ uart-comms-client "{telemetry(latest: 10){subsystem, parameter, value}" -b /dev/FTDI -p 8020
     
 Or, from your local dev environment::
 
-    $ cargo run -- "{telemetry(latest: 10){subsystem, parameter, value}" -b /dev/FTDI -p 8006
+    $ cargo run -- "{telemetry(latest: 10){subsystem, parameter, value}" -b /dev/FTDI -p 8020
 
 You should see the following output::
 
@@ -821,7 +821,7 @@ check the following:
     - OBC's UART port is correctly wired to the user's PC
     - Destination IP given to the client matches the ``ip`` parameter in the service
     - Port given to the client matches the port of the telemetry service (this is defined in
-      the systems ``config.toml`` file. The default location is ``/home/system/etc/config.toml``)
+      the systems ``config.toml`` file. The default location is ``/etc/kubos-config.toml``)
 
 GraphQL
 -------
@@ -1030,7 +1030,7 @@ Testing
 
 Now that the code is complete, we can use our communications service to send a query to itself::
 
-    $ uart-comms-client -b /dev/FTDI -p 8020 "{packetsUp,packetsDown,failedPacketsUp,failedPacketsDown,errors}"
+    $ uart-comms-client -b /dev/FTDI -p 8150 "{packetsUp,packetsDown,failedPacketsUp,failedPacketsDown,errors}"
     Response: {"data":{"failedPacketsDown":0,"failedPacketsUp":0,"packetsDown":4,"packetsUp":5},"errors":[]}
 
 .. |comms-service-start| raw:: html

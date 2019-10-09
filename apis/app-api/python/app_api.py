@@ -15,7 +15,7 @@ import socket
 import sys
 import toml
 
-SERVICE_CONFIG_PATH = "/home/system/etc/config.toml"
+SERVICE_CONFIG_PATH = "/etc/kubos-config.toml"
 UDP_BUFF_LEN = 1024
 DEFAULT_TIMEOUT = 10.0  # Seconds
 

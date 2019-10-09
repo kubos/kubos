@@ -36,7 +36,7 @@
 //!
 //! [nsl-duplex-comms-service.addr]
 //! ip = "127.0.0.1"
-//! port = 8089
+//! port = 8140
 //! ```
 //!
 //! The configuration of this service is split into three parts:
@@ -72,7 +72,7 @@
 //! NSL Duplex Communications Service starting on /dev/ttyUSB0
 //! ```
 //!
-//! If no config file is specified, then the service will look at `/home/system/etc/config.toml`.
+//! If no config file is specified, then the service will look at `/etc/kubos-config.toml`.
 //! An alternative config file may be specified on the command line at run time:
 //!
 //! ```bash

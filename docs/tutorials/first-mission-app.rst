@@ -183,7 +183,7 @@ In order to communicate with a service, we need to know where to send our messag
 All services rely on a configuration file, ``config.toml``, in order to determine which IP and port
 they should bind a listener thread to.
 
-By default, this file is located in ``/home/system/etc/config.toml``.
+By default, this file is located in ``/etc/kubos-config.toml``.
 Since we're running these tutorials locally, that file location likely doesn't exist, so instead we
 are using the ``tools/default_config.toml`` file in our cloned copy of the kubos repo.
 

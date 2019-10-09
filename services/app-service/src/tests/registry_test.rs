@@ -58,7 +58,7 @@ fn serialize_entry() {
             version: String::from("0.0.1"),
             author: String::from("noone"),
             executable: String::from("/fake/path"),
-            config: String::from("/home/system/etc/config.toml"),
+            config: String::from("/etc/kubos-config.toml"),
         },
         active_version: true,
     };

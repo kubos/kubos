@@ -9,7 +9,7 @@ import toml
 
 DEFAULT_IP = "127.0.0.1"
 DEFAULT_PORT = 8001
-DEFAULT_PATH = "/home/system/etc/config.toml"
+DEFAULT_PATH = "/etc/kubos-config.toml"
 
 
 def get_args(name):
