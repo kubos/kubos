@@ -33,12 +33,12 @@ pub enum SchedulerError {
     },
     #[fail(display = "Failed to create '{}': {}", path, err)]
     CreateError { err: String, path: String },
-    /// An error was raised while importing a config file
+    /// An error was raised while importing a task list
     #[fail(display = "Failed to import '{}': {}", name, err)]
     ImportError {
         /// The specific import error
         err: String,
-        // Path of config file which failed to import
+        // Path of task list which failed to import
         name: String,
     },
     /// An error was raised when removing a mode or task file
@@ -62,8 +62,8 @@ pub enum SchedulerError {
         /// Delay or time field parsed
         field: String,
     },
-    #[fail(display = "Failed to import config file '{}': {}", name, err)]
-    ConfigParseError { err: String, name: String },
+    #[fail(display = "Failed to import task list '{}': {}", name, err)]
+    TaskListParseError { err: String, name: String },
     #[fail(display = "Failed to load mode {}: {}", path, err)]
     LoadModeError { err: String, path: String },
     #[fail(display = "Scheduler query failed: {}", err)]

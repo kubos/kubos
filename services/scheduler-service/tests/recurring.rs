@@ -42,8 +42,8 @@ fn run_recurring_no_delay() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("imaging", &schedule_path, "init");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("imaging", &schedule_path, "init");
     fixture.activate_mode("init");
 
     // Wait for the service to restart the scheduler
@@ -77,8 +77,8 @@ fn run_recurring_delay() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("imaging", &schedule_path, "init");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("imaging", &schedule_path, "init");
     fixture.activate_mode("init");
 
     // Wait for the service to restart the scheduler

@@ -64,14 +64,14 @@ pub fn service_query(query: &str, hosturl: &str) -> Result<StartAppGraphQL, Sche
 
 // Configuration used for execution of an app
 #[derive(Clone, Debug, GraphQLObject, Serialize, Deserialize)]
-pub struct ScheduleApp {
+pub struct App {
     pub name: String,
     pub args: Option<Vec<String>>,
     pub config: Option<String>,
     pub run_level: Option<String>,
 }
 
-impl ScheduleApp {
+impl App {
     pub fn execute(&self, service_url: &str) {
         info!("Start app {}", self.name);
         let run_level = match &self.run_level {

@@ -18,9 +18,9 @@
 //! Definitions and functions concerning the manipulation of schedule modes
 //!
 
-use crate::config::{get_mode_configs, ScheduleConfig};
 use crate::error::SchedulerError;
 use crate::scheduler::SAFE_MODE;
+use crate::task_list::{get_mode_task_lists, TaskList};
 use chrono::offset::TimeZone;
 use chrono::{DateTime, Utc};
 use juniper::GraphQLObject;
@@ -35,7 +35,7 @@ pub struct ScheduleMode {
     pub name: String,
     pub path: String,
     pub last_revised: String,
-    pub schedules: Vec<ScheduleConfig>,
+    pub schedule: Vec<TaskList>,
     pub active: bool,
 }
 
@@ -58,10 +58,10 @@ impl ScheduleMode {
             })?
             .to_owned();
 
-        let schedules = get_mode_configs(&path)?;
+        let schedule = get_mode_task_lists(&path)?;
 
         let mut last_revised: DateTime<Utc> = Utc.ymd(1970, 1, 1).and_hms(0, 0, 0);
-        for s in &schedules {
+        for s in &schedule {
             let sched_time: DateTime<Utc> = Utc
                 .datetime_from_str(&s.time_imported, "%Y-%m-%d %H:%M:%S")
                 .unwrap();
@@ -78,7 +78,7 @@ impl ScheduleMode {
             name,
             path,
             last_revised,
-            schedules,
+            schedule,
             active,
         })
     }
