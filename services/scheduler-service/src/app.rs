@@ -68,17 +68,12 @@ pub struct App {
     pub name: String,
     pub args: Option<Vec<String>>,
     pub config: Option<String>,
-    pub run_level: Option<String>,
 }
 
 impl App {
     pub fn execute(&self, service_url: &str) {
         info!("Start app {}", self.name);
-        let run_level = match &self.run_level {
-            Some(run) => run,
-            None => "onBoot",
-        };
-        let mut query_args = format!("runLevel: \"{}\", name: \"{}\"", run_level, self.name);
+        let mut query_args = format!("name: \"{}\"", self.name);
         if let Some(config) = &self.config {
             query_args.push_str(&format!(", config: \"{}\"", config));
         }

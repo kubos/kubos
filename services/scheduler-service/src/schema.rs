@@ -20,7 +20,7 @@
 
 use crate::mode::*;
 use crate::scheduler::{Scheduler, SAFE_MODE};
-use crate::task_list::{import_task_list, remove_task_list};
+use crate::task_list::{import_raw_task_list, import_task_list, remove_task_list};
 use juniper::FieldResult;
 use juniper::{graphql_object, GraphQLObject};
 use kubos_service;
@@ -195,6 +195,21 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
             Ok(_) => {
                 GenericResponse { success: true, errors: "".to_owned() }
             },
+            Err(error) => GenericResponse { success: false, errors: error.to_string() }
+        })
+    }
+
+    // Imports a raw task list into a mode
+    //
+    // mutation {
+    //     importRawTaskList(path: String!, name: String!, mode: String!): {
+    //         errors: String,
+    //         success: Boolean
+    //    }
+    // }
+    field import_raw_task_list(&executor, name: String, mode: String, json: String) -> FieldResult<GenericResponse> {
+        Ok(match import_raw_task_list(&executor.context().subsystem().scheduler_dir, &name, &mode, &json).and_then(|_| executor.context().subsystem().check_start_task_list(&name, &mode)) {
+            Ok(_) => GenericResponse { success: true, errors: "".to_owned() },
             Err(error) => GenericResponse { success: false, errors: error.to_string() }
         })
     }

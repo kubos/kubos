@@ -58,7 +58,7 @@ fn run_onetime_future() {
     // Wait for the service to restart the scheduler
     thread::sleep(Duration::from_millis(1100));
 
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"basic-app\") { success, errors } }"}"#;
+    let query = r#"{"query":"mutation { startApp(name: \"basic-app\") { success, errors } }"}"#;
 
     // Check if the task actually ran
     assert_eq!(listener.get_request(), Some(query.to_owned()))

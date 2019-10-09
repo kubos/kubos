@@ -180,6 +180,52 @@ pub fn import_task_list(
     Ok(())
 }
 
+// Import raw json into a task list into a mode directory
+pub fn import_raw_task_list(
+    scheduler_dir: &str,
+    name: &str,
+    mode: &str,
+    json: &str,
+) -> Result<(), SchedulerError> {
+    let name = name.to_lowercase();
+    let mode = mode.to_lowercase();
+    info!("Importing raw task list '{}' into mode '{}'", name, mode);
+    let schedule_dest = format!("{}/{}/{}.json", scheduler_dir, mode, name);
+
+    if !Path::new(&format!("{}/{}", scheduler_dir, mode)).is_dir() {
+        return Err(SchedulerError::ImportError {
+            err: "Mode not found".to_owned(),
+            name: name.to_owned(),
+        });
+    }
+
+    let mut task_list =
+        fs::File::create(&schedule_dest).map_err(|e| SchedulerError::ImportError {
+            err: e.to_string(),
+            name: name.to_owned(),
+        })?;
+    task_list
+        .write_all(json.as_bytes())
+        .map_err(|e| SchedulerError::ImportError {
+            err: e.to_string(),
+            name: name.to_owned(),
+        })?;
+    task_list
+        .sync_all()
+        .map_err(|e| SchedulerError::ImportError {
+            err: e.to_string(),
+            name: name.to_owned(),
+        })?;
+
+    let list_path = Path::new(&schedule_dest);
+    if let Err(e) = TaskList::from_path(&list_path) {
+        let _ = fs::remove_file(&schedule_dest);
+        return Err(e);
+    }
+
+    Ok(())
+}
+
 // Remove an existing task list from the mode's directory
 pub fn remove_task_list(scheduler_dir: &str, name: &str, mode: &str) -> Result<(), SchedulerError> {
     let name = name.to_lowercase();
