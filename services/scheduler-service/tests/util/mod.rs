@@ -130,6 +130,15 @@ impl SchedulerFixture {
         service_query(&mutation, &self.ip, self.port)
     }
 
+    pub fn import_raw_task_list(&self, name: &str, mode: &str, json: &str) -> serde_json::Value {
+        let mutation = format!(
+            r#"mutation {{ importRawTaskList(name: "{}", mode: "{}", json: "{}") {{ errors, success }} }}"#,
+            name, mode, json
+        );
+
+        service_query(&mutation, &self.ip, self.port)
+    }
+
     pub fn remove_task_list(&self, name: &str, mode: &str) -> serde_json::Value {
         let mutation = format!(
             r#"mutation {{ removeTaskList(name: "{}", mode: "{}") {{ errors, success }} }}"#,

@@ -49,7 +49,7 @@ fn run_recurring_no_delay() {
     // Wait for the service to restart the scheduler
     thread::sleep(Duration::from_millis(1100));
 
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"basic-app\") { success, errors } }"}"#;
+    let query = r#"{"query":"mutation { startApp(name: \"basic-app\") { success, errors } }"}"#;
 
     // Check if the task was run only twice
     assert_eq!(listener.get_request(), Some(query.to_owned()));
@@ -84,7 +84,7 @@ fn run_recurring_delay() {
     // Wait for the service to restart the scheduler
     thread::sleep(Duration::from_millis(2100));
 
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"basic-app\") { success, errors } }"}"#;
+    let query = r#"{"query":"mutation { startApp(name: \"basic-app\") { success, errors } }"}"#;
 
     // Check if the task was run only twice
     assert_eq!(listener.get_request(), Some(query.to_owned()));

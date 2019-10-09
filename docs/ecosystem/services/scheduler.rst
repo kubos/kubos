@@ -12,7 +12,8 @@ The behavior of the scheduler is defined by three levels of organization: *mode*
 The *schedule* is then assembled by combining all the *task lists* in the schedule
 directory, each of which can contain one or many *tasks*. New *tasks* can be added to
 a *schedule* by uploading a *task list* to a location which is accessible to the 
-scheduler, and importing that *task list* to the appropriate mode. 
+scheduler, and importing that *task list* to the appropriate mode. *Tasks* can
+also be added directly via the ``importRawTaskList`` GraphQL mutation.
 
 Upon boot, or service start, the scheduler reads all task lists in the active 
 mode directory and schedules all tasks from that mode. The default active mode directory
@@ -300,5 +301,30 @@ from the scheduler. It as the following schema::
         removeTaskList(name: String!, mode:String!): {
             success: Boolean,
             errors: String
+        }
+    }
+
+The ``importRawTaskList`` mutation allows the scheduler to directly receive raw JSON
+and import it into a task list in a mode. If the mode is active, all the tasks in
+the JSON will be immediately loaded for scheduling. It has the following schema::
+
+    mutation {
+        importRawTaskList(name: String!, mode: String!, json: String!) {
+            success: Boolean,
+            errors: String
+        }
+    }
+
+When using the ``importRawTaskList`` mutation it is important to remember to escape
+all double quotes inside of the JSON. Here is an example::
+
+    mutation {
+        importRawTaskList(
+            name: "camera",
+            mode: "operational",
+            json: "{\"tasks\":[{\"name\":\"start-camera\",\"delay\":\"10m\",\"app\": {\"name\":\"activate-camera\"}}]}"
+        ) {
+            success,
+            errors
         }
     }

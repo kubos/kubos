@@ -59,7 +59,7 @@ fn run_init_single_no_delay() {
     // Wait for the service to restart the scheduler
     thread::sleep(Duration::from_millis(100));
 
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"basic-app\") { success, errors } }"}"#;
+    let query = r#"{"query":"mutation { startApp(name: \"basic-app\") { success, errors } }"}"#;
 
     // Check if the task actually ran
     assert_eq!(listener.get_request(), Some(query.to_owned()))
@@ -94,7 +94,7 @@ fn run_init_single_with_delay() {
     // Wait for service to run the task
     thread::sleep(Duration::from_millis(1000));
 
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"basic-app\") { success, errors } }"}"#;
+    let query = r#"{"query":"mutation { startApp(name: \"basic-app\") { success, errors } }"}"#;
 
     // Check if the task actually ran
     assert_eq!(listener.get_request(), Some(query.to_owned()))
@@ -133,11 +133,11 @@ fn run_init_two_tasks() {
     thread::sleep(Duration::from_millis(1100));
 
     // Check if first task ran
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"basic-app\") { success, errors } }"}"#;
+    let query = r#"{"query":"mutation { startApp(name: \"basic-app\") { success, errors } }"}"#;
     assert_eq!(listener.get_request(), Some(query.to_owned()));
 
     // Check if second app ran in order
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"other-app\") { success, errors } }"}"#;
+    let query = r#"{"query":"mutation { startApp(name: \"other-app\") { success, errors } }"}"#;
     assert_eq!(listener.get_request(), Some(query.to_owned()));
 }
 
@@ -167,7 +167,7 @@ fn run_init_single_args() {
     // Wait for service to restart scheduler and run task
     thread::sleep(Duration::from_millis(100));
 
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"basic-app\", args: [\"-l\",\"-h\"]) { success, errors } }"}"#;
+    let query = r#"{"query":"mutation { startApp(name: \"basic-app\", args: [\"-l\",\"-h\"]) { success, errors } }"}"#;
 
     // Check if the task actually ran
     assert_eq!(listener.get_request(), Some(query.to_owned()))
@@ -199,39 +199,7 @@ fn run_init_single_custom_task_list() {
     // Wait for service to restart scheduler and run task
     thread::sleep(Duration::from_millis(100));
 
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"basic-app\", config: \"path/to/custom.toml\") { success, errors } }"}"#;
-
-    // Check if the task actually ran
-    assert_eq!(listener.get_request(), Some(query.to_owned()))
-}
-
-#[test]
-fn run_init_single_custom_runlevel() {
-    let listener = ServiceListener::spawn("127.0.0.1", 9026);
-    let fixture = SchedulerFixture::spawn("127.0.0.1", 8026);
-    fixture.create_mode("init");
-
-    // Create some schedule with an init task
-    let schedule = json!({
-        "tasks": [
-            {
-                "name": "basic-task",
-                "delay": "0s",
-                "app": {
-                    "name": "basic-app",
-                    "run_level": "onCommand",
-                }
-            }
-        ]
-    });
-    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
-    fixture.import_task_list("imaging", &schedule_path, "init");
-    fixture.activate_mode("init");
-
-    // Wait for service to restart scheduler and run task
-    thread::sleep(Duration::from_millis(100));
-
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onCommand\", name: \"basic-app\") { success, errors } }"}"#;
+    let query = r#"{"query":"mutation { startApp(name: \"basic-app\", config: \"path/to/custom.toml\") { success, errors } }"}"#;
 
     // Check if the task actually ran
     assert_eq!(listener.get_request(), Some(query.to_owned()))
@@ -278,11 +246,11 @@ fn run_init_two_schedules_one_mode() {
     thread::sleep(Duration::from_millis(1100));
 
     // Check if the task ran
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"first-app\") { success, errors } }"}"#;
+    let query = r#"{"query":"mutation { startApp(name: \"first-app\") { success, errors } }"}"#;
     assert_eq!(listener.get_request(), Some(query.to_owned()));
 
     // Check if the task ran
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"second-app\") { success, errors } }"}"#;
+    let query = r#"{"query":"mutation { startApp(name: \"second-app\") { success, errors } }"}"#;
     assert_eq!(listener.get_request(), Some(query.to_owned()))
 }
 
@@ -328,7 +296,7 @@ fn run_init_two_modes() {
     thread::sleep(Duration::from_millis(100));
 
     // Check if the task ran
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"first-app\") { success, errors } }"}"#;
+    let query = r#"{"query":"mutation { startApp(name: \"first-app\") { success, errors } }"}"#;
     assert_eq!(listener.get_request(), Some(query.to_owned()));
 
     // Activate second schedule, wait for task to run
@@ -336,7 +304,7 @@ fn run_init_two_modes() {
     thread::sleep(Duration::from_millis(100));
 
     // Check if the task ran
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"second-app\") { success, errors } }"}"#;
+    let query = r#"{"query":"mutation { startApp(name: \"second-app\") { success, errors } }"}"#;
     assert_eq!(listener.get_request(), Some(query.to_owned()))
 }
 
@@ -386,7 +354,7 @@ fn run_init_two_modes_check_stop() {
     thread::sleep(Duration::from_millis(100));
 
     // Check if the task ran
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"second-app\") { success, errors } }"}"#;
+    let query = r#"{"query":"mutation { startApp(name: \"second-app\") { success, errors } }"}"#;
     assert_eq!(listener.get_request(), Some(query.to_owned()));
 
     // Give the scheduler time to run (or not) delayed task from first schedule
@@ -428,7 +396,7 @@ fn run_init_after_import() {
     thread::sleep(Duration::from_millis(100));
 
     // Check if the task ran
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"first-app\") { success, errors } }"}"#;
+    let query = r#"{"query":"mutation { startApp(name: \"first-app\") { success, errors } }"}"#;
     assert_eq!(listener.get_request(), Some(query.to_owned()));
 }
 
