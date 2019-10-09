@@ -20,12 +20,12 @@
 #![deny(missing_docs)]
 
 mod app;
-mod config;
 mod error;
 mod mode;
 mod scheduler;
 mod schema;
 mod task;
+mod task_list;
 
 use crate::error::SchedulerError;
 use kubos_service::{Config, Service};

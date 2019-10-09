@@ -15,12 +15,12 @@
  */
 
 //!
-//! Definitions and functions concerning the manipulation of schedule configs
+//! Definitions and functions concerning the manipulation of task lists
 //!
 
 use crate::error::SchedulerError;
 use crate::scheduler::SchedulerHandle;
-use crate::task::ScheduleTask;
+use crate::task::Task;
 use chrono::{DateTime, Utc};
 use juniper::GraphQLObject;
 use log::{error, info, warn};
@@ -34,27 +34,27 @@ use tokio::prelude::future::lazy;
 use tokio::prelude::*;
 use tokio::runtime::Runtime;
 
-// Schedule config's contents
+// Task list's contents
 #[derive(Debug, GraphQLObject, Serialize, Deserialize)]
-struct ConfigContents {
-    pub tasks: Vec<ScheduleTask>,
+struct ListConents {
+    pub tasks: Vec<Task>,
 }
 
-// Schedule config's metadata
+// Task list's metadata
 #[derive(Debug, GraphQLObject)]
-pub struct ScheduleConfig {
-    pub tasks: Vec<ScheduleTask>,
+pub struct TaskList {
+    pub tasks: Vec<Task>,
     pub path: String,
     pub name: String,
     pub time_imported: String,
 }
 
-impl ScheduleConfig {
-    pub fn from_path(path_obj: &Path) -> Result<ScheduleConfig, SchedulerError> {
+impl TaskList {
+    pub fn from_path(path_obj: &Path) -> Result<TaskList, SchedulerError> {
         let path = path_obj
             .to_str()
             .map(|path| path.to_owned())
-            .ok_or_else(|| SchedulerError::ConfigParseError {
+            .ok_or_else(|| SchedulerError::TaskListParseError {
                 err: "Failed to convert path".to_owned(),
                 name: "".to_owned(),
             })?;
@@ -62,43 +62,44 @@ impl ScheduleConfig {
         let name = path_obj
             .file_stem()
             .and_then(|s| s.to_str())
-            .ok_or_else(|| SchedulerError::ConfigParseError {
-                err: "Failed to read schedule name".to_owned(),
+            .ok_or_else(|| SchedulerError::TaskListParseError {
+                err: "Failed to read task list name".to_owned(),
                 name: path.to_owned(),
             })?
             .to_owned();
 
         let data = path_obj
             .metadata()
-            .map_err(|e| SchedulerError::ConfigParseError {
+            .map_err(|e| SchedulerError::TaskListParseError {
                 err: format!("Failed to read file metadata: {}", e),
                 name: name.to_owned(),
             })?;
 
         let time_imported: DateTime<Utc> = data
             .modified()
-            .map_err(|e| SchedulerError::ConfigParseError {
+            .map_err(|e| SchedulerError::TaskListParseError {
                 err: format!("Failed to get modified time: {}", e),
                 name: name.to_owned(),
             })?
             .into();
         let time_imported = time_imported.format("%Y-%m-%d %H:%M:%S").to_string();
 
-        let config =
-            fs::read_to_string(&path_obj).map_err(|e| SchedulerError::ConfigParseError {
-                err: format!("Failed to read schedule contents: {}", e),
+        let list_contents =
+            fs::read_to_string(&path_obj).map_err(|e| SchedulerError::TaskListParseError {
+                err: format!("Failed to read task list: {}", e),
                 name: name.to_owned(),
             })?;
 
-        let config: ConfigContents =
-            serde_json::from_str(&config).map_err(|_| SchedulerError::ConfigParseError {
+        let list_contents: ListConents = serde_json::from_str(&list_contents).map_err(|_| {
+            SchedulerError::TaskListParseError {
                 err: format!("Failed to parse json"),
                 name: name.to_owned(),
-            })?;
+            }
+        })?;
 
-        let tasks = config.tasks;
+        let tasks = list_contents.tasks;
 
-        Ok(ScheduleConfig {
+        Ok(TaskList {
             path,
             name,
             tasks,
@@ -106,7 +107,7 @@ impl ScheduleConfig {
         })
     }
 
-    // Schedules tasks associated with this config
+    // Schedules the tasks contained in this task list
     pub fn schedule_tasks(&self, app_service_url: &str) -> Result<SchedulerHandle, SchedulerError> {
         let (stopper, receiver) = channel::<()>();
         let service_url = app_service_url.to_owned();
@@ -143,8 +144,8 @@ impl ScheduleConfig {
     }
 }
 
-// Copy a new schedule config into a mode directory
-pub fn import_config(
+// Copy a task list into a mode directory
+pub fn import_task_list(
     scheduler_dir: &str,
     path: &str,
     name: &str,
@@ -153,7 +154,7 @@ pub fn import_config(
     let name = name.to_lowercase();
     let mode = mode.to_lowercase();
     info!(
-        "Importing new config '{}': {} into mode '{}'",
+        "Importing task list '{}': {} into mode '{}'",
         name, path, mode
     );
     let schedule_dest = format!("{}/{}/{}.json", scheduler_dir, mode, name);
@@ -170,8 +171,8 @@ pub fn import_config(
         name: name.to_owned(),
     })?;
 
-    let config_path = Path::new(&schedule_dest);
-    if let Err(e) = ScheduleConfig::from_path(&config_path) {
+    let list_path = Path::new(&schedule_dest);
+    if let Err(e) = TaskList::from_path(&list_path) {
         let _ = fs::remove_file(&schedule_dest);
         return Err(e);
     }
@@ -179,11 +180,11 @@ pub fn import_config(
     Ok(())
 }
 
-// Remove an existing schedule config from the mode's directory
-pub fn remove_config(scheduler_dir: &str, name: &str, mode: &str) -> Result<(), SchedulerError> {
+// Remove an existing task list from the mode's directory
+pub fn remove_task_list(scheduler_dir: &str, name: &str, mode: &str) -> Result<(), SchedulerError> {
     let name = name.to_lowercase();
     let mode = mode.to_lowercase();
-    info!("Removing config {}", name);
+    info!("Removing task list '{}'", name);
     let sched_path = format!("{}/{}/{}.json", scheduler_dir, mode, name);
 
     if !Path::new(&format!("{}/{}", scheduler_dir, mode)).is_dir() {
@@ -205,12 +206,12 @@ pub fn remove_config(scheduler_dir: &str, name: &str, mode: &str) -> Result<(), 
         name: name.to_owned(),
     })?;
 
-    info!("Removed config {}", name);
+    info!("Removed task list '{}'", name);
     Ok(())
 }
 
-// Get all the schedules in a mode's directory
-pub fn get_mode_configs(mode_path: &str) -> Result<Vec<ScheduleConfig>, SchedulerError> {
+// Retrieve list of the task lists in a mode's directory
+pub fn get_mode_task_lists(mode_path: &str) -> Result<Vec<TaskList>, SchedulerError> {
     let mut schedules = vec![];
 
     let mut files_list: Vec<PathBuf> = fs::read_dir(mode_path)
@@ -228,9 +229,9 @@ pub fn get_mode_configs(mode_path: &str) -> Result<Vec<ScheduleConfig>, Schedule
     files_list.sort();
 
     for path in files_list {
-        match ScheduleConfig::from_path(&path) {
+        match TaskList::from_path(&path) {
             Ok(sched) => schedules.push(sched),
-            Err(e) => warn!("Failed to parse schedule: {}", e)
+            Err(e) => warn!("Failed to parse task list {:?}: {}", path, e),
         }
     }
 

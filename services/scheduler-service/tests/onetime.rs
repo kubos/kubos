@@ -48,8 +48,8 @@ fn run_onetime_future() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("imaging", &schedule_path, "init");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("imaging", &schedule_path, "init");
     fixture.activate_mode("init");
 
     // Check if the task actually ran
@@ -88,8 +88,8 @@ fn run_onetime_past() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("imaging", &schedule_path, "init");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("imaging", &schedule_path, "init");
     fixture.activate_mode("init");
 
     // Wait for the service to restart the scheduler
@@ -124,8 +124,8 @@ fn run_onetime_far_future() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("imaging", &schedule_path, "init");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("imaging", &schedule_path, "init");
     fixture.activate_mode("init");
 
     // Wait for the service to restart the scheduler
@@ -136,19 +136,19 @@ fn run_onetime_far_future() {
 
     // Check if scheduler is still alive
     assert_eq!(
-        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
+        fixture.query(r#"{ availableModes { name, active, schedule { name } } }"#),
         json!({
             "data": {
                 "availableModes": [
                     {
                         "name": "init",
                         "active": true,
-                        "schedules": [ { "name" : "imaging" } ]
+                        "schedule": [ { "name" : "imaging" } ]
                     },
                     {
                         "name": "safe",
                         "active": false,
-                        "schedules": [ ]
+                        "schedule": [ ]
                     }
                 ]
             }
@@ -161,19 +161,19 @@ fn run_onetime_far_future() {
 
     // Check if scheduler is still alive
     assert_eq!(
-        fixture.query(r#"{ availableModes { name, active, schedules { name } } }"#),
+        fixture.query(r#"{ availableModes { name, active, schedule { name } } }"#),
         json!({
             "data": {
                 "availableModes": [
                     {
                         "name": "init",
                         "active": true,
-                        "schedules": [ { "name" : "imaging" } ]
+                        "schedule": [ { "name" : "imaging" } ]
                     },
                     {
                         "name": "safe",
                         "active": false,
-                        "schedules": [ ]
+                        "schedule": [ ]
                     }
                 ]
             }

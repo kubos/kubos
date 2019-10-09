@@ -71,7 +71,7 @@ impl SchedulerFixture {
         thread::sleep(Duration::from_millis(1000));
     }
 
-    pub fn create_config(&self, contents: Option<String>) -> String {
+    pub fn create_task_list(&self, contents: Option<String>) -> String {
         let mut schedule = NamedTempFile::new().unwrap();
 
         if let Some(c) = contents {
@@ -121,18 +121,18 @@ impl SchedulerFixture {
         service_query(&mutation, &self.ip, self.port)
     }
 
-    pub fn import_config(&self, name: &str, path: &str, mode: &str) -> serde_json::Value {
+    pub fn import_task_list(&self, name: &str, path: &str, mode: &str) -> serde_json::Value {
         let mutation = format!(
-            r#"mutation {{ importConfig(name: "{}", path: "{}", mode: "{}") {{ errors, success }} }}"#,
+            r#"mutation {{ importTaskList(name: "{}", path: "{}", mode: "{}") {{ errors, success }} }}"#,
             name, path, mode
         );
 
         service_query(&mutation, &self.ip, self.port)
     }
 
-    pub fn remove_config(&self, name: &str, mode: &str) -> serde_json::Value {
+    pub fn remove_task_list(&self, name: &str, mode: &str) -> serde_json::Value {
         let mutation = format!(
-            r#"mutation {{ removeConfig(name: "{}", mode: "{}") {{ errors, success }} }}"#,
+            r#"mutation {{ removeTaskList(name: "{}", mode: "{}") {{ errors, success }} }}"#,
             name, mode
         );
 

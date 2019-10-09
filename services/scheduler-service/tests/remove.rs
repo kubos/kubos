@@ -150,12 +150,12 @@ fn remove_existing_schedule() {
     fixture.create_mode("operational");
 
     let schedule = json!({ "tasks": [ ] });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("first", &schedule_path, "operational");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("first", &schedule_path, "operational");
 
     assert_eq!(
         fixture.query(
-            r#"{ availableModes(name: "operational") { name, active, schedules { name } } }"#
+            r#"{ availableModes(name: "operational") { name, active, schedule { name } } }"#
         ),
         json!({
             "data": {
@@ -163,7 +163,7 @@ fn remove_existing_schedule() {
                     {
                         "name": "operational",
                         "active": false,
-                        "schedules": [
+                        "schedule": [
                             {
                                 "name": "first"
                             }
@@ -175,10 +175,10 @@ fn remove_existing_schedule() {
     );
 
     assert_eq!(
-        fixture.remove_config("first", "operational"),
+        fixture.remove_task_list("first", "operational"),
         json!({
             "data" : {
-                "removeConfig": {
+                "removeTaskList": {
                     "errors": "",
                     "success": true
                 }
@@ -188,7 +188,7 @@ fn remove_existing_schedule() {
 
     assert_eq!(
         fixture.query(
-            r#"{ availableModes(name: "operational") { name, active, schedules { name } } }"#
+            r#"{ availableModes(name: "operational") { name, active, schedule { name } } }"#
         ),
         json!({
             "data": {
@@ -196,7 +196,7 @@ fn remove_existing_schedule() {
                     {
                         "name": "operational",
                         "active": false,
-                        "schedules": [ ]
+                        "schedule": [ ]
                     }
                 ]
             }
@@ -205,16 +205,16 @@ fn remove_existing_schedule() {
 }
 
 #[test]
-fn remove_nonexistant_config() {
+fn remove_nonexistant_task_list() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8024);
 
     fixture.create_mode("operational");
 
     assert_eq!(
-        fixture.remove_config("first", "operational"),
+        fixture.remove_task_list("first", "operational"),
         json!({
             "data" : {
-                "removeConfig": {
+                "removeTaskList": {
                     "errors": "Failed to remove 'first': File not found",
                     "success": false
                 }
@@ -224,14 +224,14 @@ fn remove_nonexistant_config() {
 }
 
 #[test]
-fn remove_config_nonexistant_mode() {
+fn remove_task_list_nonexistant_mode() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8025);
 
     assert_eq!(
-        fixture.remove_config("first", "operational"),
+        fixture.remove_task_list("first", "operational"),
         json!({
             "data" : {
-                "removeConfig": {
+                "removeTaskList": {
                     "errors": "Failed to remove 'first': Mode not found",
                     "success": false
                 }

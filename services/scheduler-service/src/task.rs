@@ -18,7 +18,7 @@
 //! Definitions and functions for dealing with tasks & scheduling
 //!
 
-use crate::app::ScheduleApp;
+use crate::app::App;
 use crate::error::SchedulerError;
 use chrono::offset::TimeZone;
 use chrono::Utc;
@@ -33,7 +33,7 @@ use tokio::timer::Interval;
 
 // Configuration used to schedule app execution
 #[derive(Clone, Debug, GraphQLObject, Serialize, Deserialize)]
-pub struct ScheduleTask {
+pub struct Task {
     // Descriptive name of task
     pub name: String,
     // Start delay specified in Xh Ym Zs format
@@ -46,10 +46,10 @@ pub struct ScheduleTask {
     // Used by recurring tasks
     pub period: Option<String>,
     // Details of the app to be executed
-    pub app: ScheduleApp,
+    pub app: App,
 }
 
-impl ScheduleTask {
+impl Task {
     // Parse timer delay duration from either delay or time fields
     pub fn get_duration(&self) -> Result<Duration, SchedulerError> {
         if let Some(delay) = &self.delay {

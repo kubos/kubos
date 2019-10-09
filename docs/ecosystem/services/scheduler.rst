@@ -7,20 +7,21 @@ and one time tasks with specific timing requirements.
 Behavior
 --------
 
-The behavior of the scheduler is defined through three levels of organization: *config*,
-*mode*, and *schedule*. A *config* is a file containing a list of tasks and the
-relevant information for scheduling and executing the task. A *mode* is a directory which
-contains many *config* files. The contents of all the *configs* found in a *mode*
-make up the *schedule* of that mode.
+The behavior of the scheduler is defined through three levels of organization: *mode*,
+*schedule*, and *task*. The *mode* determines which schedule directory is being executed.
+The *schedule* is then assembled through combining all the *task lists* in the schedule
+directory, each of which can contain one or many *tasks*. New *tasks* can be added to
+a *schedule* by uploading a *task list* to a location which is accessible to the 
+scheduler, and importing that *task list* to the appropriate mode. 
 
-Upon boot, or service start, the scheduler reads all config files in the active 
+Upon boot, or service start, the scheduler reads all task lists in the active 
 mode directory and schedules all tasks from that mode. The default active mode directory
 is found at ``/home/system/etc/schedules/active``, which is a symlink
 to the actual active mode's directory.
 
 Schedules consists of many tasks, each of which has a scheduled execution time.
 Tasks are loaded into the scheduler when the scheduler service starts,
-when a mode becomes active, or when a new schedule file is imported into the active mode.
+when a mode becomes active, or when a new task list is imported into the active mode.
 Any tasks configured with an execution ``delay`` will be scheduled for execution
 when their corresponding delay has passed. All other tasks configured with an
 execution ``time`` or ``period`` will be scheduled to run at their designated times.
@@ -37,34 +38,38 @@ logs all schedule related actions the scheduler takes.
 Schedule Specification
 ----------------------
 
-Schedules are specified through config files in the `json` format. Each schedule config contains
-all of the necessary information for each task to be scheduled. Multiple schedule configs can
-coexist in the same mode folder, allowing for easy loading of new scheduled tasks.
+Schedules are made up of tasks, which are specified through task lists in the 
+`json` format. Each task list contains all of the necessary information for each
+task to be scheduled. Multiple task lists can coexist in the same mode folder,
+allowing for easy loading of new scheduled tasks.
+
+Tasks can have their scheduled time of execution specified using three different
+fields: ``delay``, ``time``, and ``period``. The ``delay`` field 
 
 Schedules consist of types of tasks: ``init``, ``one-time``, and ``recurring``. Each section
 represents a different type of scheduled task. Each specified task in a section
 represents the future scheduled execution of an app by the app service.
 
-Inside of each section is the description of a task to schedule. Each task has an
-associated ``app``. The scheduler currently delegates the actual running of tasks
-to the ``app-service``, so each ``app`` contains the necessary information needed
-by the ``app-service`` to run the app.
+Tasks specify a ``name`` and a time of execution using a combination of the ``delay``,
+``time``, and ``period`` fields. Each task has an associated ``app``. The scheduler
+currently delegates the actual running of tasks to the ``app-service``, so each
+``app`` contains the necessary information needed by the ``app-service`` to run the app.
 
 .. code-block::json
 
    {
-       "app": {
-           "name": "Required name of app as known by the app service",
-           "args": ["Optional", "command", "line", "app", "args"],
-           "config": "Optional path to app config file",
-       }
+        "app": {
+            "name": "Required name of app as known by the app service",
+            "args": ["Optional", "command", "line", "app", "args"],
+            "config": "Optional path to app config file",
+        }
    }
 
-Tasks in the ``init`` section will be executed on boot or on schedule change. Tasks will be
-assigned to the scheduler in an unpredictable order. The actual execution time
+Tasks configured with only a ``delay`` will be executed on boot or on schedule change.
+Tasks will be assigned to the scheduler in an unpredictable order. The actual execution time
 of the task will be affected by the associated delay times. If more than
-one init task has the exact same delay, the execution order might be unpredictable.
-Each task in this section will be specified like so:
+one task has the exact same delay, the execution order might be unpredictable.
+Each ``delay`` task is specified like so:
 
 .. code-block:: json
 
@@ -78,8 +83,8 @@ Each task in this section will be specified like so:
         }
     }
 
-Tasks in the ``one-time`` section will be executed once at a set time. Each task
-in this section will be specified like so:
+Tasks configured with a ``time`` field will be executed once at a set time. Each 
+one time task is specified like so:
 
 .. code-block:: json
 
@@ -93,9 +98,9 @@ in this section will be specified like so:
         }
     }
 
-Tasks in the ``recurring`` section will be executed on a recurring basis. The task
+Tasks configured with a ``period`` field will be executed on a recurring basis. The task
 will occur at the given ``period`` beginning after the ``delay`` has expired.
-Each task in this section will be specified like so:
+Each recurring task in this section is specified like so:
 
 .. code-block:: json
 
@@ -173,7 +178,7 @@ mode. It has the following schema::
             name: String,
             path: String,
             lastRevised: String,
-            schedules: [ScheduleConfigFile],
+            schedule: [TaskList],
             active: Boolean
         }
     }
@@ -187,44 +192,37 @@ modes. It has the following schema::
                name: String,
                path: String,
                lastRevised: String,
-               schedules: [ScheduleConfigFile],
+               schedule: [TaskList],
                active: Boolean
             }
         ]
     }
 
-The ``ScheduleConfigFile`` object exposes metadata about individual schedule config files. It
+The ``TaskList`` object exposes metadata about individual task lists. It
 has the following schema::
 
     {
-        ScheduleConfigFile:
+        TaskList:
         {
-            config: ScheduleConfig,
+            tasks: [Task],
             path: String,
             name: String,
             timeImported: String
         }
     }
 
-The ``ScheduleConfig`` object, and it's sub-objects, expose information about
-individual schedule configs. They have the following schemas::
+The ``Task`` object, and it's sub-objects, expose information about
+individual schedule tasks. They have the following schemas::
 
     {
-        ScheduleConfig:
-        {
-            init: [ScheduleTask],
-            oneTime: [ScheduleTask],
-            recurring: [ScheduleTask]
-        }
-
-        ScheduleTask:
+        Task:
         {
             name: String,
             delay: String,
-            app: ScheduleApp
+            app: App
         }
 
-        ScheduleApp:
+        App:
         {
             name: String,
             args: [String],
@@ -238,7 +236,7 @@ Mutations
 ~~~~~~~~~
 
 The scheduler also exposes the following mutations: ``createMode``, ``removeMode``,
-``activateMode``, ``importConfig``, and ``removeConfig``.
+``activateMode``, ``importTaskList``, and ``removeTaskList``.
 
 The ``createMode`` mutation instructs the scheduler to create a new empty schedule mode.
 It has the following schema::
@@ -281,23 +279,23 @@ active. It has the following schema::
         }
     }
 
-The ``importConfig`` mutation allows the scheduler to import a new schedule config into
-a specified mode. If the targeted mode is active, all tasks in the config will be
+The ``importTaskList`` mutation allows the scheduler to import a new task list into
+a specified mode. If the targeted mode is active, all tasks in the task list will be
 immediately loaded for scheduling. It has the following schema::
 
     mutation {
-        importConfig(path: String!, name: String!, mode:String!): {
+        importTaskList(path: String!, name: String!, mode:String!): {
             success: Boolean,
             errors: String
         }
     }
 
-The ``removeConfig`` mutation allows the scheduler to remove a schedule config from
-a specified mode. If the mode is active, all tasks in the config will be removed
+The ``removeTaskList`` mutation allows the scheduler to remove a task list from
+a specified mode. If the mode is active, all tasks in the task list will be removed
 from the scheduler. It as the following schema::
 
     mutation {
-        removeConfig(name: String!, mode:String!): {
+        removeTaskList(name: String!, mode:String!): {
             success: Boolean,
             errors: String
         }

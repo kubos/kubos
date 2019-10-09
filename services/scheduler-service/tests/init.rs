@@ -52,8 +52,8 @@ fn run_init_single_no_delay() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("imaging", &schedule_path, "init");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("imaging", &schedule_path, "init");
     fixture.activate_mode("init");
 
     // Wait for the service to restart the scheduler
@@ -83,8 +83,8 @@ fn run_init_single_with_delay() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("imaging", &schedule_path, "init");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("imaging", &schedule_path, "init");
     fixture.activate_mode("init");
 
     // This task should not have run immediately
@@ -125,8 +125,8 @@ fn run_init_two_tasks() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("two", &schedule_path, "init");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("two", &schedule_path, "init");
     fixture.activate_mode("init");
 
     // Wait for service to restart scheduler and run tasks
@@ -160,8 +160,8 @@ fn run_init_single_args() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("imaging", &schedule_path, "init");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("imaging", &schedule_path, "init");
     fixture.activate_mode("init");
 
     // Wait for service to restart scheduler and run task
@@ -174,7 +174,7 @@ fn run_init_single_args() {
 }
 
 #[test]
-fn run_init_single_custom_config() {
+fn run_init_single_custom_task_list() {
     let listener = ServiceListener::spawn("127.0.0.1", 9025);
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8025);
     fixture.create_mode("init");
@@ -192,8 +192,8 @@ fn run_init_single_custom_config() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("imaging", &schedule_path, "init");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("imaging", &schedule_path, "init");
     fixture.activate_mode("init");
 
     // Wait for service to restart scheduler and run task
@@ -224,8 +224,8 @@ fn run_init_single_custom_runlevel() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("imaging", &schedule_path, "init");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("imaging", &schedule_path, "init");
     fixture.activate_mode("init");
 
     // Wait for service to restart scheduler and run task
@@ -255,8 +255,8 @@ fn run_init_two_schedules_one_mode() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("first", &schedule_path, "init");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("first", &schedule_path, "init");
 
     // Create second schedule with an init task
     let schedule = json!({
@@ -270,8 +270,8 @@ fn run_init_two_schedules_one_mode() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("second", &schedule_path, "init");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("second", &schedule_path, "init");
 
     // Activate first schedule, wait for task to run
     fixture.activate_mode("init");
@@ -305,8 +305,8 @@ fn run_init_two_modes() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("first", &schedule_path, "init");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("first", &schedule_path, "init");
 
     // Create second schedule with an init task
     let schedule = json!({
@@ -320,8 +320,8 @@ fn run_init_two_modes() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("second", &schedule_path, "secondary");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("second", &schedule_path, "secondary");
 
     // Activate first schedule, wait for task to run
     fixture.activate_mode("init");
@@ -359,8 +359,8 @@ fn run_init_two_modes_check_stop() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("first", &schedule_path, "init");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("first", &schedule_path, "init");
 
     // Register second schedule with an init task
     let schedule = json!({
@@ -374,8 +374,8 @@ fn run_init_two_modes_check_stop() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("second", &schedule_path, "secondary");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("second", &schedule_path, "secondary");
 
     // Activate first schedule, wait for task to run
     fixture.activate_mode("init");
@@ -414,7 +414,7 @@ fn run_init_after_import() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
 
     // Activate mode
     fixture.activate_mode("init");
@@ -423,8 +423,8 @@ fn run_init_after_import() {
     // Mode is empty, so no task should have run
     assert_eq!(listener.get_request(), None);
 
-    // Import config then confirm task is run afterwards
-    fixture.import_config("first", &schedule_path, "init");
+    // Import task_list then confirm task is run afterwards
+    fixture.import_task_list("first", &schedule_path, "init");
     thread::sleep(Duration::from_millis(100));
 
     // Check if the task ran
@@ -438,7 +438,7 @@ fn run_init_check_remove() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8031);
     fixture.create_mode("init");
 
-    // Register config with a delayed task
+    // Register task_list with a delayed task
     let schedule = json!({
         "tasks": [
             {
@@ -450,8 +450,8 @@ fn run_init_check_remove() {
             }
         ]
     });
-    let schedule_path = fixture.create_config(Some(schedule.to_string()));
-    fixture.import_config("first", &schedule_path, "init");
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("first", &schedule_path, "init");
 
     // Activate mode
     fixture.activate_mode("init");
@@ -460,8 +460,8 @@ fn run_init_check_remove() {
     // Task is delayed so it shouldn't have run
     assert_eq!(listener.get_request(), None);
 
-    // Remove the config
-    fixture.remove_config("first", "init");
+    // Remove the task_list
+    fixture.remove_task_list("first", "init");
     thread::sleep(Duration::from_millis(1100));
 
     // Verify task did not run

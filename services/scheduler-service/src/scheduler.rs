@@ -18,11 +18,11 @@
 //! Structures and functions concerning the actual running of a schedule
 //!
 
-use crate::config::{get_mode_configs, ScheduleConfig};
 use crate::error::SchedulerError;
 use crate::mode::{
     activate_mode, create_mode, get_active_mode, get_available_modes, is_mode_active,
 };
+use crate::task_list::{get_mode_task_lists, TaskList};
 use log::{error, info};
 use std::collections::HashMap;
 use std::fs;
@@ -45,12 +45,12 @@ pub struct SchedulerHandle {
 
 #[derive(Clone)]
 pub struct Scheduler {
-    // Path to directory where schedules are stored
+    // Path to directory where schedules/modes are stored
     pub scheduler_dir: String,
     // URL of App Service - for start app queries
     app_service_url: String,
-    // Map of active config names and scheduler handles. This allows us to
-    // start/stop tasks associated with individual config files
+    // Map of active task list names and scheduler handles. This allows us to
+    // start/stop tasks associated with individual task lists
     scheduler_map: Arc<Mutex<HashMap<String, SchedulerHandle>>>,
 }
 
@@ -84,35 +84,34 @@ impl Scheduler {
         Ok(())
     }
 
-    // Checks if config is in active mode and schedules tasks if needed
-    pub fn check_start_config_tasks(&self, name: &str, mode: &str) -> Result<(), SchedulerError> {
+    // Checks if task list is in active mode and schedules tasks if needed
+    pub fn check_start_task_list(&self, name: &str, mode: &str) -> Result<(), SchedulerError> {
         if is_mode_active(&self.scheduler_dir, &mode) {
-            let config_path = format!("{}/{}/{}.json", self.scheduler_dir, mode, name);
-            let config_path = Path::new(&config_path);
-            let config = ScheduleConfig::from_path(&config_path)?;
+            let list_path = format!("{}/{}/{}.json", self.scheduler_dir, mode, name);
+            let list_path = Path::new(&list_path);
+            let list = TaskList::from_path(&list_path)?;
 
-            Ok(self.start_config_tasks(config)?)
+            Ok(self.start_task_list(list)?)
         } else {
             Ok(())
         }
     }
 
-    // Schedules tasks associated with config
-    fn start_config_tasks(&self, config: ScheduleConfig) -> Result<(), SchedulerError> {
+    // Schedules tasks associated with task list
+    fn start_task_list(&self, list: TaskList) -> Result<(), SchedulerError> {
         let mut schedules_map = self.scheduler_map.lock().unwrap();
 
-        let scheduler_handle = config.schedule_tasks(&self.app_service_url)?;
-
-        schedules_map.insert(config.name, scheduler_handle);
+        let scheduler_handle = list.schedule_tasks(&self.app_service_url)?;
+        schedules_map.insert(list.name, scheduler_handle);
 
         Ok(())
     }
 
-    // Iterate through the active schedule file and kick off scheduling tasks
+    // Iterate through the active mode and kick off scheduling tasks
     pub fn start(&self) -> Result<(), SchedulerError> {
         if let Some(active_mode) = get_active_mode(&self.scheduler_dir)? {
-            for config in get_mode_configs(&active_mode.path)? {
-                self.start_config_tasks(config)?;
+            for list in get_mode_task_lists(&active_mode.path)? {
+                self.start_task_list(list)?;
             }
             Ok(())
         } else {
@@ -132,17 +131,17 @@ impl Scheduler {
         Ok(())
     }
 
-    // Checks if a config exists in an active mode and stops scheduler if needed
-    pub fn check_stop_config_tasks(&self, name: &str, mode: &str) -> Result<(), SchedulerError> {
+    // Checks if a task list exists in an active mode and stops it's scheduler if needed
+    pub fn check_stop_task_list(&self, name: &str, mode: &str) -> Result<(), SchedulerError> {
         if is_mode_active(&self.scheduler_dir, mode) {
-            Ok(self.stop_config_tasks(name)?)
+            Ok(self.stop_task_list(name)?)
         } else {
             Ok(())
         }
     }
 
-    // Attempts to stop scheduler associated with config
-    fn stop_config_tasks(&self, name: &str) -> Result<(), SchedulerError> {
+    // Attempts to stop scheduler associated with task list
+    fn stop_task_list(&self, name: &str) -> Result<(), SchedulerError> {
         let mut schedules_map = self.scheduler_map.lock().unwrap();
         if let Some(handle) = schedules_map.remove(name) {
             info!("Stopping {}'s tasks", name);
