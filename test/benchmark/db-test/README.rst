@@ -9,7 +9,7 @@ Pre-Requisites
 --------------
 
 The system must have a ``config.toml`` file available for this program to read.
-If one is not present at the default location (``/home/system/etc/config.toml``), 
+If one is not present at the default location (``/etc/kubos-config.toml``), 
 it may be provided with the ``-c {config.toml path}`` command-line argument.
 
 Note: An example ``config.toml`` file is included in this project.

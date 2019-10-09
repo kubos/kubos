@@ -4,36 +4,25 @@ port = 8000
 
 [telemetry-service]
 database = "telemetry.db"
-direct_port = 8001
+direct_port = 8021
 
 [telemetry-service.addr]
 ip = "127.0.0.1"
-port = 8002
+port = 8020
 
 [file-transfer-service]
 storage_dir = "file-storage"
 downlink_ip = "127.0.0.1"
-downlink_port = 8013
+downlink_port = 8080
 
 [file-transfer-service.addr]
 ip = "127.0.0.1"
-port = 8003
+port = 8040
 
 [monitor-service.addr]
 ip = "127.0.0.1"
-port = 8004
+port = 8030
 
 [shell-service.addr]
 ip = "127.0.0.1"
-port = 8005
-
-[isis-ants-service.addr]
-ip = "0.0.0.0"
-port = 8007
-
-[isis-ants-service]
-bus = "/dev/i2c-0"
-primary = "0x31"
-secondary = "0x32"
-antennas = 4
-wd_timeout = 10
+port = 8050

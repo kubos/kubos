@@ -69,7 +69,7 @@ fn register_good() {
               "active": true,
                "app": {
                    "author": "user",
-                   "config": "/home/system/etc/config.toml",
+                   "config": "/etc/kubos-config.toml",
                    "name": "dummy",
                    "version": "0.0.1",
                }

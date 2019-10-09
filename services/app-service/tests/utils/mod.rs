@@ -94,7 +94,7 @@ impl MockAppBuilder {
             config = self
                 ._config
                 .as_ref()
-                .unwrap_or(&String::from("/home/system/etc/config.toml")),
+                .unwrap_or(&String::from("/etc/kubos-config.toml")),
         )
     }
 

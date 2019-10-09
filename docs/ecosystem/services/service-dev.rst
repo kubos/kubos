@@ -117,7 +117,11 @@ Service Configuration
 By default, all services require that the IP address and port of their GraphQL endpoint be defined
 in the system's `config.toml` file.
 It is generally assumed that any port which is not already listed in the config file is available
-for use.
+for use, however there are some existing conventions:
+
+- Kubos core services use ports 8000-8079
+- Communications services use ports 8080-8099 for their downlink ports
+- Hardware services use ports 8100 and up
 
 It may be useful for your service to have certain additional configurable settings.
 For instance, you might want to be able to adjust certain timeout values, or change which device
