@@ -7,7 +7,7 @@ Hardware acquisition lead times can be quite long, in the realm of months, makin
 mission engineers to be able to begin developing their system's software before their hardware
 arrives.
 
-The Kubos SDK allows some of the high-level mission logic to be fleshed out and tested before
+The Kubos SDK allows testing integration with :doc:`KubOS core services <../ecosystem/services/core-services>` and development of the high-level mission logic before
 integrating with the final hardware system.
 
 What Can Be Done
