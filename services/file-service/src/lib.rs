@@ -47,8 +47,8 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
 
     // Get the chunk size to be used for transfers
     let chunk_size = match config.get("chunk_size") {
-        Some(val) => val.as_integer().unwrap_or(4096),
-        None => 4096,
+        Some(val) => val.as_integer().unwrap_or(1024),
+        None => 1024,
     } as usize;
 
     let hold_count = match config.get("hold_count") {
@@ -60,15 +60,16 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
     let downlink_port = config
         .get("downlink_port")
         .and_then(|i| i.as_integer())
-        .expect("Downlink port not found") as u16;
+        .unwrap_or(8080) as u16;
 
     // Get the downlink ip we'll be using when sending responses
-    let downlink_ip = config
-        .get("downlink_ip")
-        .expect("Downlink IP not found")
-        .as_str()
-        .and_then(|str| Some(str.to_owned()))
-        .expect("Downlink IP not found");
+    let downlink_ip = match config.get("downlink_ip") {
+        Some(ip) => match ip.as_str().and_then(|ip| Some(ip.to_owned())) {
+            Some(ip) => ip,
+            None => "127.0.0.1".to_owned(),
+        },
+        None => "127.0.0.1".to_owned(),
+    };
 
     info!("Starting file transfer service");
     info!("Listening on {}", host);
