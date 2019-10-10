@@ -10,7 +10,7 @@ Running the Client
 
 To build and run the client program, run the following command from this folder::
 
-    cargo run -- (upload|download) source-file [target-file] [config options]
+    cargo run -- [config options] (upload|download) source-file [target-file] 
     
 Required arguments:
 

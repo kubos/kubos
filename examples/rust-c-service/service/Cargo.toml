@@ -8,3 +8,5 @@ edition = "2018"
 extern-lib = { path = "../extern-lib" }
 kubos-service = { path = "../../../services/kubos-service" }
 juniper = "0.11"
+log = "^0.4.0"
+syslog = "4.0"

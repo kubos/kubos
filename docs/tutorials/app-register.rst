@@ -24,29 +24,23 @@ This tutorial will use the following example directories:
 
     - ``/home/user/my-app`` - Project directory
     - ``/home/user/kubos`` - Cloned copy of the kubos repo
-    - ``/home/user/app-registry`` - Directory used by the applications service to store registered
+    - ``/home/user/kubos/app-registry`` - Directory used by the applications service to store registered
       applications
 
-- Create a directory which will by used by the applications service for registry storage
-- Navigate to the kubos source directory and edit the ``tools/default_config.toml`` file to specify
-  that new directory like so::
-  
-    [app-service]
-    registry-dir = "/home/user/app-registry"
-    
-- **If you are using the SDK**, update all IP addresses in the ``tools/default_config.toml`` file,
+- Navigate to the `kubos` source directory
+- **If you are using the SDK**, update all IP addresses in the ``tools/local_config.toml`` file,
   changing them from ``127.0.0.1`` to ``0.0.0.0``, so that they are available :ref:`to your host machine <sdk-port-forward>`.
 
 - Run the following command to start the applications service in the background (the service may
   need to be built first, which will take several minutes to complete)::
   
-    $ cargo run --bin kubos-app-service -- -c tools/default_config.toml &
+    $ cargo run --bin kubos-app-service -- -c tools/local_config.toml &
     
 - If you have stopped the monitor and telemetry services since going through the previous tutorial,
   you will need to start those as well::
   
-    $ cargo run --bin monitor-service -- -c tools/default_config.toml &
-    $ cargo run --bin telemetry-service -- -c tools/default_config.toml &
+    $ cargo run --bin monitor-service -- -c tools/local_config.toml &
+    $ cargo run --bin telemetry-service -- -c tools/local_config.toml &
   
 - Navigate back out to the development directory of your choosing.
 
@@ -173,7 +167,7 @@ The response should like this::
           "entry": {
             "app": {
               "name": "my-mission-app",
-              "executable": "/home/user/app-registry/my-mission-app/1.0/my-mission-app.py"
+              "executable": "/home/user/kubos/app-registry/my-mission-app/1.0/my-mission-app.py"
             }
           }
         }
@@ -182,7 +176,7 @@ The response should like this::
 
 We can break down the resulting executable path like so:
 
-    - ``/home/user/app-registry`` - This is the directory that the applications service uses to
+    - ``/home/user/kubos/app-registry`` - This is the directory that the applications service uses to
       save all registered applications. We previously specified it in our ``config.toml`` file
     - ``my-mission-app`` - The name of our application
     - ``1.0`` - Our manifest file specified that this was version 1.0 of our application
@@ -218,7 +212,7 @@ The mutation returns three fields:
 Our request should look like this::
 
     mutation {
-      startApp(name: "my-mission-app", config:"/home/user/kubos/tools/default_config.toml") {
+      startApp(name: "my-mission-app", config:"/home/user/kubos/tools/local_config.toml") {
         success,
         pid
       }
@@ -282,7 +276,7 @@ The response should look almost identical::
                 "entry": {
                     "app": {
                         "name":"my-mission-app",
-                        "executable":"/home/user/app-registry/my-mission-app/2.0/my-mission-app.py"
+                        "executable":"/home/user/kubos/app-registry/my-mission-app/2.0/my-mission-app.py"
                     }
                 }
             }

@@ -272,7 +272,10 @@ fn main() -> NslDuplexCommsResult<()> {
     };
 
     // Read configuration from config file.
-    let comms_config = CommsConfig::new(service_config.clone())?;
+    let comms_config = CommsConfig::new(service_config.clone()).map_err(|err| {
+        error!("Failed to load comms config: {:?}", err);
+        err
+    })?;
 
     // Open radio serial connection
     let duplex_comms = Arc::new(Mutex::new(DuplexComms::new(&bus, ping_freq)));
