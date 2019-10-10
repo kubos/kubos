@@ -18,7 +18,7 @@
 //!
 //! # Configuration
 //!
-//! The service must be configured in `/home/system/etc/config.toml` with the following fields:
+//! The service must be configured in `/etc/kubos-config.toml` with the following fields:
 //!
 //! - `[iobc-supervisor-service.addr]`
 //!
@@ -30,7 +30,7 @@
 //! ```toml
 //! [iobc-supervisor-service.addr]
 //! ip = "0.0.0.0"
-//! port = 8006
+//! port = 8170
 //! ```
 //!
 //! # Starting the Service
@@ -40,7 +40,7 @@
 //! ```shell
 //! $ iobc-supervisor-service
 //! Kubos antenna systems service started
-//! Listening on: 0.0.0.0:8006
+//! Listening on: 0.0.0.0:8170
 //! ```
 //!
 //! # Available Fields

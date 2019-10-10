@@ -35,7 +35,7 @@ use toml;
 
 /// The default application registry directory in KubOS
 pub static K_APPS_DIR: &str = "/home/system/kubos/apps";
-pub static DEFAULT_CONFIG: &str = "/home/system/etc/config.toml";
+pub static DEFAULT_CONFIG: &str = "/etc/kubos-config.toml";
 
 /// AppRegistry
 #[derive(Clone, Debug)]
@@ -409,8 +409,7 @@ impl AppRegistry {
         if let Ok(Some(entry)) = find_running(&self.monitoring, app_name) {
             if entry.version == version {
                 if let Some(pid) = entry.pid {
-                    let pid = Pid::from_raw(pid);
-                    if let Err(err) = signal::kill(pid, signal::Signal::SIGKILL) {
+                    if let Err(err) = uninstall_kill(pid) {
                         errors.push(format!("Failed to kill {}: {:?}", app_name, err));
                     }
                 }
@@ -476,8 +475,7 @@ impl AppRegistry {
         // Kill any instances of the app which are still running
         if let Ok(Some(entry)) = find_running(&self.monitoring, app_name) {
             if let Some(pid) = entry.pid {
-                let pid = Pid::from_raw(pid);
-                if let Err(err) = signal::kill(pid, signal::Signal::SIGKILL) {
+                if let Err(err) = uninstall_kill(pid) {
                     errors.push(format!("Failed to kill {}: {:?}", app_name, err));
                 }
             }
@@ -756,4 +754,18 @@ impl AppRegistry {
             err: err.to_string(),
         })
     }
+}
+
+fn uninstall_kill(pid: i32) -> Result<(), nix::Error> {
+    let pid = Pid::from_raw(pid);
+    signal::kill(pid, Some(signal::Signal::SIGTERM))?;
+    thread::spawn(move || {
+        // Give the app 2 seconds to shut down nicely
+        thread::sleep(Duration::from_secs(2));
+        // Kill it less nicely
+        // (If the app already stopped, this call will fail and do nothing)
+        let _ = signal::kill(pid, Some(signal::Signal::SIGKILL));
+    });
+
+    Ok(())
 }

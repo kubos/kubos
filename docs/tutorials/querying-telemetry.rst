@@ -18,14 +18,14 @@ If you have not done so already, create a clone of the `KubOS source repo <https
 
     $ git clone https://github.com/kubos/kubos
     
-**If you are using the SDK**, update all IP addresses in the ``tools/default_config.toml`` file,
+**If you are using the SDK**, update all IP addresses in the ``tools/local_config.toml`` file,
 changing them from ``127.0.0.1`` to ``0.0.0.0``, so that they are available :ref:`to your host machine <sdk-port-forward>`.
 
-Navigate to the kubos source directory and run the following commands to start the telemetry
+Navigate to the `kubos` source directory and run the following commands to start the telemetry
 database service in the background (the services may need to be built first, which will take several
 minutes to complete)::
   
-    $ cargo run --bin telemetry-service -- -c tools/default_config.toml &
+    $ cargo run --bin telemetry-service -- -c tools/local_config.toml &
 
 In order to have something to query, we'll need to seed the database.
 We'll use ``curl`` to create some HTTP requests which will add data points to the telemetry
@@ -34,15 +34,15 @@ database.
 .. note::
 
     The example commands will be referencing the telemetry database service port which is defined
-    in the `kubos/tools/default_config.toml` file, 8002
+    in the `kubos/tools/local_config.toml` file, 8050
 
 From your development environment, run the following::
 
-    $ curl 0.0.0.0:8002 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"voltage\\\",value:\\\"5.0\\\"){success}}\"}"
-    $ curl 0.0.0.0:8002 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"voltage\\\",value:\\\"5.0\\\"){success}}\"}"
-    $ curl 0.0.0.0:8002 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"current\\\",value:\\\"0.1\\\"){success}}\"}"
-    $ curl 0.0.0.0:8002 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"current\\\",value:\\\"0.1\\\"){success}}\"}"
-    $ curl 0.0.0.0:8002 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"gps\\\",parameter:\\\"voltage\\\",value:\\\"3.3\\\"){success}}\"}"
+    $ curl 0.0.0.0:8050 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"voltage\\\",value:\\\"5.0\\\"){success}}\"}"
+    $ curl 0.0.0.0:8050 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"voltage\\\",value:\\\"5.0\\\"){success}}\"}"
+    $ curl 0.0.0.0:8050 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"current\\\",value:\\\"0.1\\\"){success}}\"}"
+    $ curl 0.0.0.0:8050 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"current\\\",value:\\\"0.1\\\"){success}}\"}"
+    $ curl 0.0.0.0:8050 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"gps\\\",parameter:\\\"voltage\\\",value:\\\"3.3\\\"){success}}\"}"
     
 Each of these commands should return the following::
 
@@ -51,7 +51,7 @@ Each of these commands should return the following::
 GraphiQL
 --------
 
-Please navigate to ``http://0.0.0.0:8002/graphiql`` in order to communicate with the telemetry service
+Please navigate to ``http://0.0.0.0:8050/graphiql`` in order to communicate with the telemetry service
 for this tutorial.
 If you are using the SDK, replace ``0.0.0.0`` with the :ref:`IP address you defined <sdk-port-forward>`
 for your VM.

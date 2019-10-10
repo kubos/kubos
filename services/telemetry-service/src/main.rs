@@ -21,7 +21,7 @@
 //!
 //! # Configuration
 //!
-//! The service can be configured in the `/home/system/etc/config.toml` with the following fields:
+//! The service can be configured in the `/etc/kubos-config.toml` with the following fields:
 //!
 //! ```
 //! [telemetry-service]
@@ -29,7 +29,7 @@
 //!
 //! [telemetry-service.addr]
 //! ip = "127.0.0.1"
-//! port = 8089
+//! port = 8020
 //! ```
 //!
 //! Where `database` specifies the path to the telemetry database file, `ip` specifies the
@@ -42,7 +42,7 @@
 //!
 //! ```
 //! $ telemetry-service
-//! Listening on: 127.0.0.1:8089
+//! Listening on: 127.0.0.1:8020
 //! ```
 //!
 //! # Panics

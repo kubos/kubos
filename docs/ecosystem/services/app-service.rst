@@ -42,7 +42,7 @@ The applications service uses the same HTTP+GraphQL communication scheme as the 
 
 Users will send GraphQL queries and mutations to the service's HTTP listener port.
 The port number can be found in the system's :doc:`configuration file <../services/service-config>`
-in `/home/system/etc/config.toml`
+in `/etc/kubos-config.toml`
 
 Querying
 --------
@@ -276,7 +276,8 @@ If the active version is not changed, then the system will not know which versio
 time the application is started.
 
 If the version of the application being uninstalled is currently running, it will be automatically
-stopped using the ``SIGKILL`` signal.
+stopped using the ``SIGTERM`` signal, followed by the more harsh ``SIGKILL`` signal two seconds
+later.
 We recommend using the :ref:`killApp <kill-app>` mutation to gracefully stop the application prior
 to making an ``uninstall`` request.
 
@@ -434,7 +435,7 @@ the current version.
 Customizing the Applications Service
 ------------------------------------
 
-The configuration for the applications service is saved in `/home/system/etc/config.toml`.
+The configuration for the applications service is saved in `/etc/kubos-config.toml`.
 This file can be editted to add or modify the following fields:
 
 - ``[app-service.addr]``

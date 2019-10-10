@@ -42,6 +42,7 @@
 #![deny(warnings)]
 
 use failure::Fail;
+use log::error;
 use serde_cbor::de;
 use std::io;
 use std::net::{SocketAddr, UdpSocket};
@@ -112,7 +113,20 @@ impl Protocol {
     ///
     pub fn new(host_url: &str, data_size: usize) -> Self {
         Self {
-            handle: UdpSocket::bind(host_url.parse::<SocketAddr>().unwrap()).unwrap(),
+            handle: UdpSocket::bind(
+                host_url
+                    .parse::<SocketAddr>()
+                    .map_err(|err| {
+                        error!("Failed to parse host_url: {:?}", err);
+                        err
+                    })
+                    .unwrap(),
+            )
+            .map_err(|err| {
+                error!("Failed to bind socket for {}: {:?}", host_url, err);
+                err
+            })
+            .unwrap(),
             msg_size: data_size + 50,
         }
     }

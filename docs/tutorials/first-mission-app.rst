@@ -35,12 +35,12 @@ Setup
 
     $ git clone https://github.com/kubos/kubos
     
-- Navigate to the kubos source directory and run the following commands to start the monitor service
+- Navigate to the `kubos` source directory and run the following commands to start the monitor service
   and telemetry database service in the background (the services may need to be built first, which
   will take several minutes to complete)::
   
-    $ cargo run --bin monitor-service -- -c tools/default_config.toml &
-    $ cargo run --bin telemetry-service -- -c tools/default_config.toml &
+    $ cargo run --bin monitor-service -- -c tools/local_config.toml &
+    $ cargo run --bin telemetry-service -- -c tools/local_config.toml &
     
 - Navigate back out to the development directory of your choosing.
   This tutorial will use ``/home/user/my-app`` as the example development directory and will assume
@@ -183,9 +183,9 @@ In order to communicate with a service, we need to know where to send our messag
 All services rely on a configuration file, ``config.toml``, in order to determine which IP and port
 they should bind a listener thread to.
 
-By default, this file is located in ``/home/system/etc/config.toml``.
+By default, this file is located in ``/etc/kubos-config.toml``.
 Since we're running these tutorials locally, that file location likely doesn't exist, so instead we
-are using the ``tools/default_config.toml`` file in our cloned copy of the kubos repo.
+are using the ``tools/local_config.toml`` file in our cloned copy of the kubos repo.
 
 We'll need to pass our application this path when we go to run it locally.
 
@@ -310,7 +310,7 @@ After adding error handling, our program should look like this:
     
 If we run our program, the output should look like this::
 
-    $ ./my-mission-app.py -c ../kubos/tools/default_config.toml
+    $ ./my-mission-app.py -c ../kubos/tools/local_config.toml
     Successfully pinged monitor service
 
 Writing Data to the Telemetry Database
@@ -444,7 +444,7 @@ With some additional error handling, our final application looks like this:
 
 If we run our program, the output should look like this::
 
-    $ ./my-mission-app.py -c ../kubos/tools/default_config.toml
+    $ ./my-mission-app.py -c ../kubos/tools/local_config.toml
     Successfully pinged monitor service
     Telemetry insert completed successfully
     

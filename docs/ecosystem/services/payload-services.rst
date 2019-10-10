@@ -195,8 +195,8 @@ If you are using the Kubos SDK Vagrant box then these will already be installed.
 Otherwise, you will need to run ``pip3 install -r requirements.txt``.
 
 Once the dependencies are in place, you can run ``python3 service.py`` and the example service should begin.
-You will know that it is running if the command line output says ``* Running on http://127.0.0.1:8001/ (Press CTRL+C to quit)``.
-You can now point a web browser to http://127.0.0.1:8001/graphiql to access a `graphical GraphQL interface <https://github.com/graphql/graphiql>`_.
+You will know that it is running if the command line output says ``* Running on http://127.0.0.1:8123/ (Press CTRL+C to quit)``.
+You can now point a web browser to http://127.0.0.1:8123/graphiql to access a `graphical GraphQL interface <https://github.com/graphql/graphiql>`_.
 Here you can run queries and mutations against the GraphQL endpoints and see the results.
 
 .. note::
@@ -209,11 +209,11 @@ interface of the service running inside of the Vagrant box we need to forward
 the port it is using. To do so you will need to add the following line to
 your ```Vagrantfile``` (after ``Vagrant.configure("2") do |config|``)::
 
-  config.vm.network "forwarded_port", guest: 8001, host: 8001
+  config.vm.network "forwarded_port", guest: 8123, host: 8123
 
 Now restart the Vagrant box with ``vagrant reload``. You should now have the ability
 to run the python service inside the Vagrant box and access it from the outside
-at http://127.0.0.1:8001.
+at http://127.0.0.1:8123.
 
 .. _rust-service-ref:
 
@@ -453,13 +453,13 @@ Issue ``cargo build`` in order to build the service.
 
 In order to run the service locally:
 
-    - Verify that port 8080 is being forwarded out of your Vagrant box
+    - Verify that port 8123 is being forwarded out of your Vagrant box
     - Issue ``cargo run``
 
 Once it is up and running you can use the GraphiQL endpoint to issue queries or mutations against
 the service.
 
-On your host machine, open a web browser and navigate to `http://127.0.0.1:8080/graphiql`.
+On your host machine, open a web browser and navigate to `http://127.0.0.1:8123/graphiql`.
 
 Note: If your service is using something other than the default IP address and/or port, you'll need
 to update the address in the URL.

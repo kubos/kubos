@@ -17,4 +17,4 @@ Usage of the API is shown in the example below
         query = "mutation {noop{success}}")
 ```
 
-The service accessed by the API must be in the system config file. You can pass in an alternate configuration file, otherwise it will look at the default config file location in KubOS: /home/system/etc/config.toml
+The service accessed by the API must be in the system config file. You can pass in an alternate configuration file, otherwise it will look at the default config file location in KubOS: /etc/kubos-config.toml

@@ -21,12 +21,12 @@
 //!
 //! # Configuration
 //!
-//! The service can be configured in the `/home/system/etc/config.toml` with the following fields:
+//! The service can be configured in the `/etc/kubos-config.toml` with the following fields:
 //!
 //! ```toml
 //! [mai400-service.addr]
 //! ip = "127.0.0.1"
-//! port = 8082
+//! port = 8120
 //! ```
 //!
 //! Where `ip` specifies the service's IP address, and `port` specifies the port which UDP requests should be sent to.
@@ -38,7 +38,7 @@
 //! ```shell
 //! $ mai400-service
 //! Kubos MAI-400 service started
-//! Listening on: 10.63.1.20:8082
+//! Listening on: 10.63.1.20:8120
 //! ```
 //!
 //! # Queries
