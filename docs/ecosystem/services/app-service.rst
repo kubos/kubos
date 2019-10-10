@@ -276,7 +276,8 @@ If the active version is not changed, then the system will not know which versio
 time the application is started.
 
 If the version of the application being uninstalled is currently running, it will be automatically
-stopped using the ``SIGKILL`` signal.
+stopped using the ``SIGTERM`` signal, followed by the more harsh ``SIGKILL`` signal two seconds
+later.
 We recommend using the :ref:`killApp <kill-app>` mutation to gracefully stop the application prior
 to making an ``uninstall`` request.
 

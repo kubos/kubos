@@ -22,6 +22,8 @@ use std::fs;
 use std::panic;
 use std::path::Path;
 use std::process::Command;
+use std::thread;
+use std::time::Duration;
 
 use tempfile::TempDir;
 
@@ -549,6 +551,9 @@ fn uninstall_running() {
 
     assert!(result.is_ok());
 
+    // Give everything a moment to finish
+    thread::sleep(Duration::from_millis(100));
+
     // App should no longer be running (ESRCH = PID not found)
     let pid = Pid::from_raw(pid as i32);
     let result = signal::kill(pid, signal::Signal::SIGINT);
@@ -609,8 +614,73 @@ fn uninstall_all_running() {
 
     assert!(result.is_ok());
 
+    // Give everything a moment to finish
+    thread::sleep(Duration::from_millis(100));
+
     // App should no longer be running (ESRCH = PID not found)
     let pid = Pid::from_raw(pid as i32);
     let result = signal::kill(pid, signal::Signal::SIGINT);
     assert_eq!(result, Err(nix::Error::Sys(nix::errno::Errno::ESRCH)));
+}
+
+#[test]
+fn uninstall_kill() {
+    let mut fixture = AppServiceFixture::setup();
+    let config = ServiceConfig::new_from_path(
+        "app-service",
+        format!(
+            "{}",
+            fixture
+                .registry_dir
+                .path()
+                .join("config.toml")
+                .to_string_lossy()
+        ),
+    )
+    .unwrap();
+
+    setup_app(&fixture.registry_dir.path());
+
+    fixture.start_service();
+
+    // Run the app so that a monitoring entry will be created
+    let result = send_query(
+        config.clone(),
+        r#"mutation {
+            startApp(name: "rust-proj", args: "-s") {
+                pid
+            }
+        }"#,
+    );
+
+    let pid = result["startApp"]["pid"].as_i64().unwrap();
+
+    let result = panic::catch_unwind(|| {
+        let result = send_query(
+            config.clone(),
+            r#"mutation {
+            uninstall(name: "rust-proj", version: "1.0") {
+                errors,
+                success
+            }
+        }"#,
+        );
+
+        assert!(
+            result["uninstall"]["success"].as_bool().unwrap(),
+            "Result: {:?}",
+            result
+        );
+    });
+
+    assert!(result.is_ok());
+
+    let pid = Pid::from_raw(pid as i32);
+    // App should capture initial nice signal (SIGTERM) and still be running
+    assert!(signal::kill(pid, None).is_ok());
+    thread::sleep(Duration::from_secs(3));
+
+    fixture.teardown();
+    // Now it should be dead
+    assert!(!signal::kill(pid, None).is_ok());
 }
