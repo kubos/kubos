@@ -5,6 +5,7 @@ Getting Started with KubOS
     :hidden:
     :titlesonly:
     
+    no-board
     local-setup
     windows-setup
     using-rust
