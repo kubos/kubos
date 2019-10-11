@@ -93,7 +93,7 @@ fn activate_non_existent_schedule() {
         json!({
             "data" : {
                 "activateMode": {
-                    "errors": "Failed to activate 'operational': Mode not found",
+                    "errors": "Scheduler failed over to safe mode due to error: Failed to activate mode 'operational' not found",
                     "success": false
                 }
             }
@@ -240,7 +240,7 @@ fn switch_to_nonexistant_mode() {
         json!({
             "data" : {
                 "activateMode": {
-                    "errors": "Failed to activate 'none': Mode not found",
+                    "errors": "Scheduler failed over to safe mode due to error: Failed to activate mode 'none' not found",
                     "success": false
                 }
             }

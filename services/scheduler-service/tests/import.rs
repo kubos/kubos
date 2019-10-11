@@ -380,7 +380,7 @@ fn import_invalid_schedule() {
         json!({
             "data" : {
                 "importTaskList": {
-                    "errors": "Failed to import task list 'first': Failed to parse json",
+                    "errors": "Failed to parse task list 'first': Failed to parse json: expected ident at line 1 column 2",
                     "success": false
                 }
             }
@@ -401,6 +401,55 @@ fn import_invalid_schedule() {
                         "name": "safe",
                         "active": true,
                         "schedule": [ ]
+                    }
+                ]
+            }
+        })
+    );
+}
+
+#[test]
+fn import_safe_schedule_upper_case() {
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8028);
+
+    assert_eq!(
+        fixture.query(r#"{ availableModes { name, active, schedule { name } } }"#),
+        json!({
+            "data": {
+                "availableModes": [
+                    {
+                        "name": "safe",
+                        "active": true,
+                        "schedule": []
+                    }
+                ]
+            }
+        })
+    );
+
+    let schedule = json!({ "tasks": [ ] });
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    assert_eq!(
+        fixture.import_task_list("first", &schedule_path, "SAFE"),
+        json!({
+            "data" : {
+                "importTaskList": {
+                    "errors": "",
+                    "success": true
+                }
+            }
+        })
+    );
+
+    assert_eq!(
+        fixture.query(r#"{ availableModes { name, active, schedule { name } } }"#),
+        json!({
+            "data": {
+                "availableModes": [
+                    {
+                        "name": "safe",
+                        "active": true,
+                        "schedule": [{ "name": "first" } ]
                     }
                 ]
             }

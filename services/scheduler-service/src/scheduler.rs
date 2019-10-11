@@ -75,17 +75,36 @@ impl Scheduler {
             }
         }
 
-        if get_active_mode(&self.scheduler_dir)?.is_none() {
-            if get_available_modes(&self.scheduler_dir, Some(SAFE_MODE.to_owned()))?.is_empty() {
-                create_mode(&self.scheduler_dir, SAFE_MODE)?;
+        match get_active_mode(&self.scheduler_dir) {
+            // If we get some directory and no error, then do nothing
+            Ok(Some(_)) => {}
+            // Otherwise if we got an error OR if we found no active directory
+            // then attempt to create and/or activate safe mode
+            _ => {
+                match get_available_modes(&self.scheduler_dir, Some(SAFE_MODE.to_owned())) {
+                    // If this list isn't empty then we know safe mode exists
+                    Ok(ref list) if !list.is_empty() => {}
+                    // If the list is empty OR there was any sort of error retrieving it
+                    // then attempt to create the safe mode
+                    _ => {
+                        create_mode(&self.scheduler_dir, SAFE_MODE)?;
+                    }
+                }
+                activate_mode(&self.scheduler_dir, SAFE_MODE)?;
             }
-            activate_mode(&self.scheduler_dir, SAFE_MODE)?;
         }
         Ok(())
     }
 
     // Checks if task list is in active mode and schedules tasks if needed
-    pub fn check_start_task_list(&self, name: &str, mode: &str) -> Result<(), SchedulerError> {
+    pub fn check_start_task_list(
+        &self,
+        raw_name: &str,
+        raw_mode: &str,
+    ) -> Result<(), SchedulerError> {
+        let name = raw_name.to_lowercase();
+        let mode = raw_mode.to_lowercase();
+
         if is_mode_active(&self.scheduler_dir, &mode) {
             let list_path = format!("{}/{}/{}.json", self.scheduler_dir, mode, name);
             let list_path = Path::new(&list_path);
@@ -100,10 +119,8 @@ impl Scheduler {
     // Schedules tasks associated with task list
     fn start_task_list(&self, list: TaskList) -> Result<(), SchedulerError> {
         let mut schedules_map = self.scheduler_map.lock().unwrap();
-
         let scheduler_handle = list.schedule_tasks(&self.app_service_url)?;
         schedules_map.insert(list.name, scheduler_handle);
-
         Ok(())
     }
 
@@ -115,7 +132,8 @@ impl Scheduler {
             }
             Ok(())
         } else {
-            panic!("Failed to find active mode");
+            error!("Failed to find an active mode");
+            panic!("Failed to find an active mode");
         }
     }
 
@@ -131,24 +149,26 @@ impl Scheduler {
         Ok(())
     }
 
-    // Checks if a task list exists in an active mode and stops it's scheduler if needed
-    pub fn check_stop_task_list(&self, name: &str, mode: &str) -> Result<(), SchedulerError> {
-        if is_mode_active(&self.scheduler_dir, mode) {
-            Ok(self.stop_task_list(name)?)
+    // Checks if a task list exists in an active mode and stops its scheduler if needed
+    pub fn check_stop_task_list(
+        &self,
+        raw_name: &str,
+        raw_mode: &str,
+    ) -> Result<(), SchedulerError> {
+        let name = raw_name.to_lowercase();
+        let mode = raw_mode.to_lowercase();
+
+        if is_mode_active(&self.scheduler_dir, &mode) {
+            let mut schedules_map = self.scheduler_map.lock().unwrap();
+            if let Some(handle) = schedules_map.remove(&name) {
+                info!("Stopping {}'s tasks", name);
+                if let Err(e) = handle.stopper.send(()) {
+                    error!("Failed to send stop to {}'s tasks: {}", name, e);
+                }
+            }
+            Ok(())
         } else {
             Ok(())
         }
-    }
-
-    // Attempts to stop scheduler associated with task list
-    fn stop_task_list(&self, name: &str) -> Result<(), SchedulerError> {
-        let mut schedules_map = self.scheduler_map.lock().unwrap();
-        if let Some(handle) = schedules_map.remove(name) {
-            info!("Stopping {}'s tasks", name);
-            if let Err(e) = handle.stopper.send(()) {
-                error!("Failed to send stop to {}'s tasks: {}", name, e);
-            }
-        }
-        Ok(())
     }
 }

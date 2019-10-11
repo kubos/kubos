@@ -31,8 +31,34 @@ pub enum SchedulerError {
         /// Mode which failed activation
         name: String,
     },
+    // An error was raised when creating a file or directory
     #[fail(display = "Failed to create '{}': {}", path, err)]
-    CreateError { err: String, path: String },
+    CreateError {
+        /// The specific error encountered
+        err: String,
+        /// Path of file/dir which failed to create
+        path: String,
+    },
+    // An error was raised when parsing a duration field
+    #[fail(display = "Failed to parse duration '{}': {}", field, err)]
+    DurationParseError {
+        /// Error encountered
+        err: String,
+        /// Delay or time field parsed
+        field: String,
+    },
+    // An error was raised and scheduler switched to safe mode
+    #[fail(display = "Scheduler failed over to safe mode due to error: {}", err)]
+    FailoverError {
+        /// Error which caused failover
+        err: String,
+    },
+    // A generic scheduler error
+    #[fail(display = "Scheduler error encountered: {}", err)]
+    GenericError {
+        /// Generic error encountered
+        err: String,
+    },
     /// An error was raised while importing a task list
     #[fail(display = "Failed to import '{}': {}", name, err)]
     ImportError {
@@ -40,6 +66,20 @@ pub enum SchedulerError {
         err: String,
         // Path of task list which failed to import
         name: String,
+    },
+    // An error was raised when loading a mode
+    #[fail(display = "Failed to load mode {}: {}", path, err)]
+    LoadModeError {
+        /// The specific error encountered
+        err: String,
+        /// The path of the mode that failed to load
+        path: String,
+    },
+    // An error was raised when sending a graphql query
+    #[fail(display = "Scheduler query failed: {}", err)]
+    QueryError {
+        /// The error encountered
+        err: String,
     },
     /// An error was raised when removing a mode or task file
     #[fail(display = "Failed to remove '{}': {}", name, err)]
@@ -49,27 +89,20 @@ pub enum SchedulerError {
         /// Name of task or mode removed
         name: String,
     },
-    // A generic scheduler error
-    #[fail(display = "Scheduler error encountered: {}", err)]
-    GenericError {
-        /// Generic error encountered
-        err: String,
-    },
-    #[fail(display = "Failed to parse duration '{}': {}", field, err)]
-    DurationParseError {
-        /// Error encountered
-        err: String,
-        /// Delay or time field parsed
-        field: String,
-    },
-    #[fail(display = "Failed to import task list '{}': {}", name, err)]
-    TaskListParseError { err: String, name: String },
-    #[fail(display = "Failed to load mode {}: {}", path, err)]
-    LoadModeError { err: String, path: String },
-    #[fail(display = "Scheduler query failed: {}", err)]
-    QueryError { err: String },
+    // An error was raised when starting up the scheduler
     #[fail(display = "Scheduler failed to start: {}", err)]
-    StartError { err: String },
+    StartError {
+        /// The error encountered
+        err: String,
+    },
+    // An error was raised when parsing a task list
+    #[fail(display = "Failed to parse task list '{}': {}", name, err)]
+    TaskListParseError {
+        /// The specific parsing error
+        err: String,
+        /// The name of the task list that failed to parse
+        name: String,
+    },
 }
 
 impl From<String> for SchedulerError {

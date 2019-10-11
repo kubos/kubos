@@ -467,3 +467,44 @@ fn run_init_check_remove() {
     // Verify task did not run
     assert_eq!(listener.get_request(), None);
 }
+
+#[test]
+fn run_init_import_twice() {
+    let listener = ServiceListener::spawn("127.0.0.1", 9032);
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8032);
+
+    fixture.create_mode("init");
+
+    // Create some schedule with an init task
+    let schedule = json!({
+        "tasks": [
+            {
+                "name": "basic-task",
+                "delay": "0s",
+                "app": {
+                    "name": "basic-app"
+                }
+            }
+        ]
+    });
+    let schedule_path = fixture.create_task_list(Some(schedule.to_string()));
+    fixture.import_task_list("imaging", &schedule_path, "init");
+    fixture.activate_mode("init");
+
+    // Wait for the service to restart the scheduler
+    thread::sleep(Duration::from_millis(100));
+
+    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"basic-app\") { success, errors } }"}"#;
+
+    // Check if the task actually ran
+    assert_eq!(listener.get_request(), Some(query.to_owned()));
+
+    // Import task list again and verify task ran again
+    fixture.import_task_list("imaging", &schedule_path, "init");
+
+    // Wait for the service to restart the scheduler
+    thread::sleep(Duration::from_millis(100));
+
+    // Check if the task actually ran
+    assert_eq!(listener.get_request(), Some(query.to_owned()))
+}

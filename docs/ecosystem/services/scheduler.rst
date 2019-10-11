@@ -7,9 +7,9 @@ and one time tasks with specific timing requirements.
 Behavior
 --------
 
-The behavior of the scheduler is defined through three levels of organization: *mode*,
+The behavior of the scheduler is defined by three levels of organization: *mode*,
 *schedule*, and *task*. The *mode* determines which schedule directory is being executed.
-The *schedule* is then assembled through combining all the *task lists* in the schedule
+The *schedule* is then assembled by combining all the *task lists* in the schedule
 directory, each of which can contain one or many *tasks*. New *tasks* can be added to
 a *schedule* by uploading a *task list* to a location which is accessible to the 
 scheduler, and importing that *task list* to the appropriate mode. 
@@ -19,12 +19,12 @@ mode directory and schedules all tasks from that mode. The default active mode d
 is found at ``/home/system/etc/schedules/active``, which is a symlink
 to the actual active mode's directory.
 
-Schedules consists of many tasks, each of which has a scheduled execution time.
+Schedules consist of many tasks, each of which has a scheduled execution time.
 Tasks are loaded into the scheduler when the scheduler service starts,
 when a mode becomes active, or when a new task list is imported into the active mode.
-Any tasks configured with an execution ``delay`` will be scheduled for execution
-when their corresponding delay has passed. All other tasks configured with an
-execution ``time`` or ``period`` will be scheduled to run at their designated times.
+Any tasks configured with a ``delay`` will be scheduled for execution
+when their corresponding delay has passed. All other tasks configured with a
+``time`` or ``period`` will be scheduled to run at their designated times.
 
 By default the scheduler comes with a single mode: ``safe``. This mode is reserved as a
 fallback and default operating mode. Additional modes can be created and made active
@@ -44,16 +44,16 @@ task to be scheduled. Multiple task lists can coexist in the same mode folder,
 allowing for easy loading of new scheduled tasks.
 
 Tasks can have their scheduled time of execution specified using three different
-fields: ``delay``, ``time``, and ``period``. The ``delay`` field 
-
-Schedules consist of types of tasks: ``init``, ``one-time``, and ``recurring``. Each section
-represents a different type of scheduled task. Each specified task in a section
-represents the future scheduled execution of an app by the app service.
+fields: ``delay``, ``time``, and ``period``. The ``delay`` field specifies
+a delay before the task executes. The ``time`` field specifies a time
+when the task will be executed. The ``period`` field indicates the app should
+be executed on a recurring basis and specifies the period of recurrence.
 
 Tasks specify a ``name`` and a time of execution using a combination of the ``delay``,
 ``time``, and ``period`` fields. Each task has an associated ``app``. The scheduler
 currently delegates the actual running of tasks to the ``app-service``, so each
-``app`` contains the necessary information needed by the ``app-service`` to run the app.
+``app`` definition contains the necessary information needed by the
+``app-service`` to run the app.
 
 .. code-block::json
 
@@ -260,7 +260,8 @@ mode, or to the *safe* mode. It has the following schema::
     }
 
 The ``activateMode`` mutation instructs the scheduler to make the specified mode
-active. It has the following schema::
+active. It cannot be used to activate safe mode, the ``safeMode`` mutation is the
+only way to activate safe mode. It has the following schema::
 
     mutation {
         activateMode(name: String!): {
@@ -270,7 +271,8 @@ active. It has the following schema::
     }
 
 The ``safeMode`` mutation instructs the scheduler to make the *safe* mode
-active. It has the following schema::
+active. This mutation is the only way to activate *safe* mode and can only
+activate that mode. It has the following schema::
 
     mutation {
         safeMode(name: String!): {
