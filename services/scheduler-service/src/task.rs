@@ -68,6 +68,11 @@ impl Task {
                     err: "Task scheduled for past time".to_owned(),
                     field: time.to_owned(),
                 })
+            } else if (run_time - now) > chrono::Duration::days(90) {
+                Err(SchedulerError::DurationParseError {
+                    err: "Task scheduled beyond 90 days in the future".to_owned(),
+                    field: time.to_owned(),
+                })
             } else {
                 Ok((run_time - now)
                     .to_std()

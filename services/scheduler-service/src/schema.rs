@@ -167,13 +167,15 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     // Imports a new task list into a mode
     //
     // mutation {
-    //     importTaskList(path: String!, name: String!, mode: String!): {
+    //     importTaskList(name: String!, path: String!, mode: String!): {
     //         errors: String,
     //         success: Boolean
     //    }
     // }
-    field import_task_list(&executor, path: String, name: String, mode: String) -> FieldResult<GenericResponse> {
-        Ok(match import_task_list(&executor.context().subsystem().scheduler_dir, &path, &name, &mode).and_then(|_| executor.context().subsystem().check_start_task_list(&name, &mode)) {
+    field import_task_list(&executor, name: String, path: String, mode: String) -> FieldResult<GenericResponse> {
+        Ok(match import_task_list(&executor.context().subsystem().scheduler_dir, &name, &path, &mode)
+        .and_then(|_| executor.context().subsystem().check_stop_task_list(&name, &mode))
+        .and_then(|_| executor.context().subsystem().check_start_task_list(&name, &mode)) {
             Ok(_) => GenericResponse { success: true, errors: "".to_owned() },
             Err(error) => GenericResponse { success: false, errors: error.to_string() }
         })

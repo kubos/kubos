@@ -24,7 +24,7 @@ use crate::task_list::{get_mode_task_lists, TaskList};
 use chrono::offset::TimeZone;
 use chrono::{DateTime, Utc};
 use juniper::GraphQLObject;
-use log::{info, warn};
+use log::{error, info, warn};
 use std::fs;
 use std::os::unix::fs::symlink;
 use std::path::{Path, PathBuf};
@@ -62,11 +62,15 @@ impl ScheduleMode {
 
         let mut last_revised: DateTime<Utc> = Utc.ymd(1970, 1, 1).and_hms(0, 0, 0);
         for s in &schedule {
-            let sched_time: DateTime<Utc> = Utc
-                .datetime_from_str(&s.time_imported, "%Y-%m-%d %H:%M:%S")
-                .unwrap();
-            if sched_time > last_revised {
-                last_revised = sched_time;
+            match Utc.datetime_from_str(&s.time_imported, "%Y-%m-%d %H:%M:%S") {
+                Ok(sched_time) => {
+                    if sched_time > last_revised {
+                        last_revised = sched_time;
+                    }
+                }
+                Err(e) => {
+                    warn!("Failed to parse import time for task '{}': {}", s.name, e);
+                }
             }
         }
 
@@ -180,13 +184,11 @@ pub fn remove_mode(scheduler_dir: &str, name: &str) -> Result<(), SchedulerError
         });
     }
 
-    if let Ok(Some(active_mode)) = get_active_mode(&scheduler_dir) {
-        if name == active_mode.name {
-            return Err(SchedulerError::RemoveError {
-                err: "Cannot remove active mode".to_owned(),
-                name: name.to_owned(),
-            });
-        }
+    if is_mode_active(&scheduler_dir, &name) {
+        return Err(SchedulerError::RemoveError {
+            err: "Cannot remove active mode".to_owned(),
+            name: name.to_owned(),
+        });
     }
 
     let mode_dir = format!("{}/{}", scheduler_dir, name);
@@ -206,12 +208,19 @@ pub fn activate_mode(scheduler_dir: &str, name: &str) -> Result<(), SchedulerErr
     let new_active_path = format!("{}/new_active", scheduler_dir);
 
     if !Path::new(&sched_path).is_dir() {
-        warn!("Attempted to activate non-existant mode. Falling back to safe mode.");
-        activate_mode(scheduler_dir, SAFE_MODE)?;
-        return Err(SchedulerError::ActivateError {
-            err: "Mode not found".to_owned(),
-            name: name.to_owned(),
-        });
+        if name == SAFE_MODE {
+            error!("Failed to activate safe mode, directory not found.");
+            return Err(SchedulerError::ActivateError {
+                err: "Safe mode not found".to_owned(),
+                name: name.to_owned(),
+            });
+        } else {
+            warn!("Attempted to activate non-existant mode. Falling back to safe mode.");
+            activate_mode(scheduler_dir, SAFE_MODE)?;
+            return Err(SchedulerError::FailoverError {
+                err: format!("Failed to activate mode '{}' not found", name),
+            });
+        }
     }
     symlink(sched_path, &new_active_path).map_err(|e| SchedulerError::ActivateError {
         err: e.to_string(),

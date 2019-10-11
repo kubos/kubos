@@ -36,7 +36,7 @@ use tokio::runtime::Runtime;
 
 // Task list's contents
 #[derive(Debug, GraphQLObject, Serialize, Deserialize)]
-struct ListConents {
+struct ListContents {
     pub tasks: Vec<Task>,
 }
 
@@ -90,9 +90,9 @@ impl TaskList {
                 name: name.to_owned(),
             })?;
 
-        let list_contents: ListConents = serde_json::from_str(&list_contents).map_err(|_| {
+        let list_contents: ListContents = serde_json::from_str(&list_contents).map_err(|e| {
             SchedulerError::TaskListParseError {
-                err: format!("Failed to parse json"),
+                err: format!("Failed to parse json: {}", e),
                 name: name.to_owned(),
             }
         })?;
@@ -120,7 +120,7 @@ impl TaskList {
 
             runner.spawn(lazy(move || {
                 for task in tasks {
-                    info!("Scheduling init task: {}", &task.name);
+                    info!("Scheduling task '{}'", &task.name);
                     tokio::spawn(task.schedule(service_url.clone()));
                 }
                 Ok(())
@@ -147,12 +147,12 @@ impl TaskList {
 // Copy a task list into a mode directory
 pub fn import_task_list(
     scheduler_dir: &str,
+    raw_name: &str,
     path: &str,
-    name: &str,
-    mode: &str,
+    raw_mode: &str,
 ) -> Result<(), SchedulerError> {
-    let name = name.to_lowercase();
-    let mode = mode.to_lowercase();
+    let name = raw_name.to_lowercase();
+    let mode = raw_mode.to_lowercase();
     info!(
         "Importing task list '{}': {} into mode '{}'",
         name, path, mode
