@@ -43,7 +43,6 @@ Required arguments:
         - ``cleanup`` - Cleanup the endpoint service's temporary storage directory
 
     - ``source-file`` - The file to be transferred. May be a relative or absolute path.
-    - ``-P {host_port}`` - The UDP port that the file transfer service will send responses to.
 
 Optional arguments:
 
@@ -53,6 +52,7 @@ Optional arguments:
     - ``-h {host IP}`` - Default: `0.0.0.0`. IP address of the local host to use.
     - ``-r {remote IP}`` - Default: `0.0.0.0`. IP address of the file transfer service to connect to.
     - ``-p {remote port}`` - Default: `8040`. UDP port of the file transfer service to connect to.
+    - ``-P {host_port}`` - Default: `8080`. The UDP port that the file transfer service will send responses to.
     - ``-s {storage_prefix}`` - Default: `file-storage`. Name of the directory which should be used
       for temporary file transfer storage.
     - ``-c {chunk_size}`` - Default: `4096`. Size, in bytes, of the individual chunks the file

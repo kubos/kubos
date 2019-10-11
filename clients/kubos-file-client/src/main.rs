@@ -197,7 +197,8 @@ fn main() {
             Arg::with_name("host_port")
                 .short("-P")
                 .help("UDP port that the file transfer service will send responses to")
-                .takes_value(true),
+                .takes_value(true)
+                .default_value("8080"),
         )
         .arg(
             Arg::with_name("remote_ip")
