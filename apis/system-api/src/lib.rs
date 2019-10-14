@@ -19,6 +19,7 @@
 //! KubOS System level APIs
 
 mod config;
+pub mod logger;
 mod uboot;
 
 pub use crate::config::DEFAULT_PATH as DEFAULT_CONFIG_PATH;

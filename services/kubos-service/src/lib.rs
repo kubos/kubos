@@ -109,4 +109,5 @@ mod macros;
 mod service;
 
 pub use crate::service::{Context, Service};
+pub use kubos_system::logger;
 pub use kubos_system::Config;

@@ -6,6 +6,9 @@ edition = "2018"
 
 [dependencies]
 failure = "0.1.2"
+log4rs = "0.8.3"
+log4rs-syslog = "3.0"
+log = "^0.4.0"
 serde = "1.0"
 serde_derive = "1.0"
 toml = "0.4"
