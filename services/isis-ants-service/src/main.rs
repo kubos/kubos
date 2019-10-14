@@ -357,9 +357,8 @@ pub use crate::objects::*;
 use crate::schema::{MutationRoot, QueryRoot};
 use failure::format_err;
 use isis_ants_api::AntSResult;
-use kubos_service::{Config, Service};
+use kubos_service::{Config, Logger, Service};
 use log::error;
-use syslog::Facility;
 
 mod model;
 mod objects;
@@ -368,12 +367,7 @@ mod schema;
 mod tests;
 
 fn main() -> AntSResult<()> {
-    syslog::init(
-        Facility::LOG_DAEMON,
-        log::LevelFilter::Debug,
-        Some("isis-ants-service"),
-    )
-    .unwrap();
+    Logger::init("isis-ants-service").unwrap();
 
     let config = Config::new("isis-ants-service")
         .map_err(|err| {

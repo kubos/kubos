@@ -11,7 +11,5 @@ juniper =  "0.11"
 kubos-system = { path = "../../apis/system-api" }
 kubos-service = { path = "../../services/kubos-service" }
 log = "^0.4.0"
-log4rs = "0.8"
-log4rs-syslog = "3.0"
 rust-uart = { path = "../../hal/rust-hal/rust-uart" }
 serial = "0.4"

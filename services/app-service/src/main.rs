@@ -29,17 +29,11 @@ mod tests;
 
 use crate::registry::AppRegistry;
 use failure::Error;
-use kubos_service::{Config, Service};
+use kubos_service::{Config, Logger, Service};
 use log::error;
-use syslog::Facility;
 
 fn main() -> Result<(), Error> {
-    syslog::init(
-        Facility::LOG_DAEMON,
-        log::LevelFilter::Debug,
-        Some("kubos-app-service"),
-    )
-    .unwrap();
+    Logger::init("kubos-app-service").unwrap();
 
     let config = Config::new("app-service").map_err(|err| {
         error!("Failed to load service config: {:?}", err);

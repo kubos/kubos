@@ -418,19 +418,13 @@ mod tests;
 use crate::model::{ReadData, Subsystem};
 pub use crate::objects::*;
 use crate::schema::{MutationRoot, QueryRoot};
-use kubos_service::{Config, Service};
+use kubos_service::{Config, Logger, Service};
 use log::error;
 use mai400_api::MAIResult;
 use std::sync::Arc;
-use syslog::Facility;
 
 fn main() -> MAIResult<()> {
-    syslog::init(
-        Facility::LOG_DAEMON,
-        log::LevelFilter::Debug,
-        Some("mai400-service"),
-    )
-    .unwrap();
+    Logger::init("mai400-service").unwrap();
 
     Service::new(
         Config::new("mai400-service")

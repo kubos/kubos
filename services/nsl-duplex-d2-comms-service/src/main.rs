@@ -230,20 +230,14 @@ use crate::model::Subsystem;
 use crate::schema::{MutationRoot, QueryRoot};
 use comms_service::*;
 use failure::Error;
-use kubos_service::{Config, Service};
+use kubos_service::{Config, Logger, Service};
 use std::sync::{Arc, Mutex};
-use syslog::Facility;
 
 // Generic return type
 type NslDuplexCommsResult<T> = Result<T, Error>;
 
 fn main() -> NslDuplexCommsResult<()> {
-    syslog::init(
-        Facility::LOG_DAEMON,
-        log::LevelFilter::Debug,
-        Some("nsl-duplex-comms-service"),
-    )
-    .unwrap();
+    Logger::init("nsl-duplex-comms-service").unwrap();
 
     let service_config = Config::new("nsl-duplex-comms-service").map_err(|err| {
         error!("Failed to load service config: {:?}", err);

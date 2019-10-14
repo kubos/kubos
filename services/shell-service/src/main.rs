@@ -16,18 +16,13 @@
 
 #![deny(warnings)]
 
+use kubos_system::logger as ServiceLogger;
 use kubos_system::Config as ServiceConfig;
 use log::{error, info, warn};
 use shell_service::*;
-use syslog::Facility;
 
 fn main() {
-    syslog::init(
-        Facility::LOG_DAEMON,
-        log::LevelFilter::Debug,
-        Some("kubos-shell-service"),
-    )
-    .unwrap();
+    ServiceLogger::init("kubos-shell-service").unwrap();
 
     let config = ServiceConfig::new("shell-service")
         .map_err(|err| {

@@ -11,4 +11,3 @@ juniper =  "0.11"
 kubos-service = { path = "../../services/kubos-service" }
 log = "^0.4.0"
 nsl-duplex-d2 = { path = "../../apis/nsl-duplex-d2" }
-syslog = "4.0"

@@ -10,7 +10,6 @@ isis-ants-api = { path = "../../apis/isis-ants-api" }
 juniper =  "0.11"
 kubos-service = { path = "../kubos-service" }
 log = "^0.4.0"
-syslog = "4.0"
 
 [dev-dependencies]
 serde = "1.0"

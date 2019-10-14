@@ -22,17 +22,11 @@ mod schema;
 
 use crate::model::Subsystem;
 use crate::schema::{MutationRoot, QueryRoot};
-use kubos_service::{Config, Service};
+use kubos_service::{Config, Logger, Service};
 use log::error;
-use syslog::Facility;
 
 fn main() {
-    syslog::init(
-        Facility::LOG_DAEMON,
-        log::LevelFilter::Debug,
-        Some("example-service"),
-    )
-    .unwrap();
+    Logger::init("example-service").unwrap();
 
     Service::new(
         Config::new("example-service")

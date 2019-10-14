@@ -58,9 +58,8 @@
 extern crate juniper;
 
 use crate::schema::{MutationRoot, QueryRoot};
-use kubos_service::{Config, Service};
+use kubos_service::{Config, Logger, Service};
 use log::error;
-use syslog::Facility;
 
 mod meminfo;
 mod objects;
@@ -70,12 +69,7 @@ mod schema;
 mod userinfo;
 
 fn main() {
-    syslog::init(
-        Facility::LOG_DAEMON,
-        log::LevelFilter::Debug,
-        Some("kubos-monitor-service"),
-    )
-    .unwrap();
+    Logger::init("kubos-monitor-service").unwrap();
 
     let config = Config::new("monitor-service")
         .map_err(|err| {
