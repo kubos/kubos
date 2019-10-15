@@ -78,36 +78,31 @@ Rust
 ~~~~
 
 Rust programs will use the standard `log framework crate <https://docs.rs/log/0.4.6/log/>`__ in
-conjunction with a crate capable of writing syslog messages.
-For example, using `syslog <https://docs.rs/syslog/4.0.1/syslog/>`__:
+conjunction with a crate capable of writing syslog messages. The ``kubos-system`` crate provides
+a `common interface <https://github.com/kubos/kubos/blob/master/apis/system-api/src/logger.rs>`__
+for initializing the syslog interface. The ``kubos-service`` crate re-exports this
+interface for usage when building services:
 
 .. code-block:: rust
 
+    use failure::{Error, SyncFailure};
+    use kubos_service::Logger;
     use log::{debug, error};
     
-    use failure::{Error, SyncFailure};
-    use syslog::Facility;
-    
     fn main() -> Result<(), Error> {
-        if let Err(error) = syslog::init(
-            // Log using the User facility (Kubos services will use LOG_DAEMON)
-            Facility::LOG_USER,
-            // Set the minimum log level we care about
-            log::LevelFilter::Debug,
-            // Set the application/program name
-            Some("log-test"),
-            // Have to do `map_err(SyncFailure::new)` in order to convert
-            // error-chain Error into something `failure` can handle
-        ).map_err(SyncFailure::new)
-        {
-            eprintln!("Failed to start logging: {}", error);
-        }
+        // Set the application/program name
+        Logger::init("log-test").unwrap();
     
         debug!("this is a debug {}", "message");
         error!("this is an error!");
         Ok(())
     }
 
+Utilizing the ``kubos_system::logger`` interface also exposes two optional command line arguments:
+
+- The ``--stdout`` flag will enable logging to stdout.
+- The ``-l log-level`` flag will control the verbosity of the logging. The following 
+  log levels are available: ``error``, ``warn``, ``info``, and ``debug``.
 
 Python
 ~~~~~~

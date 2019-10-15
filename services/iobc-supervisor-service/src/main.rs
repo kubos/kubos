@@ -99,16 +99,10 @@ mod schema;
 
 use crate::model::Supervisor;
 use crate::schema::{MutationRoot, QueryRoot};
-use kubos_service::{Config, Service};
-use syslog::Facility;
+use kubos_service::{Config, Logger, Service};
 
 fn main() {
-    syslog::init(
-        Facility::LOG_DAEMON,
-        log::LevelFilter::Debug,
-        Some("iobc-supervisor-service"),
-    )
-    .unwrap();
+    Logger::init("iobc-supervisor-service").unwrap();
 
     Service::new(
         Config::new("iobc-supervisor-service")

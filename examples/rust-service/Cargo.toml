@@ -9,4 +9,3 @@ kubos-service = { path = "../../services/kubos-service" }
 juniper =  "0.11"
 log = "^0.4.0"
 mount = "0.3.0"
-syslog = "4.0"

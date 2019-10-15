@@ -17,17 +17,12 @@
 #![deny(warnings)]
 
 use file_service::*;
+use kubos_system::logger as ServiceLogger;
 use kubos_system::Config as ServiceConfig;
 use log::{error, warn};
-use syslog::Facility;
 
 fn main() {
-    syslog::init(
-        Facility::LOG_DAEMON,
-        log::LevelFilter::Debug,
-        Some("kubos-file-service"),
-    )
-    .unwrap();
+    ServiceLogger::init("file-transfer-service").unwrap();
 
     let config = ServiceConfig::new("file-transfer-service")
         .map_err(|err| {

@@ -12,4 +12,3 @@ kubos-system = { path = "../../apis/system-api" }
 log = "^0.4.0"
 serde_cbor = "0.8"
 shell-protocol = { path = "../../libs/shell-protocol" }
-syslog = "4.0"

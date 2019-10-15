@@ -33,8 +33,6 @@ extern crate rust_uart;
 extern crate serial;
 #[macro_use]
 extern crate log;
-extern crate log4rs;
-extern crate log4rs_syslog;
 
 mod comms;
 mod kiss;
@@ -46,55 +44,14 @@ use crate::model::Subsystem;
 use crate::schema::{MutationRoot, QueryRoot};
 use comms_service::*;
 use failure::Error;
-use kubos_service::{Config, Service};
+use kubos_service::{Config, Logger, Service};
 use std::sync::{Arc, Mutex};
 
 // Return type for the ethernet service.
 type SerialServiceResult<T> = Result<T, Error>;
 
-// Initialize logging for the service
-// All messages will be routed to syslog and echoed to the console
-fn log_init() -> SerialServiceResult<()> {
-    use log4rs::append::console::ConsoleAppender;
-    use log4rs::encode::pattern::PatternEncoder;
-    use log4rs_syslog::SyslogAppender;
-    // Use custom PatternEncoder to avoid duplicate timestamps in logs.
-    let syslog_encoder = Box::new(PatternEncoder::new("{m}"));
-    // Set up logging which will be routed to syslog for processing
-    let syslog = Box::new(
-        SyslogAppender::builder()
-            .encoder(syslog_encoder)
-            .openlog(
-                "serial-comms-service",
-                log4rs_syslog::LogOption::LOG_PID | log4rs_syslog::LogOption::LOG_CONS,
-                log4rs_syslog::Facility::Daemon,
-            )
-            .build(),
-    );
-
-    // Set up logging which will be routed to stdout
-    let stdout = Box::new(ConsoleAppender::builder().build());
-
-    // Combine the loggers into one master config
-    let config = log4rs::config::Config::builder()
-        .appender(log4rs::config::Appender::builder().build("syslog", syslog))
-        .appender(log4rs::config::Appender::builder().build("stdout", stdout))
-        .build(
-            log4rs::config::Root::builder()
-                .appender("syslog")
-                .appender("stdout")
-                // Set the minimum logging level to record
-                .build(log::LevelFilter::Debug),
-        )?;
-
-    // Start the logger
-    log4rs::init_config(config)?;
-
-    Ok(())
-}
-
 fn main() -> SerialServiceResult<()> {
-    log_init()?;
+    Logger::init("serial-comms-service").unwrap();
 
     let service_config = Config::new("serial-comms-service")?;
 

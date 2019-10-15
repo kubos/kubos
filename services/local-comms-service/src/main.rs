@@ -31,6 +31,8 @@
 use crate::comms::*;
 use comms_service::*;
 use failure::Error;
+use kubos_system::logger as ServiceLogger;
+use kubos_system::Config as ServiceConfig;
 use log::error;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -41,53 +43,12 @@ mod comms;
 // Return type for the ethernet service.
 type LocalCommsServiceResult<T> = Result<T, Error>;
 
-// Initialize logging for the service
-// All messages will be routed to syslog and echoed to the console
-fn log_init() -> LocalCommsServiceResult<()> {
-    use log4rs::append::console::ConsoleAppender;
-    use log4rs::encode::pattern::PatternEncoder;
-    use log4rs_syslog::SyslogAppender;
-    // Use custom PatternEncoder to avoid duplicate timestamps in logs.
-    let syslog_encoder = Box::new(PatternEncoder::new("{m}"));
-    // Set up logging which will be routed to syslog for processing
-    let syslog = Box::new(
-        SyslogAppender::builder()
-            .encoder(syslog_encoder)
-            .openlog(
-                "ethernet-comms-service",
-                log4rs_syslog::LogOption::LOG_PID | log4rs_syslog::LogOption::LOG_CONS,
-                log4rs_syslog::Facility::Daemon,
-            )
-            .build(),
-    );
-
-    // Set up logging which will be routed to stdout
-    let stdout = Box::new(ConsoleAppender::builder().build());
-
-    // Combine the loggers into one master config
-    let config = log4rs::config::Config::builder()
-        .appender(log4rs::config::Appender::builder().build("syslog", syslog))
-        .appender(log4rs::config::Appender::builder().build("stdout", stdout))
-        .build(
-            log4rs::config::Root::builder()
-                .appender("syslog")
-                .appender("stdout")
-                // Set the minimum logging level to record
-                .build(log::LevelFilter::Debug),
-        )?;
-
-    // Start the logger
-    log4rs::init_config(config)?;
-
-    Ok(())
-}
-
 fn main() -> LocalCommsServiceResult<()> {
     // Setup new system logging for ethernet service.
-    log_init().unwrap();
+    ServiceLogger::init("local-comms-service").unwrap();
 
     // Get the main service configuration from the system's config.toml file
-    let service_config = kubos_system::Config::new("local-comms-service").map_err(|err| {
+    let service_config = ServiceConfig::new("local-comms-service").map_err(|err| {
         error!("Failed to load service config: {:?}", err);
         err
     })?;

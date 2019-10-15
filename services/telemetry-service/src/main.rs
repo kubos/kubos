@@ -209,18 +209,12 @@ mod schema;
 mod udp;
 
 use crate::schema::{MutationRoot, QueryRoot, Subsystem};
-use kubos_service::{Config, Service};
+use kubos_service::{Config, Logger, Service};
 use kubos_telemetry_db::Database;
 use log::error;
-use syslog::Facility;
 
 fn main() {
-    syslog::init(
-        Facility::LOG_DAEMON,
-        log::LevelFilter::Debug,
-        Some("kubos-telemetry-service"),
-    )
-    .unwrap();
+    Logger::init("kubos-telemetry-service").unwrap();
 
     let config = Config::new("telemetry-service")
         .map_err(|err| {

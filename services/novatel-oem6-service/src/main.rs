@@ -327,19 +327,13 @@ mod tests;
 use crate::model::{LockData, Subsystem};
 pub use crate::objects::*;
 use crate::schema::{MutationRoot, QueryRoot};
-use kubos_service::{Config, Service};
+use kubos_service::{Config, Logger, Service};
 use log::error;
 use novatel_oem6_api::OEMResult;
 use std::sync::Arc;
-use syslog::Facility;
 
 fn main() -> OEMResult<()> {
-    syslog::init(
-        Facility::LOG_DAEMON,
-        log::LevelFilter::Debug,
-        Some("novatel-oem6-service"),
-    )
-    .unwrap();
+    Logger::init("novatel-oem6-service").unwrap();
 
     let config = Config::new("novatel-oem6-service")
         .map_err(|err| {

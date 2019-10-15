@@ -9,6 +9,3 @@ failure = "0.1.3"
 comms-service = { path = "../../libs/comms-service" }
 kubos-system = { path = "../../apis/system-api" }
 log = "^0.4.0"
-syslog = "4.0"
-log4rs = "*"
-log4rs-syslog = "*"
