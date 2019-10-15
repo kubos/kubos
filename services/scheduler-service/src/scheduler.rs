@@ -25,6 +25,7 @@ use crate::mode::{
 use crate::task_list::{get_mode_task_lists, TaskList};
 use log::{error, info};
 use std::collections::HashMap;
+use std::env;
 use std::fs;
 use std::path::Path;
 use std::sync::mpsc::Sender;
@@ -56,12 +57,33 @@ pub struct Scheduler {
 
 impl Scheduler {
     // Create new Scheduler
-    pub fn new(sched_dir: &str, app_service_url: &str) -> Scheduler {
-        Scheduler {
-            scheduler_dir: sched_dir.to_owned(),
+    pub fn new(sched_dir: &str, app_service_url: &str) -> Result<Scheduler, SchedulerError> {
+        // Convert sched_dir to an absolute path
+        let sched_dir_path = Path::new(sched_dir);
+        let scheduler_dir = if sched_dir_path.is_relative() {
+            let cwd = env::current_dir().map_err(|e| SchedulerError::GenericError {
+                err: format!("Current working directory invalid: {}", e),
+            })?;
+            let sched_path = cwd.join(sched_dir_path);
+
+            sched_path
+                .to_str()
+                .ok_or_else(|| SchedulerError::GenericError {
+                    err: format!(
+                        "Failed to create absolute schedules_dir path: {:?}",
+                        sched_path
+                    ),
+                })?
+                .to_owned()
+        } else {
+            sched_dir.to_owned()
+        };
+
+        Ok(Scheduler {
+            scheduler_dir,
             scheduler_map: Arc::new(Mutex::new(HashMap::<String, SchedulerHandle>::new())),
             app_service_url: app_service_url.to_owned(),
-        }
+        })
     }
 
     // Ensure that conditions are good for starting the scheduler

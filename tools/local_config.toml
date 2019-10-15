@@ -5,6 +5,13 @@ registry-dir = "app-registry"
 ip = "127.0.0.1"
 port = 8000
 
+[scheduler-service]
+schedules_dir = "schedules"
+
+[scheduler-service.addr]
+ip = "127.0.0.1"
+port = 8010
+
 [telemetry-service]
 database = "telemetry.db"
 direct_port = 8021

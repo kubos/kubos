@@ -28,54 +28,13 @@ mod task;
 mod task_list;
 
 use crate::error::SchedulerError;
-use kubos_service::{Config, Service};
+use kubos_service::{Config, Logger, Service};
 use log::{error, info};
 use scheduler::{Scheduler, DEFAULT_SCHEDULES_DIR};
 use schema::{MutationRoot, QueryRoot};
 
-// Initialize logging for the service
-// All messages will be routed to syslog and echoed to the console
-fn log_init() -> Result<(), SchedulerError> {
-    use log4rs::append::console::ConsoleAppender;
-    use log4rs::encode::pattern::PatternEncoder;
-    use log4rs_syslog::SyslogAppender;
-    // Use custom PatternEncoder to avoid duplicate timestamps in logs.
-    let syslog_encoder = Box::new(PatternEncoder::new("{m}"));
-    // Set up logging which will be routed to syslog for processing
-    let syslog = Box::new(
-        SyslogAppender::builder()
-            .encoder(syslog_encoder)
-            .openlog(
-                "kubos-scheduler-service",
-                log4rs_syslog::LogOption::LOG_PID | log4rs_syslog::LogOption::LOG_CONS,
-                log4rs_syslog::Facility::Daemon,
-            )
-            .build(),
-    );
-
-    // Set up logging which will be routed to stdout
-    let stdout = Box::new(ConsoleAppender::builder().build());
-
-    // Combine the loggers into one master config
-    let config = log4rs::config::Config::builder()
-        .appender(log4rs::config::Appender::builder().build("syslog", syslog))
-        .appender(log4rs::config::Appender::builder().build("stdout", stdout))
-        .build(
-            log4rs::config::Root::builder()
-                .appender("syslog")
-                .appender("stdout")
-                // Set the minimum logging level to record
-                .build(log::LevelFilter::Debug),
-        )
-        .map_err(|e| format!("Logging configuration failed: {}", e))?;
-
-    // Start the logger
-    log4rs::init_config(config).map_err(|e| format!("Logging setup failed: {}", e))?;
-    Ok(())
-}
-
 fn main() -> Result<(), SchedulerError> {
-    log_init()?;
+    Logger::init("kubos-scheduler-service").unwrap();
 
     let config = Config::new("scheduler-service").map_err(|err| {
         error!("Failed to load service config: {:?}", err);
@@ -104,7 +63,7 @@ fn main() -> Result<(), SchedulerError> {
                 err: "Failed to fetch app service url".to_owned(),
             })?;
 
-    let scheduler = Scheduler::new(&scheduler_dir, &apps_service_url);
+    let scheduler = Scheduler::new(&scheduler_dir, &apps_service_url)?;
 
     info!("Starting scheduler-service - {:?}", scheduler_dir);
 
