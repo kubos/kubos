@@ -462,7 +462,7 @@ fn run_init_import_twice() {
     // Wait for the service to restart the scheduler
     thread::sleep(Duration::from_millis(100));
 
-    let query = r#"{"query":"mutation { startApp(runLevel: \"onBoot\", name: \"basic-app\") { success, errors } }"}"#;
+    let query = r#"{"query":"mutation { startApp(name: \"basic-app\") { success, errors } }"}"#;
 
     // Check if the task actually ran
     assert_eq!(listener.get_request(), Some(query.to_owned()));

@@ -208,7 +208,9 @@ graphql_object!(MutationRoot: Context as "Mutation" |&self| {
     //    }
     // }
     field import_raw_task_list(&executor, name: String, mode: String, json: String) -> FieldResult<GenericResponse> {
-        Ok(match import_raw_task_list(&executor.context().subsystem().scheduler_dir, &name, &mode, &json).and_then(|_| executor.context().subsystem().check_start_task_list(&name, &mode)) {
+        Ok(match import_raw_task_list(&executor.context().subsystem().scheduler_dir, &name, &mode, &json)
+        .and_then(|_| executor.context().subsystem().check_stop_task_list(&name, &mode))
+        .and_then(|_| executor.context().subsystem().check_start_task_list(&name, &mode)) {
             Ok(_) => GenericResponse { success: true, errors: "".to_owned() },
             Err(error) => GenericResponse { success: false, errors: error.to_string() }
         })

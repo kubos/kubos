@@ -42,7 +42,7 @@ pub struct StartAppGraphQL {
 // Helper function for sending query to app service
 pub fn service_query(query: &str, hosturl: &str) -> Result<StartAppGraphQL, SchedulerError> {
     let client = Client::builder()
-        .timeout(Duration::from_millis(100))
+        .timeout(Duration::from_millis(200))
         .build()
         .map_err(|e| SchedulerError::QueryError { err: e.to_string() })?;
     let mut map = HashMap::new();

@@ -164,6 +164,7 @@ fn import_raw_run_onetime_future() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8023);
 
     fixture.create_mode("init");
+    fixture.activate_mode("init");
 
     let now_time: DateTime<Utc> = Utc::now()
         .checked_add_signed(chrono::Duration::seconds(1))
@@ -186,13 +187,12 @@ fn import_raw_run_onetime_future() {
     .escape_default()
     .collect();
     fixture.import_raw_task_list("imaging", "init", &schedule);
-    fixture.activate_mode("init");
 
     // Check if the task actually ran
     assert_eq!(listener.get_request(), None);
 
     // Wait for the service to restart the scheduler
-    thread::sleep(Duration::from_millis(1100));
+    thread::sleep(Duration::from_millis(2000));
 
     let query = r#"{"query":"mutation { startApp(name: \"basic-app\") { success, errors } }"}"#;
 
@@ -276,4 +276,46 @@ fn import_raw_bad_json() {
             }
         })
     );
+}
+
+#[test]
+fn import_raw_run_delay_duplicate() {
+    let listener = ServiceListener::spawn("127.0.0.1", 9026);
+    let fixture = SchedulerFixture::spawn("127.0.0.1", 8026);
+
+    fixture.create_mode("init");
+
+    // Create some schedule with an init task
+    let schedule: String = json!({
+        "tasks": [
+            {
+                "name": "basic-task",
+                "delay": "0s",
+                "app": {
+                    "name": "basic-app"
+                }
+            }
+        ]
+    })
+    .to_string()
+    .escape_default()
+    .collect();
+    fixture.import_raw_task_list("imaging", "init", &schedule);
+    fixture.activate_mode("init");
+
+    // Wait for the service to restart the scheduler
+    thread::sleep(Duration::from_millis(100));
+
+    let query = r#"{"query":"mutation { startApp(name: \"basic-app\") { success, errors } }"}"#;
+
+    // Check if the task actually ran
+    assert_eq!(listener.get_request(), Some(query.to_owned()));
+
+    fixture.import_raw_task_list("imaging", "init", &schedule);
+
+    // Wait for the service to restart the scheduler
+    thread::sleep(Duration::from_millis(100));
+
+    // Check if the task actually ran
+    assert_eq!(listener.get_request(), Some(query.to_owned()))
 }
