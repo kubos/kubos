@@ -53,7 +53,7 @@ impl SchedulerFixture {
         scheduler_service.build();
         scheduler_service.spawn();
 
-        thread::sleep(Duration::from_millis(1000));
+        thread::sleep(Duration::from_millis(2000));
 
         SchedulerFixture {
             service: RefCell::new(scheduler_service),

@@ -28,6 +28,7 @@ use std::process::{Command, Stdio};
 use std::str;
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::time::Duration;
 use tempfile::tempdir;
 use warp::{self, Buf, Filter};
 
@@ -160,17 +161,24 @@ impl Drop for TestService {
 }
 
 pub fn service_query(query: &str, ip: &str, port: u16) -> Value {
-    let client = reqwest::Client::builder().build().unwrap();
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_millis(100))
+        .build()
+        .unwrap();
     let mut map = ::std::collections::HashMap::new();
     map.insert("query", query);
+    for _ in 0..5 {
+        if let Ok(mut result) = client
+            .post(&format!("http://{}:{}", ip, port))
+            .json(&map)
+            .send()
+        {
+            return serde_json::from_str(&result.text().unwrap()).unwrap();
+        }
+        thread::sleep(Duration::from_millis(100));
+    }
 
-    let mut res = client
-        .post(&format!("http://{}:{}", ip, port))
-        .json(&map)
-        .send()
-        .unwrap();
-
-    serde_json::from_str(&res.text().unwrap()).unwrap()
+    panic!("Service query failed - {}:{}", ip, port);
 }
 
 pub struct ServiceListener {
