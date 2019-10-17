@@ -20,7 +20,8 @@ Setup
 
 This tutorial will build on the :doc:`application registration tutorial <app-register>`.
 It assumes the application, monitor, and telemetry services are running. It also assumes
-the  example application exists and is registered with the application service.
+the :doc:`example mission application <first-mission-app>` exists and is registered
+with the application service.
 
 This tutorial will use the following example directories:
 
@@ -191,5 +192,4 @@ At this point our mode and task list have been loaded into the scheduler and wil
 The console where you started the app service should show the app's execution messages after 10
 seconds and then every 10 seconds after that::
 
-    Current available memory: 4390792 kB
-    Telemetry insert completed successfully
+    Successfully pinged monitor service

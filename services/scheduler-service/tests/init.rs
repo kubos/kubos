@@ -44,7 +44,7 @@ fn run_init_single_no_delay() {
     let schedule = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "0s",
                 "app": {
                     "name": "basic-app"
@@ -75,7 +75,7 @@ fn run_init_single_with_delay() {
     let schedule = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "1s",
                 "app": {
                     "name": "basic-app"
@@ -110,14 +110,14 @@ fn run_init_two_tasks() {
     let schedule = json!({
         "tasks": [
             {
-                "name": "second-task",
+                "description": "second-task",
                 "delay": "1s",
                 "app": {
                     "name": "other-app"
                 }
             },
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "0s",
                 "app": {
                     "name": "basic-app"
@@ -151,7 +151,7 @@ fn run_init_single_args() {
     let schedule = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "0s",
                 "app": {
                     "name": "basic-app",
@@ -183,7 +183,7 @@ fn run_init_single_custom_task_list() {
     let schedule = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "0s",
                 "app": {
                     "name": "basic-app",
@@ -215,7 +215,7 @@ fn run_init_two_schedules_one_mode() {
     let schedule = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "0s",
                 "app": {
                     "name": "first-app"
@@ -230,7 +230,7 @@ fn run_init_two_schedules_one_mode() {
     let schedule = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "1s",
                 "app": {
                     "name": "second-app"
@@ -265,7 +265,7 @@ fn run_init_two_modes() {
     let schedule = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "0s",
                 "app": {
                     "name": "first-app"
@@ -280,7 +280,7 @@ fn run_init_two_modes() {
     let schedule = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "0s",
                 "app": {
                     "name": "second-app"
@@ -319,7 +319,7 @@ fn run_init_two_modes_check_stop() {
     let schedule = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "1s",
                 "app": {
                     "name": "delay-app"
@@ -334,7 +334,7 @@ fn run_init_two_modes_check_stop() {
     let schedule = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "0s",
                 "app": {
                     "name": "second-app"
@@ -374,7 +374,7 @@ fn run_init_after_import() {
     let schedule = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "0s",
                 "app": {
                     "name": "first-app"
@@ -410,7 +410,7 @@ fn run_init_check_remove() {
     let schedule = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "1s",
                 "app": {
                     "name": "delay-app"
@@ -447,7 +447,7 @@ fn run_init_import_twice() {
     let schedule = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "0s",
                 "app": {
                     "name": "basic-app"

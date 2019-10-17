@@ -33,7 +33,7 @@ fn import_raw_tasks() {
     let schedule: String = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "0s",
                 "app": {
                     "name": "basic-app"
@@ -57,7 +57,7 @@ fn import_raw_tasks() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ availableModes { name, active, schedule { name } } }"#),
+        fixture.query(r#"{ availableModes { name, active, schedule { filename } } }"#),
         json!({
             "data": {
                 "availableModes": [
@@ -66,7 +66,7 @@ fn import_raw_tasks() {
                         "active": false,
                         "schedule": [
                             {
-                                "name": "first"
+                                "filename": "first"
                             }
                         ]
                     },
@@ -92,7 +92,7 @@ fn import_raw_run_delay() {
     let schedule: String = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "0s",
                 "app": {
                     "name": "basic-app"
@@ -125,14 +125,14 @@ fn import_raw_run_two_tasks() {
     let schedule: String = json!({
         "tasks": [
             {
-                "name": "second-task",
+                "description": "second-task",
                 "delay": "1s",
                 "app": {
                     "name": "other-app"
                 }
             },
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "0s",
                 "app": {
                     "name": "basic-app"
@@ -175,7 +175,7 @@ fn import_raw_run_onetime_future() {
     let schedule: String = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "time": now_time,
                 "app": {
                     "name": "basic-app"
@@ -211,7 +211,7 @@ fn import_raw_run_recurring_no_delay() {
     let schedule: String = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "0s",
                 "period": "1s",
                 "app": {
@@ -258,7 +258,7 @@ fn import_raw_bad_json() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ availableModes { name, active, schedule { name } } }"#),
+        fixture.query(r#"{ availableModes { name, active, schedule { filename } } }"#),
         json!({
             "data": {
                 "availableModes": [
@@ -289,7 +289,7 @@ fn import_raw_run_delay_duplicate() {
     let schedule: String = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "0s",
                 "app": {
                     "name": "basic-app"

@@ -155,7 +155,7 @@ fn remove_existing_schedule() {
 
     assert_eq!(
         fixture.query(
-            r#"{ availableModes(name: "operational") { name, active, schedule { name } } }"#
+            r#"{ availableModes(name: "operational") { name, active, schedule { filename } } }"#
         ),
         json!({
             "data": {
@@ -165,7 +165,7 @@ fn remove_existing_schedule() {
                         "active": false,
                         "schedule": [
                             {
-                                "name": "first"
+                                "filename": "first"
                             }
                         ]
                     }
@@ -188,7 +188,7 @@ fn remove_existing_schedule() {
 
     assert_eq!(
         fixture.query(
-            r#"{ availableModes(name: "operational") { name, active, schedule { name } } }"#
+            r#"{ availableModes(name: "operational") { name, active, schedule { filename } } }"#
         ),
         json!({
             "data": {

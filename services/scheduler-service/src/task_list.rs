@@ -45,7 +45,7 @@ struct ListContents {
 pub struct TaskList {
     pub tasks: Vec<Task>,
     pub path: String,
-    pub name: String,
+    pub filename: String,
     pub time_imported: String,
 }
 
@@ -59,7 +59,7 @@ impl TaskList {
                 name: "".to_owned(),
             })?;
 
-        let name = path_obj
+        let filename = path_obj
             .file_stem()
             .and_then(|s| s.to_str())
             .ok_or_else(|| SchedulerError::TaskListParseError {
@@ -72,14 +72,14 @@ impl TaskList {
             .metadata()
             .map_err(|e| SchedulerError::TaskListParseError {
                 err: format!("Failed to read file metadata: {}", e),
-                name: name.to_owned(),
+                name: filename.to_owned(),
             })?;
 
         let time_imported: DateTime<Utc> = data
             .modified()
             .map_err(|e| SchedulerError::TaskListParseError {
                 err: format!("Failed to get modified time: {}", e),
-                name: name.to_owned(),
+                name: filename.to_owned(),
             })?
             .into();
         let time_imported = time_imported.format("%Y-%m-%d %H:%M:%S").to_string();
@@ -87,13 +87,13 @@ impl TaskList {
         let list_contents =
             fs::read_to_string(&path_obj).map_err(|e| SchedulerError::TaskListParseError {
                 err: format!("Failed to read task list: {}", e),
-                name: name.to_owned(),
+                name: filename.to_owned(),
             })?;
 
         let list_contents: ListContents = serde_json::from_str(&list_contents).map_err(|e| {
             SchedulerError::TaskListParseError {
                 err: format!("Failed to parse json: {}", e),
-                name: name.to_owned(),
+                name: filename.to_owned(),
             }
         })?;
 
@@ -101,7 +101,7 @@ impl TaskList {
 
         Ok(TaskList {
             path,
-            name,
+            filename,
             tasks,
             time_imported,
         })
@@ -120,7 +120,7 @@ impl TaskList {
 
             runner.spawn(lazy(move || {
                 for task in tasks {
-                    info!("Scheduling task '{}'", &task.name);
+                    info!("Scheduling task '{}'", &task.app.name);
                     tokio::spawn(task.schedule(service_url.clone()));
                 }
                 Ok(())
@@ -171,8 +171,7 @@ pub fn import_task_list(
         name: name.to_owned(),
     })?;
 
-    let list_path = Path::new(&schedule_dest);
-    if let Err(e) = TaskList::from_path(&list_path) {
+    if let Err(e) = validate_task_list(&schedule_dest) {
         let _ = fs::remove_file(&schedule_dest);
         return Err(e);
     }
@@ -217,8 +216,7 @@ pub fn import_raw_task_list(
             name: name.to_owned(),
         })?;
 
-    let list_path = Path::new(&schedule_dest);
-    if let Err(e) = TaskList::from_path(&list_path) {
+    if let Err(e) = validate_task_list(&schedule_dest) {
         let _ = fs::remove_file(&schedule_dest);
         return Err(e);
     }
@@ -282,4 +280,15 @@ pub fn get_mode_task_lists(mode_path: &str) -> Result<Vec<TaskList>, SchedulerEr
     }
 
     Ok(schedules)
+}
+
+// Validate the format and content of a task list
+pub fn validate_task_list(path: &str) -> Result<(), SchedulerError> {
+    let task_path = Path::new(path);
+    let task_list = TaskList::from_path(task_path)?;
+    for task in task_list.tasks {
+        let _ = task.get_duration()?;
+        let _ = task.get_period()?;
+    }
+    Ok(())
 }

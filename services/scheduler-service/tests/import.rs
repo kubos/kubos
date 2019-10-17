@@ -43,7 +43,7 @@ fn import_new_schedule() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ availableModes { name, active, schedule { name } } }"#),
+        fixture.query(r#"{ availableModes { name, active, schedule { filename } } }"#),
         json!({
             "data": {
                 "availableModes": [
@@ -52,7 +52,7 @@ fn import_new_schedule() {
                         "active": false,
                         "schedule": [
                             {
-                                "name": "first"
+                                "filename": "first"
                             }
                         ]
                     },
@@ -86,7 +86,7 @@ fn import_new_schedule_nonexistant_file() {
 
     assert_eq!(
         fixture.query(
-            r#"{ availableModes(name: "operational") { name, active, schedule { name } } }"#
+            r#"{ availableModes(name: "operational") { name, active, schedule { filename } } }"#
         ),
         json!({
             "data": {
@@ -144,7 +144,7 @@ fn import_duplicate_schedule() {
 
     assert_eq!(
         fixture.query(
-            r#"{ availableModes(name: "operational") { name, active, schedule { name } } }"#
+            r#"{ availableModes(name: "operational") { name, active, schedule { filename } } }"#
         ),
         json!({
             "data": {
@@ -154,7 +154,7 @@ fn import_duplicate_schedule() {
                         "active": false,
                         "schedule": [
                             {
-                                "name": "imager"
+                                "filename": "imager"
                             }
                         ]
                     }
@@ -177,7 +177,7 @@ fn import_duplicate_schedule() {
 
     assert_eq!(
         fixture.query(
-            r#"{ availableModes(name: "operational") { name, active, schedule { name } } }"#
+            r#"{ availableModes(name: "operational") { name, active, schedule { filename } } }"#
         ),
         json!({
             "data": {
@@ -187,7 +187,7 @@ fn import_duplicate_schedule() {
                         "active": false,
                         "schedule": [
                             {
-                                "name": "imager"
+                                "filename": "imager"
                             }
                         ]
                     }
@@ -231,7 +231,8 @@ fn import_two_schedules() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ availableModes(name: "flight") { name, active, schedule { name } } }"#),
+        fixture
+            .query(r#"{ availableModes(name: "flight") { name, active, schedule { filename } } }"#),
         json!({
             "data": {
                 "availableModes": [
@@ -240,10 +241,10 @@ fn import_two_schedules() {
                         "active": false,
                         "schedule": [
                             {
-                                "name": "imaging"
+                                "filename": "imaging"
                             },
                             {
-                                "name": "solar"
+                                "filename": "solar"
                             }
                         ]
                     }
@@ -268,7 +269,7 @@ fn import_two_schedules_check_revised() {
 
     assert_eq!(
         fixture.query(
-            r#"{ availableModes(name: "flight") { name, active, lastRevised, schedule { name, timeImported } } }"#
+            r#"{ availableModes(name: "flight") { name, active, lastRevised, schedule { filename, timeImported } } }"#
         ),
         json!({
             "data": {
@@ -279,7 +280,7 @@ fn import_two_schedules_check_revised() {
                         "lastRevised": sched_one_time,
                         "schedule": [
                             {
-                                "name": "solar",
+                                "filename": "solar",
                                 "timeImported": sched_one_time
                             }
                         ]
@@ -297,7 +298,7 @@ fn import_two_schedules_check_revised() {
 
     assert_eq!(
         fixture.query(
-            r#"{ availableModes(name: "flight") { name, active, lastRevised, schedule { name, timeImported } } }"#
+            r#"{ availableModes(name: "flight") { name, active, lastRevised, schedule { filename, timeImported } } }"#
         ),
         json!({
             "data": {
@@ -308,11 +309,11 @@ fn import_two_schedules_check_revised() {
                         "lastRevised": sched_two_time,
                         "schedule": [
                             {
-                                "name": "imaging",
+                                "filename": "imaging",
                                 "timeImported": sched_two_time
                             },
                             {
-                                "name": "solar",
+                                "filename": "solar",
                                 "timeImported": sched_one_time
                             }
                         ]
@@ -344,7 +345,7 @@ fn import_new_schedule_mixed_case_code() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ availableModes { name, active, schedule { name } } }"#),
+        fixture.query(r#"{ availableModes { name, active, schedule { filename } } }"#),
         json!({
             "data": {
                 "availableModes": [
@@ -353,7 +354,7 @@ fn import_new_schedule_mixed_case_code() {
                         "active": false,
                         "schedule": [
                             {
-                                "name": "first"
+                                "filename": "first"
                             }
                         ]
                     },
@@ -388,7 +389,7 @@ fn import_invalid_schedule() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ availableModes { name, active, schedule { name } } }"#),
+        fixture.query(r#"{ availableModes { name, active, schedule { filename } } }"#),
         json!({
             "data": {
                 "availableModes": [
@@ -413,7 +414,7 @@ fn import_safe_schedule_upper_case() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8028);
 
     assert_eq!(
-        fixture.query(r#"{ availableModes { name, active, schedule { name } } }"#),
+        fixture.query(r#"{ availableModes { name, active, schedule { filename } } }"#),
         json!({
             "data": {
                 "availableModes": [
@@ -442,14 +443,14 @@ fn import_safe_schedule_upper_case() {
     );
 
     assert_eq!(
-        fixture.query(r#"{ availableModes { name, active, schedule { name } } }"#),
+        fixture.query(r#"{ availableModes { name, active, schedule { filename } } }"#),
         json!({
             "data": {
                 "availableModes": [
                     {
                         "name": "safe",
                         "active": true,
-                        "schedule": [{ "name": "first" } ]
+                        "schedule": [{ "filename": "first" } ]
                     }
                 ]
             }

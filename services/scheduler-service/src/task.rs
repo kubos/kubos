@@ -34,8 +34,8 @@ use tokio::timer::Interval;
 // Configuration used to schedule app execution
 #[derive(Clone, Debug, GraphQLObject, Serialize, Deserialize)]
 pub struct Task {
-    // Descriptive name of task
-    pub name: String,
+    // Description of task
+    pub description: String,
     // Start delay specified in Xh Ym Zs format
     // Used by init and recurring tasks
     pub delay: Option<String>,
@@ -52,39 +52,45 @@ pub struct Task {
 impl Task {
     // Parse timer delay duration from either delay or time fields
     pub fn get_duration(&self) -> Result<Duration, SchedulerError> {
+        if self.delay.is_some() && self.time.is_some() {
+            return Err(SchedulerError::TaskParseError {
+                err: "Both delay and time defined".to_owned(),
+                description: self.description.to_owned(),
+            });
+        }
         if let Some(delay) = &self.delay {
             Ok(parse_hms_field(delay.to_owned())?)
         } else if let Some(time) = &self.time {
             let run_time = Utc
                 .datetime_from_str(&time, "%Y-%m-%d %H:%M:%S")
-                .map_err(|e| SchedulerError::DurationParseError {
-                    err: e.to_string(),
-                    field: time.to_string(),
+                .map_err(|e| SchedulerError::TaskParseError {
+                    err: format!("Failed to parse time field '{}': {}", time, e),
+                    description: self.description.to_owned(),
                 })?;
             let now = chrono::Utc::now();
 
             if run_time < now {
-                Err(SchedulerError::DurationParseError {
-                    err: "Task scheduled for past time".to_owned(),
-                    field: time.to_owned(),
+                Err(SchedulerError::TaskParseError {
+                    err: format!("Task scheduled for past time: {}", time),
+                    description: self.description.to_owned(),
                 })
             } else if (run_time - now) > chrono::Duration::days(90) {
-                Err(SchedulerError::DurationParseError {
-                    err: "Task scheduled beyond 90 days in the future".to_owned(),
-                    field: time.to_owned(),
+                Err(SchedulerError::TaskParseError {
+                    err: format!("Task scheduled beyond 90 days in the future: {}", time),
+                    description: self.description.to_owned(),
                 })
             } else {
                 Ok((run_time - now)
                     .to_std()
-                    .map_err(|e| SchedulerError::DurationParseError {
-                        err: e.to_string(),
-                        field: time.to_string(),
+                    .map_err(|e| SchedulerError::TaskParseError {
+                        err: format!("Failed to calculate run time: {}", e),
+                        description: self.description.to_owned(),
                     })?)
             }
         } else {
-            Err(SchedulerError::DurationParseError {
-                err: "No delay or time defined for task".to_owned(),
-                field: "".to_owned(),
+            Err(SchedulerError::TaskParseError {
+                err: "No delay or time defined".to_owned(),
+                description: self.description.to_owned(),
             })
         }
     }
@@ -98,11 +104,14 @@ impl Task {
     }
 
     pub fn schedule(&self, service_url: String) -> Box<dyn Future<Item = (), Error = ()> + Send> {
-        let name = self.name.to_owned();
+        let name = self.app.name.to_owned();
         let duration = match self.get_duration() {
             Ok(d) => d,
             Err(e) => {
-                error!("Failed to parse delay duration for task '{}': {}", name, e);
+                error!(
+                    "Failed to parse time specification for task '{}': {}",
+                    name, e
+                );
                 return Box::new(future::err::<(), ()>(()));
             }
         };
@@ -141,6 +150,12 @@ impl Task {
 fn parse_hms_field(field: String) -> Result<Duration, SchedulerError> {
     let field_parts: Vec<String> = field.split(' ').map(|s| s.to_owned()).collect();
     let mut duration: u64 = 0;
+    if field_parts.is_empty() {
+        return Err(SchedulerError::HmsParseError {
+            err: "No parts found".to_owned(),
+            field: field.to_owned(),
+        });
+    }
     for mut part in field_parts {
         let unit: Option<char> = part.pop();
         let num: Result<u64, _> = part.parse();
@@ -156,13 +171,17 @@ fn parse_hms_field(field: String) -> Result<Duration, SchedulerError> {
                     duration += num * 60 * 60;
                 }
                 _ => {
-                    error!("Failed to parse hms field");
-                    return Err(SchedulerError::DurationParseError {
-                        err: "Failed to parse hms field".to_owned(),
+                    return Err(SchedulerError::HmsParseError {
+                        err: "Found invalid unit".to_owned(),
                         field: field.to_owned(),
                     });
                 }
             }
+        } else {
+            return Err(SchedulerError::HmsParseError {
+                err: "Failed to parse number".to_owned(),
+                field: field.to_owned(),
+            });
         }
     }
     Ok(Duration::from_secs(duration))

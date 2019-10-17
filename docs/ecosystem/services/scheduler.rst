@@ -2,30 +2,56 @@ Scheduler
 =========
 
 The KubOS system includes a scheduler service to facilitate recurring
-and one time tasks with specific timing requirements.
+and one time tasks with specific timing requirements, and to facilitate
+managing these tasks in groups of system-level modes. 
 
 Behavior
 --------
 
+Terminology
+~~~~~~~~~~~
+
 The behavior of the scheduler is defined by three levels of organization: *mode*,
 *schedule*, and *task*. The *mode* determines which schedule directory is being executed.
 The *schedule* is then assembled by combining all the *task lists* in the schedule
-directory, each of which can contain one or many *tasks*. New *tasks* can be added to
-a *schedule* by uploading a *task list* to a location which is accessible to the 
-scheduler, and importing that *task list* to the appropriate mode. *Tasks* can
-also be added directly via the ``importRawTaskList`` GraphQL mutation.
+directory, each of which can contain one or many *tasks*. 
+
+.. uml::
+
+    @startuml
+
+    frame "Scheduler Service" {
+        folder "Nominal Mode" {
+            file "Initial Task List" {
+                rectangle [Start Applications]
+                rectangle [Deploy Solar Panels]
+            }
+
+            file "Additional Task List" {
+                rectangle [Capture Images]
+            }
+        }
+    }
+
+    @enduml
+
+Adding Tasks
+~~~~~~~~~~~~
+
+New *tasks* can be added to a *schedule* by uploading a *task list* to a location
+which is accessible to the scheduler, and importing that *task list* to the appropriate
+mode. *Tasks* can also be added directly via the GraphQL interface.
+
+Bootup Behavior
+~~~~~~~~~~~~~~~
 
 Upon boot, or service start, the scheduler reads all task lists in the active 
 mode directory and schedules all tasks from that mode. The default active mode directory
 is found at ``/home/system/etc/schedules/active``, which is a symlink
 to the actual active mode's directory.
 
-Schedules consist of many tasks, each of which has a scheduled execution time.
-Tasks are loaded into the scheduler when the scheduler service starts,
-when a mode becomes active, or when a new task list is imported into the active mode.
-Any tasks configured with a ``delay`` will be scheduled for execution
-when their corresponding delay has passed. All other tasks configured with a
-``time`` or ``period`` will be scheduled to run at their designated times.
+Scheduler Modes
+~~~~~~~~~~~~~~~
 
 By default the scheduler comes with a single mode: ``safe``. This mode is reserved as a
 fallback and default operating mode. Additional modes can be created and made active
@@ -33,26 +59,33 @@ through the GraphQL interface. All modes are represented as different directorie
 the schedules directory (``/home/system/etc/schedules``).
 Only one mode can be active at any given time.
 
-The scheduler has its own log file, ``/var/log/kubos-schedule.log``, which
-logs all schedule related actions the scheduler takes.
+Failover Behavior
+~~~~~~~~~~~~~~~~~
+
+In addition to using the ``safe`` mode as the default operating mode, the scheduler is 
+designed to automatically failover to the ``safe`` mode when any problems are detected.
+The following situations will cause the scheduler to activate the ``safe`` mode::
+
+    - The scheduler starts and no modes exist
+    - The scheduler starts and no mode is active
+    - The scheduler attempts to activate a mode and the mode does not exist
+
+The ``safe`` mode may also be activated using the GraphQL ``safeMode`` query.
 
 .. _schedule-specification:
 
-Schedule Specification
-----------------------
+Tasks and How to Make Them
+--------------------------
 
 Schedules are made up of tasks, which are specified through task lists in the 
 `json` format. Each task list contains all of the necessary information for each
 task to be scheduled. Multiple task lists can coexist in the same mode folder,
 allowing for easy loading of new scheduled tasks.
 
-Tasks can have their scheduled time of execution specified using three different
-fields: ``delay``, ``time``, and ``period``. The ``delay`` field specifies
-a delay before the task executes. The ``time`` field specifies a time
-when the task will be executed. The ``period`` field indicates the app should
-be executed on a recurring basis and specifies the period of recurrence.
+Task format
+~~~~~~~~~~~
 
-Tasks specify a ``name`` and a time of execution using a combination of the ``delay``,
+Tasks specify a ``description`` and a time of execution using a combination of the ``delay``,
 ``time``, and ``period`` fields. Each task has an associated ``app``. The scheduler
 currently delegates the actual running of tasks to the ``app-service``, so each
 ``app`` definition contains the necessary information needed by the
@@ -68,16 +101,60 @@ currently delegates the actual running of tasks to the ``app-service``, so each
         }
    }
 
+An example task list:
+
+.. code-block:: json
+
+    {
+        "tasks": [
+            {
+                "description": "Starts camera",
+                "delay": "10m",
+                "app": {
+                    "name": "activate-camera"
+                }
+            },
+            {
+                "description": "Deploys solar panels",
+                "time": "2019-08-11 15:20:10",
+                "app": {
+                    "name": "deploy-solar-panels"
+                }
+            },
+            {
+                "description": "Regular log cleanup",
+                "delay": "1h",
+                "period": "12h",
+                "app": {
+                    "name": "clean-logs"
+                }
+            }
+        ]
+    }
+
+Specifying Time of Execution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Tasks can have their scheduled time of execution specified using three different
+fields: ``delay``, ``time``, and ``period``. The ``delay`` field specifies
+a delay before the task executes. The ``time`` field specifies a time
+when the task will be executed. The ``period`` field indicates the app should
+be executed on a recurring basis and specifies the period of recurrence. The ``delay``
+field is required, except when using the ``time`` field. The ``time`` and ``period``
+fields may not be used together.
+
+Delayed Tasks
+~~~~~~~~~~~~~
+
 Tasks configured with only a ``delay`` will be executed on boot or on schedule change.
-Tasks will be assigned to the scheduler in an unpredictable order. The actual execution time
-of the task will be affected by the associated delay times. If more than
-one task has the exact same delay, the execution order might be unpredictable.
+The actual execution time of the task will be affected by the associated delay times.
+If more than one task has the exact same delay, the execution order might be unpredictable.
 Each ``delay`` task is specified like so:
 
 .. code-block:: json
 
     {
-        "name": "Descriptive task-name",
+        "description": "Task description",
         "delay": "Required start delay in Xh Ym Zs format"
         "app": {
             "name": "Required registered name of app to run",
@@ -86,13 +163,16 @@ Each ``delay`` task is specified like so:
         }
     }
 
+One Time Tasks
+~~~~~~~~~~~~~~
+
 Tasks configured with a ``time`` field will be executed once at a set time. Each 
 one time task is specified like so:
 
 .. code-block:: json
 
     {
-        "name": "Descriptive task-name",
+        "description": "Task description",
         "time": "Required time of execution in yyyy-mm-dd hh:mm:ss format",
         "app": {
             "name": "Required registered name of app to run",
@@ -101,6 +181,9 @@ one time task is specified like so:
         }
     }
 
+Recurring Tasks
+~~~~~~~~~~~~~~~
+
 Tasks configured with a ``period`` field will be executed on a recurring basis. The task
 will occur at the given ``period`` beginning after the ``delay`` has expired.
 Each recurring task in this section is specified like so:
@@ -108,7 +191,7 @@ Each recurring task in this section is specified like so:
 .. code-block:: json
 
     {
-        "name": "Descriptive task-name",
+        "description": "Task description",
         "delay": "Required start delay in Xh Ym Zs format",
         "period": "Required period of execution in Xh Ym Zs format",
         "app": {
@@ -116,37 +199,6 @@ Each recurring task in this section is specified like so:
             "args": ["Optional", "command", "line", "app", "args"],
             "config": "Optional path to app config"
         }
-    }
-
-An example schedule config:
-
-.. code-block:: json
-
-    {
-        "tasks": [
-            {
-                "name": "start-camera",
-                "delay": "10m",
-                "app": {
-                    "name": "activate-camera"
-                }
-            },
-            {
-                "name": "deploy-solar",
-                "time": "2019-08-11 15:20:10",
-                "app": {
-                    "name": "deploy-solar-panels"
-                }
-            },
-            {
-                "name": "clean-logs-every-12hrs",
-                "delay": "1h",
-                "period": "12h",
-                "app": {
-                    "name": "clean-logs"
-                }
-            }
-        ]
     }
 
 Service Configuration
@@ -173,6 +225,9 @@ Queries
 
 The scheduler exposes two queries, ``activeMode`` and ``availableModes``.
 
+Examining the Active Mode
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
 The ``activeMode`` query  exposes information about the currently active
 mode. It has the following schema::
 
@@ -181,10 +236,13 @@ mode. It has the following schema::
             name: String,
             path: String,
             lastRevised: String,
-            schedule: [TaskList],
             active: Boolean
+            schedule: [TaskList],
         }
     }
+
+Examining All Modes
+~~~~~~~~~~~~~~~~~~~
 
 The ``availableModes`` query  exposes information about the currently available
 modes. It has the following schema::
@@ -195,11 +253,14 @@ modes. It has the following schema::
                name: String,
                path: String,
                lastRevised: String,
-               schedule: [TaskList],
                active: Boolean
+               schedule: [TaskList],
             }
         ]
     }
+
+Schemas for Task and Lists
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``TaskList`` object exposes metadata about individual task lists. It
 has the following schema::
@@ -207,10 +268,10 @@ has the following schema::
     {
         TaskList:
         {
-            tasks: [Task],
+            filename: String,
             path: String,
-            name: String,
             timeImported: String
+            tasks: [Task],
         }
     }
 
@@ -220,8 +281,10 @@ individual schedule tasks. They have the following schemas::
     {
         Task:
         {
-            name: String,
+            description: String,
             delay: String,
+            time: String,
+            period: String,
             app: App
         }
 
@@ -230,7 +293,6 @@ individual schedule tasks. They have the following schemas::
             name: String,
             args: [String],
             config: String,
-            runLevel: String
         }
     }
 
@@ -239,7 +301,11 @@ Mutations
 ~~~~~~~~~
 
 The scheduler also exposes the following mutations: ``createMode``, ``removeMode``,
-``activateMode``, ``importTaskList``, and ``removeTaskList``.
+``activateMode``, ``importTaskList``, ``importRawTaskList``, ``removeTaskList``,
+and ``safeMode``.
+
+Creating Modes
+~~~~~~~~~~~~~~
 
 The ``createMode`` mutation instructs the scheduler to create a new empty schedule mode.
 It has the following schema::
@@ -250,6 +316,9 @@ It has the following schema::
             errors: String
         }
     }
+
+Removing Modes
+~~~~~~~~~~~~~~
 
 The ``removeMode`` mutation instructs the scheduler to delete an existing mode's
 directory and all schedules within. It cannot be applied to the currently active
@@ -262,9 +331,12 @@ mode, or to the *safe* mode. It has the following schema::
         }
     }
 
+Activating Modes
+~~~~~~~~~~~~~~~~
+
 The ``activateMode`` mutation instructs the scheduler to make the specified mode
 active. It cannot be used to activate safe mode, the ``safeMode`` mutation is the
-only way to activate safe mode. It has the following schema::
+only way to activate safe mode. ``activateMode`` has the following schema::
 
     mutation {
         activateMode(name: String!): {
@@ -273,20 +345,26 @@ only way to activate safe mode. It has the following schema::
         }
     }
 
+Activating Safe Mode
+~~~~~~~~~~~~~~~~~~~~
+
 The ``safeMode`` mutation instructs the scheduler to make the *safe* mode
 active. This mutation is the only way to activate *safe* mode and can only
 activate that mode. It has the following schema::
 
     mutation {
-        safeMode(name: String!): {
+        safeMode(): {
             success: Boolean,
             errors: String
         }
     }
 
+Importing Task Lists
+~~~~~~~~~~~~~~~~~~~~
+
 The ``importTaskList`` mutation allows the scheduler to import a new task list into
 a specified mode. If the targeted mode is active, all tasks in the task list will be
-immediately loaded for scheduling. It has the following schema::
+immediately scheduled. It has the following schema::
 
     mutation {
         importTaskList(path: String!, name: String!, mode:String!): {
@@ -295,9 +373,12 @@ immediately loaded for scheduling. It has the following schema::
         }
     }
 
+Removing Task Lists
+~~~~~~~~~~~~~~~~~~~
+
 The ``removeTaskList`` mutation allows the scheduler to remove a task list from
 a specified mode. If the mode is active, all tasks in the task list will be removed
-from the scheduler. It as the following schema::
+from the schedule. It as the following schema::
 
     mutation {
         removeTaskList(name: String!, mode:String!): {
@@ -305,6 +386,9 @@ from the scheduler. It as the following schema::
             errors: String
         }
     }
+
+Importing Raw Task Lists
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``importRawTaskList`` mutation allows the scheduler to directly receive raw JSON
 and import it into a task list in a mode. If the mode is active, all the tasks in

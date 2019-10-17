@@ -39,9 +39,9 @@ pub enum SchedulerError {
         /// Path of file/dir which failed to create
         path: String,
     },
-    // An error was raised when parsing a duration field
-    #[fail(display = "Failed to parse duration '{}': {}", field, err)]
-    DurationParseError {
+    // An error was raised when parsing a hms field
+    #[fail(display = "Failed to parse hms field '{}': {}", field, err)]
+    HmsParseError {
         /// Error encountered
         err: String,
         /// Delay or time field parsed
@@ -102,6 +102,14 @@ pub enum SchedulerError {
         err: String,
         /// The name of the task list that failed to parse
         name: String,
+    },
+    // An error was raised when parsing a task
+    #[fail(display = "Failed to parse task '{}': {}", description, err)]
+    TaskParseError {
+        /// The specific parsing error
+        err: String,
+        /// The description of task that failed to parse
+        description: String,
     },
 }
 

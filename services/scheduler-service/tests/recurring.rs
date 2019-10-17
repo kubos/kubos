@@ -33,7 +33,7 @@ fn run_recurring_no_delay() {
     let schedule = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "0s",
                 "period": "1s",
                 "app": {
@@ -68,7 +68,7 @@ fn run_recurring_delay() {
     let schedule = json!({
         "tasks": [
             {
-                "name": "basic-task",
+                "description": "basic-task",
                 "delay": "1s",
                 "period": "1s",
                 "app": {

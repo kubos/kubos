@@ -58,18 +58,21 @@ impl ScheduleMode {
             })?
             .to_owned();
 
-        let schedule = get_mode_task_lists(&path)?;
+        let task_lists = get_mode_task_lists(&path)?;
 
         let mut last_revised: DateTime<Utc> = Utc.ymd(1970, 1, 1).and_hms(0, 0, 0);
-        for s in &schedule {
-            match Utc.datetime_from_str(&s.time_imported, "%Y-%m-%d %H:%M:%S") {
+        for task_list in &task_lists {
+            match Utc.datetime_from_str(&task_list.time_imported, "%Y-%m-%d %H:%M:%S") {
                 Ok(sched_time) => {
                     if sched_time > last_revised {
                         last_revised = sched_time;
                     }
                 }
                 Err(e) => {
-                    warn!("Failed to parse import time for task '{}': {}", s.name, e);
+                    warn!(
+                        "Failed to parse import time for task list '{}': {}",
+                        task_list.filename, e
+                    );
                 }
             }
         }
@@ -82,7 +85,7 @@ impl ScheduleMode {
             name,
             path,
             last_revised,
-            schedule,
+            schedule: task_lists,
             active,
         })
     }

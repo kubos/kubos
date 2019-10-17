@@ -142,7 +142,7 @@ impl Scheduler {
     fn start_task_list(&self, list: TaskList) -> Result<(), SchedulerError> {
         let mut schedules_map = self.scheduler_map.lock().unwrap();
         let scheduler_handle = list.schedule_tasks(&self.app_service_url)?;
-        schedules_map.insert(list.name, scheduler_handle);
+        schedules_map.insert(list.filename, scheduler_handle);
         Ok(())
     }
 
