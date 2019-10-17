@@ -81,6 +81,7 @@ The file and shell service tutorials are written to be used with an OBC.
     :maxdepth: 1
 
     Registering an Application <app-register>
+    Scheduling an Application <schedule-app>
     Querying the System <querying-telemetry>
     Transferring Files <file-transfer>
     Creating a Shell Connection <shell>

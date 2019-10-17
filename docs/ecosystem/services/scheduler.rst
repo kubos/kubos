@@ -36,6 +36,8 @@ Only one mode can be active at any given time.
 The scheduler has its own log file, ``/var/log/kubos-schedule.log``, which
 logs all schedule related actions the scheduler takes.
 
+.. _schedule-specification:
+
 Schedule Specification
 ----------------------
 
@@ -151,17 +153,17 @@ Service Configuration
 ---------------------
 
 The scheduler service has the following available configuration parameter which may be
-specified in the ``config.toml`` file under ``[scheduler-service]``.
+specified in the ``config.toml`` file under ``[scheduler-service]``::
 
-- ``schedules-dir`` - (Default: ``/home/system/etc/schedules/``) The path to the
-directory where modes and their schedules will be stored. This directory will be
-created if it does not already exist.
+    - ``schedules-dir`` - (Default: ``/home/system/etc/schedules/``) The path to the
+    directory where modes and their schedules will be stored. This directory will be
+    created if it does not already exist.
 
 The scheduler service also has the standard GraphQL interface parameters available for
-configuration under ``[scheduler-service.addr]``.
+configuration under ``[scheduler-service.addr]``::
 
-- ``ip`` - The IP address of the GraphQL server
-- ``port`` - The port the GraphQL server will listen on
+    - ``ip`` - The IP address of the GraphQL server
+    - ``port`` - The port the GraphQL server will listen on
 
 GraphQL API
 -----------
