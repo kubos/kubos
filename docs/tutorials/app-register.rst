@@ -229,7 +229,7 @@ And the response should look like this::
       }
     }
 
-The console where you started the app service should show the app's exection messages::
+The console where you started the app service should show the app's execution messages::
 
     Current available memory: 4390792 kB
     Telemetry insert completed successfully
