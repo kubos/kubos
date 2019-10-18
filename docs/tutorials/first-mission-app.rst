@@ -248,10 +248,9 @@ testing purposes::
     args = parser.parse_args()
     
     if args.config is not None:
-        global SERVICES
         SERVICES = app_api.Services(args.config)
     else:
-        SERVICES = app_api.services()
+        SERVICES = app_api.Services()
     
 Then, we'll create the query we want to send::
 
@@ -269,7 +268,7 @@ And finally, we'll parse the result to get our response string::
     else:
         print("Unexpected monitor service response: %s" % data)
 
-After adding error handling, our program should look like this:
+After adding proper structure, our program should look like this:
 
 .. code-block:: python
 
@@ -277,7 +276,6 @@ After adding error handling, our program should look like this:
 
     import argparse
     import app_api
-    import sys
     
     def main():
     
@@ -288,18 +286,13 @@ After adding error handling, our program should look like this:
         args = parser.parse_args()
         
         if args.config is not None:
-            global SERVICES
             SERVICES = app_api.Services(args.config)
         else:
             SERVICES = app_api.services()
         
         request = '{ ping }'
         
-        try:
-            response = SERVICES.query(service="monitor-service", query=request)
-        except Exception as e: 
-            print("Something went wrong: " + str(e))
-            sys.exit(1)
+        response = SERVICES.query(service="monitor-service", query=request)
         
         data = response["ping"]
         
@@ -375,7 +368,7 @@ Finally, we'll check the response to make sure the operation finished successful
     else:
         print("Telemetry insert completed successfully")
 
-With some additional error handling, our final application looks like this:
+With some error handling, our final application looks like this:
 
 .. code-block:: python
 
@@ -394,7 +387,6 @@ With some additional error handling, our final application looks like this:
         args = parser.parse_args()
         
         if args.config is not None:
-            global SERVICES
             SERVICES = app_api.Services(args.config)
         else:
             SERVICES = app_api.Services()
