@@ -61,16 +61,27 @@ impl AppRegistry {
     /// let registry = AppRegistry::new_from_dir("/my/apps");
     /// ```
     pub fn new_from_dir(apps_dir: &str) -> Result<AppRegistry, AppError> {
+        let active_dir = PathBuf::from(format!("{}/active", apps_dir));
+        if !active_dir.exists() {
+            fs::create_dir_all(&active_dir)?;
+        }
+
+        // Create absolute path from apps_dir so symlinks work
+        let apps_path = Path::new(&apps_dir);
+        let apps_dir = apps_path
+            .canonicalize()
+            .map_err(|e| AppError::RegistryError {
+                err: format!("Failed to get absolute apps_dir: {}", e),
+            })?;
+        let apps_dir = apps_dir.to_str().ok_or_else(|| AppError::RegistryError {
+            err: format!("Failed to create absolute apps_dir path: {:?}", apps_path),
+        })?;
+
         let registry = AppRegistry {
             entries: Arc::new(Mutex::new(Vec::new())),
             monitoring: Arc::new(Mutex::new(Vec::new())),
             apps_dir: String::from(apps_dir),
         };
-
-        let active_dir = PathBuf::from(format!("{}/active", apps_dir));
-        if !active_dir.exists() {
-            fs::create_dir_all(&active_dir)?;
-        }
 
         registry
             .entries
@@ -609,6 +620,7 @@ impl AppRegistry {
                 Err(error) => format!("{} does not exist. {}", app.executable, error),
             };
 
+            error!("{}", msg);
             return Err(AppError::StartError { err: msg });
         }
 
@@ -659,8 +671,11 @@ impl AppRegistry {
             cmd.args(&add_args);
         }
 
-        let mut child = cmd.spawn().map_err(|err| AppError::StartError {
-            err: format!("Failed to spawn app: {:?}", err),
+        let mut child = cmd.spawn().map_err(|err| {
+            error!("Failed to spawn app {}: {:?}", app_name, err);
+            AppError::StartError {
+                err: format!("Failed to spawn app: {:?}", err),
+            }
         })?;
 
         let start_time = Utc::now();
