@@ -239,7 +239,10 @@ To start, we'll import the API::
 
 Then, we'll add a new command line option ``-c`` to allow us to pass a non-default config file for
 testing purposes::
-
+    
+    import argparse
+    parser = argparse.ArgumentParser()
+    
     parser.add_argument('--config', '-c')
     
     args = parser.parse_args()
