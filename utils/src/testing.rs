@@ -16,13 +16,21 @@
 
 extern crate tempfile;
 
+use serde_json::Value;
 use std::cell::RefCell;
+use std::collections::VecDeque;
 use std::fs::File;
+use std::io::prelude::*;
+use std::io::SeekFrom;
 use std::io::Write;
 use std::process;
 use std::process::{Command, Stdio};
 use std::str;
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Duration;
 use tempfile::tempdir;
+use warp::{self, Buf, Filter};
 
 pub struct TestCommand {
     command: String,
@@ -93,6 +101,12 @@ impl TestService {
         }
     }
 
+    /// Appends additional configuration data to service's config
+    pub fn config(&mut self, config_data: &str) {
+        self._config_file.seek(SeekFrom::End(0)).unwrap();
+        self._config_file.write_all(config_data.as_bytes()).unwrap();
+    }
+
     /// Ask Cargo to build the service binary.
     /// This is a *blocking* function. We know when it returns
     /// that the service is ready to be run.
@@ -125,6 +139,14 @@ impl TestService {
         let mut child_handle = self.child_handle.borrow_mut();
         *child_handle = Box::new(Some(child));
     }
+
+    /// Kill the running process.
+    pub fn kill(&self) {
+        let mut borrowed_child = self.child_handle.borrow_mut();
+        if let Some(mut handle) = borrowed_child.take() {
+            handle.kill().unwrap();
+        }
+    }
 }
 
 /// Implement custom drop functionality which
@@ -135,5 +157,65 @@ impl Drop for TestService {
         if let Some(mut handle) = borrowed_child.take() {
             handle.kill().unwrap();
         }
+    }
+}
+
+pub fn service_query(query: &str, ip: &str, port: u16) -> Value {
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_millis(100))
+        .build()
+        .unwrap();
+    let mut map = ::std::collections::HashMap::new();
+    map.insert("query", query);
+    for _ in 0..5 {
+        if let Ok(mut result) = client
+            .post(&format!("http://{}:{}", ip, port))
+            .json(&map)
+            .send()
+        {
+            return serde_json::from_str(&result.text().unwrap()).unwrap();
+        }
+        thread::sleep(Duration::from_millis(100));
+    }
+
+    panic!("Service query failed - {}:{}", ip, port);
+}
+
+pub struct ServiceListener {
+    requests: Arc<Mutex<VecDeque<String>>>,
+}
+
+impl ServiceListener {
+    /// Spawns a new dummy service listener
+    /// This listener will just listen for posts and save off
+    /// the request bodies for examination in tests
+    pub fn spawn(_ip: &str, port: u16) -> ServiceListener {
+        let requests = Arc::new(Mutex::new(VecDeque::<String>::new()));
+
+        let req_handle = requests.clone();
+
+        let listener = warp::post2()
+            .and(warp::any())
+            .and(warp::body::concat().and_then(|body: warp::body::FullBody| {
+                std::str::from_utf8(body.bytes())
+                    .map(String::from)
+                    .map_err(warp::reject::custom)
+            }))
+            .map(move |body: String| {
+                req_handle.lock().unwrap().push_back(body.to_owned());
+                "hi"
+            });
+
+        thread::spawn(move || warp::serve(listener).run(([127, 0, 0, 1], port)));
+
+        ServiceListener {
+            requests: requests.clone(),
+        }
+    }
+
+    /// Pops a request body from the collected queue
+    /// These are popped off in FIFO fashion
+    pub fn get_request(&self) -> Option<String> {
+        self.requests.lock().unwrap().pop_front()
     }
 }
