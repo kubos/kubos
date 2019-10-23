@@ -70,12 +70,12 @@ impl Task {
             let now = chrono::Utc::now();
 
             if run_time < now {
-                Err(SchedulerError::TaskParseError {
+                Err(SchedulerError::TaskTimeError {
                     err: format!("Task scheduled for past time: {}", time),
                     description: self.description.to_owned(),
                 })
             } else if (run_time - now) > chrono::Duration::days(90) {
-                Err(SchedulerError::TaskParseError {
+                Err(SchedulerError::TaskTimeError {
                     err: format!("Task scheduled beyond 90 days in the future: {}", time),
                     description: self.description.to_owned(),
                 })

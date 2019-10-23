@@ -65,7 +65,7 @@ fn main() -> Result<(), SchedulerError> {
 
     let scheduler = Scheduler::new(&scheduler_dir, &apps_service_url)?;
 
-    info!("Starting scheduler-service - {:?}", scheduler_dir);
+    info!("Starting scheduler-service - {:?}", scheduler.scheduler_dir);
 
     scheduler.init()?;
 

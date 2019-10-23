@@ -22,8 +22,8 @@ use crate::error::SchedulerError;
 use crate::mode::{
     activate_mode, create_mode, get_active_mode, get_available_modes, is_mode_active,
 };
-use crate::task_list::{get_mode_task_lists, TaskList};
-use log::{error, info};
+use crate::task_list::{get_mode_task_lists, validate_task_list, TaskList};
+use log::{error, info, warn};
 use std::collections::HashMap;
 use std::env;
 use std::fs;
@@ -147,10 +147,38 @@ impl Scheduler {
     }
 
     // Iterate through the active mode and kick off scheduling tasks
+    // Validation and error returning is done here and caught in
+    // start() for fail over.
+    fn check_start(&self, mode_path: &str) -> Result<(), SchedulerError> {
+        for list in get_mode_task_lists(&mode_path)? {
+            match validate_task_list(&list.path) {
+                Err(SchedulerError::TaskTimeError { description, .. }) => warn!(
+                    "Found task '{}' in task list '{}' with out of bounds time",
+                    description, list.filename
+                ),
+                Ok(()) => {}
+                Err(e) => return Err(e),
+            }
+            self.start_task_list(list)?;
+        }
+        Ok(())
+    }
+
+    // Iterate through the active mode and kick off scheduling tasks
     pub fn start(&self) -> Result<(), SchedulerError> {
         if let Some(active_mode) = get_active_mode(&self.scheduler_dir)? {
-            for list in get_mode_task_lists(&active_mode.path)? {
-                self.start_task_list(list)?;
+            if let Err(err) = self.check_start(&active_mode.path) {
+                if active_mode.name == SAFE_MODE {
+                    error!("Failed to start safe mode: {}", err);
+                    panic!("Failed to start safe mode: {}", err);
+                } else {
+                    error!(
+                        "Failed to start mode '{}', failing over: {}",
+                        active_mode.name, err
+                    );
+                    activate_mode(&self.scheduler_dir, &SAFE_MODE)?;
+                    self.start()?;
+                }
             }
             Ok(())
         } else {

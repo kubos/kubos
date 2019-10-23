@@ -64,11 +64,15 @@ Failover Behavior
 
 In addition to using the ``safe`` mode as the default operating mode, the scheduler is 
 designed to automatically failover to the ``safe`` mode when any problems are detected.
-The following situations will cause the scheduler to activate the ``safe`` mode::
+The following situations will cause the scheduler to activate the ``safe`` mode:
 
     - The scheduler starts and no modes exist
     - The scheduler starts and no mode is active
     - The scheduler attempts to activate a mode and the mode does not exist
+    - The scheduler loads an active mode and encounters an invalid task list
+
+The only error situation that will **not** cause the scheduler to activate ``safe`` mode
+is if the scheduler encounters errors when querying the application service to start an app. 
 
 The ``safe`` mode may also be activated using the GraphQL ``safeMode`` query.
 
@@ -137,7 +141,7 @@ Specifying Time of Execution
 
 Tasks can have their scheduled time of execution specified using three different
 fields: ``delay``, ``time``, and ``period``. The ``delay`` field specifies
-a delay before the task executes. The ``time`` field specifies a time
+a delay before the task executes. The ``time`` field specifies a UTC date and time
 when the task will be executed. The ``period`` field indicates the app should
 be executed on a recurring basis and specifies the period of recurrence. The ``delay``
 field is required, except when using the ``time`` field. The ``time`` and ``period``
@@ -166,14 +170,15 @@ Each ``delay`` task is specified like so:
 One Time Tasks
 ~~~~~~~~~~~~~~
 
-Tasks configured with a ``time`` field will be executed once at a set time. Each 
-one time task is specified like so:
+Tasks configured with a ``time`` field will be executed once at a set time. The designated
+time and system time are both always assumed to be in UTC. Each one time task is specified
+like so:
 
 .. code-block:: json
 
     {
         "description": "Task description",
-        "time": "Required time of execution in yyyy-mm-dd hh:mm:ss format",
+        "time": "Required UTC time of execution in yyyy-mm-dd hh:mm:ss format",
         "app": {
             "name": "Required registered name of app to run",
             "args": ["Optional", "command", "line", "app", "args"],
@@ -185,7 +190,7 @@ Recurring Tasks
 ~~~~~~~~~~~~~~~
 
 Tasks configured with a ``period`` field will be executed on a recurring basis. The task
-will occur at the given ``period`` beginning after the ``delay`` has expired.
+will first occur after ``delay`` and then recur each ``period`` thereafter.
 Each recurring task in this section is specified like so:
 
 .. code-block:: json
@@ -205,14 +210,14 @@ Service Configuration
 ---------------------
 
 The scheduler service has the following available configuration parameter which may be
-specified in the ``config.toml`` file under ``[scheduler-service]``::
+specified in the ``config.toml`` file under ``[scheduler-service]``:
 
     - ``schedules-dir`` - (Default: ``/home/system/etc/schedules/``) The path to the
-    directory where modes and their schedules will be stored. This directory will be
-    created if it does not already exist.
+      directory where modes and their schedules will be stored. This directory will be
+      created if it does not already exist.
 
 The scheduler service also has the standard GraphQL interface parameters available for
-configuration under ``[scheduler-service.addr]``::
+configuration under ``[scheduler-service.addr]``:
 
     - ``ip`` - The IP address of the GraphQL server
     - ``port`` - The port the GraphQL server will listen on
@@ -224,6 +229,11 @@ Queries
 ~~~~~~~
 
 The scheduler exposes two queries, ``activeMode`` and ``availableModes``.
+
+.. note::
+
+    All names of modes and task lists are converted to lower case for usage inside
+    of the scheduler service.
 
 Examining the Active Mode
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -303,6 +313,11 @@ Mutations
 The scheduler also exposes the following mutations: ``createMode``, ``removeMode``,
 ``activateMode``, ``importTaskList``, ``importRawTaskList``, ``removeTaskList``,
 and ``safeMode``.
+
+.. note::
+
+    All names of modes and task lists are converted to lower case for usage inside
+    of the scheduler service.
 
 Creating Modes
 ~~~~~~~~~~~~~~
@@ -408,7 +423,7 @@ all double quotes inside of the JSON. Here is an example::
         importRawTaskList(
             name: "camera",
             mode: "operational",
-            json: "{\"tasks\":[{\"name\":\"start-camera\",\"delay\":\"10m\",\"app\": {\"name\":\"activate-camera\"}}]}"
+            json: "{\"tasks\":[{\"description\":\"start-camera\",\"delay\":\"10m\",\"app\": {\"name\":\"activate-camera\"}}]}"
         ) {
             success,
             errors

@@ -111,6 +111,17 @@ pub enum SchedulerError {
         /// The description of task that failed to parse
         description: String,
     },
+    // An out of bounds time was found when parsing a task
+    #[fail(
+        display = "Out of bounds time found in task '{}': {}",
+        description, err
+    )]
+    TaskTimeError {
+        /// The specific parsing error
+        err: String,
+        /// The description of task that failed to parse
+        description: String,
+    },
 }
 
 impl From<String> for SchedulerError {

@@ -244,7 +244,7 @@ fn validate_past_time() {
         json!({
             "data" : {
                 "importTaskList": {
-                    "errors": "Failed to parse task \'first-task\': Task scheduled for past time: 1970-1-1 00:00:00",
+                    "errors": "Out of bounds time found in task \'first-task\': Task scheduled for past time: 1970-1-1 00:00:00",
                     "success": false
                 }
             }
@@ -275,7 +275,7 @@ fn validate_far_future_time() {
         json!({
             "data" : {
                 "importTaskList": {
-                    "errors": "Failed to parse task \'first-task\': Task scheduled beyond 90 days in the future: 2070-1-1 00:00:00",
+                    "errors": "Out of bounds time found in task \'first-task\': Task scheduled beyond 90 days in the future: 2070-1-1 00:00:00",
                     "success": false
                 }
             }

@@ -23,7 +23,7 @@ use crate::scheduler::SchedulerHandle;
 use crate::task::Task;
 use chrono::{DateTime, Utc};
 use juniper::GraphQLObject;
-use log::{error, info, warn};
+use log::{error, info};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -273,10 +273,7 @@ pub fn get_mode_task_lists(mode_path: &str) -> Result<Vec<TaskList>, SchedulerEr
     files_list.sort();
 
     for path in files_list {
-        match TaskList::from_path(&path) {
-            Ok(sched) => schedules.push(sched),
-            Err(e) => warn!("Failed to parse task list {:?}: {}", path, e),
-        }
+        schedules.push(TaskList::from_path(&path)?);
     }
 
     Ok(schedules)
