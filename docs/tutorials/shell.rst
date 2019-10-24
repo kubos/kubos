@@ -30,13 +30,14 @@ Syntax
 
 The shell client has the following command syntax::
 
-  kubos-shell-client [options] (start | list | join | kill)
+  kubos-shell-client [options] (start | run | list | join | kill)
 
 Required arguments:
 
     - Operation to perform
 
         - ``start`` - Start a new shell session
+        - ``run`` - Run single remote command
         - ``list`` - List current shell sessions
         - ``join`` - Join an existing shell session
         - ``kill`` - Kill an existing shell session
@@ -58,7 +59,7 @@ Our command should look like this::
 
 Or, from your local dev environment::
 
-    $ cargo run -- -i 10.0.2.20 -p 8050 start
+    $ cargo run --bin kubos-shell-client -- -i 10.0.2.20 -p 8050 start
 
 The output from the client should look like this:
 
@@ -180,3 +181,35 @@ The output from the client should look like this:
 
    Starting shell client -> 10.0.2.20:8050
    Killing existing shell session -c 672712
+
+Running a Single Remote Command
+-------------------------------
+
+Sometimes only a single command needs to be run. In these cases it is
+not necessary to start a whole shell session. The run command will
+handle starting the shell session, running the remote command,
+retrieving the output, and terminating the shell session.
+
+The run command has the following syntax::
+
+   kubos-shell-client run -c "<command>"
+
+The run command requires a command string to know what to run.
+This command string must include the base command as well as
+any required arguments. The command string **must** be enclosed in `"`s.
+
+A good use case for this command is determining the contents of a directory.
+We will look at the contents of the `/home` directory. Our command should
+look like this::
+
+   $ kubos-shell-client -i 10.0.2.20 -p 8050 run -c "ls /home"
+
+The output from the client should look like this:
+
+.. code-block:: none
+
+   Starting shell client: -> 10.0.2.20:8050
+   Running remote command 'ls -l /home'
+
+   kubos
+   system

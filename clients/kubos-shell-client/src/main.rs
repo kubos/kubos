@@ -15,7 +15,7 @@
 //
 
 #![deny(warnings)]
-use channel_protocol::ChannelProtocol;
+use channel_protocol::{ChannelProtocol, ProtocolError};
 use clap::{value_t, App, AppSettings, Arg, SubCommand};
 use failure::{bail, Error};
 use std::collections::HashMap;
@@ -33,6 +33,65 @@ fn start_session(channel_proto: &ChannelProtocol) -> Result<(), Error> {
         None,
     )?)?;
     run_shell(channel_proto, channel_id)?;
+    Ok(())
+}
+
+fn run_command(channel_proto: &ChannelProtocol, command: &str) -> Result<(), Error> {
+    let channel_id = channel_protocol::generate_channel();
+    let command = format!("{}\n", command);
+
+    channel_proto.send(&shell_protocol::messages::spawn::to_cbor(
+        channel_id,
+        &"/bin/sh".to_owned(),
+        None,
+    )?)?;
+
+    channel_proto.send(&shell_protocol::messages::stdin::to_cbor(
+        channel_id,
+        Some(&command),
+    )?)?;
+
+    loop {
+        let recvd_data = match channel_proto.recv_message(Some(Duration::from_millis(100))) {
+            Ok(data) => data,
+            Err(ProtocolError::ReceiveTimeout) => break,
+            Err(e) => {
+                eprintln!("Recv Error: {}", e);
+                break;
+            }
+        };
+        let parsed_msg = match shell_protocol::messages::parse_message(&recvd_data) {
+            Ok(msg) => msg,
+            Err(e) => {
+                eprintln!("Msg Parse Error: {}", e);
+                break;
+            }
+        };
+
+        match parsed_msg {
+            shell_protocol::messages::Message::Exit { .. } => {
+                break;
+            }
+            shell_protocol::messages::Message::Stdout { data, .. } => {
+                if let Some(data) = data {
+                    print!("{}", data);
+                }
+            }
+            shell_protocol::messages::Message::Stderr { data, .. } => {
+                if let Some(data) = data {
+                    print!("{}", data);
+                }
+            }
+            shell_protocol::messages::Message::Error { message, .. } => {
+                eprintln!("Shell Protocol Error: {}", message);
+                break;
+            }
+            _ => {}
+        }
+    }
+
+    channel_proto.send(&shell_protocol::messages::kill::to_cbor(channel_id, None)?)?;
+
     Ok(())
 }
 
@@ -157,6 +216,17 @@ fn main() -> Result<(), failure::Error> {
                         .takes_value(true),
                 ),
         )
+        .subcommand(
+            SubCommand::with_name("run")
+                .about("Runs a single remote command")
+                .arg(
+                    Arg::with_name("command")
+                        .help("Remote command to execute")
+                        .short("c")
+                        .takes_value(true)
+                        .required(true),
+                ),
+        )
         .arg(
             Arg::with_name("service_ip")
                 .help("IP address of remote shell service")
@@ -185,6 +255,16 @@ fn main() -> Result<(), failure::Error> {
 
     match args.subcommand_name() {
         Some("start") => start_session(&channel_proto),
+        Some("run") => {
+            let command = if let Some(command_matches) = args.subcommand_matches("run") {
+                command_matches.value_of("command").unwrap()
+            } else {
+                bail!("No arguments found for run");
+            };
+
+            println!("Running remote command: '{}'", &command);
+            run_command(&channel_proto, command)
+        }
         Some("list") => {
             println!("Fetching existing shell sessions:");
             list_sessions(&channel_proto)
