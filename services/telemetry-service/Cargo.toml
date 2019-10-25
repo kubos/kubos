@@ -18,5 +18,5 @@ tar = "0.4"
 time = "0.1"
 
 [dev-dependencies]
-reqwest = "0.9.9"
+reqwest = "=0.9.14"
 tempfile = "3"
