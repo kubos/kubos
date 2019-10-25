@@ -11,7 +11,7 @@ juniper = "0.11"
 juniper_warp = "0.2.0"
 kubos-system = { path = "../../apis/system-api" }
 log = "^0.4.0"
-warp = "0.1.12"
+warp = "= 0.1.12"
 
 [dev-dependencies]
 failure = "0.1.2"

@@ -20,4 +20,4 @@ toml = "0.4.10"
 bytes = "*"
 tempfile = "3.0"
 utils = { path = "../../utils" }
-warp = "0.1.12"
+warp = "= 0.1.12"
