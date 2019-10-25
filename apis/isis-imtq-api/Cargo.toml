@@ -8,7 +8,7 @@ edition = "2018"
 adcs-api = { path = "../adcs-api" }
 
 [dev-dependencies]
-double = "0.2.2"
+double = "= 0.2.2"
 
 [build-dependencies]
 kubos-build-helper = {path = "../../kubos-build-helper"}

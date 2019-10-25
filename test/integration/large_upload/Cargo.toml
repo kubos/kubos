@@ -8,5 +8,5 @@ edition = "2018"
 file-protocol = { path = "../../../libs/file-protocol" }
 file-service = { path = "../../../services/file-service" }
 kubos-system = { path = "../../../apis/system-api" }
-rand = "0.5.5"
+rand = "= 0.5.5"
 tempfile = "3"

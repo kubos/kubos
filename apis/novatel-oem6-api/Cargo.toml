@@ -8,9 +8,9 @@ edition = "2018"
 nos3 = ["rust-uart/nos3"]
 
 [dependencies]
-bitflags = "1.0"
-byteorder = "1.2"
-failure = "0.1.2"
+bitflags = "= 1.0"
+byteorder = "= 1.2"
+failure = "= 0.1.5"
 nom = "4.0.0-beta1"
 rust-uart = { path = "../../hal/rust-hal/rust-uart" }
-serial = "0.4"
+serial = "= 0.4"

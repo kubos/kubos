@@ -8,8 +8,8 @@ edition = "2018"
 nos3 = ["nosengine-rust"]
 
 [dependencies]
-serial = "0.4.0"
-failure = "0.1.2"
+serial = "= 0.4.0"
+failure = "= 0.1.5"
 nosengine-rust = { path = "../../../apis/nosengine-rust", optional = true }
-toml = "0.4.0"
-display_derive = "0.0.0"
+toml = "= 0.4.0"
+display_derive = "= 0.0.0"

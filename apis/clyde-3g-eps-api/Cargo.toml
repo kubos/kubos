@@ -8,8 +8,8 @@ edition = "2018"
 nos3 = ["rust-i2c/nos3"]
 
 [dependencies]
-bitflags = "1.0"
+bitflags = "= 1.0"
 eps-api = { path = "../eps-api" }
-failure = "0.1.2"
-nom = "4.0"
+failure = "= 0.1.5"
+nom = "= 4.0"
 rust-i2c = { path = "../../hal/rust-hal/rust-i2c" }

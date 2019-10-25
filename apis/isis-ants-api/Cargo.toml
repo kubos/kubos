@@ -7,7 +7,7 @@ repository = "https://github.com/kubos/kubos"
 edition = "2018"
 
 [dependencies]
-failure = "0.1.2"
+failure = "= 0.1.5"
 nom = "4.0.0-beta1"
 
 [build-dependencies]

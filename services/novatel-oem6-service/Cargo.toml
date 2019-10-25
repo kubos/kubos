@@ -8,7 +8,7 @@ edition = "2018"
 nos3 = ["novatel-oem6-api/nos3"]
 
 [dependencies]
-failure = "0.1.2"
+failure = "= 0.1.5"
 juniper =  "0.11"
 kubos-service = { path = "../kubos-service" }
 log = "^0.4.0"

@@ -5,8 +5,8 @@ authors = ["Marshall Culpepper <marshall@kubos.com>"]
 edition = "2018"
 
 [dependencies]
-diesel = { version = "1.0.0", features = ["sqlite"] }
+diesel = { version = "= 1.0.0", features = ["sqlite"] }
 log = "^0.4.0"
-serde = "1.0"
-serde_derive = "1.0"
-time = "0.1"
+serde = "= 1.0"
+serde_derive = "= 1.0"
+time = "= 0.1"

@@ -7,5 +7,5 @@ edition = "2018"
 [dependencies]
 isis-ants-api = { path = "../../../../apis/isis-ants-api" }
 log = "^0.4.0"
-log4rs = "0.8"
-log4rs-syslog = "3.0"
+log4rs = "= 0.8"
+log4rs-syslog = "= 3.0"

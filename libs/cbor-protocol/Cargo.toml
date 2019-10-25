@@ -5,6 +5,6 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 edition = "2018"
 
 [dependencies]
-serde_cbor = "0.8"
-failure = "0.1.2"
+serde_cbor = "= 0.8"
+failure = "= 0.1.5"
 log = "^0.4.0"

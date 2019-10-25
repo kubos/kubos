@@ -5,5 +5,5 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 edition = "2018"
 
 [dependencies]
-glob = "0.2"
-cmake = "0.1"
+glob = "= 0.2"
+cmake = "= 0.1"
