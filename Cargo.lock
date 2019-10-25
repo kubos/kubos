@@ -442,7 +442,7 @@ dependencies = [
 name = "db-test"
 version = "0.1.0"
 dependencies = [
- "diesel 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "diesel 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "getopts 0.2.21 (registry+https://github.com/rust-lang/crates.io-index)",
  "kubos-system 0.1.0",
  "kubos-telemetry-db 0.1.0",
@@ -455,7 +455,7 @@ dependencies = [
 
 [[package]]
 name = "diesel"
-version = "1.0.0"
+version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "byteorder 1.2.7 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1246,7 +1246,7 @@ dependencies = [
 name = "kubos-telemetry-db"
 version = "0.1.0"
 dependencies = [
- "diesel 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "diesel 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_derive 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2767,7 +2767,7 @@ dependencies = [
 name = "telemetry-service"
 version = "0.1.0"
 dependencies = [
- "diesel 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "diesel 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "flate2 1.0.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "juniper 0.11.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "kubos-service 0.1.0",
@@ -3421,7 +3421,7 @@ dependencies = [
 "checksum crossbeam-utils 0.6.6 (registry+https://github.com/rust-lang/crates.io-index)" = "04973fa96e96579258a5091af6003abde64af786b860f18622b82e026cca60e6"
 "checksum csv 1.0.7 (registry+https://github.com/rust-lang/crates.io-index)" = "9044e25afb0924b5a5fc5511689b0918629e85d68ea591e5e87fbf1e85ea1b3b"
 "checksum csv-core 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)" = "9b5cadb6b25c77aeff80ba701712494213f4a8418fcda2ee11b6560c3ad0bf4c"
-"checksum diesel 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "de51f2e2321a7db9bdfd7e3457c6ce11dce5009cad7ff9ac25a04879239e5fe6"
+"checksum diesel 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "66d7d3a2f8a24763a1a52b5324737b4d24141bb294440ed9094db60bd6cd29ee"
 "checksum diesel_derives 1.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "45f5098f628d02a7a0f68ddba586fb61e80edec3bdc1be3b921f4ceec60858d3"
 "checksum digest 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)" = "f3d0c8c8752312f9713efd397ff63acb9f85585afbf179282e720e7704954dd5"
 "checksum dirs 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)" = "3fd78930633bd1c6e35c4b42b1df7b0cbc6bc191146e512bb3bedf243fcc3901"

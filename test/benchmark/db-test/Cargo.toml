@@ -5,7 +5,7 @@ authors = ["Catherine Garabedian <catherine@kubos.co>"]
 edition = "2018"
 
 [dependencies]
-diesel = { version = "= 1.0.0", features = ["sqlite"] }
+diesel = { version = "= 1.4.0", features = ["sqlite"] }
 kubos-system = { path = "../../../apis/system-api" }
 kubos-telemetry-db = { path = "../../../apis/telemetry-db-api" }
 prettytable-rs = "^0.8"
