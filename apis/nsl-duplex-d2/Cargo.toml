@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 radio-api = { path = "../rust-radio-api" }
-nom = "4.0.0-beta1"
+nom = "= 4.2.3"
 serial = "= 0.4"
 crc16 = "= 0.3.4"
 chrono = "= 0.4.0"

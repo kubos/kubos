@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 failure = "= 0.1.5"
-nom = "4.0.0-beta1"
+nom = "= 4.2.3"
 
 [build-dependencies]
 kubos-build-helper = {path = "../../kubos-build-helper"}

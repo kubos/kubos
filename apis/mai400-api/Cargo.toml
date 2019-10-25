@@ -12,7 +12,7 @@ bitflags = "= 1.0"
 byteorder = "= 1.2"
 crc16 = "= 0.3.4"
 failure = "= 0.1.5"
-nom = "4.0.0-beta1"
+nom = "= 4.2.3"
 rust-uart = { path = "../../hal/rust-hal/rust-uart" }
 serial = "= 0.4"
 

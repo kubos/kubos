@@ -11,5 +11,5 @@ nos3 = ["rust-i2c/nos3"]
 bitflags = "= 1.0"
 eps-api = { path = "../eps-api" }
 failure = "= 0.1.5"
-nom = "= 4.0"
+nom = "= 4.2.3"
 rust-i2c = { path = "../../hal/rust-hal/rust-i2c" }

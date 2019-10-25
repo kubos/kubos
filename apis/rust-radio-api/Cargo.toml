@@ -5,5 +5,5 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 edition = "2018"
 
 [dependencies]
-nom = "4.0.0-beta1"
+nom = "= 4.2.3"
 failure = "= 0.1.5"
