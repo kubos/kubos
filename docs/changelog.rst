@@ -1,6 +1,26 @@
 Kubos Changelog
 ===============
 
+v1.19.0 - Oct 30 2019
+---------------------
+
+- `Added Scheduler Service <https://docs.kubos.com/1.19.0/ecosystem/scheduler.html>`__
+- Updated kubos-shell-client to allow single command execution
+- Updated default ``config.toml`` location from ``/home/system/etc/config.toml`` to ``/etc/kubos-config.toml``
+- `Migrated to new default service ports <https://docs.kubos.com/master/1.19.0/ecosystem/services/service-dev.html#service-configuration>`__
+- Removed run levels from apps and the associated app arg
+- Changed app service uninstall logic to nicely kill a running app first
+- `Added No Hardware doc <https://docs.kubos.com/1.19.0/getting-started/no-board.html>`__
+- Added ``--stdout`` flag to services for easy output on stdout
+- Standardized the default service storage location in ``tools/local_config.toml`` for easier local development
+- Miscellaneous doc improvements
+
+Bug Fixes:
+~~~~~~~~~~
+
+- Fixed crashing file service & client with bad defaults
+- Fixed communications issue in ISIS Antenna Service
+
 v1.18.0 - Sept 12 2019
 ----------------------
 
