@@ -14,8 +14,7 @@ Overview
 The KubOS platform provides satellite developers the tools and libraries necessary to quickly bring up space-ready software.
 We leverage multiple existing open source projects, along with our own custom framework and SDK.
 
-Just looking for an explanation of what KubOS is?
-
+Just looking for an explanation of what KubOS is? 
 Check out our design guide for an overview of how KubOS works and what it provides,
 and check out our ecosystem docs for a deeper explanation of each component:
 
