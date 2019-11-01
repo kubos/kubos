@@ -57,7 +57,8 @@ The application itself should not be concerned with when or how often it is run.
 the scheduler comes in. We rely on the :ref:`scheduler service <scheduler-service>` to schedule
 application execution at designated times or at pre-defined intervals.
 
-We recommend all missions develop a thorough safe mode to ship as the mission's default schedule and to use in fail over situations. Each application area in the :doc:`mission needs <mission-needs>`
+We recommend all missions develop a thorough safe mode to ship as the mission's default schedule
+and to use in fail over situations. Each application area in the :doc:`mission needs <mission-needs>`
 doc should be considered for inclusion in the default safe mode schedule.
 
 5. Update and Recovery

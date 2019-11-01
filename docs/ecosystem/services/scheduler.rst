@@ -1,5 +1,7 @@
-Scheduler
-=========
+.. _scheduler-service:
+
+Scheduler Service
+=================
 
 The KubOS system includes a scheduler service to facilitate recurring
 and one time tasks with specific timing requirements, and to facilitate
