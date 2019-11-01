@@ -49,7 +49,18 @@ We've listed the typical necessary applications:
     mission-needs
     deployment
 
-4. Update and Recovery
+4. Scheduling Tasks
+-------------------
+
+Applications in KubOS are generally designed to be single purpose and run relatively quickly.
+The application itself should not be concerned with when or how often it is run. That is where
+the scheduler comes in. We rely on the :ref:`scheduler service <scheduler-service>` to schedule
+application execution at designated times or at pre-defined intervals.
+
+We recommend all missions develop a thorough safe mode to ship as the mission's default schedule and to use in fail over situations. Each application area in the :doc:`mission needs <mission-needs>`
+doc should be considered for inclusion in the default safe mode schedule.
+
+5. Update and Recovery
 ----------------------
 
 KubOS uses similar procedures for both updating and recovering the operating system.
@@ -76,7 +87,7 @@ In addition, we also recommend doing several test cycles forcing the recovery to
 
 Kubos offers `SLAs <https://www.kubos.com/kubos/>`__ to aid in the augmentation of the process and/or auditing your mission's recovery process.
 
-5. Flight Readiness
+6. Flight Readiness
 -------------------
 
 You have all the hardware integrated, you have all the required mission applications, and you've tested everything to your heart's content...you're ready for launch.
