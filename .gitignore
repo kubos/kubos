@@ -49,6 +49,7 @@ yotta_*
 
 doxygen_warn.log
 html/
+pdf/
 xml/
 doctrees/
 *.swo

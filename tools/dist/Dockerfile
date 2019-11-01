@@ -14,6 +14,7 @@ RUN apt-get install --no-install-recommends -y python file rsync bc cpio ncurses
 
 #Tools to generate docs
 RUN apt-get install --no-install-recommends -y doxygen graphviz plantuml
+RUN apt-get install --no-install-recommends -y texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended latexmk texlive-fonts-extra
 
 # Install pip for Python2 and Python3
 RUN apt-get install --no-install-recommends -y python3-pip python3-setuptools

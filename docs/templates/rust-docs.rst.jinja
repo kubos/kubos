@@ -1,0 +1,9 @@
+{% macro rust_docs_link(name, relative_uri, label) -%}
+{% if outformat == 'html' %}
+.. |{{ name }}| raw:: html
+
+    <a href="{{ relative_uri }}" target="_blank">{{ label }}</a>
+{% elif outformat == 'pdf' %}
+.. |{{ name }}| replace:: `{{ label }} <https://docs.kubos.com/{{ release }}/{{ relative_uri }}>`__
+{% endif %}
+{%- endmacro %}
