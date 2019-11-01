@@ -75,7 +75,6 @@ impl From<io::Error> for AntsError {
 pub type AntSResult<T> = Result<T, AntsError>;
 
 /// Trait used to represent the AntS object. Allows for mock objects to be created for unit tests
-#[cfg(not(feature = "nos3"))]
 pub trait IAntS: Send {
     /// Construct a new AntS instance
     fn new(bus: &str, primary: u8, secondary: u8, ant_count: u8, timeout: u32) -> AntSResult<Self>
@@ -83,47 +82,6 @@ pub trait IAntS: Send {
         Self: ::std::marker::Sized;
     /// Configure which microcontroller should be used to control the system
     fn configure(&self, config: KANTSController) -> AntSResult<()>;
-    /// Perform a software reset of the microcontrollers
-    fn reset(&self) -> AntSResult<()>;
-    /// Arm the system for deployment
-    fn arm(&self) -> AntSResult<()>;
-    /// Disable deployment
-    fn disarm(&self) -> AntSResult<()>;
-    /// Deploy one antenna
-    fn deploy(&self, antenna: KANTSAnt, force: bool, timeout: u8) -> AntSResult<()>;
-    /// Automatically deploy all antennas
-    fn auto_deploy(&self, timeout: u8) -> AntSResult<()>;
-    /// Cancel all current deployment actions
-    fn cancel_deploy(&self) -> AntSResult<()>;
-    /// Get the current deployment status of the system
-    fn get_deploy(&self) -> AntSResult<DeployStatus>;
-    /// Get the system uptime
-    fn get_uptime(&self) -> AntSResult<u32>;
-    /// Get the system telemetry data
-    fn get_system_telemetry(&self) -> AntSResult<AntsTelemetry>;
-    /// Get an antenna's activation count
-    fn get_activation_count(&self, antenna: KANTSAnt) -> AntSResult<u8>;
-    /// Get the amount of time spent attempting to deploy an antenna
-    fn get_activation_time(&self, antenna: KANTSAnt) -> AntSResult<u16>;
-    /// Kick the hardware watchdog
-    fn watchdog_kick(&self) -> AntSResult<()>;
-    /// Start automatic watchdog kicking
-    fn watchdog_start(&self) -> AntSResult<()>;
-    /// Stop automatic watchdog kicking
-    fn watchdog_stop(&self) -> AntSResult<()>;
-    /// Pass a data packet directly through to the device
-    fn passthrough(&self, tx: &[u8], rx_in: &mut [u8]) -> AntSResult<()>;
-}
-
-/// Trait used to represent the AntS object. Allows for mock objects to be created for unit tests
-#[cfg(feature = "nos3")]
-pub trait IAntS: Send {
-    /// Construct a new AntS instance
-    fn new(bus: &str, primary: u8, secondary: u8, ant_count: u8, timeout: u32) -> AntSResult<Self>
-    where
-        Self: ::std::marker::Sized;
-    /// Configure which microcontroller should be used to control the system
-    fn configure(&mut self, config: KANTSController) -> AntSResult<()>;
     /// Perform a software reset of the microcontrollers
     fn reset(&self) -> AntSResult<()>;
     /// Arm the system for deployment
@@ -713,7 +671,7 @@ impl IAntS for AntS {
 pub struct AntS {
     bus: String,
     controllers: AntSControllers,
-    connection: Connection,
+    connection: Arc<Mutex<Connection>>,
 }
 
 #[cfg(feature = "nos3")]
@@ -739,30 +697,25 @@ impl IAntS for AntS {
                 side_a: primary,
                 side_b: secondary,
             },
-            connection: Connection::from_path(bus, primary as u16),
+            connection: Arc::new(Mutex::new(Connection::from_path(bus, primary as u16))),
         };
         Ok(ants)
     }
 
     /// Configure the system to send future commands to the requested microcontroller
-    fn configure(&mut self, config: KANTSController) -> AntSResult<()> {
-        match config {
-            KANTSController::Primary => {
-                let path = self.controllers.side_a as u16;
-                self.connection = Connection::from_path(&self.bus, path);
-                Ok(())
-            }
-            KANTSController::Secondary => {
-                let path = self.controllers.side_b as u16;
-                self.connection = Connection::from_path(&self.bus, path);
-                Ok(())
-            }
-        }
+    fn configure(&self, config: KANTSController) -> AntSResult<()> {
+        let path = match config {
+            KANTSController::Primary => self.controllers.side_a as u16,
+            KANTSController::Secondary => self.controllers.side_b as u16,
+        };
+        let mut connection = self.connection.lock().unwrap();
+        connection = Connection::from_path(&self.bus, path);
+        Ok(())
     }
 
     /// Reset the Ant System
     fn reset(&self) -> AntSResult<()> {
-        self.connection.write(Command {
+        self.connection.lock().unwrap().write(Command {
             cmd: 0xAA,
             data: vec![],
         })?;
@@ -771,7 +724,7 @@ impl IAntS for AntS {
 
     /// Ready Ant System for deployment
     fn arm(&self) -> AntSResult<()> {
-        self.connection.write(Command {
+        self.connection.lock().unwrap().write(Command {
             cmd: 0xAD,
             data: vec![],
         })?;
@@ -780,7 +733,7 @@ impl IAntS for AntS {
 
     /// Disable deployment
     fn disarm(&self) -> AntSResult<()> {
-        self.connection.write(Command {
+        self.connection.lock().unwrap().write(Command {
             cmd: 0xAC,
             data: vec![],
         })?;
@@ -803,7 +756,7 @@ impl IAntS for AntS {
                 KANTSAnt::Ant4 => 0xA4,
             },
         };
-        self.connection.write(Command {
+        self.connection.lock().unwrap().write(Command {
             cmd: cmd,
             data: vec![timeout],
         })?;
@@ -812,7 +765,7 @@ impl IAntS for AntS {
 
     /// Automatically deploy all antennas
     fn auto_deploy(&self, timeout: u8) -> AntSResult<()> {
-        self.connection.write(Command {
+        self.connection.lock().unwrap().write(Command {
             cmd: 0xA5,
             data: vec![timeout],
         })?;
@@ -821,7 +774,7 @@ impl IAntS for AntS {
 
     /// Cancel all current deployment actions
     fn cancel_deploy(&self) -> AntSResult<()> {
-        self.connection.write(Command {
+        self.connection.lock().unwrap().write(Command {
             cmd: 0xA9,
             data: vec![],
         })?;
