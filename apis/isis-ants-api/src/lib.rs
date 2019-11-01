@@ -57,5 +57,7 @@ pub use crate::ants::*;
 pub use crate::parse::{AntsTelemetry, DeployStatus, KANTSAnt, KANTSController};
 
 mod ants;
+#[cfg_attr(feature = "nos3", allow(dead_code))]
 mod ffi;
+#[cfg_attr(feature = "nos3", allow(dead_code))]
 mod parse;

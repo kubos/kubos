@@ -22,10 +22,60 @@ use std::str;
 use std::sync::{Arc, Mutex, RwLock};
 
 use crate::objects::*;
+#[cfg(feature = "nos3")]
+#[derive(Clone)]
+pub struct AntSShare(Arc<Mutex<Box<IAntS + Send>>>);
+// Abstractions so Subsystem is agnostic of `Arc<Mutex<Box<IAntS + Send>>>` (nos3)
+// or `Box<IAntS>` in its AntS api calls
+#[cfg(feature = "nos3")]
+impl AntSShare {
+    pub fn get_deploy(&self) -> AntSResult<DeployStatus> {
+        self.0.lock().unwrap().get_deploy()
+    }
+    pub fn get_uptime(&self) -> AntSResult<u32> {
+        self.0.lock().unwrap().get_uptime()
+    }
+    pub fn get_system_telemetry(&self) -> AntSResult<AntsTelemetry> {
+        self.0.lock().unwrap().get_system_telemetry()
+    }
+    pub fn get_activation_time(&self, antenna: KANTSAnt) -> AntSResult<u16> {
+        self.0.lock().unwrap().get_activation_time(antenna)
+    }
+    pub fn get_activation_count(&self, antenna: KANTSAnt) -> AntSResult<u8> {
+        self.0.lock().unwrap().get_activation_count(antenna)
+    }
+    pub fn watchdog_kick(&self) -> AntSResult<()> {
+        self.0.lock().unwrap().watchdog_kick()
+    }
+    pub fn deploy(&self, antenna: KANTSAnt, force: bool, timeout: u8) -> AntSResult<()> {
+        self.0.lock().unwrap().deploy(antenna, force, timeout)
+    }
+    pub fn configure(&self, config: KANTSController) -> AntSResult<()> {
+        self.0.lock().unwrap().configure(config)
+    }
+    pub fn disarm(&self) -> AntSResult<()> {
+        self.0.lock().unwrap().disarm()
+    }
+    pub fn reset(&self) -> AntSResult<()> {
+        self.0.lock().unwrap().reset()
+    }
+    pub fn auto_deploy(&self, timeout: u8) -> AntSResult<()> {
+        self.0.lock().unwrap().auto_deploy(timeout)
+    }
+    fn passthrough(&self, tx: &[u8], rx_in: &mut [u8]) -> AntSResult<()> {
+        self.0.lock().unwrap().passthrough(tx, rx_in)
+    }
+    pub fn arm(&self) -> AntSResult<()> {
+        self.0.lock().unwrap().arm()
+    }
+}
 
 #[derive(Clone)]
 pub struct Subsystem {
+    #[cfg(not(feature = "nos3"))]
     pub ants: Arc<Mutex<Box<dyn IAntS>>>,
+    #[cfg(feature = "nos3")]
+    pub ants: AntSShare,
     pub count: u8,
     pub controller: Arc<RwLock<ConfigureController>>,
     pub errors: Arc<RwLock<Vec<String>>>,
@@ -40,9 +90,16 @@ impl Subsystem {
         count: u8,
         timeout: u32,
     ) -> AntSResult<Subsystem> {
+        #[cfg(not(feature = "nos3"))]
         let ants: Arc<Mutex<Box<dyn IAntS>>> = Arc::new(Mutex::new(Box::new(AntS::new(
             bus, primary, secondary, count, timeout,
         )?)));
+        #[cfg(feature = "nos3")]
+        let ants = AntSShare(Arc::new(Mutex::new({
+            let mut _ants = AntS::new(bus, primary, secondary, count, timeout)?;
+            let ants_box: Box<IAntS + Send> = Box::new(_ants);
+            ants_box
+        })));
 
         info!("Kubos antenna systems service started");
 

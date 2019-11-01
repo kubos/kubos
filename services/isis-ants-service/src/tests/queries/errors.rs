@@ -54,7 +54,7 @@ fn query_errors_single() {
         }"#;
 
     let expected = json!({
-            "errors": ["lock (services/isis-ants-service/src/model.rs:350): Configuration error"]
+            "errors": ["lock (services/isis-ants-service/src/model.rs:407): Configuration error"]
     });
 
     test!(service, query, expected);
@@ -81,7 +81,7 @@ fn query_errors_multiple() {
         }"#;
 
     let expected = json!({
-            "errors": ["lock (services/isis-ants-service/src/model.rs:350): Configuration error", "lock (services/isis-ants-service/src/model.rs:350): Configuration error"]
+            "errors": ["lock (services/isis-ants-service/src/model.rs:407): Configuration error", "lock (services/isis-ants-service/src/model.rs:407): Configuration error"]
     });
 
     test!(service, query, expected);

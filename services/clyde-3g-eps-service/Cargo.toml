@@ -4,9 +4,6 @@ version = "0.1.0"
 authors = ["Ryan Plauche <ryan@kubos.co>", "Catherine Garabedian <catherine@kubos.co>"]
 edition = "2018"
 
-[features]
-nos3 = ["clyde-3g-eps-api/nos3"]
-
 [dependencies]
 clyde-3g-eps-api = { path = "../../apis/clyde-3g-eps-api" }
 eps-api = { path = "../../apis/eps-api" }

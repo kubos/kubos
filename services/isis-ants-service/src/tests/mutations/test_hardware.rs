@@ -203,7 +203,7 @@ fn hardware_test() {
                 data,
                 errors,
                 success,
-                
+
             }}
         }"#;
 

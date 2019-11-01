@@ -6,9 +6,13 @@ license = "Apache-2.0"
 repository = "https://github.com/kubos/kubos"
 edition = "2018"
 
+[features]
+nos3 = ["rust-i2c/nos3"]
+
 [dependencies]
 failure = "0.1.2"
 nom = "4.0.0-beta1"
+rust-i2c = { path = "../../hal/rust-hal/rust-i2c", optional = true }
 
 [build-dependencies]
 kubos-build-helper = {path = "../../kubos-build-helper"}
