@@ -1,4 +1,4 @@
-Flask==0.12.2
+Flask==1.0
 Flask-GraphQL==1.4.1
 graphene==2.1.1
 toml==0.9.3.1
