@@ -5,6 +5,7 @@ v1.19.0 - Oct 30 2019
 ---------------------
 
 - `Added Scheduler Service <https://docs.kubos.com/1.19.0/ecosystem/scheduler.html>`__
+    - **note**: The scheduler service is currently not included in Kubos Linux builds for the iOBC.
 - Updated kubos-shell-client to allow single command execution
 - Updated default ``config.toml`` location from ``/home/system/etc/config.toml`` to ``/etc/kubos-config.toml``
 - `Migrated to new default service ports <https://docs.kubos.com/master/1.19.0/ecosystem/services/service-dev.html#service-configuration>`__
