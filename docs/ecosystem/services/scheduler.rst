@@ -5,6 +5,9 @@ The KubOS system includes a scheduler service to facilitate recurring
 and one time tasks with specific timing requirements, and to facilitate
 managing these tasks in groups of system-level modes. 
 
+.. warning::
+    The scheduler service is currently not included in Kubos Linux builds for the iOBC.
+
 Behavior
 --------
 
