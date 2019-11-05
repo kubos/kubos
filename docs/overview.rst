@@ -42,7 +42,6 @@ Just want to say hello? `Come talk to us! <https://slack.kubos.co/>`__ If for so
 
 .. jinja:: kubos
    :file: docs/supported-hw.rst.jinja
-   :debug: true
 
 Contributing to KubOS
 ---------------------
