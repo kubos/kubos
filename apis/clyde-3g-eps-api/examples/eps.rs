@@ -73,6 +73,7 @@ macro_rules! dump_reset_telem {
     };
 }
 
+#[allow(clippy::cognitive_complexity)]
 pub fn main() {
     let eps = Eps::new(Connection::from_path("/dev/i2c-1", 0x2B));
 

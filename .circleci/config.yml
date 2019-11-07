@@ -7,7 +7,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: cargo check --all
+        - run: cargo check --workspace --all-targets
 
     # Run for all PR commits
     rust_check_mbm2:
@@ -17,7 +17,7 @@ jobs:
         - checkout
         - run:
             name: Cargo check for BBB
-            command: cargo check --all --target arm-unknown-linux-gnueabihf
+            command: cargo check --workspace --all-targets --target arm-unknown-linux-gnueabihf
             environment:
               PKG_CONFIG_ALLOW_CROSS: 1
               CC: /usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc
@@ -31,7 +31,7 @@ jobs:
         - checkout
         - run:
             name: Cargo check for iOBC
-            command: cargo check --all --target armv5te-unknown-linux-gnueabi
+            command: cargo check --workspace --all-targets --target armv5te-unknown-linux-gnueabi
             environment:
               PKG_CONFIG_ALLOW_CROSS: 1
               CC: /usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc
@@ -46,7 +46,7 @@ jobs:
       steps:
         - checkout
         - run: cd apis/app-api/python && pip3 install .
-        - run: cargo test --all --release
+        - run: cargo test --workspace --release
         - run: cargo test --package kubos-app-service --test test_python_app --release -- --ignored
 
     # Rust testing - large upload test
@@ -84,7 +84,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: cargo fmt -- --check
+        - run: cargo fmt --all -- --check
 
 
     # Rust testing - Clippy linter
@@ -94,7 +94,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: cargo clippy
+        - run: cargo clippy --workspace --all-targets
 
 
     # CLI, C and Python testing

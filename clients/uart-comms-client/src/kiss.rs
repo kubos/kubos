@@ -135,38 +135,39 @@ pub fn decode(chunk: &[u8]) -> ClientResult<(Vec<u8>, Vec<u8>, Vec<u8>)> {
 }
 
 #[cfg(test)]
+#[allow(clippy::zero_prefixed_literal)]
 mod tests {
     use super::*;
 
     #[test]
     fn test_unescapes() {
-        assert_eq!(unescape(&vec![0xDB, 0xDC]), (vec![0xC0], true));
+        assert_eq!(unescape(&[0xDB, 0xDC]), (vec![0xC0], true));
 
-        assert_eq!(unescape(&vec![0xDB, 0xDD]), (vec![0xDB], true));
+        assert_eq!(unescape(&[0xDB, 0xDD]), (vec![0xDB], true));
 
         assert_eq!(
-            unescape(&vec![0x1, 0xDB, 0xDC, 0x1]),
+            unescape(&[0x1, 0xDB, 0xDC, 0x1]),
             (vec![0x1, 0xC0, 0x1], true)
         );
 
         assert_eq!(
-            unescape(&vec![0x1, 0xDB, 0xDC, 0x2, 0xDB, 0xDD, 0x3]),
+            unescape(&[0x1, 0xDB, 0xDC, 0x2, 0xDB, 0xDD, 0x3]),
             (vec![0x1, 0xC0, 0x2, 0xDB, 0x3], true)
         );
 
-        assert_eq!(unescape(&vec![0xDB, 0x11]), (vec![], false));
+        assert_eq!(unescape(&[0xDB, 0x11]), (vec![], false));
     }
 
     #[test]
     fn test_encode() {
-        let encoded = encode(&vec![0x00, 0x01, 0x02, 0x03]);
+        let encoded = encode(&[0x00, 0x01, 0x02, 0x03]);
 
         assert_eq!(encoded, vec![0xC0, 0x00, 0x00, 0x01, 0x02, 0x03, 0xC0]);
     }
 
     #[test]
     fn test_encode_with_escape() {
-        let encoded = encode(&vec![0x01, 0x02, 0xC0, 0x04]);
+        let encoded = encode(&[0x01, 0x02, 0xC0, 0x04]);
 
         assert_eq!(
             encoded,
@@ -176,7 +177,7 @@ mod tests {
 
     #[test]
     fn test_encode_with_n_escapes() {
-        let encoded = encode(&vec![0x01, 0xDB, 0x02, 0xC0, 0x04, 0xDB, 0xC0]);
+        let encoded = encode(&[0x01, 0xDB, 0x02, 0xC0, 0x04, 0xDB, 0xC0]);
 
         assert_eq!(
             encoded,
@@ -188,7 +189,7 @@ mod tests {
 
     #[test]
     fn test_decode_frame() {
-        let (decoded, pre, post) = decode(&vec![0xC0, 0x00, 0x01, 0x01, 0x01, 0xC0]).unwrap();
+        let (decoded, pre, post) = decode(&[0xC0, 0x00, 0x01, 0x01, 0x01, 0xC0]).unwrap();
         let blank: Vec<u8> = vec![];
         assert_eq!(pre, blank);
         assert_eq!(post, blank);
@@ -198,7 +199,7 @@ mod tests {
     #[test]
     fn test_decode_frame_pre_junk() {
         let (decoded, pre, post) =
-            decode(&vec![0xFF, 0xBB, 0xCC, 0xC0, 0x00, 0x01, 0x02, 0x03, 0xC0]).unwrap();
+            decode(&[0xFF, 0xBB, 0xCC, 0xC0, 0x00, 0x01, 0x02, 0x03, 0xC0]).unwrap();
         let blank: Vec<u8> = vec![];
         assert_eq!(pre, vec![0xFF, 0xBB, 0xCC]);
         assert_eq!(post, blank);
@@ -208,7 +209,7 @@ mod tests {
     #[test]
     fn test_decode_frame_post_junk() {
         let (decoded, pre, post) =
-            decode(&vec![0xC0, 0x00, 0x03, 0x02, 0x01, 0xC0, 0xFF, 0xBB, 0xCC]).unwrap();
+            decode(&[0xC0, 0x00, 0x03, 0x02, 0x01, 0xC0, 0xFF, 0xBB, 0xCC]).unwrap();
         let blank: Vec<u8> = vec![];
         assert_eq!(pre, blank);
         assert_eq!(post, vec![0xFF, 0xBB, 0xCC]);
@@ -217,7 +218,7 @@ mod tests {
 
     #[test]
     fn test_decode_frame_junk_surround() {
-        let (decoded, pre, post) = decode(&vec![
+        let (decoded, pre, post) = decode(&[
             0xFF, 0xBB, 0xCC, 0xC0, 0x00, 0x03, 0x04, 0x05, 0xC0, 0xFF, 0xBB, 0xCC,
         ])
         .unwrap();
@@ -228,10 +229,8 @@ mod tests {
 
     #[test]
     fn test_decode_frame_escapes() {
-        let (decoded, pre, post) = decode(&vec![
-            0xC0, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0xC0,
-        ])
-        .unwrap();
+        let (decoded, pre, post) =
+            decode(&[0xC0, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0xC0]).unwrap();
         let blank: Vec<u8> = vec![];
         assert_eq!(pre, blank);
         assert_eq!(post, blank);
@@ -240,7 +239,7 @@ mod tests {
 
     #[test]
     fn test_decode_frame_escapes_junks() {
-        let (decoded, pre, post) = decode(&vec![
+        let (decoded, pre, post) = decode(&[
             0x1, 0xF, 0xC0, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0xC0, 0x1, 0xF, 0x2,
         ])
         .unwrap();
@@ -254,7 +253,7 @@ mod tests {
         assert_eq!(
             format!(
                 "{}",
-                decode(&vec![
+                decode(&[
                     0x1, 0xF, 0xC1, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0xC0, 0x1, 0xF,
                     0x2
                 ],)
@@ -269,7 +268,7 @@ mod tests {
         assert_eq!(
             format!(
                 "{}",
-                decode(&vec![
+                decode(&[
                     0x1, 0xF, 0xC0, 0x00, 0x03, 0xDB, 0xDC, 0x04, 0xDB, 0xDD, 0x05, 0x10, 0x1, 0xF,
                     0x2
                 ],)
@@ -281,7 +280,7 @@ mod tests {
 
     #[test]
     fn test_decode_test_data() {
-        let (decoded, pre, post) = decode(&vec![
+        let (decoded, pre, post) = decode(&[
             192, 000, 027, 88, 143, 61, 000, 98, 85, 98, 000, 130, 026, 000, 004, 124, 82, 245, 192,
         ])
         .unwrap();
@@ -309,7 +308,7 @@ mod tests {
     #[test]
     fn test_decode_two_frames() {
         let (decoded, pre, post) =
-            decode(&vec![0xC0, 0x00, 0x01, 0xC0, 0xC0, 0x00, 0x02, 0xC0]).unwrap();
+            decode(&[0xC0, 0x00, 0x01, 0xC0, 0xC0, 0x00, 0x02, 0xC0]).unwrap();
 
         let blank: Vec<u8> = vec![];
 

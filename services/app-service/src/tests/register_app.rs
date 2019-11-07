@@ -128,7 +128,7 @@ fn register_good_exec() {
     let result: Vec<u8> = request!(service, register_query)
         .body()
         .iter()
-        .map(|entry| *entry)
+        .copied()
         .collect();
     let result: serde_json::Value =
         serde_json::from_str(::std::str::from_utf8(&result).unwrap()).unwrap();
@@ -201,7 +201,7 @@ fn register_good_config() {
     let result: Vec<u8> = request!(service, register_query)
         .body()
         .iter()
-        .map(|entry| *entry)
+        .copied()
         .collect();
     let result: serde_json::Value =
         serde_json::from_str(::std::str::from_utf8(&result).unwrap()).unwrap();

@@ -99,7 +99,7 @@ mod tests {
                 },
                 daughterboard: None,
             },
-            parse(&vec![0xBA, 0xDC]).unwrap()
+            parse(&[0xBA, 0xDC]).unwrap()
         )
     }
 
@@ -116,7 +116,7 @@ mod tests {
                     firmware_number: 0x321,
                 }),
             },
-            parse(&vec![0x21, 0x43, 0xBA, 0xDC]).unwrap()
+            parse(&[0x21, 0x43, 0xBA, 0xDC]).unwrap()
         );
     }
 
@@ -124,7 +124,7 @@ mod tests {
     fn test_parse_one() {
         assert_eq!(
             EpsError::parsing_failure("Version Info"),
-            parse(&vec![0x0]).err().unwrap()
+            parse(&[0x0]).err().unwrap()
         )
     }
 
@@ -132,7 +132,7 @@ mod tests {
     fn test_parse_three() {
         assert_eq!(
             EpsError::parsing_failure("Version Info"),
-            parse(&vec![0x0, 0x1, 0x3]).err().unwrap()
+            parse(&[0x0, 0x1, 0x3]).err().unwrap()
         )
     }
 }
