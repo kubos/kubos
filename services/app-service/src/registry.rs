@@ -23,6 +23,7 @@ use fs_extra;
 use log::*;
 use nix::sys::signal;
 use nix::unistd::Pid;
+use std::ffi::OsStr;
 use std::fs;
 use std::io::Read;
 use std::os::unix;
@@ -31,6 +32,7 @@ use std::process::Command;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
+use tempfile::TempDir;
 use toml;
 
 /// The default application registry directory in KubOS
@@ -204,7 +206,10 @@ impl AppRegistry {
     ///
     /// # Arguments
     ///
-    /// * `path` - The path to an application binary
+    /// * `path` - The path to either an application directory containing a manifest and binary,
+    ///            or the path to a .tgz file containing a manifest and binary at its root.
+    ///            (Create a flat tar file in an application directory with a command like
+    ///             'tar -czf archive.tgz *')
     ///
     /// # Examples
     ///
@@ -219,18 +224,81 @@ impl AppRegistry {
             return Err(AppError::RegisterError {
                 err: format!("{} does not exist", path),
             });
-        }
+        } else if !app_path.is_dir() {
+            match app_path.extension().and_then(OsStr::to_str) {
+                Some("tgz") => {
+                    let tmp_dir = TempDir::new().map_err(|error| AppError::RegisterError {
+                        err: format!(
+                            "Error creating temporary directory to expand archive: {}",
+                            error
+                        ),
+                    })?;
 
-        if !app_path.is_dir() {
-            return Err(AppError::RegisterError {
-                err: format!("{} is not a directory", path),
-            });
+                    let mut command = if PathBuf::from("/usr/bin/tar").exists() {
+                        Command::new("/usr/bin/tar")
+                    } else if PathBuf::from("/bin/tar").exists() {
+                        Command::new("/bin/tar")
+                    } else {
+                        return Err(AppError::RegisterError {
+                            err: String::from("Error expanding archive: tar command not found"),
+                        });
+                    };
+
+                    let output = command
+                        .arg("-zxf")
+                        .arg(path)
+                        .arg("--directory")
+                        .arg(tmp_dir.path())
+                        .output()
+                        .map_err(|error| AppError::RegisterError {
+                            err: format!("Error expanding archive: {}", error),
+                        })?;
+
+                    if output.status.success() {
+                        // Ensure they packaged the tarball correctly.
+                        if !Path::new(&tmp_dir.path().join("manifest.toml")).exists() {
+                            return Err(AppError::RegisterError {
+                                err: String::from("Manifest file manifest.toml not found in root of archive. When you create the archive, do so in the application directory, with a command like: tar -czf archive.tgz *")
+                            });
+                        }
+
+                        let path = OsStr::to_str(tmp_dir.path().as_os_str()).ok_or(
+                            AppError::RegisterError {
+                                err: String::from("Error converting temp dir path to UTF8"),
+                            },
+                        )?;
+                        return self.register(path);
+                    } else {
+                        return Err(AppError::RegisterError {
+                            err: format!(
+                                "Non-successful status when expanding archive: {:?}",
+                                output.status.code()
+                            ),
+                        });
+                    }
+                }
+                Some(extension) => {
+                    return Err(AppError::RegisterError {
+                        err: format!("Provided file with extension {} is neither a directory nor a tgz archive file", extension),
+                    });
+                }
+                None => {
+                    return Err(AppError::RegisterError {
+                        err: String::from(
+                            "Provided file is neither a directory nor a tgz archive file",
+                        ),
+                    });
+                }
+            }
         }
 
         // Load the metadata
         let mut data = String::new();
         fs::File::open(app_path.join("manifest.toml"))
-            .and_then(|mut fp| fp.read_to_string(&mut data))?;
+            .and_then(|mut fp| fp.read_to_string(&mut data))
+            .map_err(|error| AppError::RegisterError {
+                err: format!("Unable to load manifest.toml: {}", error),
+            })?;
 
         let metadata: AppMetadata = match toml::from_str(&data) {
             Ok(val) => val,

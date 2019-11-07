@@ -29,7 +29,10 @@ fn custom_apps_dir() {
     let registry = AppRegistry::new_from_dir(&registry_path).unwrap();
     // OS X's temporary directory is a link from /var/folders/ to /private/var/folders/, so we need
     // to normalize off the /private to compare.
-    assert_eq!(registry.apps_dir.trim_start_matches("/private"), String::from(registry_path));
+    assert_eq!(
+        registry.apps_dir.trim_start_matches("/private"),
+        String::from(registry_path)
+    );
 }
 
 #[test]
