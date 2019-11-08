@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #![allow(dead_code)]
+#![allow(clippy::unreadable_literal)]
 
 use super::*;
 

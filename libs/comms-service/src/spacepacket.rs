@@ -163,7 +163,7 @@ mod tests {
     #[test]
     fn do_build_parse() {
         let packet =
-            SpacePacket::build(1294, PayloadType::GraphQL, 15001, &vec![5, 4, 3, 2, 1]).unwrap();
+            SpacePacket::build(1294, PayloadType::GraphQL, 15001, &[5, 4, 3, 2, 1]).unwrap();
         println!("packet {:?}", packet);
 
         let raw = packet.to_bytes();

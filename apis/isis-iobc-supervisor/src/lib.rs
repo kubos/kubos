@@ -120,7 +120,8 @@ fn convert_raw_version(raw: &ffi::supervisor_version) -> SupervisorVersion {
 
 /// Interface for retrieving iOBC supervisor version data
 pub fn supervisor_version() -> Result<SupervisorVersion, String> {
-    let mut version: ffi::supervisor_version = unsafe { mem::uninitialized() };
+    let mut version: ffi::supervisor_version =
+        unsafe { mem::MaybeUninit::<ffi::supervisor_version>::uninit().assume_init() };
     let version_result = unsafe { ffi::supervisor_get_version(&mut version) };
     if !version_result {
         Err(String::from("Problem retrieving supervisor version"))
@@ -178,7 +179,8 @@ fn convert_raw_housekeeping(raw: &ffi::supervisor_housekeeping) -> SupervisorHou
 
 /// Interface for fetching iOBC supervisor housekeeping data
 pub fn supervisor_housekeeping() -> Result<SupervisorHousekeeping, String> {
-    let mut raw: ffi::supervisor_housekeeping = unsafe { mem::uninitialized() };
+    let mut raw: ffi::supervisor_housekeeping =
+        unsafe { mem::MaybeUninit::<ffi::supervisor_housekeeping>::uninit().assume_init() };
     let result = unsafe { ffi::supervisor_get_housekeeping(&mut raw) };
 
     if !result {
@@ -219,7 +221,7 @@ mod tests {
         assert_eq!(version.major_version, 3);
         assert_eq!(version.minor_version, 4);
         assert_eq!(version.patch_version, 5);
-        assert_eq!(version.git_head_version, 151521030);
+        assert_eq!(version.git_head_version, 151_521_030);
         assert_eq!(version.serial_number, 2826);
         for i in 12..31 {
             assert_eq!(version.compile_information[i - 12], i as i8);
@@ -266,8 +268,8 @@ mod tests {
         assert_eq!(housekeeping.enable_status.busy_rtc, 1);
         assert_eq!(housekeeping.enable_status.power_off_rtc, 0);
         assert_eq!(housekeeping.supervisor_uptime, 66051);
-        assert_eq!(housekeeping.iobc_uptime, 16909060);
-        assert_eq!(housekeeping.iobc_reset_count, 33752069);
+        assert_eq!(housekeeping.iobc_uptime, 16_909_060);
+        assert_eq!(housekeeping.iobc_reset_count, 33_752_069);
         assert_eq!(housekeeping.adc_data[0], 256);
         assert_eq!(housekeeping.adc_data[1], 770);
         assert_eq!(housekeeping.adc_data[2], 1284);

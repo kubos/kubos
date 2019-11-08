@@ -281,6 +281,7 @@ pub fn root_dir() -> PathBuf {
 }
 
 #[cfg(test)]
+#[allow(clippy::unreadable_literal)]
 mod tests {
     use super::*;
 

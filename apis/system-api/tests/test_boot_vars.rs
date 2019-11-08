@@ -25,7 +25,7 @@ use std::thread;
 use std::time::Duration;
 use tempfile::TempDir;
 
-const DUMMY_PRINTENV: &'static str = r#"#!/bin/bash
+const DUMMY_PRINTENV: &str = r#"#!/bin/bash
 VAR="$2"
 [[ -n "${!VAR+set}" ]] || exit 1
 echo ${!VAR}

@@ -81,7 +81,7 @@ fn get_lock_status_good() {
                 "positionStatus": "INSUFFICIENT_OBSERVATIONS",
                 "positionType": "NONE",
                 "time": {
-                    "ms": 164195000,
+                    "ms": 164_195_000,
                     "week": 3025
                 },
                 "timeStatus": "COARSE_STEERING",
@@ -120,7 +120,7 @@ fn get_lock_status_nondefault() {
                 "positionStatus": "SOL_COMPUTED",
                 "positionType": "PSRDIFF",
                 "time": {
-                    "ms": 164195000,
+                    "ms": 164_195_000,
                     "week": 3025
                 },
                 "timeStatus": "FINE_STEERING",

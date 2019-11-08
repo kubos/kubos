@@ -48,27 +48,27 @@ impl MockAppBuilder {
         }
     }
 
-    pub fn bin<'a>(&'a mut self, bin_name: &str) -> &'a mut Self {
+    pub fn bin(&mut self, bin_name: &str) -> &mut Self {
         self._bin = Some(String::from(bin_name));
         self
     }
 
-    pub fn version<'a>(&'a mut self, version: &str) -> &'a mut Self {
+    pub fn version(&mut self, version: &str) -> &mut Self {
         self._version = Some(String::from(version));
         self
     }
 
-    pub fn author<'a>(&'a mut self, author: &str) -> &'a mut Self {
+    pub fn author(&mut self, author: &str) -> &mut Self {
         self._author = Some(String::from(author));
         self
     }
 
-    pub fn active<'a>(&'a mut self, active: bool) -> &'a mut Self {
+    pub fn active(&mut self, active: bool) -> &mut Self {
         self._active = Some(active);
         self
     }
 
-    pub fn config<'a>(&'a mut self, config: &str) -> &'a mut Self {
+    pub fn config(&mut self, config: &str) -> &mut Self {
         self._config = Some(String::from(config));
         self
     }
@@ -134,23 +134,23 @@ impl MockAppBuilder {
     }
 
     pub fn generate_bin(&self, bin_dest: &Path) {
-        let mut file = fs::File::create(bin_dest.clone()).unwrap();
-        if !file.write_all(self.src().as_bytes()).is_ok() {
+        let mut file = fs::File::create(bin_dest).unwrap();
+        if file.write_all(self.src().as_bytes()).is_err() {
             panic!("failed to write app script");
         }
 
         let mut perms = file.metadata().unwrap().permissions();
         perms.set_mode(0o755);
 
-        if !file.set_permissions(perms).is_ok() {
+        if file.set_permissions(perms).is_err() {
             panic!("failed to change permissions of app script");
         }
     }
 
     pub fn generate_toml(&self, registry_dir: &Path, toml_dest: &Path) {
-        let mut file = fs::File::create(toml_dest.clone()).unwrap();
+        let mut file = fs::File::create(toml_dest).unwrap();
         let toml = self.toml(registry_dir.to_str().unwrap());
-        if !file.write_all(toml.as_bytes()).is_ok() {
+        if file.write_all(toml.as_bytes()).is_err() {
             panic!("Failed to write app TOML");
         }
     }
@@ -222,7 +222,7 @@ impl AppServiceFixture {
         .expect("Failed to write config.toml");
 
         Self {
-            registry_dir: registry_dir,
+            registry_dir,
             addr: format!("127.0.0.1:{}", port),
             config_toml: config_toml.clone(),
             join_handle: None,
@@ -259,7 +259,7 @@ impl AppServiceFixture {
             let mut run = true;
             while run {
                 thread::sleep(Duration::from_millis(100));
-                if let Ok(_) = rx.try_recv() {
+                if rx.try_recv().is_ok() {
                     service_proc.kill().unwrap();
                     run = false;
                 }
@@ -299,7 +299,7 @@ pub fn send_query(config: ServiceConfig, query: &str) -> serde_json::Value {
         .expect("Couldn't deserialize response");
 
     if let Some(data) = response.get("data") {
-        return data.clone();
+        data.clone()
     } else {
         panic!("Bad query response: {:?}", response);
     }

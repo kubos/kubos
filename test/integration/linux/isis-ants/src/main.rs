@@ -16,8 +16,6 @@
 
 use isis_ants_api::*;
 use log::*;
-use std::fs::File;
-use std::sync::Mutex;
 
 fn arm(ants: &AntS) -> u8 {
     match ants.arm() {

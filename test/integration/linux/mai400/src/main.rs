@@ -48,11 +48,10 @@ fn set_gps_time(mai: &MAI400, logger: &Logger) -> u8 {
     // Set GPS time to Jan 01, 2018
     let result = mai.set_gps_time(gps_time);
 
-    if result.is_err() {
+    if let Err(err) = result {
         error!(
             logger,
-            "[Set GPS Time] Failed to send SetGPSTime command: {}",
-            result.unwrap_err()
+            "[Set GPS Time] Failed to send SetGPSTime command: {}", err
         );
         return 1;
     }
@@ -108,11 +107,10 @@ fn set_mode(mai: &MAI400, logger: &Logger) -> u8 {
 
     let result = mai.set_mode(0, [0; 4]);
 
-    if result.is_err() {
+    if let Err(err) = result {
         error!(
             logger,
-            "[Set Mode] Failed to send SetAcsMode command: {}",
-            result.unwrap_err()
+            "[Set Mode] Failed to send SetAcsMode command: {}", err
         );
         return 1;
     }
@@ -152,11 +150,10 @@ fn set_mode_sun(mai: &MAI400, logger: &Logger) -> u8 {
 
     let result = mai.set_mode_sun(7, 0, 15.0);
 
-    if result.is_err() {
+    if let Err(err) = result {
         error!(
             logger,
-            "[Set Mode (Sun)] Failed to send SetAcsMode command: {}",
-            result.unwrap_err()
+            "[Set Mode (Sun)] Failed to send SetAcsMode command: {}", err
         );
         return 1;
     }
@@ -197,12 +194,8 @@ fn set_rv(mai: &MAI400, logger: &Logger) -> u8 {
     // TODO: Set real values
     let result = mai.set_rv(RV_POS_ECI, RV_VEL_ECI, RV_EPOCH);
 
-    if result.is_err() {
-        error!(
-            logger,
-            "[Set RV] Failed to send SetRV command: {}",
-            result.unwrap_err()
-        );
+    if let Err(err) = result {
+        error!(logger, "[Set RV] Failed to send SetRV command: {}", err);
         return 1;
     }
 
@@ -239,11 +232,10 @@ fn passthrough(mai: &MAI400, logger: &Logger) -> u8 {
 
     let result = mai.passthrough(&array);
 
-    if result.is_err() {
+    if let Err(err) = result {
         error!(
             logger,
-            "[Passthrough] Failed to send passthrough packet: {}",
-            result.unwrap_err()
+            "[Passthrough] Failed to send passthrough packet: {}", err
         );
         return 1;
     }
@@ -272,12 +264,8 @@ fn passthrough(mai: &MAI400, logger: &Logger) -> u8 {
 fn reset(mai: &MAI400, logger: &Logger) -> u8 {
     let result = mai.reset();
 
-    if result.is_err() {
-        error!(
-            logger,
-            "[Reset] Failed to send Reset commands: {}",
-            result.unwrap_err()
-        );
+    if let Err(err) = result {
+        error!(logger, "[Reset] Failed to send Reset commands: {}", err);
         return 1;
     }
 
