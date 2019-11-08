@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-use libc::uint8_t;
-
 pub const LENGTH_TELEMETRY_HOUSEKEEPING: usize = 37;
 pub const LENGTH_TELEMETRY_GET_VERSION: usize = 34;
 pub const LENGTH_COMPILE_INFORMATION: usize = 19;
@@ -23,13 +21,13 @@ pub const SUPERVISOR_NUMBER_OF_ADC_CHANNELS: usize = 10;
 
 /// There isn't a big need to replicate the C-union/struct representation
 /// of the data only to have it moved into a Rust struct. So we will just
-/// use an array of uint8_t to capture the data and later move it into
+/// use an array of u8 to capture the data and later move it into
 /// a proper Rust struct.
 #[repr(C)]
-pub struct supervisor_version(pub [uint8_t; LENGTH_TELEMETRY_GET_VERSION]);
+pub struct supervisor_version(pub [u8; LENGTH_TELEMETRY_GET_VERSION]);
 
 #[repr(C)]
-pub struct supervisor_housekeeping(pub [uint8_t; LENGTH_TELEMETRY_HOUSEKEEPING]);
+pub struct supervisor_housekeeping(pub [u8; LENGTH_TELEMETRY_HOUSEKEEPING]);
 
 /// Bring in C functions from isis-iobc-supervisor
 extern "C" {

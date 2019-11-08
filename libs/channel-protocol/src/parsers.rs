@@ -89,7 +89,7 @@ mod tests {
     #[test]
     fn test_parse_channel_id() {
         let raw = ser::to_vec_packed(&(1, 2, 3, 4, 5)).unwrap();
-        let channel_id = parse_channel_id(&de::from_slice(&raw).unwrap()).unwrap();;
+        let channel_id = parse_channel_id(&de::from_slice(&raw).unwrap()).unwrap();
 
         assert_eq!(channel_id, 1);
     }

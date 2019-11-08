@@ -757,7 +757,7 @@ impl IAntS for AntS {
             },
         };
         self.connection.lock().unwrap().write(Command {
-            cmd: cmd,
+            cmd,
             data: vec![timeout],
         })?;
         Ok(())
@@ -814,7 +814,7 @@ impl IAntS for AntS {
         let telem = AntsTelemetry {
             raw_temp: temp,
             deploy_status: status,
-            uptime: uptime,
+            uptime,
         };
         Ok(telem)
     }
@@ -827,10 +827,7 @@ impl IAntS for AntS {
             KANTSAnt::Ant3 => 0xB2,
             KANTSAnt::Ant4 => 0xB3,
         };
-        let cmd = Command {
-            cmd: cmd,
-            data: vec![],
-        };
+        let cmd = Command { cmd, data: vec![] };
         let count = self.connection.transfer(cmd, 1, Duration::from_millis(1))?;
         Ok(count[0])
     }
@@ -843,10 +840,7 @@ impl IAntS for AntS {
             KANTSAnt::Ant3 => 0xB6,
             KANTSAnt::Ant4 => 0xB7,
         };
-        let cmd = Command {
-            cmd: cmd,
-            data: vec![],
-        };
+        let cmd = Command { cmd, data: vec![] };
         let time = self.connection.transfer(cmd, 2, Duration::from_millis(1))?;
 
         match le_u16(&time) {

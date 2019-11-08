@@ -27,9 +27,10 @@ pub struct QueryRoot;
 graphql_object!(QueryRoot: Context as "Query" |&self| {
     field ping(fail = false: bool) -> FieldResult<String>
     {
-        match fail {
-            true => Err(FieldError::new("Query failed", Value::null())),
-            false => Ok(String::from("query"))
+        if fail {
+            Err(FieldError::new("Query failed", Value::null()))
+        } else {
+            Ok(String::from("query"))
         }
     }
 });

@@ -83,6 +83,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[allow(clippy::float_cmp)]
     fn test_adcs_result() {
         let raw = vec![0x01, 0x23];
         let adc = get_adc_result(&raw).unwrap();
@@ -111,6 +112,6 @@ mod tests {
                 2
             )
         );
-        assert_eq!(parse(&vec![0x01, 0x23], Type::TestVal1), Ok(2900.0));
+        assert_eq!(parse(&[0x01, 0x23], Type::TestVal1), Ok(2900.0));
     }
 }

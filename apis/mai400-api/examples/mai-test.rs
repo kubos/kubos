@@ -4,6 +4,7 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
+#[allow(clippy::cognitive_complexity)]
 fn read_loop(mai: MAI400, exit: Arc<AtomicBool>) {
     let mut std = StandardTelemetry::default();
     let mut imu = RawIMU::default();
@@ -14,15 +15,15 @@ fn read_loop(mai: MAI400, exit: Arc<AtomicBool>) {
     while !exit.load(Ordering::Relaxed) {
         let (new_std, new_imu, new_irehs) = mai.get_message().unwrap();
 
-        if new_std.is_some() {
-            std = new_std.unwrap();
-            rotating.update(&std);
+        if let Some(some_std) = new_std {
+            rotating.update(&some_std);
+            std = some_std;
         }
-        if new_imu.is_some() {
-            imu = new_imu.unwrap();
+        if let Some(some_imu) = new_imu {
+            imu = some_imu
         }
-        if new_irehs.is_some() {
-            irehs = new_irehs.unwrap();
+        if let Some(some_irehs) = new_irehs {
+            irehs = some_irehs;
         }
     }
 
@@ -233,7 +234,7 @@ fn read_loop(mai: MAI400, exit: Arc<AtomicBool>) {
     for elem in irehs.solution_degraded.iter() {
         print!(" {:?}", elem);
     }
-    println!("");
+    println!();
 }
 
 fn main() -> MAIResult<()> {
@@ -249,7 +250,7 @@ fn main() -> MAIResult<()> {
     let handle = thread::spawn(move || read_loop(mai_ref, thread_exit));
 
     // Set GPS time to Jan 01, 2018
-    mai.set_gps_time(1198800018).unwrap();
+    mai.set_gps_time(1_198_800_018).unwrap();
 
     // Let read loop run for 10 seconds
     thread::sleep(Duration::new(10, 0));

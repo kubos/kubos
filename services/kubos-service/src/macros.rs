@@ -230,18 +230,17 @@ mod tests {
     }
 
     fn test_func(fail: bool, output: String) -> Result<String, Error> {
-        match fail {
-            true => {
-                let chain: TopError = TopError::Error {
-                    cause: RootError::RootError {
-                        message: "root".to_owned(),
-                    },
-                    message: "top".to_owned(),
-                };
+        if fail {
+            let chain: TopError = TopError::Error {
+                cause: RootError::RootError {
+                    message: "root".to_owned(),
+                },
+                message: "top".to_owned(),
+            };
 
-                Err(chain.into())
-            }
-            false => Ok(output),
+            Err(chain.into())
+        } else {
+            Ok(output)
         }
     }
 
@@ -307,7 +306,7 @@ mod tests {
 
         assert_eq!(result, Err("TopError: top, RootError: root".to_owned()));
         assert_eq!(
-            vec!["test_func (services/kubos-service/src/macros.rs:306): TopError: top, RootError: root".to_owned()],
+            vec!["test_func (services/kubos-service/src/macros.rs:305): TopError: top, RootError: root".to_owned()],
             *master_err.read().unwrap()
         );
     }
@@ -321,5 +320,4 @@ mod tests {
         let test_vec: Vec<String> = vec![];
         assert_eq!(test_vec, *master_err.read().unwrap());
     }
-
 }

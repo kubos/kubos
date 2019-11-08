@@ -119,7 +119,7 @@ mod tests {
                 motherboard: ErrorCode::BadCRC,
                 daughterboard: None,
             },
-            parse(&vec![0x00, 0x10]).unwrap()
+            parse(&[0x00, 0x10]).unwrap()
         );
     }
 
@@ -130,7 +130,7 @@ mod tests {
                 motherboard: ErrorCode::CommandDataIncorrect,
                 daughterboard: Some(ErrorCode::ChannelInactive),
             },
-            parse(&vec![0x00, 0x02, 0x00, 0x04]).unwrap()
+            parse(&[0x00, 0x02, 0x00, 0x04]).unwrap()
         );
     }
 
@@ -138,7 +138,7 @@ mod tests {
     fn test_parse_bad_data_len() {
         assert_eq!(
             EpsError::parsing_failure("Last Error"),
-            parse(&vec![]).err().unwrap()
+            parse(&[]).err().unwrap()
         );
     }
 }
