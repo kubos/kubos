@@ -103,7 +103,7 @@ fn get_lock_info_good() {
             "lockInfo": {
                 "position": [1.1, 2.2, 3.3],
                 "time": {
-                    "ms": 164195000,
+                    "ms": 164_195_000,
                     "week": 3025
                 },
                 "velocity": [4.4, 5.5, 6.6],
@@ -138,7 +138,7 @@ fn get_lock_info_nolock_after_good() {
             "lockInfo": {
                 "position": [1.1, 2.2, 3.3],
                 "time": {
-                    "ms": 164195000,
+                    "ms": 164_195_000,
                     "week": 3025
                 },
                 "velocity": [4.4, 5.5, 6.6],

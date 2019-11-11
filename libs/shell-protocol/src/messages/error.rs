@@ -60,7 +60,7 @@ mod tests {
     #[test]
     fn create_parse_message() {
         let channel_id = 13;
-        let message = format!("No session found");
+        let message = "No session found".to_owned();
 
         let raw = to_cbor(channel_id, &message).unwrap();
         let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();

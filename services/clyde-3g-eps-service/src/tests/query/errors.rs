@@ -51,13 +51,9 @@ fn query_errors_single() {
             errors
         }"#;
 
-    // The resulting error containg a line number, which changes every time this crate changes.
+    // The resulting error containing a line number, which changes every time this crate changes.
     // We'll verify this result by parts in order to avoid having to update the test repeatedly
-    let result: Vec<u8> = request!(service, query)
-        .body()
-        .iter()
-        .map(|entry| *entry)
-        .collect();
+    let result: Vec<u8> = request!(service, query).body().iter().copied().collect();
     let result: serde_json::Value =
         serde_json::from_str(::std::str::from_utf8(&result).unwrap()).unwrap();
 
@@ -87,11 +83,7 @@ fn query_errors_multiple() {
             errors
         }"#;
 
-    let result: Vec<u8> = request!(service, query)
-        .body()
-        .iter()
-        .map(|entry| *entry)
-        .collect();
+    let result: Vec<u8> = request!(service, query).body().iter().copied().collect();
     let result: serde_json::Value =
         serde_json::from_str(::std::str::from_utf8(&result).unwrap()).unwrap();
 

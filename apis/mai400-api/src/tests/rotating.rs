@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#![allow(clippy::float_cmp)]
+
 use super::*;
 
 #[test]

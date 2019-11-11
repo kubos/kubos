@@ -183,10 +183,7 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
 
     let timeout = config
         .get("timeout")
-        .and_then(|val| {
-            val.as_integer()
-                .and_then(|num| Some(Duration::from_secs(num as u64)))
-        })
+        .and_then(|val| val.as_integer().map(|num| Duration::from_secs(num as u64)))
         .unwrap_or(Duration::from_millis(2));
 
     // Setup map of channel IDs to thread channels

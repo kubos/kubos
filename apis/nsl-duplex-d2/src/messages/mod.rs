@@ -48,7 +48,7 @@ mod tests {
     #[test]
     fn it_parses_u32() {
         assert_eq!(
-            Ok((&b"extra"[..], 0x12345678)),
+            Ok((&b"extra"[..], 0x1234_5678)),
             parse_u32(b"GU\x12\x34\x56\x78extra")
         );
     }
@@ -56,7 +56,7 @@ mod tests {
     #[test]
     fn it_parses_u32_and_skips_garbage() {
         assert_eq!(
-            Ok((&b"extra"[..], 0x12345678)),
+            Ok((&b"extra"[..], 0x1234_5678)),
             parse_u32(b"garbageGU\x12\x34\x56\x78extra")
         );
     }

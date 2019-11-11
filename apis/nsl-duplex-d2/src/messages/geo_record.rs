@@ -104,9 +104,9 @@ mod tests {
             Ok((
                 &b"extra"[..],
                 GeoRecord {
-                    lat: 40.482502,
-                    lon: -85.49389,
-                    time: 1514898642,
+                    lat: 40.482_502,
+                    lon: -85.493_89,
+                    time: 1_514_898_642,
                     max_error: 5000,
                 },
             )),
