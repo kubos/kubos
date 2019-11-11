@@ -225,71 +225,16 @@ impl AppRegistry {
                 err: format!("{} does not exist", path),
             });
         } else if !app_path.is_dir() {
-            match app_path.extension().and_then(OsStr::to_str) {
-                Some("tgz") => {
-                    let tmp_dir = TempDir::new().map_err(|error| AppError::RegisterError {
-                        err: format!(
-                            "Error creating temporary directory to expand archive: {}",
-                            error
-                        ),
-                    })?;
-
-                    let mut command = if PathBuf::from("/usr/bin/tar").exists() {
-                        Command::new("/usr/bin/tar")
-                    } else if PathBuf::from("/bin/tar").exists() {
-                        Command::new("/bin/tar")
-                    } else {
-                        return Err(AppError::RegisterError {
-                            err: String::from("Error expanding archive: tar command not found"),
-                        });
-                    };
-
-                    let output = command
-                        .arg("-zxf")
-                        .arg(path)
-                        .arg("--directory")
-                        .arg(tmp_dir.path())
-                        .output()
-                        .map_err(|error| AppError::RegisterError {
-                            err: format!("Error expanding archive: {}", error),
-                        })?;
-
-                    if output.status.success() {
-                        // Ensure they packaged the tarball correctly.
-                        if !Path::new(&tmp_dir.path().join("manifest.toml")).exists() {
-                            return Err(AppError::RegisterError {
-                                err: String::from("Manifest file manifest.toml not found in root of archive. When you create the archive, do so in the application directory, with a command like: tar -czf archive.tgz *")
-                            });
-                        }
-
-                        let path = OsStr::to_str(tmp_dir.path().as_os_str()).ok_or(
-                            AppError::RegisterError {
-                                err: String::from("Error converting temp dir path to UTF8"),
-                            },
-                        )?;
-                        return self.register(path);
-                    } else {
-                        return Err(AppError::RegisterError {
-                            err: format!(
-                                "Non-successful status when expanding archive: {:?}",
-                                output.status.code()
-                            ),
-                        });
-                    }
-                }
-                Some(extension) => {
-                    return Err(AppError::RegisterError {
-                        err: format!("Provided file with extension {} is neither a directory nor a tgz archive file", extension),
-                    });
-                }
-                None => {
-                    return Err(AppError::RegisterError {
-                        err: String::from(
-                            "Provided file is neither a directory nor a tgz archive file",
-                        ),
-                    });
-                }
-            }
+            // Handle tgz archives.
+            return match app_path.extension().and_then(OsStr::to_str) {
+                Some("tgz") => extract_archive(&self, path),
+                Some(extension) => Err(AppError::RegisterError {
+                                            err: format!("Provided file with extension {} is neither a directory nor a tgz archive file", extension)
+                                         }),
+                None => Err(AppError::RegisterError {
+                            err: String::from("Provided file is neither a directory nor a tgz archive file"),
+                        })
+            };
         }
 
         // Load the metadata
@@ -851,4 +796,55 @@ fn uninstall_kill(pid: i32) -> Result<(), nix::Error> {
     });
 
     Ok(())
+}
+
+fn extract_archive(registry: &AppRegistry, path: &str) -> Result<AppRegistryEntry, AppError> {
+    let tmp_dir = TempDir::new().map_err(|error| AppError::RegisterError {
+        err: format!(
+            "Error creating temporary directory to expand archive: {}",
+            error
+        ),
+    })?;
+
+    let mut command = if PathBuf::from("/usr/bin/tar").exists() {
+        Command::new("/usr/bin/tar")
+    } else if PathBuf::from("/bin/tar").exists() {
+        Command::new("/bin/tar")
+    } else {
+        return Err(AppError::RegisterError {
+            err: String::from("Error expanding archive: tar command not found"),
+        });
+    };
+
+    let output = command
+        .arg("-zxf")
+        .arg(path)
+        .arg("--directory")
+        .arg(tmp_dir.path())
+        .output()
+        .map_err(|error| AppError::RegisterError {
+            err: format!("Error expanding archive: {}", error),
+        })?;
+
+    if output.status.success() {
+        // Ensure they packaged the tarball correctly.
+        if Path::new(&tmp_dir.path().join("manifest.toml")).exists() {
+            let path =
+                OsStr::to_str(tmp_dir.path().as_os_str()).ok_or(AppError::RegisterError {
+                    err: String::from("Error converting temp dir path to UTF8"),
+                })?;
+            registry.register(path)
+        } else {
+            Err(AppError::RegisterError {
+                err: String::from("Manifest file manifest.toml not found in root of archive. When you create the archive, do so in the application directory, with a command like: tar -czf archive.tgz *")
+            })
+        }
+    } else {
+        Err(AppError::RegisterError {
+            err: format!(
+                "Non-successful status when expanding archive: {:?}",
+                output.status.code()
+            ),
+        })
+    }
 }

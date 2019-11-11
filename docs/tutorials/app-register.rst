@@ -109,7 +109,7 @@ It has the following schema::
      }
      
 The ``path`` input parameter specifies the path to either a directory where the application and manifest files reside,
-or a the path to a ``.tgz`` archive file containing the application and manifest in its root.
+or the path to a ``.tgz`` archive file containing the application and manifest in its root.
 
 .. note::
 
