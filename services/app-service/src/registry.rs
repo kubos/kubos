@@ -829,11 +829,11 @@ fn extract_archive(registry: &AppRegistry, path: &str) -> Result<AppRegistryEntr
     if output.status.success() {
         // Ensure they packaged the tarball correctly.
         if Path::new(&tmp_dir.path().join("manifest.toml")).exists() {
-            let path =
+            let tmp_dir_path =
                 OsStr::to_str(tmp_dir.path().as_os_str()).ok_or(AppError::RegisterError {
                     err: String::from("Error converting temp dir path to UTF8"),
                 })?;
-            registry.register(path)
+            registry.register(tmp_dir_path)
         } else {
             Err(AppError::RegisterError {
                 err: String::from("Manifest file manifest.toml not found in root of archive. When you create the archive, do so in the application directory, with a command like: tar -czf archive.tgz *")
