@@ -205,17 +205,17 @@ Registering
 -----------
 
 Once an application has been written and compiled, the application and its accompanying :ref:`manifest.toml file <app-manifest>`
-should be transferred to a new directory on the OBC.
+should be either transferred to a new directory or ``.tgz`` archive file on the OBC.
 This file transfer can be done using the :doc:`file transfer service <../services/file>`.
 
 The application may be split into multiple files (which is useful for large Python apps), however,
 the name of the initial file which should be called for execution must exactly match the ``name``
 property in the manifest file.
 
-It can then be registered with the applications service using the ``register`` mutation by specifying
-the directory containing the application files.
+The application can then be registered with the applications service using the ``register`` mutation by specifying
+the directory or ``.tgz`` archive containing the application files.
 
-The service will copy all of the contents from the specified path into the apps registry.
+The service will copy all of the contents from the specified path or archive into the apps registry.
 Once registered, users may delete the original application files.
 
 For example::
