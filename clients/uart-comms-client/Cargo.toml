@@ -9,6 +9,6 @@ byteorder = "1.2.7"
 clap = "2.32"
 comms-service = { path = "../../libs/comms-service" }
 failure = "0.1.2"
-pnet = "0.22.0"
+pnet = "0.23.0"
 serde_json = "1.0"
 serial = "0.4"
