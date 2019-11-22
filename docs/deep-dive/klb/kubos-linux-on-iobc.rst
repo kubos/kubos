@@ -175,3 +175,12 @@ Using Kubos Linux
 
 For information on how to create and run applications on your new Kubos Linux system, see the
 :doc:`../../obc-docs/iobc/working-with-the-iobc` guide.
+
+Configuring Kubos Linux
+-----------------------
+
+For information on how to customize your build of Kubos Linux, see the
+:doc:`configuring-kubos` guide.
+
+This guide covers things like including custom packages, enabling hardware services, and selecting
+a non-default version of the KubOS source.
