@@ -58,6 +58,24 @@ How do I make Rust binaries smaller?
 :ref:`Check out our Rust optimization tips <rust-opt>` for suggestions on how to make your compiled
 Rust projects smaller.
 
+Updating my local Rust installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We keep the KubOS repo locked to specific Rust version. When this version changes
+you will need to update your local Rust version. You can do so by looking at the Rust version
+that KubOS is locked to (`found here <https://github.com/kubos/kubos/blob/master/rust-toolchain>`__)
+and using that version number in the following commands.
+
+Updating the native Rust toolchain::
+
+    $ rustup toolchain install 1.xx.y-x86_64-unknown-linux-gnu
+
+Updating the Rust cross compiler targets::
+
+    $ rustup target add armv5te-unknown-linux-gnueabi --toolchain 1.xx.y
+    $ rustup target add arm-unknown-linux-gnueabihf --toolchain 1.xx.y
+
+
 Troubleshooting
 ---------------
 
