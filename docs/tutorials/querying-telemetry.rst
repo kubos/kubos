@@ -34,15 +34,15 @@ database.
 .. note::
 
     The example commands will be referencing the telemetry database service port which is defined
-    in the `kubos/tools/local_config.toml` file, 8050
+    in the `kubos/tools/local_config.toml` file, 8020
 
 From your development environment, run the following::
 
-    $ curl 0.0.0.0:8050 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"voltage\\\",value:\\\"5.0\\\"){success}}\"}"
-    $ curl 0.0.0.0:8050 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"voltage\\\",value:\\\"5.0\\\"){success}}\"}"
-    $ curl 0.0.0.0:8050 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"current\\\",value:\\\"0.1\\\"){success}}\"}"
-    $ curl 0.0.0.0:8050 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"current\\\",value:\\\"0.1\\\"){success}}\"}"
-    $ curl 0.0.0.0:8050 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"gps\\\",parameter:\\\"voltage\\\",value:\\\"3.3\\\"){success}}\"}"
+    $ curl 0.0.0.0:8020 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"voltage\\\",value:\\\"5.0\\\"){success}}\"}"
+    $ curl 0.0.0.0:8020 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"voltage\\\",value:\\\"5.0\\\"){success}}\"}"
+    $ curl 0.0.0.0:8020 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"current\\\",value:\\\"0.1\\\"){success}}\"}"
+    $ curl 0.0.0.0:8020 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"eps\\\",parameter:\\\"current\\\",value:\\\"0.1\\\"){success}}\"}"
+    $ curl 0.0.0.0:8020 -H "Content-Type: application/json" --data "{\"query\":\"mutation {insert(subsystem:\\\"gps\\\",parameter:\\\"voltage\\\",value:\\\"3.3\\\"){success}}\"}"
     
 Each of these commands should return the following::
 
@@ -51,7 +51,7 @@ Each of these commands should return the following::
 GraphiQL
 --------
 
-Please navigate to ``http://0.0.0.0:8050/graphiql`` in order to communicate with the telemetry service
+Please navigate to ``http://0.0.0.0:8020/graphiql`` in order to communicate with the telemetry service
 for this tutorial.
 If you are using the SDK, replace ``0.0.0.0`` with the :ref:`IP address you defined <sdk-port-forward>`
 for your VM.
@@ -219,10 +219,14 @@ Our request should look like this::
 The response should look like this::
 
     {
-      telemetry(subsystem: "eps", parameter: "voltage", limit: 1) {
-        timestamp
-        subsystem
-        parameter
-        value
+      "data": {
+        "telemetry": [
+          {
+            "timestamp": 1573594014.6698866,
+            "subsystem": "eps",
+            "parameter": "voltage",
+            "value": "5.0"
+          }
+        ]
       }
     }

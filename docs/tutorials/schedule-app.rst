@@ -96,7 +96,7 @@ Task lists are the individual files stored in modes which contain the actual
 schedule specification. Each task list contains a list of one or more tasks
 to be scheduled and executed.
 
-We'll go ahead and create a new task list which schedules ``my-mission-app`` 
+We'll go ahead and create a new task list which schedules ``my-mission-app``
 to execute every 10 seconds, after an initial 10 second delay.
 
 Create a new file called ``my-mission.json`` with the following contents::
@@ -104,7 +104,7 @@ Create a new file called ``my-mission.json`` with the following contents::
     {
         "tasks": [
             {
-                "name": "my-app",
+                "description": "Execute mission logic",
                 "delay": "10s",
                 "period": "10s",
                 "app": {
@@ -115,9 +115,9 @@ Create a new file called ``my-mission.json`` with the following contents::
     }
 
 The ``tasks`` list is required in each task list and holds all task specifications.
-Each task requires a ``name`` identifier, one of either ``delay``, ``period``, or
+Each task requires a ``description``, one of either ``delay``, ``period``, or
 ``time`` to specify execution time, and ``app`` to specify the details of the app
-execution. More details on the task list specification can be found 
+execution. More details on the task list specification can be found
 :ref:`here <schedule-specification>`.
 
 To import a task list, we use the service's ``importTaskList`` mutation.
