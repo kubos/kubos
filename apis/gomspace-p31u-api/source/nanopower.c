@@ -43,7 +43,7 @@ KEPSStatus k_eps_init(KEPSConf config)
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to initialize EPS: %d\n", status);
-        return EPS_ERROR;
+        return status;
     }
 
     return EPS_OK;
@@ -69,14 +69,14 @@ KEPSStatus k_eps_ping()
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to send EPS ping: %d\n", status);
-        return EPS_ERROR;
+        return EPS_I2C_ERROR;
     }
 
     status = k_i2c_read(eps_bus, eps_addr, &resp, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to get EPS ping response: %d\n", status);
-        return EPS_ERROR;
+        return EPS_I2C_ERROR;
     }
 
     if (resp != cmd)
@@ -98,7 +98,7 @@ KEPSStatus k_eps_reset()
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to reset EPS: %d\n", status);
-        return EPS_ERROR;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -113,7 +113,7 @@ KEPSStatus k_eps_reboot()
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to reboot EPS: %d\n", status);
-        return EPS_ERROR;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -265,7 +265,8 @@ KEPSStatus k_eps_set_single_output(uint8_t channel, uint8_t value, int16_t delay
      * Output[0] is actually channel 7 (onboard heater)
      * and output[7] is channel 0
      */
-    packet.channel = 7 - channel;
+   // packet.channel = 7 - channel;
+    packet.channel = channel;
     packet.value = value;
     packet.delay = htobe16(delay);
 
@@ -716,7 +717,7 @@ KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to send EPS command: %d\n", status);
-        return EPS_ERROR;
+        return EPS_I2C_ERROR;
     }
 
     status = k_i2c_read(eps_bus, eps_addr, rx, rx_len);
@@ -725,7 +726,7 @@ KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
     {
         fprintf(stderr, "Failed to read EPS response (%x): %d\n", tx[0],
                 status);
-        return EPS_ERROR;
+        return EPS_I2C_ERROR;
     }
 
     eps_resp_header response = { .cmd = rx[0], .status = rx[1] };
@@ -735,7 +736,7 @@ KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
         /* Echoed command should match command requested */
         fprintf(stderr, "Command mismatch - Sent: %d Received: %d\n", tx[0],
                 response.cmd);
-        return EPS_ERROR;
+        return EPS_I2C_ERROR;
     }
 
     /* Check the status byte */

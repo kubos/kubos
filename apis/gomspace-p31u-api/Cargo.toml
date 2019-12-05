@@ -1,0 +1,14 @@
+[package]
+name = "gomspace-p31u-api"
+version = "0.1.0"
+authors = ["Xueliang"]
+build = "build.rs"
+edition = "2018"
+
+[dependencies]
+juniper =  "0.11"
+failure = "0.1.2"
+nom = "4.0.0-beta1"
+
+[build-dependencies]
+kubos-build-helper = { path = "../../../kubos/kubos-build-helper" }
