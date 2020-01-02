@@ -135,8 +135,8 @@ The system will now boot off of the microSD card and into Kubos Linux.
 Flash the eMMC
 ~~~~~~~~~~~~~~
 
-To flash the eMMC, log into the board and then run the installation script, ``install-os``.
-It has been placed within the system PATH, so may be called from any location.
+To flash the eMMC, log into the board using the default `root` user with password `Kubos123` and then run the
+installation script, ``install-os``. It has been placed within the system PATH, so may be called from any location.
 
 A confirmation dialog will be issued. Enter ``y`` to proceed with the installation.
 
