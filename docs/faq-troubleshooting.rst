@@ -147,7 +147,7 @@ custom Kubos Linux builds.
 The OBC is Booting from the eMMC Instead of the microSD when Upgrading
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you see errors, or the OBD seems to be booting from the eMMC instead of the microSD, make sure your microSD is being read correctly by running ``ls mcc 0:1`` at the U-Boot prompt.
+If you see errors, or the OBC seems to be booting from the eMMC instead of the microSD, make sure your microSD is being read correctly by running ``ls mcc 0:1`` at the U-Boot prompt. You should see the boot partition files listed (kernel, {board}.dtb, etc). If you are presented with errors, check that the microSD card is seated properly in the SD card slot.
 
 I transferred a script, but it won't run
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
