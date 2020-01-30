@@ -1,0 +1,12 @@
+[target.thumbv7m-unknown-linux-uclibc.dependencies.std]
+stage = 0
+
+
+[target.thumbv7m-unknown-linux-uclibc.dependencies.compiler_builtins]
+# stage = 1
+
+[patch.crates-io]
+compiler_builtins = { path = "/vagrant/repos/compiler-builtins" }
+libc = { path = "/vagrant/repos/libc" }
+# panic_unwind = { path = "/vagrant/repos/rust/src/libpanic_unwind" }
+# backtrace = { path = "/vagrant/repos/backtrace-rs" }

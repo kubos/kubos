@@ -114,12 +114,20 @@ exclude = [
 
 [profile.release]
 lto = true
-opt-level = "z"
+opt-level = 'z'
 panic = "abort"
 codegen-units = 1
 
-[profile.bench]
-lto = true
-opt-level = "z"
+[profile.dev]
 panic = "abort"
-codegen-units = 1
+
+[profile.bench]
+#lto = true
+opt-level = 0
+panic = "abort"
+#codegen-units = 1
+
+[patch.crates-io]
+nix = { path = "/vagrant/repos/nix" }
+libc = { path = "/vagrant/repos/libc" }
+backtrace = { path = "/vagrant/repos/backtrace-rs" }
