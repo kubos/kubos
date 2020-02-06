@@ -105,6 +105,8 @@ members=[
 "services/iobc-supervisor-service",
 "services/isis-ants-service",
 "test/integration/linux/isis-ants",
+"shell-test",
+"rocket-hello"
 ]
 
 exclude = [
@@ -114,12 +116,14 @@ exclude = [
 
 [profile.release]
 lto = true
-opt-level = 'z'
+opt-level = 1
 panic = "abort"
 codegen-units = 1
 
 [profile.dev]
 panic = "abort"
+lto = true
+codegen-units = 1
 
 [profile.bench]
 #lto = true
@@ -131,3 +135,6 @@ panic = "abort"
 nix = { path = "/vagrant/repos/nix" }
 libc = { path = "/vagrant/repos/libc" }
 backtrace = { path = "/vagrant/repos/backtrace-rs" }
+mio = { path = "/vagrant/repos/mio" }
+# tokio = { path = "/vagrant/repos/tokio/tokio" }
+# tokio-reactor = { path = "/vagrant/repos/tokio/tokio-reactor" }
