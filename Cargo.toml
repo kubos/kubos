@@ -104,9 +104,7 @@ members=[
 "examples/rust-c-service/service",
 "services/iobc-supervisor-service",
 "services/isis-ants-service",
-"test/integration/linux/isis-ants",
-"shell-test",
-"rocket-hello"
+"test/integration/linux/isis-ants"
 ]
 
 exclude = [
@@ -136,5 +134,4 @@ nix = { path = "/vagrant/repos/nix" }
 libc = { path = "/vagrant/repos/libc" }
 backtrace = { path = "/vagrant/repos/backtrace-rs" }
 mio = { path = "/vagrant/repos/mio" }
-# tokio = { path = "/vagrant/repos/tokio/tokio" }
-# tokio-reactor = { path = "/vagrant/repos/tokio/tokio-reactor" }
+filetime = { path = "/vagrant/repos/filetime" }
