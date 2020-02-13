@@ -16,10 +16,8 @@
   "position-independent-executables": true,
   "pre-link-args": {
     "gcc": [
-      "-T", "elf2ld.ld.super",
       "-Wl,--as-needed",
       "-Wl,-z,noexecstack",
-      "-L", "/home/vagrant/armv7m-m3-uclibc-2018/arm-buildroot-uclinux-uclibcgnueabi/sysroot/usr/lib/",
       "-mthumb",
       "-mcpu=cortex-m3"
     ]
