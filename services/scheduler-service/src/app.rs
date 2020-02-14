@@ -22,7 +22,7 @@ use crate::error::SchedulerError;
 use crate::schema::GenericResponse;
 use juniper::GraphQLObject;
 use log::{error, info};
-use reqwest::Client;
+use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::from_str;
 use std::collections::HashMap;
@@ -50,7 +50,7 @@ pub fn service_query(query: &str, hosturl: &str) -> Result<StartAppGraphQL, Sche
     map.insert("query", query);
     let url = format!("http://{}", hosturl);
 
-    let mut res = client
+    let res = client
         .post(&url)
         .json(&map)
         .send()
