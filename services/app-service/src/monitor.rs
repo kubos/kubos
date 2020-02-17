@@ -22,7 +22,7 @@ use std::process::{Child, ExitStatus};
 use std::sync::{Arc, Mutex};
 
 /// Apps which have been started and are being monitored until they finish
-#[derive(Clone, Debug, GraphQLObject)]
+#[derive(Clone, Debug, juniper::GraphQLObject)]
 pub struct MonitorEntry {
     pub name: String,
     pub version: String,

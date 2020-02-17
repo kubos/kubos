@@ -114,7 +114,7 @@ exclude = [
 
 [profile.release]
 lto = true
-opt-level = 1
+opt-level = "s"
 panic = "abort"
 codegen-units = 1
 

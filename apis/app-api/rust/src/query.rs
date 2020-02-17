@@ -79,8 +79,8 @@ pub fn query(
     timeout: Option<Duration>,
 ) -> AppResult<serde_json::Value> {
     let client = match timeout {
-        Some(time) => reqwest::Client::builder().timeout(time).build()?,
-        None => reqwest::Client::builder().build()?,
+        Some(time) => reqwest::blocking::Client::builder().timeout(time).build()?,
+        None => reqwest::blocking::Client::builder().build()?,
     };
 
     let uri = format!(
