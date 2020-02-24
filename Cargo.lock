@@ -1621,6 +1621,7 @@ dependencies = [
  "pkg-config",
  "serde",
  "serde_json",
+ "tokio 0.1.22",
  "warp",
 ]
 

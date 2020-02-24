@@ -20,6 +20,7 @@ use log::info;
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::{Arc, RwLock};
+use std::time::Duration;
 
 use warp::{filters::BoxedFilter, Filter};
 
@@ -177,6 +178,18 @@ impl Service {
             .unwrap();
         info!("Listening on: {}", addr);
 
-        warp::serve(self.filter).run(addr);
+        // warp::serve(self.filter).run(addr);
+
+        let rt = tokio::runtime::Builder::new()
+            .blocking_threads(1)
+            .keep_alive(Some(Duration::from_secs(2)))
+            .stack_size(32 * 1024)
+            .core_threads(1)
+            .build()
+            .unwrap();
+
+        let server_instance = warp::serve(self.filter).bind(addr);
+
+        rt.block_on_all(server_instance).unwrap();
     }
 }
