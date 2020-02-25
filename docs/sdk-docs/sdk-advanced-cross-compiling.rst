@@ -49,13 +49,13 @@ Now create the following files in your Rust project:
 
 ``Xargo.toml``::
 
-    [target.powerpc-unknown-linux-gnuspe.dependencies.std]
+    [target.target-triple.std]
     stage = 0
 
 ``.cargo/config``::
-    [target.powerpc-unknown-linux-gnuspe]
-    linker = "/home/vagrant/csbc_toolchain/bin/powerpc-buildroot-linux-uclibcspe-gcc"
-    ar = "/home/vagrant/csbc_toolchain/bin/powerpc-buildroot-linux-uclibcspe-gcc"
+    [target.target-triple]
+    linker = "$TOOLCHAIN/toolchain-name-gcc"
+    ar = "$TOOLCHAIN/toolchain-name-ar"
 
 And rebuild. You may also want to delete the ``$HOME/.xargo`` and ``target``
 folders before rebuilding.
