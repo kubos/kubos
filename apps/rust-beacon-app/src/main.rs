@@ -10,6 +10,7 @@ use std::time::Duration;
 #[derive(Serialize, Clone, Debug, Default)]
 pub struct Beacon {
     mem: Option<u64>,
+    up: Option<f64>,
     la1: Option<f64>,
     la5: Option<f64>,
     la15: Option<f64>,
@@ -39,7 +40,7 @@ fn main() -> Result<(), Error> {
 fn get_beacon_information() -> Result<Beacon, Error> {
     let monitor_service = ServiceConfig::new("monitor-service")?;
 
-    let request = "{ memInfo { available }, loadAverage { one, five, fifteen } }";
+    let request = "{ memInfo { available }, uptime, loadAverage { one, five, fifteen } }";
     let response = match query(&monitor_service, request, Some(Duration::from_secs(1))) {
         Ok(msg) => msg,
         Err(err) => {
@@ -49,6 +50,7 @@ fn get_beacon_information() -> Result<Beacon, Error> {
     };
 
     let memory = response.get("memInfo").and_then(|msg| msg.get("available"));
+    let uptime = response.get("uptime");
     let load_average = response.get("loadAverage");
     let la1 = load_average.and_then(|msg| msg.get("one"));
     let la5 = load_average.and_then(|msg| msg.get("five"));
@@ -56,6 +58,7 @@ fn get_beacon_information() -> Result<Beacon, Error> {
 
     let mut beacon: Beacon = Default::default();
     beacon.mem = memory.and_then(|v| v.as_u64());
+    beacon.up = uptime.and_then(|v| v.as_f64());
     beacon.la1 = la1.and_then(|v| v.as_f64());
     beacon.la5 = la5.and_then(|v| v.as_f64());
     beacon.la15 = la15.and_then(|v| v.as_f64());
