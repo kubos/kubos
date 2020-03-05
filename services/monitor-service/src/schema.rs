@@ -47,6 +47,13 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
             .map_err(|err| FieldError::new(err, juniper::Value::null()))
     }
 
+    field uptime(&executor) -> FieldResult<f64> {
+        let sys = System::new();
+        sys.uptime()
+            .map(|uptime| uptime.as_secs_f64())
+            .map_err(|err| FieldError::new(err, juniper::Value::null()))
+    }
+
     field ps(&executor, pids: Option<Vec<i32>>) -> FieldResult<Vec<PSResponse>>
     {
         let pids_vec: Vec<i32> = match pids {

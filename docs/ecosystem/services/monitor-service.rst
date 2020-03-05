@@ -146,3 +146,14 @@ It has the following schema::
             fifteen: Float!
         }
     }
+
+Uptime Query
+-------------
+
+The ``uptime`` query can be used to get the current uptime in seconds.
+
+It has the following schema::
+
+    {
+        uptime: Float!
+    }

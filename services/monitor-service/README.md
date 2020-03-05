@@ -29,6 +29,7 @@ type Query {
     ping: String!
     memInfo: MemInfo!
     loadAverage: LoadAverage!
+    uptime: Float!
     ps(pids: [Int!] = null): [ProcInfo!]!
 }
 
