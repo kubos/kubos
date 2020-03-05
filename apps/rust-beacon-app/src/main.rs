@@ -7,9 +7,12 @@ use serde_json;
 use std::net::UdpSocket;
 use std::time::Duration;
 
-#[derive(Serialize, Clone, Debug)]
+#[derive(Serialize, Clone, Debug, Default)]
 pub struct Beacon {
     mem: Option<u64>,
+    la1: Option<f64>,
+    la5: Option<f64>,
+    la15: Option<f64>,
 }
 
 fn main() -> Result<(), Error> {
@@ -26,19 +29,17 @@ fn main() -> Result<(), Error> {
     );
     opts.optflag("h", "help", "Print this help menu");
 
-    // Get the amount of memory currently available on the OBC
-    let mem = get_available_memory()?;
-    info!("Current memory value: {:?}", mem);
-
-    send_beacon(&Beacon { mem })?;
+    let beacon = get_beacon_information()?;
+    info!("Current beacon info: {:?}", beacon);
+    send_beacon(&beacon)?;
 
     Ok(())
 }
 
-fn get_available_memory() -> Result<Option<u64>, Error> {
+fn get_beacon_information() -> Result<Beacon, Error> {
     let monitor_service = ServiceConfig::new("monitor-service")?;
 
-    let request = "{memInfo{available}}";
+    let request = "{ memInfo { available }, loadAverage { one, five, fifteen } }";
     let response = match query(&monitor_service, request, Some(Duration::from_secs(1))) {
         Ok(msg) => msg,
         Err(err) => {
@@ -48,11 +49,18 @@ fn get_available_memory() -> Result<Option<u64>, Error> {
     };
 
     let memory = response.get("memInfo").and_then(|msg| msg.get("available"));
-    if let Some(mem) = memory {
-        Ok(mem.as_u64())
-    } else {
-        Ok(None)
-    }
+    let load_average = response.get("loadAverage");
+    let la1 = load_average.and_then(|msg| msg.get("one"));
+    let la5 = load_average.and_then(|msg| msg.get("five"));
+    let la15 = load_average.and_then(|msg| msg.get("fifteen"));
+
+    let mut beacon: Beacon = Default::default();
+    beacon.mem = memory.and_then(|v| v.as_u64());
+    beacon.la1 = la1.and_then(|v| v.as_f64());
+    beacon.la5 = la5.and_then(|v| v.as_f64());
+    beacon.la15 = la15.and_then(|v| v.as_f64());
+
+    Ok(beacon)
 }
 
 fn send_beacon(beacon: &Beacon) -> Result<(), Error> {
