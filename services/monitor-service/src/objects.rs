@@ -16,6 +16,7 @@
 use crate::meminfo::MemInfo;
 use crate::process::ProcStat;
 use crate::userinfo::UserInfo;
+use systemstat::LoadAverage;
 
 pub struct MemInfoResponse {
     pub info: MemInfo,
@@ -36,6 +37,24 @@ graphql_object!(MemInfoResponse: () |&self| {
 
     field low_free() -> Option<i32> {
         self.info.low_free().map(|v| v as i32)
+    }
+});
+
+pub struct LoadAverageResponse {
+    pub load_average: LoadAverage,
+}
+
+graphql_object!(LoadAverageResponse: () |&self| {
+    field one() -> f64 {
+        self.load_average.one.into()
+    }
+
+    field five() -> f64 {
+        self.load_average.five.into()
+    }
+
+    field fifteen() -> f64 {
+        self.load_average.fifteen.into()
     }
 });
 

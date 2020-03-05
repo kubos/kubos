@@ -16,6 +16,7 @@
 
 use juniper::{self, FieldError, FieldResult};
 use kubos_service;
+use systemstat::{System, Platform};
 
 use crate::meminfo;
 use crate::objects::*;
@@ -36,6 +37,13 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
 
         meminfo::MemInfo::from_proc()
             .map(|info| MemInfoResponse { info })
+            .map_err(|err| FieldError::new(err, juniper::Value::null()))
+    }
+
+    field load_average(&executor) -> FieldResult<LoadAverageResponse> {
+        let sys = System::new();
+        sys.load_average()
+            .map(|load_average| LoadAverageResponse { load_average })
             .map_err(|err| FieldError::new(err, juniper::Value::null()))
     }
 

@@ -130,3 +130,19 @@ The query has the following response fields:
 
     Not all response fields are available on all systems.
     They will be omitted from the response if they are not available.
+
+LoadAverage Query
+-------------
+
+The ``loadAverage`` query can be used to get the system's current
+`load average <https://en.wikipedia.org/wiki/Load_(computing)#Unix-style_load_calculation>`__.
+
+It has the following schema::
+
+    {
+        loadAverage {
+            one: Float!
+            five: Float!
+            fifteen: Float!
+        }
+    }

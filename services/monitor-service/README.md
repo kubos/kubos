@@ -28,6 +28,7 @@ schema {
 type Query {
     ping: String!
     memInfo: MemInfo!
+    loadAverage: LoadAverage!
     ps(pids: [Int!] = null): [ProcInfo!]!
 }
 
@@ -36,6 +37,12 @@ type MemInfo {
     free: Int
     available: Int
     lowFree: Int
+}
+
+type LoadAverage {
+    one: Float
+    five: Float
+    fifteen: Float
 }
 
 type ProcInfo {

@@ -56,6 +56,7 @@
 
 #[macro_use]
 extern crate juniper;
+extern crate systemstat;
 
 use crate::schema::{MutationRoot, QueryRoot};
 use kubos_service::{Config, Logger, Service};
