@@ -30,6 +30,7 @@ type Query {
     memInfo: MemInfo!
     loadAverage: LoadAverage!
     uptime: Float!
+    mounts: [Mount!]!
     ps(pids: [Int!] = null): [ProcInfo!]!
 }
 
@@ -41,9 +42,21 @@ type MemInfo {
 }
 
 type LoadAverage {
-    one: Float
-    five: Float
-    fifteen: Float
+    one: Float!
+    five: Float!
+    fifteen: Float!
+}
+
+type Mount {
+    free: Float!
+    avail: Float!
+    total: Float!
+    files: Float!
+    filesTotal: Float!
+    filesAvail: Float!
+    fsType: String!
+    fsMountedOn: String!
+    fsMountedFrom: String!
 }
 
 type ProcInfo {

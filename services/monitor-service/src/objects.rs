@@ -16,7 +16,7 @@
 use crate::meminfo::MemInfo;
 use crate::process::ProcStat;
 use crate::userinfo::UserInfo;
-use systemstat::LoadAverage;
+use systemstat::{Filesystem, LoadAverage};
 
 pub struct MemInfoResponse {
     pub info: MemInfo,
@@ -55,6 +55,48 @@ graphql_object!(LoadAverageResponse: () |&self| {
 
     field fifteen() -> f64 {
         self.load_average.fifteen.into()
+    }
+});
+
+pub struct MountResponse {
+    pub mount: Filesystem,
+}
+
+graphql_object!(MountResponse: () |&self| {
+    field files() -> f64 {
+        self.mount.files as f64
+    }
+
+    field files_total() -> f64 {
+        self.mount.files_total as f64
+    }
+
+    field files_avail() -> f64 {
+        self.mount.files_avail as f64
+    }
+
+    field free() -> f64 {
+        self.mount.free.as_u64() as f64
+    }
+
+    field avail() -> f64 {
+        self.mount.avail.as_u64() as f64
+    }
+
+    field total() -> f64 {
+        self.mount.total.as_u64() as f64
+    }
+
+    field fs_type() -> String {
+        self.mount.fs_type.clone()
+    }
+
+    field fs_mounted_from() -> String {
+        self.mount.fs_mounted_from.clone()
+    }
+
+    field fs_mounted_on() -> String {
+        self.mount.fs_mounted_on.clone()
     }
 });
 

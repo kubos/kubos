@@ -157,3 +157,24 @@ It has the following schema::
     {
         uptime: Float!
     }
+
+Mounts Query
+-------------
+
+The ``mounts`` query can be used to get current filesystem mounts information.
+
+It has the following schema::
+
+    {
+        mounts: {
+            free: Float!
+            avail: Float!
+            total: Float!
+            files: Float!
+            filesTotal: Float!
+            filesAvail: Float!
+            fsType: String!
+            fsMountedOn: String!
+            fsMountedFrom: String!
+        }
+    }

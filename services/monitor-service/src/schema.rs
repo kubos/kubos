@@ -16,7 +16,7 @@
 
 use juniper::{self, FieldError, FieldResult};
 use kubos_service;
-use systemstat::{System, Platform};
+use systemstat::{Platform, System};
 
 use crate::meminfo;
 use crate::objects::*;
@@ -51,6 +51,13 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
         let sys = System::new();
         sys.uptime()
             .map(|uptime| uptime.as_secs_f64())
+            .map_err(|err| FieldError::new(err, juniper::Value::null()))
+    }
+
+    field mounts(&executor) -> FieldResult<Vec<MountResponse>> {
+        let sys = System::new();
+        sys.mounts()
+            .map(|mounts| mounts.iter().map(|mount| MountResponse { mount: mount.clone() }).collect())
             .map_err(|err| FieldError::new(err, juniper::Value::null()))
     }
 
