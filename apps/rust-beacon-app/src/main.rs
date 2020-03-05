@@ -4,6 +4,7 @@ use kubos_app::*;
 use log::*;
 use serde_derive::Serialize;
 use serde_json;
+use serde_json::Value;
 use std::net::UdpSocket;
 use std::time::Duration;
 
@@ -14,6 +15,9 @@ pub struct Beacon {
     la1: Option<f64>,
     la5: Option<f64>,
     la15: Option<f64>,
+    root_avail: Option<f64>,
+    home_avail: Option<f64>,
+    envar_avail: Option<f64>,
 }
 
 fn main() -> Result<(), Error> {
@@ -40,7 +44,7 @@ fn main() -> Result<(), Error> {
 fn get_beacon_information() -> Result<Beacon, Error> {
     let monitor_service = ServiceConfig::new("monitor-service")?;
 
-    let request = "{ memInfo { available }, uptime, loadAverage { one, five, fifteen } }";
+    let request = "{ memInfo { available }, uptime, loadAverage { one, five, fifteen }, mounts { avail, fsMountedOn } }";
     let response = match query(&monitor_service, request, Some(Duration::from_secs(1))) {
         Ok(msg) => msg,
         Err(err) => {
@@ -49,12 +53,13 @@ fn get_beacon_information() -> Result<Beacon, Error> {
         }
     };
 
-    let memory = response.get("memInfo").and_then(|msg| msg.get("available"));
+    let memory = response.get("memInfo").and_then(|v| v.get("available"));
     let uptime = response.get("uptime");
+    let mounts = response.get("mounts").and_then(|v| v.as_array());
     let load_average = response.get("loadAverage");
-    let la1 = load_average.and_then(|msg| msg.get("one"));
-    let la5 = load_average.and_then(|msg| msg.get("five"));
-    let la15 = load_average.and_then(|msg| msg.get("fifteen"));
+    let la1 = load_average.and_then(|v| v.get("one"));
+    let la5 = load_average.and_then(|v| v.get("five"));
+    let la15 = load_average.and_then(|v| v.get("fifteen"));
 
     let mut beacon: Beacon = Default::default();
     beacon.mem = memory.and_then(|v| v.as_u64());
@@ -62,8 +67,30 @@ fn get_beacon_information() -> Result<Beacon, Error> {
     beacon.la1 = la1.and_then(|v| v.as_f64());
     beacon.la5 = la5.and_then(|v| v.as_f64());
     beacon.la15 = la15.and_then(|v| v.as_f64());
+    beacon.root_avail = available_space_for_mount(mounts, "/");
+    beacon.home_avail = available_space_for_mount(mounts, "/home");
+    beacon.envar_avail = available_space_for_mount(mounts, "/envar");
 
     Ok(beacon)
+}
+
+fn available_space_for_mount(mounts_value: Option<&Vec<Value>>, path: &str) -> Option<f64> {
+    mounts_value
+        .and_then(|mounts| {
+            mounts.iter().find(|&v| {
+                if let Some(value) = v.get("fsMountedOn") {
+                    if let Some(str) = value.as_str() {
+                        str == path
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
+            })
+        })
+        .and_then(|v| v.get("avail"))
+        .and_then(|v| v.as_f64())
 }
 
 fn send_beacon(beacon: &Beacon) -> Result<(), Error> {
