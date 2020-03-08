@@ -53,6 +53,7 @@
 typedef enum {
     EPS_OK,                                 /**< Requested function completed successfully */
     EPS_ERROR,                              /**< Generic error */
+    EPS_I2C_ERROR,                          /**< I2C error */
     EPS_ERROR_CONFIG,                       /**< Configuration error */
     EPS_ERROR_INTERNAL                      /**< An error was thrown by the subsystem */
 } KEPSStatus;
