@@ -18,6 +18,7 @@ use juniper::{self, FieldError, FieldResult};
 use kubos_service;
 use systemstat::{Platform, System};
 
+use crate::log_file_info;
 use crate::meminfo;
 use crate::objects::*;
 use crate::process;
@@ -37,6 +38,12 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
 
         meminfo::MemInfo::from_proc()
             .map(|info| MemInfoResponse { info })
+            .map_err(|err| FieldError::new(err, juniper::Value::null()))
+    }
+
+    field log_files(&executor) -> FieldResult<LogFileInfoResponse> {
+        log_file_info::LogFileInfo::from_disk(None)
+            .map(|log_file_info| LogFileInfoResponse { log_file_info })
             .map_err(|err| FieldError::new(err, juniper::Value::null()))
     }
 

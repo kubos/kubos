@@ -13,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+use crate::log_file_info::LogFileInfo;
 use crate::meminfo::MemInfo;
 use crate::process::ProcStat;
 use crate::userinfo::UserInfo;
@@ -37,6 +38,20 @@ graphql_object!(MemInfoResponse: () |&self| {
 
     field low_free() -> Option<i32> {
         self.info.low_free().map(|v| v as i32)
+    }
+});
+
+pub struct LogFileInfoResponse {
+    pub log_file_info: LogFileInfo,
+}
+
+graphql_object!(LogFileInfoResponse: () |&self| {
+    field kubos_mod_time() -> Option<f64> {
+        self.log_file_info.kubos_mod_time
+    }
+
+    field app_mod_time() -> Option<f64> {
+        self.log_file_info.app_mod_time
     }
 });
 

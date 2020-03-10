@@ -178,3 +178,17 @@ It has the following schema::
             fsMountedFrom: String!
         }
     }
+
+Log Files Query
+-------------
+
+The ``logFiles`` query can be used to get information about log files, currently ``/var/log/kubos-warn.log`` and ``/var/log/app-warn.log``.
+
+It has the following schema::
+
+    {
+        logFiles: {
+            kubosModTime: Float
+            appModTime: Float
+        }
+    }

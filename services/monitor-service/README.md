@@ -29,6 +29,7 @@ type Query {
     ping: String!
     memInfo: MemInfo!
     loadAverage: LoadAverage!
+    logFiles: LogFiles!
     uptime: Float!
     mounts: [Mount!]!
     ps(pids: [Int!] = null): [ProcInfo!]!
@@ -45,6 +46,11 @@ type LoadAverage {
     one: Float!
     five: Float!
     fifteen: Float!
+}
+
+type LogFiles {
+    kubosModTime: Float
+    appModTime: Float
 }
 
 type Mount {

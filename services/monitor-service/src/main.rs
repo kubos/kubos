@@ -62,6 +62,7 @@ use crate::schema::{MutationRoot, QueryRoot};
 use kubos_service::{Config, Logger, Service};
 use log::error;
 
+mod log_file_info;
 mod meminfo;
 mod objects;
 #[macro_use]

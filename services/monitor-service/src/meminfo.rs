@@ -20,7 +20,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::str::FromStr;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct MemInfo {
     total: Option<u32>,
     free: Option<u32>,
@@ -29,16 +29,6 @@ pub struct MemInfo {
 }
 
 impl MemInfo {
-    /// Create an empty MemInfo object
-    pub fn new() -> Self {
-        Self {
-            total: None,
-            free: None,
-            available: None,
-            low_free: None,
-        }
-    }
-
     fn parse_amount(amount: &str) -> Option<u32> {
         let mut iter = amount.split_whitespace();
         match iter.next() {
@@ -54,7 +44,7 @@ impl MemInfo {
     where
         R: BufRead,
     {
-        let mut mem_info = MemInfo::new();
+        let mut mem_info: MemInfo = Default::default();
 
         for line in info.lines() {
             let line = line?;
