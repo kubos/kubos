@@ -13,18 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Kubos Service for interacting with [ISIS Antenna Systems](https://www.isispace.nl/product-category/products/antenna-systems/)
+//! Kubos Service for interacting with [GomSpace p31u EPS]
 //!
 //! # Configuration
 //!
 //! The service must be configured in `/home/system/etc/config.toml` with the following fields:
 //!
-//! - `[isis-ants-service.addr]`
+//! - `[gomspace-p31u-service.addr]`
 //!
 //!     - `ip` - Specifies the service's IP address
 //!     - `port` - Specifies the port on which the service will be listening for UDP packets
 //!
-//! - `[isis-ants-service]`
+//! - `[gomspace-p31u-service]`
 //!
 //!     - `bus` - Specifies the I2C bus the antenna system is connected to
 //! 	- `addr` - Specifies the I2C address of the antenna system's primary microcontroller

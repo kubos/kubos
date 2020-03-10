@@ -15,7 +15,6 @@
 //
 use failure::Error;
 use gomspace_p31u_api::*;
-//use gomspace_p31u_api::{EpsSystemConfig, EpsBatteryConfig,EpsHk,EpsError};
 use kubos_service::{process_errors, push_err, run};
 use log::info;
 use std::str;
