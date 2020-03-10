@@ -63,8 +63,6 @@ use syslog::Facility;
 mod model;
 mod objects;
 mod schema;
-#[cfg(test)]
-mod tests;
 
 fn main()-> EpsResult<()> {
 
