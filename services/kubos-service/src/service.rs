@@ -181,10 +181,10 @@ impl Service {
         // warp::serve(self.filter).run(addr);
 
         let rt = tokio::runtime::Builder::new()
-            .blocking_threads(1)
+            .blocking_threads(2)
             .keep_alive(Some(Duration::from_secs(2)))
-            .stack_size(32 * 1024)
-            .core_threads(1)
+            .stack_size(128 * 1024)
+            .core_threads(2)
             .build()
             .unwrap();
 
