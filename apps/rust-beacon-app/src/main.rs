@@ -12,6 +12,8 @@ use std::time::Duration;
 pub struct Beacon {
     mem: Option<u64>,
     up: Option<f64>,
+    kubos_mtime: Option<f64>,
+    app_mtime: Option<f64>,
     la1: Option<f64>,
     la5: Option<f64>,
     la15: Option<f64>,
@@ -44,7 +46,7 @@ fn main() -> Result<(), Error> {
 fn get_beacon_information() -> Result<Beacon, Error> {
     let monitor_service = ServiceConfig::new("monitor-service")?;
 
-    let request = "{ memInfo { available }, uptime, loadAverage { one, five, fifteen }, mounts { avail, fsMountedOn } }";
+    let request = "{ memInfo { available }, logFiles { appModTime, kubosModTime }, uptime, loadAverage { one, five, fifteen }, mounts { avail, fsMountedOn } }";
     let response = match query(&monitor_service, request, Some(Duration::from_secs(1))) {
         Ok(msg) => msg,
         Err(err) => {
@@ -56,6 +58,9 @@ fn get_beacon_information() -> Result<Beacon, Error> {
     let memory = response.get("memInfo").and_then(|v| v.get("available"));
     let uptime = response.get("uptime");
     let mounts = response.get("mounts").and_then(|v| v.as_array());
+    let log_files = response.get("log_files");
+    let kubos_mtime = log_files.and_then(|v| v.get("appModTime"));
+    let app_mtime = log_files.and_then(|v| v.get("kubosModTime"));
     let load_average = response.get("loadAverage");
     let la1 = load_average.and_then(|v| v.get("one"));
     let la5 = load_average.and_then(|v| v.get("five"));
@@ -63,6 +68,8 @@ fn get_beacon_information() -> Result<Beacon, Error> {
 
     let mut beacon: Beacon = Default::default();
     beacon.mem = memory.and_then(|v| v.as_u64());
+    beacon.kubos_mtime = kubos_mtime.and_then(|v| v.as_f64());
+    beacon.app_mtime = app_mtime.and_then(|v| v.as_f64());
     beacon.up = uptime.and_then(|v| v.as_f64());
     beacon.la1 = la1.and_then(|v| v.as_f64());
     beacon.la5 = la5.and_then(|v| v.as_f64());
