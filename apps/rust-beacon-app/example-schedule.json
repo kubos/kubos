@@ -1,0 +1,13 @@
+{
+  "tasks": [
+    {
+      "description": "Recurring beacon",
+      "delay": "10s",
+      "period": "10s",
+      "app": {
+        "name": "rust-beacon-app",
+        "config": "/workspace/kubos/tools/local_config.toml"
+      }
+    }
+  ]
+}

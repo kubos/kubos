@@ -1,0 +1,4 @@
+name = "rust-beacon-app"
+version = "0.1.0"
+author = "Andrew Cantino <andrew@kubos.com>"
+executable = "rust-beacon-app"

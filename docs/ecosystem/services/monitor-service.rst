@@ -130,3 +130,65 @@ The query has the following response fields:
 
     Not all response fields are available on all systems.
     They will be omitted from the response if they are not available.
+
+LoadAverage Query
+-------------
+
+The ``loadAverage`` query can be used to get the system's current
+`load average <https://en.wikipedia.org/wiki/Load_(computing)#Unix-style_load_calculation>`__.
+
+It has the following schema::
+
+    {
+        loadAverage {
+            one: Float!
+            five: Float!
+            fifteen: Float!
+        }
+    }
+
+Uptime Query
+-------------
+
+The ``uptime`` query can be used to get the current uptime in seconds.
+
+It has the following schema::
+
+    {
+        uptime: Float!
+    }
+
+Mounts Query
+-------------
+
+The ``mounts`` query can be used to get current filesystem mounts information.
+
+It has the following schema::
+
+    {
+        mounts: {
+            free: Float!
+            avail: Float!
+            total: Float!
+            files: Float!
+            filesTotal: Float!
+            filesAvail: Float!
+            fsType: String!
+            fsMountedOn: String!
+            fsMountedFrom: String!
+        }
+    }
+
+Log Files Query
+-------------
+
+The ``logFiles`` query can be used to get information about log files, currently ``/var/log/kubos-warn.log`` and ``/var/log/app-warn.log``.
+
+It has the following schema::
+
+    {
+        logFiles: {
+            kubosModTime: Float
+            appModTime: Float
+        }
+    }

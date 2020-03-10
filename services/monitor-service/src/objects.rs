@@ -13,9 +13,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+use crate::log_file_info::LogFileInfo;
 use crate::meminfo::MemInfo;
 use crate::process::ProcStat;
 use crate::userinfo::UserInfo;
+use systemstat::{Filesystem, LoadAverage};
 
 pub struct MemInfoResponse {
     pub info: MemInfo,
@@ -36,6 +38,80 @@ graphql_object!(MemInfoResponse: () |&self| {
 
     field low_free() -> Option<i32> {
         self.info.low_free().map(|v| v as i32)
+    }
+});
+
+pub struct LogFileInfoResponse {
+    pub log_file_info: LogFileInfo,
+}
+
+graphql_object!(LogFileInfoResponse: () |&self| {
+    field kubos_mod_time() -> Option<f64> {
+        self.log_file_info.kubos_mod_time
+    }
+
+    field app_mod_time() -> Option<f64> {
+        self.log_file_info.app_mod_time
+    }
+});
+
+pub struct LoadAverageResponse {
+    pub load_average: LoadAverage,
+}
+
+graphql_object!(LoadAverageResponse: () |&self| {
+    field one() -> f64 {
+        self.load_average.one.into()
+    }
+
+    field five() -> f64 {
+        self.load_average.five.into()
+    }
+
+    field fifteen() -> f64 {
+        self.load_average.fifteen.into()
+    }
+});
+
+pub struct MountResponse {
+    pub mount: Filesystem,
+}
+
+graphql_object!(MountResponse: () |&self| {
+    field files() -> f64 {
+        self.mount.files as f64
+    }
+
+    field files_total() -> f64 {
+        self.mount.files_total as f64
+    }
+
+    field files_avail() -> f64 {
+        self.mount.files_avail as f64
+    }
+
+    field free() -> f64 {
+        self.mount.free.as_u64() as f64
+    }
+
+    field avail() -> f64 {
+        self.mount.avail.as_u64() as f64
+    }
+
+    field total() -> f64 {
+        self.mount.total.as_u64() as f64
+    }
+
+    field fs_type() -> String {
+        self.mount.fs_type.clone()
+    }
+
+    field fs_mounted_from() -> String {
+        self.mount.fs_mounted_from.clone()
+    }
+
+    field fs_mounted_on() -> String {
+        self.mount.fs_mounted_on.clone()
     }
 });
 

@@ -28,6 +28,10 @@ schema {
 type Query {
     ping: String!
     memInfo: MemInfo!
+    loadAverage: LoadAverage!
+    logFiles: LogFiles!
+    uptime: Float!
+    mounts: [Mount!]!
     ps(pids: [Int!] = null): [ProcInfo!]!
 }
 
@@ -36,6 +40,29 @@ type MemInfo {
     free: Int
     available: Int
     lowFree: Int
+}
+
+type LoadAverage {
+    one: Float!
+    five: Float!
+    fifteen: Float!
+}
+
+type LogFiles {
+    kubosModTime: Float
+    appModTime: Float
+}
+
+type Mount {
+    free: Float!
+    avail: Float!
+    total: Float!
+    files: Float!
+    filesTotal: Float!
+    filesAvail: Float!
+    fsType: String!
+    fsMountedOn: String!
+    fsMountedFrom: String!
 }
 
 type ProcInfo {

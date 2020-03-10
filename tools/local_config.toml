@@ -36,3 +36,7 @@ port = 8030
 [shell-service.addr]
 ip = "127.0.0.1"
 port = 8050
+
+[rust-beacon-app.addr]
+ip = "192.168.33.1"
+port = 8500

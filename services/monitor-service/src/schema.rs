@@ -16,7 +16,9 @@
 
 use juniper::{self, FieldError, FieldResult};
 use kubos_service;
+use systemstat::{Platform, System};
 
+use crate::log_file_info;
 use crate::meminfo;
 use crate::objects::*;
 use crate::process;
@@ -36,6 +38,33 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
 
         meminfo::MemInfo::from_proc()
             .map(|info| MemInfoResponse { info })
+            .map_err(|err| FieldError::new(err, juniper::Value::null()))
+    }
+
+    field log_files(&executor) -> FieldResult<LogFileInfoResponse> {
+        log_file_info::LogFileInfo::from_disk(None)
+            .map(|log_file_info| LogFileInfoResponse { log_file_info })
+            .map_err(|err| FieldError::new(err, juniper::Value::null()))
+    }
+
+    field load_average(&executor) -> FieldResult<LoadAverageResponse> {
+        let sys = System::new();
+        sys.load_average()
+            .map(|load_average| LoadAverageResponse { load_average })
+            .map_err(|err| FieldError::new(err, juniper::Value::null()))
+    }
+
+    field uptime(&executor) -> FieldResult<f64> {
+        let sys = System::new();
+        sys.uptime()
+            .map(|uptime| uptime.as_secs_f64())
+            .map_err(|err| FieldError::new(err, juniper::Value::null()))
+    }
+
+    field mounts(&executor) -> FieldResult<Vec<MountResponse>> {
+        let sys = System::new();
+        sys.mounts()
+            .map(|mounts| mounts.iter().map(|mount| MountResponse { mount: mount.clone() }).collect())
             .map_err(|err| FieldError::new(err, juniper::Value::null()))
     }
 
