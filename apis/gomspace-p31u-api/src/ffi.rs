@@ -20,7 +20,7 @@ pub struct EpsSystemConfig {
     pub ppt_mode: u8,
     pub battheater_mode: u8,
 	pub battheater_low:i8,
-	pub battheater_high:i8,
+    pub battheater_high:i8,
 	pub output_normal_value:[u8;8],
 	pub output_safe_value:[u8;8],
 	pub output_initial_on_delay:[u16;8],

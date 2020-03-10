@@ -43,7 +43,7 @@ KEPSStatus k_eps_init(KEPSConf config)
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to initialize EPS: %d\n", status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -167,7 +167,7 @@ KEPSStatus k_eps_configure_system(const eps_system_config_t * config)
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to set EPS system configuration: %d\n", status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -201,7 +201,7 @@ KEPSStatus k_eps_configure_battery(const eps_battery_config_t * config)
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to set EPS battery configuration: %d\n", status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -218,7 +218,7 @@ KEPSStatus k_eps_save_battery_config()
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to reset EPS battery configuration: %d\n", status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -236,7 +236,7 @@ KEPSStatus k_eps_set_output(uint8_t channel_mask)
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to set EPS outputs: %d\n", status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -275,7 +275,7 @@ KEPSStatus k_eps_set_single_output(uint8_t channel, uint8_t value, int16_t delay
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to set EPS output %d value: %d\n", channel, status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -304,7 +304,7 @@ KEPSStatus k_eps_set_input_value(uint16_t in1_voltage, uint16_t in2_voltage,
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to set EPS input voltages: %d\n", status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -329,7 +329,7 @@ KEPSStatus k_eps_set_input_mode(uint8_t mode)
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to set EPS input mode: %d\n", status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -361,7 +361,7 @@ KEPSStatus k_eps_set_heater(uint8_t cmd, uint8_t heater, uint8_t mode)
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to set EPS heater/s %d mode: %d\n", heater, status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -378,7 +378,7 @@ KEPSStatus k_eps_reset_system_config()
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to reset EPS system configuration: %d\n", status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -395,7 +395,7 @@ KEPSStatus k_eps_reset_battery_config()
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to reset EPS battery configuration: %d\n", status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -412,7 +412,7 @@ KEPSStatus k_eps_reset_counters()
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to reset EPS counters: %d\n", status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -434,7 +434,7 @@ KEPSStatus k_eps_get_housekeeping(eps_hk_t * buff)
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to get EPS housekeeping data: %d\n", status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     eps_hk_t * body = (eps_hk_t *) (response + sizeof(eps_resp_header));
@@ -504,7 +504,7 @@ KEPSStatus k_eps_get_system_config(eps_system_config_t * buff)
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to get EPS system configuration: %d\n", status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     eps_system_config_t * body = (eps_system_config_t *) (response + sizeof(eps_resp_header));
@@ -551,7 +551,7 @@ KEPSStatus k_eps_get_battery_config(eps_battery_config_t * buff)
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to get EPS battery configuration: %d\n", status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     eps_battery_config_t * body = (eps_battery_config_t *) (response + sizeof(eps_resp_header));
@@ -579,7 +579,7 @@ KEPSStatus k_eps_get_heater(uint8_t * bp4, uint8_t * onboard)
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to get EPS heater data: %d\n", status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     if (bp4 != NULL)
@@ -605,7 +605,7 @@ KEPSStatus k_eps_watchdog_kick()
     if (status != EPS_OK)
     {
         fprintf(stderr, "Failed to kick EPS watchdog: %d\n", status);
-        return status;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
