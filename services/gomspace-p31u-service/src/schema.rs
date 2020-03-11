@@ -21,7 +21,6 @@ use kubos_service;
 
 type Context = kubos_service::Context<Subsystem>;
 
-
 pub struct QueryRoot;
 // Base GraphQL query model
 graphql_object!(QueryRoot : Context as "Query" |&self| {

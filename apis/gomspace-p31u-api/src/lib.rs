@@ -3,7 +3,7 @@
 #![deny(missing_docs)]
 
 pub use crate::eps::*;
-pub use crate::object::{EpsSystemConfig, EpsBatteryConfig,EpsHk};
+pub use crate::object::{EpsBatteryConfig, EpsHk, EpsSystemConfig};
 
 mod eps;
 mod ffi;

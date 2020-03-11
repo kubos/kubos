@@ -29,7 +29,7 @@
 //!     - `bus` - Specifies the I2C bus the antenna system is connected to
 //! 	- `addr` - Specifies the I2C address of the antenna system's primary microcontroller
 //! 	- `wd_timeout` - Specifies the interval at which the AntS watchdog should be automatically kicked. To disable automatic kicking, this value should be `0`.
-//! Example: 
+//! Example:
 //!     [gomspace-eps-service.addr]
 //!     ip = "0.0.0.0"
 //!     port = 8021
@@ -47,6 +47,7 @@
 #![deny(missing_docs)]
 #![recursion_limit = "256"]
 #![deny(warnings)]
+#![allow(clippy::too_many_arguments)]
 
 #[macro_use]
 extern crate juniper;
@@ -64,8 +65,7 @@ mod model;
 mod objects;
 mod schema;
 
-fn main()-> EpsResult<()> {
-
+fn main() -> EpsResult<()> {
     syslog::init(
         Facility::LOG_DAEMON,
         log::LevelFilter::Debug,
@@ -105,16 +105,8 @@ fn main()-> EpsResult<()> {
     } else {
         u8::from_str_radix(addr, 16).unwrap()
     };
-    
-    Service::new(
-        config,
-        Subsystem::new(bus,addr)?,
-        QueryRoot,
-        MutationRoot,
-    )
-    .start();
+
+    Service::new(config, Subsystem::new(bus, addr)?, QueryRoot, MutationRoot).start();
 
     Ok(())
 }
-
-

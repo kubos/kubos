@@ -148,7 +148,7 @@ typedef struct __attribute__((packed))
 
 single_output_packet single_output_be = {
     .cmd = SET_SINGLE_OUTPUT,
-    .channel = 1, /* Converted value (orig. 6) */
+    .channel = 6, /* Converted value (orig. 6) */
     .value = 1,
     .delay = 1280 /* 5 */
 };
@@ -175,7 +175,7 @@ static void test_init_no_addr(void ** arg)
 
 static void test_no_init_reset(void ** arg)
 {
-    assert_int_equal(k_eps_reset(), EPS_ERROR);
+    assert_int_equal(k_eps_reset(), EPS_I2C_ERROR);
 }
 
 static void test_ping(void ** arg)
@@ -816,7 +816,6 @@ int main(void)
         cmocka_unit_test_setup_teardown(test_set_output, init, term),
         cmocka_unit_test_setup_teardown(test_set_single_output_bad_channel, init, term),
         cmocka_unit_test_setup_teardown(test_set_single_output_bad_value, init, term),
-        cmocka_unit_test_setup_teardown(test_set_single_output, init, term),
         cmocka_unit_test_setup_teardown(test_set_single_output, init, term),
         cmocka_unit_test_setup_teardown(test_set_input_value, init, term),
         cmocka_unit_test_setup_teardown(test_set_input_mode, init, term),
