@@ -85,7 +85,7 @@ mod tests {
                 motherboard: 0xCDAB,
                 daughterboard: None,
             },
-            parse(&vec![0xAB, 0xCD]).unwrap()
+            parse(&[0xAB, 0xCD]).unwrap()
         );
     }
 
@@ -96,7 +96,7 @@ mod tests {
                 motherboard: 0x3412,
                 daughterboard: Some(0xCDAB),
             },
-            parse(&vec![0xAB, 0xCD, 0x12, 0x34]).unwrap()
+            parse(&[0xAB, 0xCD, 0x12, 0x34]).unwrap()
         );
     }
 
@@ -104,7 +104,7 @@ mod tests {
     fn test_parse_one_byte() {
         assert_eq!(
             EpsError::parsing_failure("Checksum"),
-            parse(&vec![0]).err().unwrap()
+            parse(&[0]).err().unwrap()
         );
     }
 
@@ -112,7 +112,7 @@ mod tests {
     fn test_parse_three_bytes() {
         assert_eq!(
             EpsError::parsing_failure("Checksum"),
-            parse(&vec![1, 2, 3]).err().unwrap()
+            parse(&[1, 2, 3]).err().unwrap()
         );
     }
 }

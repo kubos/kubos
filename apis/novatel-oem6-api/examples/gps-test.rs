@@ -48,7 +48,7 @@ fn get_version(oem: &OEM6) -> OEMResult<()> {
                         "    Compiled: {} {}",
                         component.compile_date, component.compile_time
                     );
-                    println!("");
+                    println!();
                 }
                 break;
             }

@@ -122,7 +122,7 @@ mod tests {
                 motherboard: StatusCode::default(),
                 daughterboard: Some(StatusCode::default()),
             },
-            parse(&vec![0x0, 0x0, 0x0, 0x0]).unwrap()
+            parse(&[0x0, 0x0, 0x0, 0x0]).unwrap()
         )
     }
 
@@ -133,7 +133,7 @@ mod tests {
                 motherboard: StatusCode::LAST_COMMAND_FAILED,
                 daughterboard: Some(StatusCode::WATCHDOG_ERROR),
             },
-            parse(&vec![0x2, 0x0, 0x1, 0x0]).unwrap()
+            parse(&[0x2, 0x0, 0x1, 0x0]).unwrap()
         )
     }
 
@@ -144,7 +144,7 @@ mod tests {
                 motherboard: StatusCode::BAD_COMMAND_DATA,
                 daughterboard: None,
             },
-            parse(&vec![0x4, 0x0]).unwrap()
+            parse(&[0x4, 0x0]).unwrap()
         )
     }
 }

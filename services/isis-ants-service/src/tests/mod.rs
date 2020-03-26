@@ -13,10 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
+#![allow(unused_parens)]
+
 use crate::model::*;
 use crate::objects::*;
 use crate::schema::*;
-#[allow(unused_parens)]
 use isis_ants_api::*;
 use kubos_service::{Config, Service};
 use serde_json::json;
@@ -46,7 +48,7 @@ impl IAntS for MockAntS {
     }
 
     fn configure(&self, _config: KANTSController) -> AntSResult<()> {
-        if self.state == true {
+        if self.state {
             Ok(())
         } else {
             Err(AntsError::ConfigError)
@@ -54,7 +56,7 @@ impl IAntS for MockAntS {
     }
 
     fn reset(&self) -> AntSResult<()> {
-        if self.state == true {
+        if self.state {
             Ok(())
         } else {
             Err(AntsError::ConfigError)
@@ -62,7 +64,7 @@ impl IAntS for MockAntS {
     }
 
     fn arm(&self) -> AntSResult<()> {
-        if self.state == true {
+        if self.state {
             Ok(())
         } else {
             Err(AntsError::ConfigError)
@@ -70,7 +72,7 @@ impl IAntS for MockAntS {
     }
 
     fn disarm(&self) -> AntSResult<()> {
-        if self.state == true {
+        if self.state {
             Ok(())
         } else {
             Err(AntsError::ConfigError)
@@ -78,7 +80,7 @@ impl IAntS for MockAntS {
     }
 
     fn deploy(&self, _antenna: KANTSAnt, _force: bool, _timeout: u8) -> AntSResult<()> {
-        if self.state == true {
+        if self.state {
             Ok(())
         } else {
             Err(AntsError::ConfigError)
@@ -86,7 +88,7 @@ impl IAntS for MockAntS {
     }
 
     fn auto_deploy(&self, _timeout: u8) -> AntSResult<()> {
-        if self.state == true {
+        if self.state {
             Ok(())
         } else {
             Err(AntsError::ConfigError)
@@ -94,7 +96,7 @@ impl IAntS for MockAntS {
     }
 
     fn cancel_deploy(&self) -> AntSResult<()> {
-        if self.state == true {
+        if self.state {
             Ok(())
         } else {
             Err(AntsError::ConfigError)
@@ -102,7 +104,7 @@ impl IAntS for MockAntS {
     }
 
     fn get_deploy(&self) -> AntSResult<DeployStatus> {
-        if self.state == true {
+        if self.state {
             Ok(self.deploy_status.clone())
         } else {
             Err(AntsError::GenericError)
@@ -110,7 +112,7 @@ impl IAntS for MockAntS {
     }
 
     fn get_uptime(&self) -> AntSResult<u32> {
-        if self.state == true {
+        if self.state {
             Ok(10)
         } else {
             Ok(0)
@@ -118,7 +120,7 @@ impl IAntS for MockAntS {
     }
 
     fn get_system_telemetry(&self) -> AntSResult<AntsTelemetry> {
-        if self.state == true {
+        if self.state {
             Ok(AntsTelemetry {
                 raw_temp: 15,
                 uptime: 35,
@@ -135,7 +137,7 @@ impl IAntS for MockAntS {
     }
 
     fn get_activation_count(&self, antenna: KANTSAnt) -> AntSResult<u8> {
-        if self.state == true {
+        if self.state {
             match antenna {
                 KANTSAnt::Ant1 => Ok(1),
                 KANTSAnt::Ant2 => Ok(2),
@@ -148,7 +150,7 @@ impl IAntS for MockAntS {
     }
 
     fn get_activation_time(&self, antenna: KANTSAnt) -> AntSResult<u16> {
-        if self.state == true {
+        if self.state {
             match antenna {
                 KANTSAnt::Ant1 => Ok(11),
                 KANTSAnt::Ant2 => Ok(22),
@@ -161,7 +163,7 @@ impl IAntS for MockAntS {
     }
 
     fn watchdog_kick(&self) -> AntSResult<()> {
-        if self.state == true {
+        if self.state {
             Ok(())
         } else {
             Err(AntsError::ConfigError)
@@ -169,7 +171,7 @@ impl IAntS for MockAntS {
     }
 
     fn watchdog_start(&self) -> AntSResult<()> {
-        if self.state == true {
+        if self.state {
             Ok(())
         } else {
             Err(AntsError::ConfigError)
@@ -177,7 +179,7 @@ impl IAntS for MockAntS {
     }
 
     fn watchdog_stop(&self) -> AntSResult<()> {
-        if self.state == true {
+        if self.state {
             assert_eq!(
                 self.watchdog_thread.get(),
                 true,
@@ -191,7 +193,7 @@ impl IAntS for MockAntS {
     }
 
     fn passthrough(&self, _tx: &[u8], rx_in: &mut [u8]) -> AntSResult<()> {
-        if self.state == true {
+        if self.state {
             for (i, elem) in rx_in.iter_mut().enumerate() {
                 *elem = i as u8;
             }

@@ -55,7 +55,7 @@ Services
 
 Kubos services are defined as any persistent process that is used to interact with the satellite.
 Services rarely make decisions, but will allow the user to accomplish typical flight software tasks
-such as telemetry storage, file management, shell access, and hardware interaction.
+such as task scheduling, telemetry storage, file management, shell access, and hardware interaction.
 
 All services expose their functionality via HTTP endpoints which accept :doc:`GraphQL <services/graphql>`
 requests and return JSON responses.
@@ -66,8 +66,8 @@ There are three distinct kinds of services:
 
 - Core services, as the name implies, provide the core functionality of the system. They are
   OBC-independent and are automatically included in KubOS. These services include things like
-  OBC monitoring, telemetry management, delay-tolerant file transfer and shell access, and
-  application management.
+  OBC monitoring, telemetry management, delay-tolerant file transfer and shell access,
+  application management, and task scheduling.
 - Hardware services expose the functionality of a connected hardware device (ADCS, GPS, radio, etc)
   to the rest of the bus. They should be re-usable between missions. KubOS comes with support for a
   certain selection of :ref:`pre-built hardware services <supported-hardware>`.

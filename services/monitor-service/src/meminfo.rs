@@ -100,6 +100,7 @@ impl MemInfo {
 }
 
 #[cfg(test)]
+#[allow(clippy::unreadable_literal)]
 mod tests {
     use super::*;
 

@@ -41,7 +41,7 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
     // Get the storage directory prefix that we'll be using for our
     // temporary/intermediate storage location
     let prefix = match config.get("storage_dir") {
-        Some(val) => val.as_str().and_then(|str| Some(str.to_owned())),
+        Some(val) => val.as_str().map(|str| str.to_owned()),
         None => None,
     };
 
@@ -64,7 +64,7 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
 
     // Get the downlink ip we'll be using when sending responses
     let downlink_ip = match config.get("downlink_ip") {
-        Some(ip) => match ip.as_str().and_then(|ip| Some(ip.to_owned())) {
+        Some(ip) => match ip.as_str().map(|ip| ip.to_owned()) {
             Some(ip) => ip,
             None => "127.0.0.1".to_owned(),
         },
@@ -81,10 +81,7 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
 
     let timeout = config
         .get("timeout")
-        .and_then(|val| {
-            val.as_integer()
-                .and_then(|num| Some(Duration::from_secs(num as u64)))
-        })
+        .and_then(|val| val.as_integer().map(|num| Duration::from_secs(num as u64)))
         .unwrap_or(Duration::from_secs(2));
 
     // Setup map of channel IDs to thread channels

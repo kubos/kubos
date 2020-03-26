@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#![allow(clippy::unreadable_literal)]
+#![allow(clippy::excessive_precision)]
+
 use super::*;
 use crate::model::*;
 use crate::schema::*;
@@ -486,6 +489,7 @@ fn telemetry_nominal() {
 }
 
 #[test]
+#[allow(clippy::cognitive_complexity)]
 fn telemetry_debug_irehs() {
     let mock = MockStream::default();
 

@@ -1,10 +1,28 @@
 Kubos Changelog
 ===============
 
+v1.20.0 - Nov 22 2019
+---------------------
+
+- `Added ability to register apps in a single archive file <https://docs.kubos.com/1.20.0/ecosystem/services/app-service.html#registering>`__
+- Upgraded Rust usage to v1.39.0
+
+Community Contributions
+~~~~~~~~~~~~~~~~~~~~~~~
+
+- Miscellaneous tutorial fixes
+
+Bug Fixes
+~~~~~~~~~
+
+- `Added instructions for changing the KubOS source version when building Kubos Linux <https://docs.kubos.com/1.20.0/deep-dive/klb/configuring-kubos.html#kubos-version-selection>`__
+- `Added instructions for manually upgrading the Rust cross-compile toolchains <https://docs.kubos.com/1.20.0/faq-troubleshooting.html#updating-my-local-rust-installation>`__
+
 v1.19.0 - Oct 30 2019
 ---------------------
 
 - `Added Scheduler Service <https://docs.kubos.com/1.19.0/ecosystem/scheduler.html>`__
+    - **note**: The scheduler service is currently not included in Kubos Linux builds for the iOBC.
 - Updated kubos-shell-client to allow single command execution
 - Updated default ``config.toml`` location from ``/home/system/etc/config.toml`` to ``/etc/kubos-config.toml``
 - `Migrated to new default service ports <https://docs.kubos.com/master/1.19.0/ecosystem/services/service-dev.html#service-configuration>`__

@@ -66,7 +66,7 @@ fn get_telemetry_nominal() {
                     "lockInfo": {
                         "position": [1.1, 2.2, 3.3],
                         "time": {
-                            "ms": 164195000,
+                            "ms": 164_195_000,
                             "week": 3025
                         },
                         "velocity": [4.4, 5.5, 6.6],
@@ -75,7 +75,7 @@ fn get_telemetry_nominal() {
                         "positionStatus": "SOL_COMPUTED",
                         "positionType": "PSRDIFF",
                         "time": {
-                            "ms": 164195000,
+                            "ms": 164_195_000,
                             "week": 3025
                         },
                         "timeStatus": "FINE_STEERING",
@@ -219,7 +219,7 @@ fn get_telemetry_both() {
                     "lockInfo": {
                         "position": [1.1, 2.2, 3.3],
                         "time": {
-                            "ms": 164195000,
+                            "ms": 164_195_000,
                             "week": 3025
                         },
                         "velocity": [4.4, 5.5, 6.6],
@@ -228,7 +228,7 @@ fn get_telemetry_both() {
                         "positionStatus": "SOL_COMPUTED",
                         "positionType": "PSRDIFF",
                         "time": {
-                            "ms": 164195000,
+                            "ms": 164_195_000,
                             "week": 3025
                         },
                         "timeStatus": "FINE_STEERING",

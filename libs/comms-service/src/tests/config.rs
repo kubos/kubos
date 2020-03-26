@@ -19,9 +19,12 @@ use crate::errors::*;
 use crate::service::*;
 use std::sync::Arc;
 
+#[allow(clippy::trivially_copy_pass_by_ref)]
 fn test_read(_read_conn: &u8) -> CommsResult<Vec<u8>> {
     Ok(vec![])
 }
+
+#[allow(clippy::trivially_copy_pass_by_ref)]
 fn test_write(_write_conn: &u8, _data: &[u8]) -> CommsResult<()> {
     Ok(())
 }

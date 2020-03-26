@@ -17,7 +17,8 @@
 use kubos_service::{Config, Service};
 use serde_json::json;
 use std::fs;
-
+use std::path::PathBuf;
+use std::process::Command;
 use tempfile::TempDir;
 
 use crate::registry::*;
@@ -128,7 +129,7 @@ fn register_good_exec() {
     let result: Vec<u8> = request!(service, register_query)
         .body()
         .iter()
-        .map(|entry| *entry)
+        .copied()
         .collect();
     let result: serde_json::Value =
         serde_json::from_str(::std::str::from_utf8(&result).unwrap()).unwrap();
@@ -201,7 +202,7 @@ fn register_good_config() {
     let result: Vec<u8> = request!(service, register_query)
         .body()
         .iter()
-        .map(|entry| *entry)
+        .copied()
         .collect();
     let result: serde_json::Value =
         serde_json::from_str(::std::str::from_utf8(&result).unwrap()).unwrap();
@@ -262,7 +263,7 @@ fn register_no_manifest() {
     let expected = json!({
        "register": {
            "entry": null,
-           "errors": "IO Error: No such file or directory (os error 2)",
+           "errors": "Failed to register app: Unable to load manifest.toml: No such file or directory (os error 2)",
            "success": false,
        }
     });
@@ -620,6 +621,230 @@ fn register_no_active() {
            },
            "errors": "",
            "success": true,
+       }
+    });
+
+    test!(service, register_query, expected);
+}
+
+#[test]
+fn register_good_archive() {
+    let registry_dir = TempDir::new().unwrap();
+    let service = mock_service!(registry_dir);
+
+    let app_dir = TempDir::new().unwrap();
+    let app_bin = app_dir.path().join("dummy-app");
+
+    fs::create_dir(app_bin.clone()).unwrap();
+
+    // Create dummy app file
+    fs::File::create(app_bin.join("dummy")).unwrap();
+
+    // Create manifest file
+    let manifest = r#"
+            name = "dummy"
+            version = "0.0.1"
+            author = "user"
+            "#;
+    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
+
+    let mut command = if PathBuf::from("/usr/bin/tar").exists() {
+        Command::new("/usr/bin/tar")
+    } else if PathBuf::from("/bin/tar").exists() {
+        Command::new("/bin/tar")
+    } else {
+        panic!("Tar command not found");
+    };
+
+    let output = command
+        .current_dir(app_bin)
+        .arg("-czf")
+        .arg(app_dir.path().join("archive.tgz"))
+        .arg("manifest.toml")
+        .arg("dummy")
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    let register_query = format!(
+        r#"mutation {{
+        register(path: \"{}\") {{
+            entry {{
+                active,
+                app {{
+                    author,
+                    config,
+                    name,
+                    version,
+                }}
+            }},
+            errors,
+            success,
+        }}
+    }}"#,
+        app_dir.path().join("archive.tgz").to_str().unwrap()
+    );
+
+    let expected = json!({
+       "register": {
+           "entry": {
+              "active": true,
+               "app": {
+                   "author": "user",
+                   "config": "/etc/kubos-config.toml",
+                   "name": "dummy",
+                   "version": "0.0.1",
+               }
+           },
+           "errors": "",
+           "success": true,
+       }
+    });
+
+    test!(service, register_query, expected);
+}
+
+#[test]
+fn register_archive_bad_structure() {
+    let registry_dir = TempDir::new().unwrap();
+    let service = mock_service!(registry_dir);
+
+    let app_dir = TempDir::new().unwrap();
+    let app_bin = app_dir.path().join("dummy-app");
+
+    fs::create_dir(app_bin.clone()).unwrap();
+
+    // Create dummy app file
+    fs::File::create(app_bin.join("dummy")).unwrap();
+
+    // Create manifest file
+    let manifest = r#"
+            name = "dummy"
+            version = "0.0.1"
+            author = "user"
+            "#;
+    fs::write(app_bin.join("manifest.toml"), manifest).unwrap();
+
+    let mut command = if PathBuf::from("/usr/bin/tar").exists() {
+        Command::new("/usr/bin/tar")
+    } else if PathBuf::from("/bin/tar").exists() {
+        Command::new("/bin/tar")
+    } else {
+        panic!("Tar command not found");
+    };
+
+    let output = command
+        .current_dir(app_dir.path())
+        .arg("-czf")
+        .arg("archive.tgz")
+        .arg("dummy-app/manifest.toml")
+        .arg("dummy-app/dummy")
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+
+    let register_query = format!(
+        r#"mutation {{
+        register(path: \"{}\") {{
+            entry {{
+                active,
+                app {{
+                    author,
+                    config,
+                    name,
+                    version,
+                }}
+            }},
+            errors,
+            success,
+        }}
+    }}"#,
+        app_dir.path().join("archive.tgz").to_str().unwrap()
+    );
+
+    let expected = json!({
+       "register": {
+           "entry": null,
+           "errors": "Failed to register app: Manifest file manifest.toml not found in root of archive. When you create the archive, do so in the application directory, with a command like: tar -czf archive.tgz *",
+           "success": false,
+       }
+    });
+
+    test!(service, register_query, expected);
+}
+
+#[test]
+fn register_archive_no_extension() {
+    let registry_dir = TempDir::new().unwrap();
+    let service = mock_service!(registry_dir);
+
+    let dir = TempDir::new().unwrap();
+
+    fs::File::create(dir.path().join("dummy")).unwrap();
+
+    let register_query = format!(
+        r#"mutation {{
+        register(path: \"{}\") {{
+            entry {{
+                active,
+                app {{
+                    author,
+                    config,
+                    name,
+                    version,
+                }}
+            }},
+            errors,
+            success,
+        }}
+    }}"#,
+        dir.path().join("dummy").to_str().unwrap()
+    );
+
+    let expected = json!({
+       "register": {
+           "entry": null,
+           "errors": "Failed to register app: Provided file is neither a directory nor a tgz archive file",
+           "success": false,
+       }
+    });
+
+    test!(service, register_query, expected);
+}
+
+#[test]
+fn register_archive_wrong_extension() {
+    let registry_dir = TempDir::new().unwrap();
+    let service = mock_service!(registry_dir);
+
+    let dir = TempDir::new().unwrap();
+
+    fs::File::create(dir.path().join("dummy.txt")).unwrap();
+
+    let register_query = format!(
+        r#"mutation {{
+        register(path: \"{}\") {{
+            entry {{
+                active,
+                app {{
+                    author,
+                    config,
+                    name,
+                    version,
+                }}
+            }},
+            errors,
+            success,
+        }}
+    }}"#,
+        dir.path().join("dummy.txt").to_str().unwrap()
+    );
+
+    let expected = json!({
+       "register": {
+           "entry": null,
+           "errors": "Failed to register app: Provided file with extension txt is neither a directory nor a tgz archive file",
+           "success": false,
        }
     });
 
