@@ -24,116 +24,89 @@ use std::time::Duration;
 
 #[allow(clippy::too_many_arguments)]
 fn upload(
-    host_ip: &str,
-    host_port: u16,
-    remote_addr: &str,
+    protocol_instance: FileProtocol,
     source_path: &str,
     target_path: &str,
-    prefix: Option<String>,
-    chunk_size: usize,
-    hold_count: u16,
 ) -> Result<(), failure::Error> {
-    let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
-    let f_protocol =
-        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
-
     info!(
         "Uploading local:{} to remote:{}",
         &source_path, &target_path
     );
 
     // Copy file to upload to temp storage. Calculate the hash and chunk info
-    let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
+    let (hash, num_chunks, mode) = protocol_instance.initialize_file(&source_path)?;
 
     // Generate channel id for transaction
-    let channel = f_protocol.generate_channel()?;
+    let channel = protocol_instance.generate_channel()?;
 
     // Tell our destination the hash and number of chunks to expect
-    f_protocol.send_metadata(channel, &hash, num_chunks)?;
+    protocol_instance.send_metadata(channel, &hash, num_chunks)?;
 
     // Send export command for file
-    f_protocol.send_export(channel, &hash, &target_path, mode)?;
+    protocol_instance.send_export(channel, &hash, &target_path, mode)?;
 
     // Start the engine to send the file data chunks
-    f_protocol.message_engine(
-        |d| f_protocol.recv(Some(d)),
+    protocol_instance.message_engine(
+        |d| protocol_instance.recv(Some(d)),
         Duration::from_secs(2),
         &State::Transmitting,
     )?;
     Ok(())
 }
 
-#[allow(clippy::too_many_arguments)]
 fn download(
-    host_ip: &str,
-    host_port: u16,
-    remote_addr: &str,
+    protocol_instance: FileProtocol,
     source_path: &str,
     target_path: &str,
-    prefix: Option<String>,
-    chunk_size: usize,
-    hold_count: u16,
 ) -> Result<(), failure::Error> {
-    let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
-    let f_protocol =
-        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
-
     info!(
         "Downloading remote: {} to local: {}",
         source_path, target_path
     );
 
     // Generate channel id for transaction
-    let channel = f_protocol.generate_channel()?;
+    let channel = protocol_instance.generate_channel()?;
 
     // Send our file request to the remote addr and verify that it's
     // going to be able to send it
-    f_protocol.send_import(channel, source_path)?;
+    protocol_instance.send_import(channel, source_path)?;
 
     // Wait for the request reply.
     // Note/TODO: We don't use a timeout here because we don't know how long it will
     // take the server to prepare the file we've requested.
     // Larger files (> 100MB) can take over a minute to process.
-    let reply = match f_protocol.recv(None) {
+    let reply = match protocol_instance.recv(None) {
         Ok(message) => message,
         Err(error) => bail!("Failed to import file: {}", error),
     };
 
-    let state = f_protocol.process_message(
+    let state = protocol_instance.process_message(
         reply,
         &State::StartReceive {
             path: target_path.to_string(),
         },
     )?;
 
-    f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), &state)?;
+    protocol_instance.message_engine(
+        |d| protocol_instance.recv(Some(d)),
+        Duration::from_secs(2),
+        &state,
+    )?;
     Ok(())
 }
 
-fn cleanup(
-    host_ip: &str,
-    host_port: u16,
-    remote_addr: &str,
-    hash: Option<String>,
-    prefix: Option<String>,
-    chunk_size: usize,
-    hold_count: u16,
-) -> Result<(), failure::Error> {
+fn cleanup(protocol_instance: FileProtocol, hash: Option<String>) -> Result<(), failure::Error> {
     match &hash {
         Some(s) => info!("Requesting remote cleanup of temp storage for hash {}", s),
         None => info!("Requesting remote cleanup of all temp storage"),
     }
 
-    let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
-    let f_protocol =
-        FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
-
     // Generate channel ID for transaction
-    let channel = f_protocol.generate_channel()?;
+    let channel = protocol_instance.generate_channel()?;
 
     // Send our cleanup request to the remote addr and verify that it's
     // going to be able to send it
-    f_protocol.send_cleanup(channel, hash)?;
+    protocol_instance.send_cleanup(channel, hash)?;
 
     Ok(())
 }
@@ -188,49 +161,81 @@ fn main() {
         )
         .arg(
             Arg::with_name("host_ip")
-                .short("-h")
                 .help("IP address of the local host to use")
+                .long("host_ip")
+                .short("-h")
                 .takes_value(true)
                 .default_value("0.0.0.0"),
         )
         .arg(
             Arg::with_name("host_port")
-                .short("-P")
                 .help("UDP port that the file transfer service will send responses to")
+                .long("host_port")
+                .short("-P")
                 .takes_value(true)
                 .default_value("8080"),
         )
         .arg(
             Arg::with_name("remote_ip")
-                .short("-r")
                 .help("IP address of the file transfer service to connect to")
+                .long("remote_ip")
+                .short("-r")
                 .takes_value(true)
                 .default_value("0.0.0.0"),
         )
         .arg(
             Arg::with_name("remote_port")
-                .short("-p")
                 .help("UDP port of the file transfer service to connect to")
+                .long("remote_port")
+                .short("-p")
                 .takes_value(true)
                 .default_value("8040"),
         )
         .arg(
             Arg::with_name("storage_prefix")
+                .help("Folder name used for transfer storage")
+                .long("storage_prefix")
                 .short("-s")
                 .takes_value(true)
                 .default_value("file-storage"),
         )
         .arg(
-            Arg::with_name("chunk_size")
+            Arg::with_name("transfer_chunk_size")
+                .help("Chunk size used for transfer chunking")
+                .long("transfer_chunk_size")
                 .short("-c")
                 .takes_value(true)
                 .default_value("1024"),
         )
         .arg(
+            Arg::with_name("hash_chunk_size")
+                .help("Chunk size used when hashing for file storage")
+                .long("hash_chunk_size")
+                .takes_value(true)
+                .default_value("2048"),
+        )
+        .arg(
             Arg::with_name("hold_count")
+                .help("Internal hold counter controlling retry length")
+                .long("hold_count")
                 .short("-t")
                 .takes_value(true)
                 .default_value("6"),
+        )
+        .arg(
+            Arg::with_name("inter_chunk_delay")
+                .help("Delay (in milliseconds) between each chunk transmission")
+                .long("inter_chunk_delay")
+                .short("-d")
+                .takes_value(true)
+                .default_value("1"),
+        )
+        .arg(
+            Arg::with_name("max_chunks_transmit")
+                .help("Maximum number of chunks to transmit in one go")
+                .long("max_chunks_transmit")
+                .short("-m")
+                .takes_value(true),
         )
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .setting(AppSettings::DeriveDisplayOrder)
@@ -243,9 +248,39 @@ fn main() {
         args.value_of("remote_ip").unwrap(),
         args.value_of("remote_port").unwrap()
     );
-    let chunk_size: usize = args.value_of("chunk_size").unwrap().parse().unwrap();
+    let transfer_chunk_size: usize = args
+        .value_of("transfer_chunk_size")
+        .unwrap()
+        .parse()
+        .unwrap();
+    let hash_chunk_size: usize = args.value_of("hash_chunk_size").unwrap().parse().unwrap();
     let hold_count: u16 = args.value_of("hold_count").unwrap().parse().unwrap();
     let storage_prefix = args.value_of("storage_prefix").unwrap().to_string();
+    let inter_chunk_delay: u64 = args.value_of("inter_chunk_delay").unwrap().parse().unwrap();
+    let max_chunks_transmit: Option<u32> = if args.is_present("max_chunks_transmit") {
+        Some(
+            args.value_of("max_chunks_transmit")
+                .unwrap()
+                .parse()
+                .unwrap(),
+        )
+    } else {
+        None
+    };
+
+    let protocol_config = FileProtocolConfig::new(
+        Some(storage_prefix),
+        transfer_chunk_size,
+        hold_count,
+        inter_chunk_delay,
+        max_chunks_transmit,
+        hash_chunk_size,
+    );
+    let protocol_instance = FileProtocol::new(
+        &format!("{}:{}", host_ip, host_port),
+        &remote_addr,
+        protocol_config,
+    );
 
     let result = match args.subcommand_name() {
         Some("upload") => {
@@ -260,16 +295,7 @@ fn main() {
                     .into_owned(),
             };
 
-            upload(
-                host_ip,
-                host_port,
-                &remote_addr,
-                &source_path,
-                &target_path,
-                Some(storage_prefix),
-                chunk_size,
-                hold_count,
-            )
+            upload(protocol_instance, &source_path, &target_path)
         }
         Some("download") => {
             let download_args = args.subcommand_matches("download").unwrap();
@@ -283,16 +309,7 @@ fn main() {
                     .into_owned(),
             };
 
-            download(
-                host_ip,
-                host_port,
-                &remote_addr,
-                &source_path,
-                &target_path,
-                Some(storage_prefix),
-                chunk_size,
-                hold_count,
-            )
+            download(protocol_instance, &source_path, &target_path)
         }
         Some("cleanup") => {
             let hash = args
@@ -301,15 +318,7 @@ fn main() {
                 .value_of("hash")
                 .to_owned()
                 .map(|v| v.to_owned());
-            cleanup(
-                host_ip,
-                host_port,
-                &remote_addr,
-                hash,
-                Some(storage_prefix),
-                chunk_size,
-                hold_count,
-            )
+            cleanup(protocol_instance, hash)
         }
         _ => panic!("Invalid command"),
     };

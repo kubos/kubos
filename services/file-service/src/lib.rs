@@ -46,9 +46,15 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
     };
 
     // Get the chunk size to be used for transfers
-    let chunk_size = match config.get("chunk_size") {
+    let transfer_chunk_size = match config.get("transfer_chunk_size") {
         Some(val) => val.as_integer().unwrap_or(1024),
         None => 1024,
+    } as usize;
+
+    // Get the chunk size to be used for hashing
+    let hash_chunk_size = match config.get("hash_chunk_size") {
+        Some(val) => val.as_integer().unwrap_or(2048),
+        None => 2048,
     } as usize;
 
     let hold_count = match config.get("hold_count") {
@@ -71,13 +77,32 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
         None => "127.0.0.1".to_owned(),
     };
 
+    // Get the inter chunk delay value
+    let inter_chunk_delay = config
+        .get("inter_chunk_delay")
+        .and_then(|i| i.as_integer())
+        .unwrap_or(1) as u64;
+
+    // Get the max chunk transmission value
+    let max_chunks_transmit = config
+        .get("max_chunks_transmit")
+        .and_then(|chunks| chunks.as_integer())
+        .map(|chunks| chunks as u32);
+
     info!("Starting file transfer service");
     info!("Listening on {}", host);
     info!("Downlinking to {}:{}", downlink_ip, downlink_port);
 
-    let f_config = FileProtocolConfig::new(prefix, chunk_size, hold_count);
+    let f_config = FileProtocolConfig::new(
+        prefix,
+        transfer_chunk_size,
+        hold_count,
+        inter_chunk_delay,
+        max_chunks_transmit,
+        hash_chunk_size,
+    );
 
-    let c_protocol = cbor_protocol::Protocol::new(&host.clone(), chunk_size);
+    let c_protocol = cbor_protocol::Protocol::new(&host.clone(), transfer_chunk_size);
 
     let timeout = config
         .get("timeout")

@@ -164,13 +164,20 @@ defined in the system's :doc:`config.toml <../services/service-config>` file:
         - ``timeout`` - `Default: 2.` The length of time, in seconds, for which the service
           should wait for new messages from the client once a file protocol transaction has
           been started
-        - ``chunk_size`` - `Default: 4096.` Each file is broken up into equally sized
+        - ``transfer_chunk_size`` - `Default: 1024.` Each file is broken up into equally sized
           chunks prior to transfer. This option specifies the size of those chunks
           in bytes.
+        - ``hash_chunk_size`` - `Default: 2048.` Each file is broken up into equally sized
+          chunks which are used to calculate the file's hash. This option specifies the size
+          of those chunks.
         - ``hold_count`` - `Default: 5.` The number of times the protocol waits for
           a new message before ending the transaction.
         - ``downlink_ip`` - `Required` The IP address that the file service responds to.
         - ``downlink_port`` - `Required` The port that the file service responds to.
+        - ``inter_chunk_delay`` - `Default: 1` The delay, in milliseconds, taken 
+            between the transmission of each chunk.
+        - ``max_chunks_transmit`` - `Optional` The maximum number of chunks to transmit before
+            waiting on a response. The default is to transmit the entire file.
 
     - ``[file-transfer-service.addr]``
 

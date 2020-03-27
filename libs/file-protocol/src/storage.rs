@@ -256,7 +256,8 @@ pub fn validate_file(
 pub fn initialize_file(
     prefix: &str,
     source_path: &str,
-    chunk_size: usize,
+    transfer_chunk_size: usize,
+    hash_chunk_size: usize,
 ) -> Result<(String, u32, u32), ProtocolError> {
     let storage_path = format!("{}/storage", prefix);
 
@@ -278,7 +279,7 @@ pub fn initialize_file(
             action: format!("open {:?}", source_path),
             err,
         })?;
-        let mut reader = BufReader::with_capacity(chunk_size * 2, input);
+        let mut reader = BufReader::with_capacity(hash_chunk_size, input);
         let mut output = File::create(&temp_path).map_err(|err| ProtocolError::StorageError {
             action: format!("create/open {:?} for writing", temp_path),
             err,
@@ -325,11 +326,10 @@ pub fn initialize_file(
         action: format!("open temp file {:?}", temp_path),
         err,
     })?;
-
     let mut index = 0;
 
     loop {
-        let mut chunk = vec![0u8; chunk_size];
+        let mut chunk = vec![0u8; transfer_chunk_size];
         match output.read(&mut chunk) {
             Ok(n) => {
                 if n == 0 {
@@ -346,7 +346,6 @@ pub fn initialize_file(
             }
         }
     }
-
     store_meta(prefix, &hash, index)?;
     match fs::remove_file(&temp_path) {
         Ok(_) => {}

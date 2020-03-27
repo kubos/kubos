@@ -55,10 +55,16 @@ Optional arguments:
     - ``-P {host_port}`` - Default: `8080`. The UDP port that the file transfer service will send responses to.
     - ``-s {storage_prefix}`` - Default: `file-storage`. Name of the directory which should be used
       for temporary file transfer storage.
-    - ``-c {chunk_size}`` - Default: `4096`. Size, in bytes, of the individual chunks the file
-      should be broken into before transfer.
+    - ``-c {transfer_chunk_size}`` - Default: `1024`. Size, in bytes, of the individual chunks the 
+      file should be broken into before transfer.
     - ``-t {hold_count}`` - Default: `6`. The number of times the client should fail to receive data
       from the endpoint service before giving up and exiting.
+    - ``-d {inter_chunk_delay}`` - Default: `1`. The delay in milliseconds between
+      each chunk transmission.
+    - ``-m {max_chunks_transmit}`` - Default: None. The maximum number of chunks to transmit 
+      before waiting for a response. The default is to transmit the whole file.
+    - ``--hash_chunk_size`` - Default: `2048`: The chunk size, in bytes, to be used when 
+      generating the file's hash.
 
 Sending a File to an OBC
 ------------------------
