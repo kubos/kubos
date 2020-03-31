@@ -28,6 +28,15 @@ External
 - `Device Trees <https://www.devicetree.org/>`__
 - `Busybox <https://busybox.net/about.html>`__
 
+System Requirements
+-------------------
+
+We recommend that any board being targeted for Kubos Linux have at least the following resources:
+
+- 400MHz processor with MMU
+- 32MB RAM (64MB+ preferred, particularly if Python is enabled)
+- 100MB storage for OS and upgrade partition, if Python is disabled. 400MB storage if Python is enabled.
+
 System Layout
 -------------
 
