@@ -49,13 +49,15 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
     let transfer_chunk_size = match config.get("transfer_chunk_size") {
         Some(val) => val.as_integer().unwrap_or(1024),
         None => 1024,
-    } as usize;
+    };
 
     // Get the chunk size to be used for hashing
     let hash_chunk_size = match config.get("hash_chunk_size") {
-        Some(val) => val.as_integer().unwrap_or(2048),
-        None => 2048,
+        Some(val) => val.as_integer().unwrap_or(transfer_chunk_size * 2),
+        None => transfer_chunk_size * 2,
     } as usize;
+
+    let transfer_chunk_size = transfer_chunk_size as usize;
 
     let hold_count = match config.get("hold_count") {
         Some(val) => val.as_integer().unwrap_or(5),
@@ -92,6 +94,8 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
     info!("Starting file transfer service");
     info!("Listening on {}", host);
     info!("Downlinking to {}:{}", downlink_ip, downlink_port);
+    info!("Transfer Chunk {}", transfer_chunk_size);
+    info!("Hash Chunk Size {}", hash_chunk_size);
 
     let f_config = FileProtocolConfig::new(
         prefix,

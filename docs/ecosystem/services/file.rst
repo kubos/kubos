@@ -142,7 +142,6 @@ resume transmitting file chunk data.
 .. note::
 
     This timeout is currently hardcoded to two seconds.
-    It will be a configurable option in a future release.
 
 In order to support simultaneous client connections, whenever a message is received
 on the main UDP socket, a new socket is spawned in order to handle the rest
@@ -175,7 +174,7 @@ defined in the system's :doc:`config.toml <../services/service-config>` file:
         - ``downlink_ip`` - `Required` The IP address that the file service responds to.
         - ``downlink_port`` - `Required` The port that the file service responds to.
         - ``inter_chunk_delay`` - `Default: 1` The delay, in milliseconds, taken 
-            between the transmission of each chunk.
+            between the transmission of each chunk. This is to allow manual flow control.
         - ``max_chunks_transmit`` - `Optional` The maximum number of chunks to transmit before
             waiting on a response. The default is to transmit the entire file.
 

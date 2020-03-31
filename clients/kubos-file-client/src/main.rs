@@ -162,39 +162,35 @@ fn main() {
         .arg(
             Arg::with_name("host_ip")
                 .help("IP address of the local host to use")
-                .long("host_ip")
-                .short("-h")
+                .long("host-ip")
                 .takes_value(true)
                 .default_value("0.0.0.0"),
         )
         .arg(
             Arg::with_name("host_port")
                 .help("UDP port that the file transfer service will send responses to")
-                .long("host_port")
-                .short("-P")
+                .long("host-port")
                 .takes_value(true)
                 .default_value("8080"),
         )
         .arg(
             Arg::with_name("remote_ip")
                 .help("IP address of the file transfer service to connect to")
-                .long("remote_ip")
-                .short("-r")
+                .long("remote-ip")
                 .takes_value(true)
                 .default_value("0.0.0.0"),
         )
         .arg(
             Arg::with_name("remote_port")
                 .help("UDP port of the file transfer service to connect to")
-                .long("remote_port")
-                .short("-p")
+                .long("remote-port")
                 .takes_value(true)
                 .default_value("8040"),
         )
         .arg(
             Arg::with_name("storage_prefix")
                 .help("Folder name used for transfer storage")
-                .long("storage_prefix")
+                .long("storage-prefix")
                 .short("-s")
                 .takes_value(true)
                 .default_value("file-storage"),
@@ -202,7 +198,7 @@ fn main() {
         .arg(
             Arg::with_name("transfer_chunk_size")
                 .help("Chunk size used for transfer chunking")
-                .long("transfer_chunk_size")
+                .long("transfer-chunk-size")
                 .short("-c")
                 .takes_value(true)
                 .default_value("1024"),
@@ -210,14 +206,14 @@ fn main() {
         .arg(
             Arg::with_name("hash_chunk_size")
                 .help("Chunk size used when hashing for file storage")
-                .long("hash_chunk_size")
+                .long("hash-chunk-size")
                 .takes_value(true)
                 .default_value("2048"),
         )
         .arg(
             Arg::with_name("hold_count")
                 .help("Internal hold counter controlling retry length")
-                .long("hold_count")
+                .long("hold-count")
                 .short("-t")
                 .takes_value(true)
                 .default_value("6"),
@@ -225,7 +221,7 @@ fn main() {
         .arg(
             Arg::with_name("inter_chunk_delay")
                 .help("Delay (in milliseconds) between each chunk transmission")
-                .long("inter_chunk_delay")
+                .long("inter-chunk-delay")
                 .short("-d")
                 .takes_value(true)
                 .default_value("1"),
@@ -233,7 +229,7 @@ fn main() {
         .arg(
             Arg::with_name("max_chunks_transmit")
                 .help("Maximum number of chunks to transmit in one go")
-                .long("max_chunks_transmit")
+                .long("max-chunks-transmit")
                 .short("-m")
                 .takes_value(true),
         )
