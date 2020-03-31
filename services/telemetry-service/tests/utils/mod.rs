@@ -86,45 +86,59 @@ fn start_telemetry(config: String) -> (JoinHandle<()>, Sender<bool>) {
     return (telem_thread, tx);
 }
 
-pub fn setup(
-    db: &str,
-    service_port: Option<u16>,
-    udp_port: Option<u16>,
-    sql: Option<&str>,
-) -> (JoinHandle<()>, Sender<bool>) {
-    let service_port = service_port.unwrap_or(8111);
-    let udp_port = udp_port.unwrap_or(8112);
-
-    setup_db(&db, sql);
-
-    let config_dir = match Path::new(db).parent() {
-        Some(dir) => dir,
-        None => Path::new(""),
-    };
-    let config_path = config_dir.join("config.toml");
-
-    let config = format!(
-        r#"
-        [telemetry-service]
-        database = "{}"
-        direct_port = {}
-        
-        [telemetry-service.addr]
-        ip = "127.0.0.1"
-        port = {}
-        "#,
-        db, udp_port, service_port
-    );
-
-    let mut config_file = File::create(config_path.clone()).unwrap();
-    config_file.write_all(&config.as_bytes()).unwrap();
-
-    return start_telemetry(config_path.to_str().unwrap().to_owned());
+pub struct TelemetryServiceFixture {
+    join_handle: Option<JoinHandle<()>>,
+    sender: Option<Sender<bool>>,
 }
 
-pub fn teardown(handle: JoinHandle<()>, sender: Sender<bool>) {
-    sender.send(true).unwrap();
-    handle.join().unwrap();
+impl TelemetryServiceFixture {
+    pub fn setup(
+        db: &str,
+        service_port: Option<u16>,
+        udp_port: Option<u16>,
+        sql: Option<&str>,
+    ) -> Self {
+        let service_port = service_port.unwrap_or(8111);
+        let udp_port = udp_port.unwrap_or(8112);
+
+        setup_db(&db, sql);
+
+        let config_dir = match Path::new(db).parent() {
+            Some(dir) => dir,
+            None => Path::new(""),
+        };
+        let config_path = config_dir.join("config.toml");
+
+        let config = format!(
+            r#"
+            [telemetry-service]
+            database = "{}"
+            direct_port = {}
+            
+            [telemetry-service.addr]
+            ip = "127.0.0.1"
+            port = {}
+            "#,
+            db, udp_port, service_port
+        );
+
+        let mut config_file = File::create(config_path.clone()).unwrap();
+        config_file.write_all(&config.as_bytes()).unwrap();
+
+        let (join_handle, sender) = start_telemetry(config_path.to_str().unwrap().to_owned());
+
+        return Self {
+            join_handle: Some(join_handle),
+            sender: Some(sender),
+        };
+    }
+}
+
+impl Drop for TelemetryServiceFixture {
+    fn drop(&mut self) {
+        self.sender.take().unwrap().send(true).unwrap();
+        self.join_handle.take().unwrap().join().unwrap();
+    }
 }
 
 pub fn do_query(service_port: Option<u16>, query: &str) -> serde_json::Value {

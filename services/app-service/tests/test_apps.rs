@@ -96,7 +96,6 @@ macro_rules! test_query {
                 ));
             });
 
-            fixture.teardown();
             assert!(result.is_ok());
         }
     };

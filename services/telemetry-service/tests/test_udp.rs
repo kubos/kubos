@@ -31,7 +31,7 @@ fn test_udp_timestamp() {
     let port = 8111;
     let udp = 8121;
 
-    let (handle, sender) = setup(db, Some(port), Some(udp), None);
+    let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), None);
 
     let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
     let service = format!("0.0.0.0:{}", udp);
@@ -73,7 +73,7 @@ fn test_udp_timestamp() {
         Some(port),
         "{telemetry{timestamp,subsystem,parameter,value}}",
     );
-    teardown(handle, sender);
+
     assert_eq!(
         res,
         json!({
@@ -98,7 +98,7 @@ fn test_udp_no_timestamp() {
     let port = 8112;
     let udp = 8122;
 
-    let (handle, sender) = setup(db, Some(port), Some(udp), None);
+    let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), None);
 
     let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
     let service = format!("0.0.0.0:{}", udp);
@@ -142,7 +142,7 @@ fn test_udp_no_timestamp() {
     ::std::thread::sleep(Duration::from_secs(1));
 
     let res = do_query(Some(port), "{telemetry{subsystem,parameter,value}}");
-    teardown(handle, sender);
+
     assert_eq!(
         res,
         json!({
@@ -167,7 +167,7 @@ fn test_udp_bulk_timestamp() {
     let port = 8113;
     let udp = 8123;
 
-    let (handle, sender) = setup(db, Some(port), Some(udp), None);
+    let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), None);
 
     let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
     let service = format!("0.0.0.0:{}", udp);
@@ -201,7 +201,7 @@ fn test_udp_bulk_timestamp() {
         Some(port),
         "{telemetry{timestamp,subsystem,parameter,value}}",
     );
-    teardown(handle, sender);
+
     assert_eq!(
         res,
         json!({
@@ -226,7 +226,7 @@ fn test_udp_bulk_no_timestamp() {
     let port = 8114;
     let udp = 8124;
 
-    let (handle, sender) = setup(db, Some(port), Some(udp), None);
+    let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), None);
 
     let socket = UdpSocket::bind("0.0.0.0:0").unwrap();
     let service = format!("0.0.0.0:{}", udp);
@@ -258,7 +258,7 @@ fn test_udp_bulk_no_timestamp() {
     ::std::thread::sleep(Duration::from_secs(1));
 
     let res = do_query(Some(port), "{telemetry{subsystem,parameter,value}}");
-    teardown(handle, sender);
+
     assert_eq!(
         res,
         json!({
