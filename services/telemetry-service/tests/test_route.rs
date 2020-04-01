@@ -45,7 +45,7 @@ fn test_route_file() {
     let port = 8111;
     let udp = 8121;
 
-    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
+    let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), Some(SQL));
 
     let output_dir = TempDir::new().unwrap();
     let output_path = output_dir.path().join("output");
@@ -58,8 +58,6 @@ fn test_route_file() {
     );
 
     do_query(Some(port), &query);
-
-    teardown(handle, sender);
 
     let mut output_file = File::open(output_path).unwrap();
     let mut contents = String::new();
@@ -93,7 +91,7 @@ fn test_route_response() {
     let port = 8112;
     let udp = 8122;
 
-    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
+    let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), Some(SQL));
 
     // Use a file that won't have a randomly generated path
     let output_path = "output";
@@ -107,7 +105,6 @@ fn test_route_response() {
 
     let res = do_query(Some(port), &query);
 
-    teardown(handle, sender);
     // Since it's not a temporary file, we'll need to delete it ourselves
     fs::remove_file(output_path).unwrap();
 
@@ -129,7 +126,7 @@ fn test_route_filter() {
     let port = 8113;
     let udp = 8123;
 
-    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
+    let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), Some(SQL));
 
     let output_dir = TempDir::new().unwrap();
     let output_path = output_dir.path().join("output");
@@ -149,8 +146,6 @@ fn test_route_filter() {
     );
 
     do_query(Some(port), &query);
-
-    teardown(handle, sender);
 
     let mut output_file = File::open(output_path).unwrap();
     let mut contents = String::new();
@@ -176,7 +171,7 @@ fn test_route_compress_file() {
     let port = 8114;
     let udp = 8124;
 
-    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
+    let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), Some(SQL));
 
     let output_dir = TempDir::new().unwrap();
     let output_name = "output";
@@ -190,8 +185,6 @@ fn test_route_compress_file() {
     );
 
     do_query(Some(port), &query);
-
-    teardown(handle, sender);
 
     let tar_path = output_dir.path().join(format!("{}.tar.gz", output_name));
     let result_dir = output_dir.path().join("final");
@@ -234,7 +227,7 @@ fn test_route_compress_response() {
     let port = 8115;
     let udp = 8125;
 
-    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
+    let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), Some(SQL));
 
     // Use a file that won't have a randomly generated path
     let output_path = "compressed-output";
@@ -248,7 +241,6 @@ fn test_route_compress_response() {
 
     let res = do_query(Some(port), &query);
 
-    teardown(handle, sender);
     // Since it's not a temporary file, we'll need to delete it ourselves
     fs::remove_file(&format!("{}.tar.gz", output_path)).unwrap();
 
@@ -270,7 +262,7 @@ fn test_route_parameters() {
     let port = 8116;
     let udp = 8126;
 
-    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
+    let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), Some(SQL));
 
     let output_dir = TempDir::new().unwrap();
     let output_path = output_dir.path().join("output");
@@ -288,8 +280,6 @@ fn test_route_parameters() {
     );
 
     do_query(Some(port), &query);
-
-    teardown(handle, sender);
 
     let mut output_file = File::open(output_path).unwrap();
     let mut contents = String::new();
@@ -318,7 +308,7 @@ fn test_route_conflict() {
     let port = 8117;
     let udp = 8127;
 
-    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
+    let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), Some(SQL));
 
     let res = do_query(
         Some(port),
@@ -329,7 +319,7 @@ fn test_route_conflict() {
         }
     }"#,
     );
-    teardown(handle, sender);
+
     assert_eq!(
         res,
         json!({

@@ -271,8 +271,10 @@ impl AppServiceFixture {
         self.join_handle = Some(handle);
         self.sender = Some(tx);
     }
+}
 
-    pub fn teardown(&mut self) {
+impl Drop for AppServiceFixture {
+    fn drop(&mut self) {
         if self.sender.is_some() {
             self.sender.take().unwrap().send(true).unwrap();
         }

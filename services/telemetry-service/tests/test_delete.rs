@@ -43,7 +43,7 @@ fn test_delete_ge() {
     let port = 8112;
     let udp = 8122;
 
-    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
+    let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), Some(SQL));
 
     let mutation = r#"mutation {
             delete(timestampGe: 1004) {
@@ -104,8 +104,6 @@ fn test_delete_ge() {
     });
     let query_result = do_query(Some(port), query);
 
-    teardown(handle, sender);
-
     assert_eq!(mutation_result, mutation_expected);
     assert_eq!(query_result, query_expected);
 }
@@ -119,7 +117,7 @@ fn test_delete_le() {
     let port = 8113;
     let udp = 8123;
 
-    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
+    let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), Some(SQL));
 
     let mutation = r#"mutation {
             delete(timestampLe: 1008) {
@@ -168,8 +166,6 @@ fn test_delete_le() {
     });
     let query_result = do_query(Some(port), query);
 
-    teardown(handle, sender);
-
     assert_eq!(mutation_result, mutation_expected);
     assert_eq!(query_result, query_expected);
 }
@@ -183,7 +179,7 @@ fn test_delete_range() {
     let port = 8114;
     let udp = 8124;
 
-    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
+    let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), Some(SQL));
 
     let mutation = r#"mutation {
             delete(timestampGe: 1001, timestampLe: 1009) {
@@ -232,8 +228,6 @@ fn test_delete_range() {
     });
     let query_result = do_query(Some(port), query);
 
-    teardown(handle, sender);
-
     assert_eq!(mutation_result, mutation_expected);
     assert_eq!(query_result, query_expected);
 }
@@ -247,7 +241,7 @@ fn test_delete_subsystem() {
     let port = 8115;
     let udp = 8125;
 
-    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
+    let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), Some(SQL));
 
     let mutation = r#"mutation {
             delete(subsystem: "eps") {
@@ -310,8 +304,6 @@ fn test_delete_subsystem() {
     });
     let query_result = do_query(Some(port), query);
 
-    teardown(handle, sender);
-
     assert_eq!(mutation_result, mutation_expected);
     assert_eq!(query_result, query_expected);
 }
@@ -325,7 +317,7 @@ fn test_delete_parameter() {
     let port = 8116;
     let udp = 8126;
 
-    let (handle, sender) = setup(db, Some(port), Some(udp), Some(SQL));
+    let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), Some(SQL));
 
     let mutation = r#"mutation {
             delete(parameter: "voltage") {
@@ -379,8 +371,6 @@ fn test_delete_parameter() {
         }
     });
     let query_result = do_query(Some(port), query);
-
-    teardown(handle, sender);
 
     assert_eq!(mutation_result, mutation_expected);
     assert_eq!(query_result, query_expected);

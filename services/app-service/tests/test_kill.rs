@@ -148,8 +148,6 @@ fn kill_good() {
         }"#,
     );
 
-    fixture.teardown();
-
     assert_eq!(
         result["appStatus"][0]["name"].as_str().unwrap(),
         "rust-proj"
@@ -193,8 +191,6 @@ fn kill_app_bad_name() {
            "success": false
         }
     });
-
-    fixture.teardown();
 
     assert_eq!(result, expected);
 }
@@ -246,8 +242,6 @@ fn kill_app_not_running() {
            "success": false
         }
     });
-
-    fixture.teardown();
 
     assert_eq!(result, expected);
 }
@@ -325,8 +319,6 @@ fn kill_custom_signal() {
             }
         }"#,
     );
-
-    fixture.teardown();
 
     assert_eq!(
         result["appStatus"][0]["name"].as_str().unwrap(),
