@@ -31,11 +31,11 @@ External
 System Requirements
 -------------------
 
-We recommend that any board being targeted for Kubos Linux have at least the following resources:
+We recommend that any board being targeted for Kubos Linux have **at least** the following resources:
 
 - 400MHz processor with MMU
-- 32MB RAM (64MB+ preferred, particularly if Python is enabled)
-- 100MB storage for OS and upgrade partition, if Python is disabled. 400MB storage if Python is enabled.
+- 64MB RAM (32MB is sufficient if Python is disabled)
+- 400MB storage for OS and upgrade partition (100MB is sufficient if Python is disabled)
 
 System Layout
 -------------
