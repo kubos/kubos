@@ -143,7 +143,6 @@ fn uninstall_last_app() {
         "No such file or directory (os error 2)"
     );
 
-    fixture.teardown();
     assert!(result.is_ok());
 }
 
@@ -196,7 +195,6 @@ fn uninstall_notlast_app() {
     // Our app directory should still exist since there's a version left in the registry
     assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
 
-    fixture.teardown();
     assert!(result.is_ok());
 }
 
@@ -255,7 +253,6 @@ fn uninstall_all_app() {
     // Our app directory should now no longer exist
     assert_eq!(fixture.registry_dir.path().join("dummy").exists(), false);
 
-    fixture.teardown();
     assert!(result.is_ok());
 }
 
@@ -347,7 +344,6 @@ fn uninstall_new_app() {
     // Our app directory should still exist since there's a version left in the registry
     assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
 
-    fixture.teardown();
     assert!(result.is_ok());
 }
 
@@ -410,7 +406,6 @@ fn uninstall_unmonitor() {
         assert!(result["appStatus"].as_array().unwrap().is_empty());
     });
 
-    fixture.teardown();
     assert!(result.is_ok());
 }
 
@@ -493,7 +488,6 @@ fn uninstall_all_unmonitor() {
     // Our app directory should now no longer exist
     assert_eq!(fixture.registry_dir.path().join("dummy").exists(), false);
 
-    fixture.teardown();
     assert!(result.is_ok());
 }
 
@@ -546,8 +540,6 @@ fn uninstall_running() {
             result
         );
     });
-
-    fixture.teardown();
 
     assert!(result.is_ok());
 
@@ -609,8 +601,6 @@ fn uninstall_all_running() {
             result
         );
     });
-
-    fixture.teardown();
 
     assert!(result.is_ok());
 
@@ -680,7 +670,6 @@ fn uninstall_kill() {
     assert!(signal::kill(pid, None).is_ok());
     thread::sleep(Duration::from_secs(3));
 
-    fixture.teardown();
     // Now it should be dead
     assert!(!signal::kill(pid, None).is_ok());
 }

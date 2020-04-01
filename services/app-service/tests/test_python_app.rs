@@ -100,8 +100,6 @@ fn app_single_pos_arg() {
 
     thread::sleep(Duration::from_millis(400));
 
-    fixture.teardown();
-
     assert!(result["startApp"]["success"].as_bool().unwrap());
 }
 
@@ -137,8 +135,6 @@ fn app_single_flag() {
 
     thread::sleep(Duration::from_millis(400));
 
-    fixture.teardown();
-
     assert!(result["startApp"]["success"].as_bool().unwrap());
 }
 
@@ -173,8 +169,6 @@ fn app_flag_arg() {
     );
 
     thread::sleep(Duration::from_millis(400));
-
-    fixture.teardown();
 
     assert!(result["startApp"]["success"].as_bool().unwrap());
 }
@@ -212,8 +206,6 @@ fn app_failure() {
     );
 
     thread::sleep(Duration::from_millis(400));
-
-    fixture.teardown();
 
     assert_eq!(
         result["startApp"]["errors"].as_str().unwrap(),

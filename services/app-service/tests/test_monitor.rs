@@ -165,8 +165,6 @@ fn monitor_good() {
         }"#,
     );
 
-    fixture.teardown();
-
     assert_eq!(
         result["appStatus"][0]["name"].as_str().unwrap(),
         "rust-proj"
@@ -211,8 +209,6 @@ fn monitor_existing() {
 
     // If we try to start the app a second time, it should fail
     let result = send_query(config.clone(), start_app);
-
-    fixture.teardown();
 
     assert_eq!(
         result["startApp"]["errors"].as_str().unwrap(),

@@ -28,13 +28,12 @@ macro_rules! test_mutation_query_results {
         let port: u16 = 8110 + $port_offset;
         let udp: u16 = 8210 + $port_offset;
 
-        let (handle, sender) = setup(db, Some(port), Some(udp), None);
+        let _fixture = TelemetryServiceFixture::setup(db, Some(port), Some(udp), None);
         let mutation_expected = json!($mutation_expected);
         let mutation_result = do_query(Some(port), $mutation);
         let query_expected = json!($query_expected);
 
         let query_result = do_query(Some(port), $query);
-        teardown(handle, sender);
 
         assert_eq!(mutation_result, mutation_expected);
         assert_eq!(query_result, query_expected);
