@@ -23,7 +23,7 @@
 //! use std::time::Duration;
 //!
 //! fn upload() -> Result<(), ProtocolError> {
-//!     let config = FileProtocolConfig::new(Some("storage/dir".to_owned()), 4096, 5);
+//!     let config = FileProtocolConfig::new(Some("storage/dir".to_owned()), 1024, 5, 1, None, 2048);
 //!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", config);
 //!
 //!     # ::std::fs::File::create("client.txt").unwrap();
@@ -54,7 +54,7 @@
 //! use std::time::Duration;
 //!
 //! fn download() -> Result<(), ProtocolError> {
-//!     let config = FileProtocolConfig::new(None, 4096, 5);
+//!     let config = FileProtocolConfig::new(None, 1024, 5, 1, None, 2048);
 //!     let f_protocol = FileProtocol::new("0.0.0.0", "0.0.0.0:7000", config);
 //!
 //!     let channel_id = f_protocol.generate_channel()?;
