@@ -102,8 +102,6 @@ fn app_no_args() {
         }"#,
     );
 
-    fixture.teardown();
-
     // The test app is setup to verify arguments, so for this case we want to make sure it failed
     // as expected
     assert_eq!(
@@ -142,8 +140,6 @@ fn app_single_pos_arg() {
         }"#,
     );
 
-    fixture.teardown();
-
     assert!(result["startApp"]["success"].as_bool().unwrap());
 }
 
@@ -176,8 +172,6 @@ fn app_single_flag() {
             }
         }"#,
     );
-
-    fixture.teardown();
 
     assert!(result["startApp"]["success"].as_bool().unwrap());
 }
@@ -212,8 +206,6 @@ fn app_flag_arg() {
         }"#,
     );
 
-    fixture.teardown();
-
     assert!(result["startApp"]["success"].as_bool().unwrap());
 }
 
@@ -246,8 +238,6 @@ fn app_custom_config() {
             }
         }"#,
     );
-
-    fixture.teardown();
 
     assert!(result["startApp"]["success"].as_bool().unwrap());
 }

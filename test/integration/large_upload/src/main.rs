@@ -34,7 +34,8 @@ macro_rules! service_new {
                         r#"
                 [file-transfer-service]
                 storage_dir = "{}"
-                chunk_size = {}
+                transfer_chunk_size = {}
+                hash_chunk_size = {}
                 hold_count = 5
                 downlink_ip = "127.0.0.1"
                 downlink_port = {}
@@ -42,7 +43,11 @@ macro_rules! service_new {
                 ip = "127.0.0.1"
                 port = {}
                 "#,
-                        $storage_dir, $chunk_size, $down_port, $port
+                        $storage_dir,
+                        $chunk_size,
+                        $chunk_size * 64,
+                        $down_port,
+                        $port
                     ),
                 )
                 .unwrap(),
@@ -123,8 +128,15 @@ pub fn upload(
     prefix: Option<String>,
     chunk_size: u32,
 ) -> Result<String, ProtocolError> {
-    let hold_count = 5;
-    let f_config = FileProtocolConfig::new(prefix, chunk_size as usize, hold_count);
+    let hold_count = 20;
+    let f_config = FileProtocolConfig::new(
+        prefix,
+        chunk_size as usize,
+        hold_count,
+        1,
+        None,
+        (chunk_size as usize) * 64,
+    );
     let f_protocol =
         FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 

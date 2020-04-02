@@ -30,9 +30,9 @@ fn test() {
     let db_dir = TempDir::new().unwrap();
     let db_path = db_dir.path().join("test.db");
     let db = db_path.to_str().unwrap();
-    let (handle, sender) = setup(db, None, None, Some(SQL));
+    let _fixture = TelemetryServiceFixture::setup(db, None, None, Some(SQL));
     let res = do_query(None, "{telemetry{timestamp,subsystem,parameter,value}}");
-    teardown(handle, sender);
+
     assert_eq!(
         res,
         json!({

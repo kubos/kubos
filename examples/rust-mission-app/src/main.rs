@@ -126,8 +126,8 @@ fn main() -> Result<(), Error> {
                     }
                 }
                 Err(err) => {
-                    error!("Monitor service mutation failed: {}", err);
-                    bail!("Monitor service mutation failed: {}", err);
+                    error!("Telemetry service mutation failed: {}", err);
+                    bail!("Telemetry service mutation failed: {}", err);
                 }
             }
         }

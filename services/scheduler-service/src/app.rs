@@ -41,8 +41,9 @@ pub struct StartAppGraphQL {
 
 // Helper function for sending query to app service
 pub fn service_query(query: &str, hosturl: &str) -> Result<StartAppGraphQL, SchedulerError> {
+    // The app service will wait 300ms to see if an app completes before returning its response to us
     let client = Client::builder()
-        .timeout(Duration::from_millis(200))
+        .timeout(Duration::from_millis(350))
         .build()
         .map_err(|e| SchedulerError::QueryError { err: e.to_string() })?;
     let mut map = HashMap::new();
