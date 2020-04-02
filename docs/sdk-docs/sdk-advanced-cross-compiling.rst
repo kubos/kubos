@@ -72,11 +72,3 @@ Then build with::
 
     xargo build --target target --release
     
-
-For csbr port
--------------
-
-gcc complained ``error while loading shared libraries: libmpfr.so.4: cannot open
-shared object file: No such file or directory``, the shared library did not exist in
-the libs for cross compiling. Fixed this by cloning the ``backtrace-rs`` project and
-modifying the ``backtrace-sys`` subcrate to not build for this target.
