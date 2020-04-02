@@ -253,83 +253,45 @@ pub fn validate_file(
 /// Create temporary folder for chunks
 /// Stream copy file from mutable space to immutable space
 /// Move folder to hash of contents
+/// Import file into chunked storage for transfer
 pub fn initialize_file(
     prefix: &str,
     source_path: &str,
-    chunk_size: usize,
+    transfer_chunk_size: usize,
+    hash_chunk_size: usize,
 ) -> Result<(String, u32, u32), ProtocolError> {
     let storage_path = format!("{}/storage", prefix);
 
+    // Confirm file exists
     fs::metadata(source_path).map_err(|err| ProtocolError::StorageError {
         action: format!("stat file {}", source_path),
         err,
     })?;
 
-    // Copy input file to storage area and calculate hash
+    // Create necessary storage directory
     fs::create_dir_all(&storage_path).map_err(|err| ProtocolError::StorageError {
         action: format!("create dir {}", storage_path),
         err,
     })?;
 
+    // Create a temp copy of the file to use for hashing and chunking
     let temp_path = Path::new(&storage_path).join(format!(".{}", time::get_time().nsec));
-    let mut hasher = Blake2s::new(HASH_SIZE);
-    {
-        let input = File::open(&source_path).map_err(|err| ProtocolError::StorageError {
-            action: format!("open {:?}", source_path),
-            err,
-        })?;
-        let mut reader = BufReader::with_capacity(chunk_size * 2, input);
-        let mut output = File::create(&temp_path).map_err(|err| ProtocolError::StorageError {
-            action: format!("create/open {:?} for writing", temp_path),
-            err,
-        })?;
+    fs::copy(&source_path, &temp_path).map_err(|err| ProtocolError::StorageError {
+        action: format!("copy {:?} to temp file {:?}", source_path, temp_path),
+        err,
+    })?;
 
-        // Need to bring in blake2fs here to create hash
-        loop {
-            let length = {
-                let chunk = reader
-                    .fill_buf()
-                    .map_err(|err| ProtocolError::StorageError {
-                        action: "read chunk from source".to_owned(),
-                        err,
-                    })?;
-                if chunk.is_empty() {
-                    output
-                        .sync_all()
-                        .map_err(|err| ProtocolError::StorageError {
-                            action: format!("failed to sync {:?}", temp_path),
-                            err,
-                        })?;
-                    break;
-                }
-                hasher.update(&chunk);
-                output
-                    .write(&chunk)
-                    .map_err(|err| ProtocolError::StorageError {
-                        action: "write chunk".to_owned(),
-                        err,
-                    })?;
-                chunk.len()
-            };
-            reader.consume(length);
-            thread::sleep(Duration::from_millis(2));
-        }
-    }
-    let hash_result = hasher.finalize();
-    let mut hash = String::from("");
-    for c in hash_result.as_bytes().iter() {
-        hash = format!("{}{:02x}", hash, c);
-    }
+    // Calculate hash of temp file
+    let hash = calc_file_hash(&source_path, hash_chunk_size)?;
 
+    // Chunk and store temp file into hash directory
     let mut output = File::open(&temp_path).map_err(|err| ProtocolError::StorageError {
         action: format!("open temp file {:?}", temp_path),
         err,
     })?;
-
     let mut index = 0;
-
     loop {
-        let mut chunk = vec![0u8; chunk_size];
+        let mut chunk = vec![0u8; transfer_chunk_size];
         match output.read(&mut chunk) {
             Ok(n) => {
                 if n == 0 {
@@ -346,7 +308,6 @@ pub fn initialize_file(
             }
         }
     }
-
     store_meta(prefix, &hash, index)?;
     match fs::remove_file(&temp_path) {
         Ok(_) => {}
@@ -360,14 +321,15 @@ pub fn initialize_file(
     }
 }
 
-// Copy temporary data chunks into permanent file?
+// Export received chunks into final file and verify correct file hash
 pub fn finalize_file(
     prefix: &str,
     hash: &str,
     target_path: &str,
     mode: Option<u32>,
+    hash_chunk_size: usize,
 ) -> Result<(), ProtocolError> {
-    // Double check that all the chunks of the file are present and the hash matches up
+    // Double check that all the chunks of the file are present
     let (result, _) = validate_file(prefix, hash, None)?;
 
     if !result {
@@ -385,6 +347,7 @@ pub fn finalize_file(
         err,
     })?;
 
+    // Set exported file's mode
     if let Some(mode_val) = mode {
         file.set_permissions(Permissions::from_mode(mode_val))
             .map_err(|err| ProtocolError::StorageError {
@@ -393,8 +356,7 @@ pub fn finalize_file(
             })?;
     }
 
-    let mut calc_hash = Blake2s::new(HASH_SIZE);
-
+    // Iterate through chunks and reassemble file
     let mut load_chunk_err = None;
     for chunk_num in 0..num_chunks {
         let chunk = match load_chunk(prefix, hash, chunk_num) {
@@ -410,8 +372,6 @@ pub fn finalize_file(
             }
         };
 
-        // Update our verification hash
-        calc_hash.update(&chunk);
         // Write the chunk to the destination file
         file.write_all(&chunk)
             .map_err(|err| ProtocolError::StorageError {
@@ -424,16 +384,11 @@ pub fn finalize_file(
         return Err(e);
     }
 
-    let calc_hash_str = calc_hash
-        .finalize()
-        .as_bytes()
-        .iter()
-        .map(|val| format!("{:02x}", val))
-        .collect::<String>();
+    // Calculate hash of exported file
+    let calc_hash_str = calc_file_hash(&target_path, hash_chunk_size)?;
 
+    // Final determination if file was correctly received and assembled
     if calc_hash_str == hash {
-        // TODO: Do we want to clean up the temporary directory here?
-        // Alternatively, the service can be resposible for that
         Ok(())
     } else {
         // If the hash doesn't match then we start over
@@ -474,4 +429,40 @@ pub fn delete_storage(prefix: &str) -> Result<(), ProtocolError> {
     })?;
 
     Ok(())
+}
+
+/// Calculate the blake2s hash for a file at given path
+fn calc_file_hash(path: &str, hash_chunk_size: usize) -> Result<String, ProtocolError> {
+    let mut hasher = Blake2s::new(HASH_SIZE);
+    let input = File::open(&path).map_err(|err| ProtocolError::StorageError {
+        action: format!("open {:?}", path),
+        err,
+    })?;
+    let mut reader = BufReader::with_capacity(hash_chunk_size, input);
+
+    // Need to bring in blake2fs here to create hash
+    loop {
+        let length = {
+            let chunk = reader
+                .fill_buf()
+                .map_err(|err| ProtocolError::StorageError {
+                    action: "read chunk from source".to_owned(),
+                    err,
+                })?;
+            if chunk.is_empty() {
+                break;
+            }
+            hasher.update(&chunk);
+            chunk.len()
+        };
+        reader.consume(length);
+        thread::sleep(Duration::from_millis(2));
+    }
+
+    Ok(hasher
+        .finalize()
+        .as_bytes()
+        .iter()
+        .map(|val| format!("{:02x}", val))
+        .collect::<String>())
 }
