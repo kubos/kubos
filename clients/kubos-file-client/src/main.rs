@@ -163,6 +163,7 @@ fn main() {
             Arg::with_name("host_ip")
                 .help("IP address of the local host to use")
                 .long("host-ip")
+                .short("-h")
                 .takes_value(true)
                 .default_value("0.0.0.0"),
         )
@@ -170,6 +171,7 @@ fn main() {
             Arg::with_name("host_port")
                 .help("UDP port that the file transfer service will send responses to")
                 .long("host-port")
+                .short("-P")
                 .takes_value(true)
                 .default_value("8080"),
         )
@@ -177,6 +179,7 @@ fn main() {
             Arg::with_name("remote_ip")
                 .help("IP address of the file transfer service to connect to")
                 .long("remote-ip")
+                .short("-r")
                 .takes_value(true)
                 .default_value("0.0.0.0"),
         )
@@ -184,6 +187,7 @@ fn main() {
             Arg::with_name("remote_port")
                 .help("UDP port of the file transfer service to connect to")
                 .long("remote-port")
+                .short("-p")
                 .takes_value(true)
                 .default_value("8040"),
         )
