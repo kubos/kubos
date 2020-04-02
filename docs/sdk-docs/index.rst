@@ -65,6 +65,7 @@ This documentation section contains the various guides related to using the Kubo
     - :doc:`sdk-rust` - How to develop and run Kubos projects using Rust
     - :doc:`sdk-python` - How to develop and run Kubos projects using Python
     - :doc:`sdk-upgrading` - How to upgrade to the latest version of the Kubos SDK
+    - :doc:`sdk-advanced-cross-compiling` - How to cross compile unsupported targets with Rust
 
 .. toctree::
     :hidden:
@@ -74,3 +75,4 @@ This documentation section contains the various guides related to using the Kubo
     sdk-python
     sdk-c
     Upgrading the Kubos SDK <sdk-upgrading>
+    sdk-advanced-cross-compiling
