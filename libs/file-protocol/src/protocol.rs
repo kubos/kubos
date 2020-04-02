@@ -415,7 +415,13 @@ impl Protocol {
         target_path: &str,
         mode: Option<u32>,
     ) -> Result<(), ProtocolError> {
-        match storage::finalize_file(&self.config.storage_prefix, hash, target_path, mode) {
+        match storage::finalize_file(
+            &self.config.storage_prefix,
+            hash,
+            target_path,
+            mode,
+            self.config.hash_chunk_size,
+        ) {
             Ok(_) => {
                 self.send(&messages::operation_success(channel_id, hash)?)?;
                 storage::delete_file(&self.config.storage_prefix, hash)?;
