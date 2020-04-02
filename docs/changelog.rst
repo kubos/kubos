@@ -1,6 +1,20 @@
 Kubos Changelog
 ===============
 
+v1.21.0 - Apr 2 2020
+--------------------
+
+- `Added new config options to help fine-tune file transfers <https://docs.kubos.com/master/1.21.0/ecosystem/services/file.html#configuration>`__
+- `Added Kubos Linux system requirements description to docs <https://docs.kubos.com/master/1.21.0/obc-docs/porting-kubos.html#system-requirements>`__
+- `Added basic instructions on how to cross-compile for targets which are not fully supported by Rust <https://docs.kubos.com/master/1.21.0/sdk-docs/sdk-advanced-cross-compiling.html>`__
+- Improved first-time user instructions
+
+Bug Fixes
+~~~~~~~~~
+
+- Fixed scheduler service's wait time after requesting an app be started
+- Corrected Rust-based example mission app behavior when run locally
+
 v1.20.0 - Nov 22 2019
 ---------------------
 
