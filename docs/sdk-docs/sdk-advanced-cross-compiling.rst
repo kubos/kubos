@@ -25,9 +25,10 @@ the following options::
 If the desired target is under **Tier 2.5** or **Tier 3** then it likely
 cannot be added directly via ``rustup`` and will required additional work.
 
-First these two dependencies need to be installed:
+First these dependencies need to be installed::
 
     $ cargo install xargo
+    $ rustup default nightly-2020-01-29
     $ rustup component add rust-src
 
 You will also need a functional gcc cross-compiling toolchain in
@@ -39,7 +40,7 @@ to beginning to cross compile::
     $ export CC=$TOOLCHAIN/bin/target-triple-gcc
     $ export CXX=$TOOLCHAIN/bin/target-triple-g++
 
-Now run this command in your Rust project:
+Now run this command in your Rust project::
 
     $ xargo build --target target-triple-here
 
@@ -53,6 +54,7 @@ Now create the following files in your Rust project:
     stage = 0
 
 ``.cargo/config``::
+
     [target.target-triple]
     linker = "$TOOLCHAIN/toolchain-name-gcc"
     ar = "$TOOLCHAIN/toolchain-name-ar"
