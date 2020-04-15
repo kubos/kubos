@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017 Kubos Corporation
+// Copyright (C) 2020 Kubos Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
+
+// Contributed by Xueliang Bai <x.bai@sydney.edu.au> on behalf of the
+// ARC Training Centre for CubeSats, UAVs & Their Applications (CUAVA) team (www.cuava.com.au)
+// at the University of Sydney
 
 use crate::model::*;
 use crate::objects::*;
