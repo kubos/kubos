@@ -27,7 +27,7 @@ pub struct EpsSystemConfig {
 impl EpsSystemConfig {
     #[doc(hidden)]
     pub fn new(k_epssysconf: &ffi::EpsSystemConfig) -> Result<EpsSystemConfig, EpsError> {
-        let epssysconf = EpsSystemConfig {
+        Ok(EpsSystemConfig {
             ppt_mode: k_epssysconf.ppt_mode,
             battheater_mode: k_epssysconf.battheater_mode,
             battheater_low: k_epssysconf.battheater_low,
@@ -37,8 +37,7 @@ impl EpsSystemConfig {
             output_initial_on_delay: k_epssysconf.output_initial_on_delay,
             output_initial_off_delay: k_epssysconf.output_initial_off_delay,
             vboost: k_epssysconf.vboost,
-        };
-        Ok(epssysconf)
+        })
     }
 }
 
@@ -62,16 +61,14 @@ pub struct EpsBatteryConfig {
 impl EpsBatteryConfig {
     #[doc(hidden)]
     pub fn new(k_epsbatconf: &ffi::EpsBatteryConfig) -> Result<EpsBatteryConfig, EpsError> {
-        let epsbatconf = EpsBatteryConfig {
+        Ok(EpsBatteryConfig {
             batt_maxvoltage: k_epsbatconf.batt_maxvoltage,
             batt_safevoltage: k_epsbatconf.batt_safevoltage,
             batt_criticalvoltage: k_epsbatconf.batt_criticalvoltage,
             batt_normalvoltage: k_epsbatconf.batt_normalvoltage,
             reserved1: k_epsbatconf.reserved1,
             reserved2: k_epsbatconf.reserved2,
-        };
-
-        Ok(epsbatconf)
+        })
     }
 }
 
@@ -129,7 +126,7 @@ pub struct EpsHk {
 impl EpsHk {
     #[doc(hidden)]
     pub fn new(k_epshk: &ffi::EpsHk) -> Result<EpsHk, EpsError> {
-        let epshk = EpsHk {
+        Ok(EpsHk {
             vboost: k_epshk.vboost,
             vbatt: k_epshk.vbatt,
             curin: k_epshk.curin,
@@ -153,7 +150,6 @@ impl EpsHk {
             batt_mode: k_epshk.batt_mode,
             ppt_mode: k_epshk.ppt_mode,
             reserved2: k_epshk.reserved2,
-        };
-        Ok(epshk)
+        })
     }
 }

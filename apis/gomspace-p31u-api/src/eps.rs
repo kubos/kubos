@@ -1,3 +1,24 @@
+//
+// Copyright (C) 2020 Kubos Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License")
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// The API wrapper is contributed by Xueliang Bai <x.bai@sydney.edu.au> on behalf of the
+// ARC Training Centre for CubeSats, UAVs & Their Applications (CUAVA) team (www.cuava.com.au)
+// at the University of Sydney
+
+//! Kubos API wrapper for interacting with [GomSpace p31u EPS]
+
 /*
  * Note that the conf save function is not implemented
  * so the EPS's default seting can't be reconfigured in orbit.
@@ -10,9 +31,7 @@
 use crate::ffi;
 use crate::object::*;
 use failure::Fail;
-//use std::error::Error;
 use std::ptr;
-//use std::io;
 
 /// EpsError
 ///
@@ -23,7 +42,6 @@ pub enum EpsError {
     #[fail(display = "Generic Error")]
     GenericError,
     /// Configuration error. Thrown when a parameter passed to a C API function
-    /// is out-of-bounds => EPS_ERROR_CONFIG
     #[fail(display = "Configuration error")]
     ConfigError,
 
@@ -90,8 +108,6 @@ pub trait GsEps: Send {
     fn watchdog_kick(&self) -> EpsResult<()>;
     /// Pass a data packet directly through to the device
     fn passthrough(&self, tx: &[u8], rx: &mut [u8]) -> EpsResult<()>;
-    // fn passthrough(&self,tx:*mut u8,tx_len:i32,rx:*mut u8,rx_len:i32) -> EpsResult<()>;
-    //	fn prv_transfer(&self, tx:*const u8,tx_len:i32,rx:*mut u8,rx_len:i32) -> EpsResult<()>;
 }
 
 /// Structure for interacting with a GomSpace EPS System
@@ -198,10 +214,6 @@ impl GsEps for Eps {
 
         match unsafe { ffi::k_eps_configure_system(&epssysconf) } {
             ffi::KEPSStatus::EpsOk => Ok(()),
-            // {
-            // let sysconf = EpsSystemConfig :: new(&mut epssysconf)?;
-            // Ok(sysconf)
-            // }
             ffi::KEPSStatus::EpsI2CError => Err(EpsError::I2cError),
             ffi::KEPSStatus::EpsErrorConfig => Err(EpsError::ConfigError),
             ffi::KEPSStatus::EpsErrorInternal => Err(EpsError::InternalError),
@@ -240,10 +252,6 @@ impl GsEps for Eps {
         };
         match unsafe { ffi::k_eps_configure_battery(&epsbatconf) } {
             ffi::KEPSStatus::EpsOk => Ok(()),
-            // {
-            //     let battconf = EpsBatteryConfig :: new (&mut epsbattconf)?;
-            //     Ok(battconf)
-            // },
             ffi::KEPSStatus::EpsI2CError => Err(EpsError::I2cError),
             ffi::KEPSStatus::EpsErrorConfig => Err(EpsError::ConfigError),
             ffi::KEPSStatus::EpsErrorInternal => Err(EpsError::InternalError),

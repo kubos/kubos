@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2017 Kubos Corporation
+// Copyright (C) 2020 Kubos Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Contributed by Xueliang Bai <x.bai@sydney.edu.au> on behalf of the
+// ARC Training Centre for CubeSats, UAVs & Their Applications (CUAVA) team (www.cuava.com.au)
+// at the University of Sydney
 
 //! Kubos Service for interacting with [GomSpace p31u EPS]
 //!
@@ -28,7 +32,7 @@
 //!
 //!     - `bus` - Specifies the I2C bus the antenna system is connected to
 //! 	- `addr` - Specifies the I2C address of the antenna system's primary microcontroller
-//! 	- `wd_timeout` - Specifies the interval at which the AntS watchdog should be automatically kicked. To disable automatic kicking, this value should be `0`.
+//!
 //! Example:
 //!     [gomspace-eps-service.addr]
 //!     ip = "0.0.0.0"
@@ -37,11 +41,10 @@
 //!     [gomspace-eps-service]
 //!     bus = "/dev/i2c-0"
 //!     addr = "0x08"
-//!     wd_timeout = 10
-//!
+//!    
 //!  # Starting the Service
 //!
-//! The service should be started automatically by its init script, but may also be started manually:
+//! The service should be started automatically by its init script, but may also be started manually
 //!
 
 #![deny(missing_docs)]
