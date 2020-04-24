@@ -16,9 +16,9 @@
 // Contributed by Xueliang Bai <x.bai@sydney.edu.au> on behalf of the
 // ARC Training Centre for CubeSats, UAVs & Their Applications (CUAVA) team (www.cuava.com.au)
 // at the University of Sydney
-use gomspace_p31u_api::*;
 use crate::model::*;
 use crate::objects::*;
+use gomspace_p31u_api::*;
 use juniper::FieldResult;
 use kubos_service;
 

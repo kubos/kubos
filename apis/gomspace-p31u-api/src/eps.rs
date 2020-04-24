@@ -65,7 +65,7 @@ pub enum EpsPowerState {
 
 fn powerstate_to_u8(powerstate: EpsPowerState) -> u8 {
     match powerstate {
-        EpsPowerState::Off => 0, 
+        EpsPowerState::Off => 0,
         EpsPowerState::On => 1,
     }
 }
@@ -73,7 +73,7 @@ fn powerstate_to_u8(powerstate: EpsPowerState) -> u8 {
 /// Enum for EPS power channels
 #[derive(Clone, Debug, GraphQLEnum, PartialEq)]
 pub enum EpsChannels {
-    /// EPS channel 0 => H1-47	
+    /// EPS channel 0 => H1-47
     Output0,
     /// EPS channel 1 => H1-49	    
     Output1,
@@ -115,7 +115,7 @@ pub enum HeaterSelect {
     Both,
 }
 
-fn heater_sel_to_u8(heater_sel:HeaterSelect) ->u8 {
+fn heater_sel_to_u8(heater_sel: HeaterSelect) -> u8 {
     match heater_sel {
         HeaterSelect::BP4 => 0,
         HeaterSelect::Onboard => 1,
@@ -158,7 +158,12 @@ pub trait GsEps: Send {
     /// Batch set EPS outputs
     fn set_output(&self, channel_mask: u8) -> EpsResult<()>;
     ///Set a channel on/off
-    fn set_single_output(&self, channel:EpsChannels, value:EpsPowerState, delay: u16) -> EpsResult<()>;
+    fn set_single_output(
+        &self,
+        channel: EpsChannels,
+        value: EpsPowerState,
+        delay: u16,
+    ) -> EpsResult<()>;
     /// Set MPPT input level
     fn set_input_value(
         &self,
@@ -169,7 +174,7 @@ pub trait GsEps: Send {
     /// Set the MPPT mode
     fn set_input_mode(&self, mode: u8) -> EpsResult<()>;
     /// Set heater configuration
-    fn set_heater(&self, heater:HeaterSelect, mode:EpsPowerState) -> EpsResult<()>;
+    fn set_heater(&self, heater: HeaterSelect, mode: EpsPowerState) -> EpsResult<()>;
     /// Reset system configuration
     fn reset_system_config(&self) -> EpsResult<()>;
     /// Reset battery configuration
@@ -211,7 +216,7 @@ impl GsEps for Eps {
             k_bus: bus.as_ptr(),
             k_addr: addr,
         };
-       
+
         convert_status(unsafe { ffi::k_eps_init(k_config) })?;
         Ok(Eps)
     }
@@ -220,7 +225,7 @@ impl GsEps for Eps {
     /// Expect the same command returned by the EPS
 
     fn ping(&self) -> EpsResult<()> {
-        convert_status( unsafe { ffi::k_eps_ping() })
+        convert_status(unsafe { ffi::k_eps_ping() })
     }
 
     /// Hard reset the EPS's microcontrollers
@@ -261,7 +266,7 @@ impl GsEps for Eps {
             output_initial_off_delay: config.output_initial_off_delay,
             vboost: config.vboost,
         };
-        convert_status( unsafe {ffi::k_eps_configure_system(&epssysconf) })
+        convert_status(unsafe { ffi::k_eps_configure_system(&epssysconf) })
     }
 
     /// Battery Configuration (conf2)
@@ -290,7 +295,7 @@ impl GsEps for Eps {
     /// # Errors
     /// If this function encounters any errors, an [`EpsError`] variant will be returned.
     fn save_battery_config(&self) -> EpsResult<()> {
-        convert_status(unsafe { ffi::k_eps_save_battery_config() }) 
+        convert_status(unsafe { ffi::k_eps_save_battery_config() })
     }
 
     /// Batch set EPS output
@@ -322,7 +327,12 @@ impl GsEps for Eps {
     ///
     /// # Errors
     /// If this function encounters any errors, an [`EpsError`] variant will be returned.
-    fn set_single_output(&self, channel:EpsChannels, value:EpsPowerState, delay: u16) -> EpsResult<()> {
+    fn set_single_output(
+        &self,
+        channel: EpsChannels,
+        value: EpsPowerState,
+        delay: u16,
+    ) -> EpsResult<()> {
         let epschn = epschn_to_u8(channel);
         let powerstate = powerstate_to_u8(value);
         convert_status(unsafe { ffi::k_eps_set_single_output(epschn, powerstate, delay) })
@@ -345,7 +355,7 @@ impl GsEps for Eps {
         in2_voltage: u16,
         in3_voltage: u16,
     ) -> EpsResult<()> {
-        convert_status( unsafe { ffi::k_eps_set_input_value(in1_voltage, in2_voltage, in3_voltage) })
+        convert_status(unsafe { ffi::k_eps_set_input_value(in1_voltage, in2_voltage, in3_voltage) })
     }
 
     /// Set the MPPT mode
@@ -358,7 +368,7 @@ impl GsEps for Eps {
     /// # Errors
     /// If this function encounters any errors, an [`EpsError`] variant will be returned.
     fn set_input_mode(&self, mode: u8) -> EpsResult<()> {
-        convert_status( unsafe { ffi::k_eps_set_input_mode(mode) })
+        convert_status(unsafe { ffi::k_eps_set_input_mode(mode) })
     }
 
     /// Set heater ON/OFF
@@ -372,7 +382,7 @@ impl GsEps for Eps {
     fn set_heater(&self, heater: HeaterSelect, mode: EpsPowerState) -> EpsResult<()> {
         let cmd = 0;
         let heater_sel = heater_sel_to_u8(heater);
-        let powerstate = powerstate_to_u8 (mode);
+        let powerstate = powerstate_to_u8(mode);
         convert_status(unsafe { ffi::k_eps_set_heater(cmd, heater_sel, powerstate) })
     }
 

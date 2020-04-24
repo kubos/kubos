@@ -395,12 +395,13 @@ impl Subsystem {
     }
 
     /// Set Heater on/off
-    pub fn eps_set_heater(&self, heater:HeaterSelect, mode:EpsPowerState) -> EpsResult<(GenericResponse)> {
+    pub fn eps_set_heater(
+        &self,
+        heater: HeaterSelect,
+        mode: EpsPowerState,
+    ) -> EpsResult<(GenericResponse)> {
         let result = run!(
-            self.eps
-                .lock()
-                .unwrap()
-                .set_heater(heater, mode),
+            self.eps.lock().unwrap().set_heater(heater, mode),
             self.errors
         );
 
