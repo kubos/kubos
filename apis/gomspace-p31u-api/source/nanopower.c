@@ -260,12 +260,6 @@ KEPSStatus k_eps_set_single_output(uint8_t channel, uint8_t value, int16_t delay
     }
 
     packet.cmd = SET_SINGLE_OUTPUT;
-    /*
-     * The channel ordering is secretly backwards.
-     * Output[0] is actually channel 7 (onboard heater)
-     * and output[7] is channel 0
-     */
-   // packet.channel = 7 - channel;
     packet.channel = channel;
     packet.value = value;
     packet.delay = htobe16(delay);

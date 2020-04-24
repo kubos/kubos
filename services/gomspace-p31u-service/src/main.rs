@@ -25,24 +25,24 @@
 //!
 //! - `[gomspace-p31u-service.addr]`
 //!
-//!     - `ip` - Specifies the service's IP address
+//!     - `ip`   - Specifies the service's IP address
 //!     - `port` - Specifies the port on which the service will be listening for UDP packets
 //!
 //! - `[gomspace-p31u-service]`
 //!
-//!     - `bus` - Specifies the I2C bus the antenna system is connected to
-//! 	- `addr` - Specifies the I2C address of the antenna system's primary microcontroller
+//!     - `bus`  - Specifies the I2C bus the antenna system is connected to
+//!     - `addr` - Specifies the I2C address of the antenna system's primary microcontroller
 //!
 //! Example:
 //!     [gomspace-eps-service.addr]
 //!     ip = "0.0.0.0"
 //!     port = 8021
-
+//!
 //!     [gomspace-eps-service]
 //!     bus = "/dev/i2c-0"
-//!     addr = "0x08"
+//!     i2c_addr = "0x08"
 //!    
-//!  # Starting the Service
+//! # Starting the Service
 //!
 //! The service should be started automatically by its init script, but may also be started manually
 //!
@@ -88,7 +88,6 @@ fn main() -> EpsResult<()> {
         .ok_or_else(|| {
             error!("Failed to load 'bus' config value");
             format_err!("Failed to load 'bus' config value");
-            println!("Failed to load bus");
         })
         .unwrap();
     let bus = bus.as_str().unwrap();
@@ -98,7 +97,6 @@ fn main() -> EpsResult<()> {
         .ok_or_else(|| {
             error!("Failed to load 'addr' config value");
             format_err!("Failed to load 'addr' config value");
-            println!("Failed to load addr");
         })
         .unwrap();
     let addr = addr.as_str().unwrap();

@@ -29,7 +29,6 @@ use crate::objects::*;
 /// Model for service's subsystem
 #[derive(Clone)]
 pub struct Subsystem {
-    //pub eps: Box<GsEps>,
     pub eps: Arc<Mutex<Box<dyn GsEps>>>,
     pub errors: Arc<RwLock<Vec<String>>>,
     pub last_cmd: Arc<RwLock<AckCommand>>,
@@ -40,9 +39,6 @@ impl Subsystem {
     /// Code initializing subsystems communications
     /// would likely be placed here
     pub fn new(bus: &str, addr: u8) -> EpsResult<Subsystem> {
-        // Initialize config
-
-        //let eps = Box::new(Eps::new(bus, addr, wd_timeout)?);
         let eps: Arc<Mutex<Box<dyn GsEps>>> = Arc::new(Mutex::new(Box::new(Eps::new(bus, addr)?)));
 
         info!("Kubos GomSpace EPS systems service started");
@@ -107,7 +103,6 @@ impl Subsystem {
 
     /// Get EPS system configuration
     pub fn eps_get_system_config(&self) -> EpsResult<SchEpsSystemConfig> {
-        println!("Get System configuration");
         let result =
             run!(self.eps.lock().unwrap().get_system_config(), self.errors).unwrap_or_default();
 
@@ -140,7 +135,6 @@ impl Subsystem {
 
     /// Get battery configuration
     pub fn eps_get_battery_config(&self) -> EpsResult<SchEpsBatteryConfig> {
-        println!("Get Battery configuration");
         let result =
             run!(self.eps.lock().unwrap().get_battery_config(), self.errors).unwrap_or_default();
 
@@ -152,18 +146,18 @@ impl Subsystem {
             reserved1: result.reserved1.iter().map(|x| *x as i32).collect(),
             reserved2: result.reserved2.iter().map(|x| *x as i32).collect(),
         };
+
         Ok(epsbatconf)
     }
 
+    /// Get heater  configuration
     pub fn eps_get_heater(&self) -> EpsResult<i32> {
-        println!("Get Heater configuration");
         let result = run!(self.eps.lock().unwrap().get_heater(), self.errors).unwrap();
 
         Ok(result)
     }
 
     //----- Functions for EPS Mutations -----//
-
     /// Reset the EPS
     pub fn eps_reset(&self) -> EpsResult<GenericResponse> {
         let result = run!(self.eps.lock().unwrap().reset(), self.errors);
@@ -337,27 +331,18 @@ impl Subsystem {
     /// Subsystem power state setter
     pub fn eps_set_single_output(
         &self,
-        eps_channel: i32,
-        eps_value: i32,
+        eps_channel: EpsChannels,
+        eps_value: EpsPowerState,
         eps_delay: i32,
     ) -> EpsResult<(GenericResponse)> {
-        let channel = eps_channel as u8;
-        let value = eps_value as u8;
         let delay = eps_delay as u16;
-        println!(
-            "Service: Setting power state: Channel {} is set to {} with {}ms delay",
-            channel, value, delay
-        );
-
         let result = run!(
             self.eps
                 .lock()
                 .unwrap()
-                .set_single_output(channel, value, delay),
+                .set_single_output(eps_channel, eps_value, delay),
             self.errors
         );
-
-        println!("Service: Updating i2c return in GraphicQL");
 
         Ok(GenericResponse {
             success: result.is_ok(),
@@ -378,13 +363,6 @@ impl Subsystem {
         let in1 = in1_voltage as u16;
         let in2 = in2_voltage as u16;
         let in3 = in3_voltage as u16;
-        println!(
-            "Setting MPPT power state: Channel 1 is set to {},\n
-                        Channel 2 is set to {},\n
-                        Channel 3 is set to {}",
-            in1, in2, in3
-        );
-
         let result = run!(
             self.eps.lock().unwrap().set_input_value(in1, in2, in3),
             self.errors
@@ -402,8 +380,6 @@ impl Subsystem {
     /// Set MPPT mode
     pub fn eps_set_input_mode(&self, mode: i32) -> EpsResult<(GenericResponse)> {
         let eps_mode = mode as u8;
-        println!("Setting MPPT mode to mode{}", eps_mode);
-
         let result = run!(
             self.eps.lock().unwrap().set_input_mode(eps_mode),
             self.errors
@@ -419,20 +395,12 @@ impl Subsystem {
     }
 
     /// Set Heater on/off
-    pub fn eps_set_heater(&self, cmd: i32, heater: i32, mode: i32) -> EpsResult<(GenericResponse)> {
-        let heater_cmd = cmd as u8;
-        let heater_select = heater as u8;
-        let heater_mode = mode as u8;
-        println!(
-            "Setting Heater {} to {}; mode{}.",
-            heater_select, heater_cmd, heater_mode
-        );
-
+    pub fn eps_set_heater(&self, heater:HeaterSelect, mode:EpsPowerState) -> EpsResult<(GenericResponse)> {
         let result = run!(
             self.eps
                 .lock()
                 .unwrap()
-                .set_heater(heater_cmd, heater_select, heater_mode),
+                .set_heater(heater, mode),
             self.errors
         );
 

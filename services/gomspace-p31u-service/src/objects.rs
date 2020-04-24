@@ -19,7 +19,7 @@
 
 // Convert the objects to GraphQLEnum objects
 
-use juniper::{FieldResult, GraphQLObject};
+use juniper::GraphQLObject;
 
 /// Common response fields structure for requests
 /// which don't return any specific data
@@ -80,56 +80,6 @@ pub struct RawCommandResponse {
     /// Command response from system
     pub response: String,
 }
-
-/// Fields for EPS channels
-#[derive(GraphQLEnum, Clone, Eq, PartialEq, Debug)]
-pub enum EpsChannels {
-    ///5V channel
-    Channel0,
-    ///5V channel
-    Channel1,
-    ///5V channel
-    Channel2,
-    ///3.3V channel
-    Channel3,
-    ///3.3V channel
-    Channel4,
-    ///3.3V channel
-    Channel5,
-}
-
-/// Fields for EPS power states
-#[derive(GraphQLEnum, Clone, Eq, PartialEq, Debug)]
-pub enum PowerState {
-    /// System is on
-    On,
-    /// System is off or unavailable
-    Off,
-}
-
-/// Response fields for 'controlPower' mutation
-pub struct EnSubsysResponse {
-    /// Current power status
-    pub state: PowerState,
-    /// select output channel
-    pub channel: EpsChannels,
-    /// Power delay
-    pub delay: i32,
-}
-
-graphql_object!(EnSubsysResponse:() |&self| {
-    field state() -> FieldResult<PowerState> {
-        Ok(self.state.clone())
-    }
-
-    field channel() -> FieldResult<EpsChannels> {
-        Ok(self.channel.clone())
-    }
-
-    field delay() -> FieldResult<i32> {
-        Ok(self.delay as i32)
-    }
-});
 
 /// Response fields for 'SchEpsSystemConfig' mutation
 #[derive(GraphQLObject)]

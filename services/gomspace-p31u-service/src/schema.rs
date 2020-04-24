@@ -16,7 +16,7 @@
 // Contributed by Xueliang Bai <x.bai@sydney.edu.au> on behalf of the
 // ARC Training Centre for CubeSats, UAVs & Their Applications (CUAVA) team (www.cuava.com.au)
 // at the University of Sydney
-
+use gomspace_p31u_api::*;
 use crate::model::*;
 use crate::objects::*;
 use juniper::FieldResult;
@@ -194,11 +194,11 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
     }
 
     /// Set a single EPS output
-    field eps_set_single_output(&executor, channel:i32, value:i32,delay:i32) -> FieldResult<(GenericResponse)>
+    field eps_set_single_output(&executor, channel:EpsChannels, power_state:EpsPowerState, delay:i32) -> FieldResult<(GenericResponse)>
     {
         let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
         *last_cmd = AckCommand::SetEpsChannels;
-        Ok(executor.context().subsystem().eps_set_single_output(channel,value,delay)?)
+        Ok(executor.context().subsystem().eps_set_single_output(channel,power_state,delay)?)
     }
 
     /// Set EPS MPPT value for mode 2 (Non-Auto mode)
@@ -218,11 +218,11 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
     }
 
     /// set heater on/off
-    field eps_set_heater(&executor,cmd:i32,heater:i32,mode:i32) -> FieldResult<GenericResponse>
+    field eps_set_heater(&executor, heater:HeaterSelect, mode:EpsPowerState) -> FieldResult<GenericResponse>
     {
         let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
         *last_cmd = AckCommand::EpsHeaterToggle;
-        Ok(executor.context().subsystem().eps_set_heater(cmd,heater,mode)?)
+        Ok(executor.context().subsystem().eps_set_heater(heater,mode)?)
     }
 
     /// EPS set output

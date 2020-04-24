@@ -20,6 +20,8 @@
 //! Kubos API for interacting with [GomSpace EPS Systems]
 
 #![deny(missing_docs)]
+#[macro_use]
+extern crate juniper;
 
 pub use crate::eps::*;
 pub use crate::object::{EpsBatteryConfig, EpsHk, EpsSystemConfig};
