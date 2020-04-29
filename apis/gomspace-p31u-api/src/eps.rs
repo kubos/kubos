@@ -403,9 +403,7 @@ impl GsEps for Eps {
     }
 
     /// Reset boot counter and WDT counters (excluding the dedicated WDT)
-    ///
-    /// magic = 0x78
-    ///
+    /// 
     /// # Errors
     /// If this function encounters any errors, an [`EpsError`] variant will be returned.
     fn reset_counters(&self) -> EpsResult<()> {
@@ -516,7 +514,7 @@ impl GsEps for Eps {
         convert_status(unsafe { ffi::k_eps_watchdog_kick() })
     }
 
-    /// Via function. Pass the infromation through
+    /// Command pass through function. Pass the infromation through
     ///      
     /// # Errors
     /// If this function encounters any errors, an [`EpsError`] variant will be returned.

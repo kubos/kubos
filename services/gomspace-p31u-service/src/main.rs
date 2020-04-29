@@ -31,7 +31,7 @@
 //! - `[gomspace-p31u-service]`
 //!
 //!     - `bus`  - Specifies the I2C bus the antenna system is connected to
-//!     - `addr` - Specifies the I2C address of the antenna system's primary microcontroller
+//!     - `i2c_addr` - Specifies the I2C address of the antenna system's primary microcontroller
 //!
 //! Example:
 //!     [gomspace-eps-service.addr]

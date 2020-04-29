@@ -8,7 +8,6 @@ edition = "2018"
 [dependencies]
 failure = "0.1.2"
 juniper =  "0.11" 
-#juniper_codegen = "0.14.2" 
 
 [build-dependencies]
 kubos-build-helper = { path = "../../kubos-build-helper" }
