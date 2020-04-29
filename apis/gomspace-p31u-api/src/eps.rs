@@ -403,7 +403,7 @@ impl GsEps for Eps {
     }
 
     /// Reset boot counter and WDT counters (excluding the dedicated WDT)
-    /// 
+    ///
     /// # Errors
     /// If this function encounters any errors, an [`EpsError`] variant will be returned.
     fn reset_counters(&self) -> EpsResult<()> {
