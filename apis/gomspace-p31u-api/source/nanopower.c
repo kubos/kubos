@@ -468,10 +468,12 @@ KEPSStatus k_eps_get_housekeeping(eps_hk_t * buff)
     buff->wdt_csp_pings_left[0] = body->wdt_csp_pings_left[0];
     buff->wdt_csp_pings_left[1] = body->wdt_csp_pings_left[1];
     buff->counter_wdt_i2c = be32toh(body->counter_wdt_i2c);
-    buff->counter_wdt_gnd = be32toh(body->counter_wdt_gnd);
+    /* Changed counter_wdt_gnd from uint32_t to uint16_t */
+    buff->counter_wdt_gnd = be16toh(body->counter_wdt_gnd);
     buff->counter_wdt_csp[0] = be32toh(body->counter_wdt_csp[0]);
     buff->counter_wdt_csp[1] = be32toh(body->counter_wdt_csp[1]);
-    buff->counter_boot = be32toh(body->counter_boot);
+    /* Changed counter_boot from uint32_t to uint16_t */
+    buff->counter_boot = be16toh(body->counter_boot);
     for (int i = 0; i < 6; i++)
     {
         buff->temp[i] = be16toh(body->temp[i]);

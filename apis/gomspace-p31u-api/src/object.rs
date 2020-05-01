@@ -91,6 +91,7 @@ impl EpsBatteryConfig {
     }
 }
 
+/* Changed counter_wdt_gnd and counter_boot from u32 to u16 to match the FFI*/
 /// System telemetry fields returned from [`EpsHk`]
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct EpsHk {
@@ -125,11 +126,11 @@ pub struct EpsHk {
     /// i2c watchdog counter
     pub counter_wdt_i2c: u32,
     /// GND watchdog counter    
-    pub counter_wdt_gnd: u32,
+    pub counter_wdt_gnd: u16,
     /// CSP watchdog counter
     pub counter_wdt_csp: [u32; 2],
     /// Boot counter
-    pub counter_boot: u32,
+    pub counter_boot: u16,
     /// Temperature
     pub temp: [i16; 6],
     /// Bootcause

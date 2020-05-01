@@ -57,6 +57,7 @@ pub struct EpsBatteryConfig {
     pub reserved2: [u8; 4],
 }
 
+/* Changed counter_wdt_gnd and counter_boot from u32 to u16 to match the C API*/
 #[repr(C)]
 #[derive(Default)]
 pub struct EpsHk {
@@ -75,9 +76,9 @@ pub struct EpsHk {
     pub wdt_gnd_time_left: u32,
     pub wdt_csp_pings_left: [u8; 2],
     pub counter_wdt_i2c: u32,
-    pub counter_wdt_gnd: u32,
+    pub counter_wdt_gnd: u16,
     pub counter_wdt_csp: [u32; 2],
-    pub counter_boot: u32,
+    pub counter_boot: u16,
     pub temp: [i16; 6],
     pub boot_cause: u8,
     pub batt_mode: u8,
