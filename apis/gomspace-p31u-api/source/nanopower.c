@@ -43,7 +43,7 @@ KEPSStatus k_eps_init(KEPSConf config)
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to initialize EPS: %d\n", status);
-        return EPS_ERROR;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -69,14 +69,14 @@ KEPSStatus k_eps_ping()
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to send EPS ping: %d\n", status);
-        return EPS_ERROR;
+        return EPS_I2C_ERROR;
     }
 
     status = k_i2c_read(eps_bus, eps_addr, &resp, 1);
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to get EPS ping response: %d\n", status);
-        return EPS_ERROR;
+        return EPS_I2C_ERROR;
     }
 
     if (resp != cmd)
@@ -98,7 +98,7 @@ KEPSStatus k_eps_reset()
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to reset EPS: %d\n", status);
-        return EPS_ERROR;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -113,7 +113,7 @@ KEPSStatus k_eps_reboot()
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to reboot EPS: %d\n", status);
-        return EPS_ERROR;
+        return EPS_I2C_ERROR;
     }
 
     return EPS_OK;
@@ -260,12 +260,7 @@ KEPSStatus k_eps_set_single_output(uint8_t channel, uint8_t value, int16_t delay
     }
 
     packet.cmd = SET_SINGLE_OUTPUT;
-    /*
-     * The channel ordering is secretly backwards.
-     * Output[0] is actually channel 7 (onboard heater)
-     * and output[7] is channel 0
-     */
-    packet.channel = 7 - channel;
+    packet.channel = channel;
     packet.value = value;
     packet.delay = htobe16(delay);
 
@@ -473,10 +468,12 @@ KEPSStatus k_eps_get_housekeeping(eps_hk_t * buff)
     buff->wdt_csp_pings_left[0] = body->wdt_csp_pings_left[0];
     buff->wdt_csp_pings_left[1] = body->wdt_csp_pings_left[1];
     buff->counter_wdt_i2c = be32toh(body->counter_wdt_i2c);
-    buff->counter_wdt_gnd = be32toh(body->counter_wdt_gnd);
+    /* Changed counter_wdt_gnd from uint32_t to uint16_t */
+    buff->counter_wdt_gnd = be16toh(body->counter_wdt_gnd);
     buff->counter_wdt_csp[0] = be32toh(body->counter_wdt_csp[0]);
     buff->counter_wdt_csp[1] = be32toh(body->counter_wdt_csp[1]);
-    buff->counter_boot = be32toh(body->counter_boot);
+    /* Changed counter_boot from uint32_t to uint16_t */
+    buff->counter_boot = be16toh(body->counter_boot);
     for (int i = 0; i < 6; i++)
     {
         buff->temp[i] = be16toh(body->temp[i]);
@@ -716,7 +713,7 @@ KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
     if (status != I2C_OK)
     {
         fprintf(stderr, "Failed to send EPS command: %d\n", status);
-        return EPS_ERROR;
+        return EPS_I2C_ERROR;
     }
 
     status = k_i2c_read(eps_bus, eps_addr, rx, rx_len);
@@ -725,7 +722,7 @@ KEPSStatus kprv_eps_transfer(const uint8_t * tx, int tx_len, uint8_t * rx,
     {
         fprintf(stderr, "Failed to read EPS response (%x): %d\n", tx[0],
                 status);
-        return EPS_ERROR;
+        return EPS_I2C_ERROR;
     }
 
     eps_resp_header response = { .cmd = rx[0], .status = rx[1] };

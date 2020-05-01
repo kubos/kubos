@@ -811,6 +811,30 @@ version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "gomspace-p31u-api"
+version = "0.1.0"
+dependencies = [
+ "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "juniper 0.11.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "kubos-build-helper 0.1.1",
+]
+
+[[package]]
+name = "gomspace-p31u-service"
+version = "0.1.0"
+dependencies = [
+ "failure 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "gomspace-p31u-api 0.1.0",
+ "juniper 0.11.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "kubos-service 0.1.0",
+ "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rust-i2c 0.1.0",
+ "serde_json 1.0.41 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syslog 4.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "warp 0.1.20 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "h2"
 version = "0.1.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -1,0 +1,18 @@
+[package]
+name = "gomspace-p31u-service"
+version = "0.1.0"
+authors = ["Xueliang Bai <x.bai@sydney.edu.au>"]
+edition = "2018"
+
+[dependencies]
+gomspace-p31u-api = { path = "../../apis/gomspace-p31u-api"}
+kubos-service = { path = "../../services/kubos-service" }
+rust-i2c = { path = "../../hal/rust-hal/rust-i2c" }
+juniper = "0.11"
+syslog = "4.0"
+log = "^0.4.0"
+failure = "0.1.2"
+
+[dev-dependencies]
+serde_json = "1.0"
+warp = "0.1.12"

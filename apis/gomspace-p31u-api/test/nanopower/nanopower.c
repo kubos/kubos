@@ -79,9 +79,9 @@ eps_hk_t hk_le = {
         .wdt_gnd_time_left = 4321,
         .wdt_csp_pings_left = {4, 5},
         .counter_wdt_i2c = 3210,
-        .counter_wdt_gnd = 123456789,
+        .counter_wdt_gnd = 12345, 
         .counter_wdt_csp = {6543, 76543210},
-        .counter_boot = 9,
+        .counter_boot = 9,   
         .temp = {23, 24, 25, 26, 27, 28},
         .boot_cause = 2,
         .batt_mode = 3,
@@ -103,9 +103,9 @@ eps_hk_t hk_be = {
         .wdt_gnd_time_left = 3775922176,
         .wdt_csp_pings_left = {4, 5},
         .counter_wdt_i2c = 2316042240,
-        .counter_wdt_gnd = 365779719,
+        .counter_wdt_gnd = 14640,  
         .counter_wdt_csp = {2400780288, 3941895940},
-        .counter_boot = 150994944,
+        .counter_boot = 2304,
         .temp = {5888,6144,6400,6656,6912,7168},
         .boot_cause = 2,
         .batt_mode = 3,
@@ -148,7 +148,7 @@ typedef struct __attribute__((packed))
 
 single_output_packet single_output_be = {
     .cmd = SET_SINGLE_OUTPUT,
-    .channel = 1, /* Converted value (orig. 6) */
+    .channel = 6, /* Converted value (orig. 6) */
     .value = 1,
     .delay = 1280 /* 5 */
 };
@@ -175,7 +175,7 @@ static void test_init_no_addr(void ** arg)
 
 static void test_no_init_reset(void ** arg)
 {
-    assert_int_equal(k_eps_reset(), EPS_ERROR);
+    assert_int_equal(k_eps_reset(), EPS_I2C_ERROR);
 }
 
 static void test_ping(void ** arg)
@@ -816,7 +816,6 @@ int main(void)
         cmocka_unit_test_setup_teardown(test_set_output, init, term),
         cmocka_unit_test_setup_teardown(test_set_single_output_bad_channel, init, term),
         cmocka_unit_test_setup_teardown(test_set_single_output_bad_value, init, term),
-        cmocka_unit_test_setup_teardown(test_set_single_output, init, term),
         cmocka_unit_test_setup_teardown(test_set_single_output, init, term),
         cmocka_unit_test_setup_teardown(test_set_input_value, init, term),
         cmocka_unit_test_setup_teardown(test_set_input_mode, init, term),

@@ -53,6 +53,7 @@
 typedef enum {
     EPS_OK,                                 /**< Requested function completed successfully */
     EPS_ERROR,                              /**< Generic error */
+    EPS_I2C_ERROR,                          /**< I2C error */
     EPS_ERROR_CONFIG,                       /**< Configuration error */
     EPS_ERROR_INTERNAL                      /**< An error was thrown by the subsystem */
 } KEPSStatus;
@@ -106,6 +107,14 @@ typedef struct
 
 /**
  * P31u-8 housekeeping
+ * 
+ * NOTE that some changes have been made from the GomSpace datasheet
+ * due to the complier mis-matches the bytes in the data structure 
+ * 1) Changed counter_wdt_gnd and counter_boot from uint32_t to uint16_t
+ * 2) The __attribute__((packed)) attribute is removed 
+ * 
+ * The data sizes at other parts of this API are changed accordingly 
+ * 
  */
 typedef struct
 {
@@ -124,15 +133,15 @@ typedef struct
     uint32_t wdt_gnd_time_left;             /**< Time left for dedicated watchdog [seconds] */
     uint8_t  wdt_csp_pings_left[2];         /**< Pings left for CSP watchdog */
     uint32_t counter_wdt_i2c;               /**< Number of I2C watchdog reboots */
-    uint32_t counter_wdt_gnd;               /**< Number of dedicated watchdog reboots */
+    uint16_t counter_wdt_gnd;               /**< Number of dedicated watchdog reboots */
     uint32_t counter_wdt_csp[2];            /**< Number of CSP watchdog reboots */
-    uint32_t counter_boot;                  /**< Number of EPS reboots */
+    uint16_t counter_boot;                  /**< Number of EPS reboots */
     int16_t  temp[6];                       /**< Temperatures [degC] [0 = Temp1, Temp2, Temp3, Temp4, BP4a, BP4b] */
     uint8_t  boot_cause;                    /**< Cause of last EPS reset */
     uint8_t  batt_mode;                     /**< Mode for battery [0 = Initial, 1 = Critical, 2 = Safe, 3 = Normal, 4 = Full] */
     uint8_t  ppt_mode;                      /**< Mode of power-point tracker [1 = Automatic maximum, 2 = Fixed] */
     uint16_t reserved2;                     /**< Reserved */
-} __attribute__((packed)) eps_hk_t;
+} eps_hk_t;
 
 /*
  * Public Functions
