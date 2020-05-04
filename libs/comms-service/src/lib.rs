@@ -70,6 +70,7 @@
 //! ip = "192.168.8.2"
 //! ```
 
+#[cfg(feature = "graphql")]
 #[macro_use]
 extern crate juniper;
 
