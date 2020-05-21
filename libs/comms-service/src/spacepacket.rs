@@ -134,7 +134,9 @@ impl LinkPacket for SpacePacket {
         bytes.write_u16::<BigEndian>(header_2)?;
         bytes.write_u64::<BigEndian>(self.secondary_header.command_id)?;
         bytes.write_u16::<BigEndian>(self.secondary_header.destination_port)?;
-        bytes.append(&mut self.payload.clone());
+
+        // bytes.append(&mut self.payload.clone());
+        bytes.extend(&self.payload);
 
         Ok(bytes)
     }
