@@ -19,7 +19,7 @@ and using Homebrew on macOS.
 
     - You will probably want to add ``~/.cargo/bin`` to your system's ``PATH``
 
-- Rust v1.32.0 (``rustup default 1.32.0``)
+- Rust v1.39.0 (``rustup default 1.39.0``)
 - Clippy (``rustup component add clippy``)
 - Rustfmt (``rustup component add rustfmt``)
 - gcc
