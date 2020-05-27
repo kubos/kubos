@@ -35,15 +35,15 @@ pub type WriteFn<Connection> =
 
 /// Struct that holds configuration data to allow users to set up a Communication Service.
 #[derive(Clone)]
-pub struct CommsControlBlock<Connection: Clone> {
+pub struct CommsControlBlock<ReadConnection: Clone, WriteConnection: Clone> {
     /// Function pointer to a function that defines how to read from a gateway.
-    pub read: Option<Arc<ReadFn<Connection>>>,
+    pub read: Option<Arc<ReadFn<ReadConnection>>>,
     /// Function pointers to functions that define methods for writing data over a gateway.
-    pub write: Vec<Arc<WriteFn<Connection>>>,
+    pub write: Vec<Arc<WriteFn<WriteConnection>>>,
     /// Gateway connection to read from.
-    pub read_conn: Connection,
+    pub read_conn: ReadConnection,
     /// Gateway connection to write to.
-    pub write_conn: Connection,
+    pub write_conn: WriteConnection,
     /// Maximum number of concurrent message handlers allowed.
     pub max_num_handlers: u16,
     /// Timeout for the completion of GraphQL operations within message handlers (in milliseconds).
@@ -55,7 +55,9 @@ pub struct CommsControlBlock<Connection: Clone> {
     pub downlink_ports: Option<Vec<u16>>,
 }
 
-impl<Connection: Clone + Debug> Debug for CommsControlBlock<Connection> {
+impl<ReadConnection: Clone + Debug, WriteConnection: Clone + Debug> Debug
+    for CommsControlBlock<ReadConnection, WriteConnection>
+{
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         let read = if self.read.is_some() {
             "Some(fn)"
@@ -87,13 +89,15 @@ impl<Connection: Clone + Debug> Debug for CommsControlBlock<Connection> {
     }
 }
 
-impl<Connection: Clone> CommsControlBlock<Connection> {
+impl<ReadConnection: Clone, WriteConnection: Clone>
+    CommsControlBlock<ReadConnection, WriteConnection>
+{
     /// Creates a new instance of the CommsControlBlock
     pub fn new(
-        read: Option<Arc<ReadFn<Connection>>>,
-        write: Vec<Arc<WriteFn<Connection>>>,
-        read_conn: Connection,
-        write_conn: Connection,
+        read: Option<Arc<ReadFn<ReadConnection>>>,
+        write: Vec<Arc<WriteFn<WriteConnection>>>,
+        read_conn: ReadConnection,
+        write_conn: WriteConnection,
         config: CommsConfig,
     ) -> CommsResult<Self> {
         if write.is_empty() {
@@ -129,15 +133,21 @@ pub struct CommsService;
 
 impl CommsService {
     /// Starts an instance of the Communication Service and its associated background threads.
-    pub fn start<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + 'static>(
-        control: CommsControlBlock<Connection>,
+    pub fn start<
+        ReadConnection: Clone + Send + 'static,
+        WriteConnection: Clone + Send + 'static,
+        Packet: LinkPacket + Send + 'static,
+    >(
+        control: CommsControlBlock<ReadConnection, WriteConnection>,
         telem: &Arc<Mutex<CommsTelemetry>>,
     ) -> CommsResult<()> {
         // If desired, spawn a read thread
         if control.read.is_some() {
             let telem_ref = telem.clone();
             let control_ref = control.clone();
-            thread::spawn(move || read_thread::<Connection, Packet>(control_ref, &telem_ref));
+            thread::spawn(move || {
+                read_thread::<ReadConnection, WriteConnection, Packet>(control_ref, &telem_ref)
+            });
         }
 
         // For each provided `write()` function, spawn a downlink endpoint thread.
@@ -149,7 +159,7 @@ impl CommsService {
                 let write_ref = write.clone();
                 let ip = control.ip;
                 thread::spawn(move || {
-                    downlink_endpoint::<Connection, Packet>(
+                    downlink_endpoint::<ReadConnection, WriteConnection, Packet>(
                         &telem_ref, port_ref, conn_ref, &write_ref, ip,
                     );
                 });
@@ -162,8 +172,12 @@ impl CommsService {
 }
 
 // This thread reads from a gateway and passes received messages to message handlers.
-fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + 'static>(
-    comms: CommsControlBlock<Connection>,
+fn read_thread<
+    ReadConnection: Clone + Send + 'static,
+    WriteConnection: Clone + Send + 'static,
+    Packet: LinkPacket + Send + 'static,
+>(
+    comms: CommsControlBlock<ReadConnection, WriteConnection>,
     data: &Arc<Mutex<CommsTelemetry>>,
 ) {
     // Take reader from control block.
@@ -280,9 +294,9 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
 // The thread then writes the response to the gateway.
 #[cfg(features = "graphql")]
 #[allow(clippy::boxed_local)]
-fn handle_graphql_request<Connection: Clone, Packet: LinkPacket>(
-    write_conn: Connection,
-    write: &Arc<WriteFn<Connection>>,
+fn handle_graphql_request<WriteConnection: Clone, Packet: LinkPacket>(
+    write_conn: WriteConnection,
+    write: &Arc<WriteFn<WriteConnection>>,
     message: Box<Packet>,
     timeout: u64,
     sat_ip: Ipv4Addr,
@@ -332,11 +346,11 @@ fn handle_udp_passthrough<Packet: LinkPacket>(
 
 // This thread reads indefinitely from a UDP socket, creating link packets from
 // the UDP packet payload and then writes the link packets to a gateway.
-fn downlink_endpoint<Connection: Clone, Packet: LinkPacket>(
+fn downlink_endpoint<ReadConnection: Clone, WriteConnection: Clone, Packet: LinkPacket>(
     data: &Arc<Mutex<CommsTelemetry>>,
     port: u16,
-    write_conn: Connection,
-    write: &Arc<WriteFn<Connection>>,
+    write_conn: WriteConnection,
+    write: &Arc<WriteFn<WriteConnection>>,
     sat_ip: Ipv4Addr,
 ) {
     // Bind the downlink endpoint to a UDP socket.
