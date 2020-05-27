@@ -26,7 +26,6 @@ use std::net::{Ipv4Addr, UdpSocket};
 use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::Duration;
 
 /// Type definition for a "read" function pointer.
 pub type ReadFn<Connection> = dyn Fn(&Connection) -> CommsResult<Vec<u8>> + Send + Sync + 'static;
@@ -171,6 +170,7 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
     let read = comms.read.unwrap();
 
     // Initiate counter for handlers
+    #[cfg(features = "graphql")]
     let num_handlers: Arc<Mutex<u16>> = Arc::new(Mutex::new(0));
 
     loop {
@@ -232,6 +232,7 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
                     }
                 });
             }
+            #[cfg(features = "graphql")]
             PayloadType::GraphQL => {
                 if let Ok(mut num_handlers) = num_handlers.lock() {
                     if *num_handlers >= comms.max_num_handlers {
@@ -277,6 +278,7 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
 
 // This thread sends a query/mutation to its intended destination and waits for a response.
 // The thread then writes the response to the gateway.
+#[cfg(features = "graphql")]
 #[allow(clippy::boxed_local)]
 fn handle_graphql_request<Connection: Clone, Packet: LinkPacket>(
     write_conn: Connection,
@@ -285,6 +287,8 @@ fn handle_graphql_request<Connection: Clone, Packet: LinkPacket>(
     timeout: u64,
     sat_ip: Ipv4Addr,
 ) -> Result<(), String> {
+    use std::time::Duration;
+
     let payload = message.payload().to_vec();
 
     let client = reqwest::Client::builder()

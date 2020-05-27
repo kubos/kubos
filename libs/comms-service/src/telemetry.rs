@@ -20,7 +20,8 @@ use crate::errors::*;
 use std::sync::{Arc, Mutex};
 
 /// Generic telemetry collected by the communication service.
-#[derive(Default, GraphQLObject)]
+#[derive(Default)]
+#[cfg_attr(feature = "graphql", derive(GraphQLObject))]
 pub struct CommsTelemetry {
     /// Errors that have occured within the communication service.
     pub errors: Vec<String>,

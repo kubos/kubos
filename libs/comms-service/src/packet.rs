@@ -23,6 +23,7 @@ use crate::CommsResult;
 #[repr(u8)]
 pub enum PayloadType {
     /// Packet intended for GraphQL request/response
+    #[cfg(features = "graphql")]
     GraphQL,
     /// Packet intended for UDP passthrough
     UDP,
@@ -33,6 +34,7 @@ pub enum PayloadType {
 impl From<u16> for PayloadType {
     fn from(num: u16) -> PayloadType {
         match num {
+            #[cfg(features = "graphql")]
             0 => PayloadType::GraphQL,
             1 => PayloadType::UDP,
             other => PayloadType::Unknown(other),
@@ -43,6 +45,7 @@ impl From<u16> for PayloadType {
 impl From<PayloadType> for u16 {
     fn from(value: PayloadType) -> u16 {
         match value {
+            #[cfg(features = "graphql")]
             PayloadType::GraphQL => 0,
             PayloadType::UDP => 1,
             PayloadType::Unknown(value) => value as u16,
