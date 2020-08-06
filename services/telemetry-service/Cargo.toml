@@ -12,7 +12,7 @@ udp = ["kubos-service/udp"]
 diesel = { version = "1.0.0", features = ["sqlite"] }
 flate2 = "1.0"
 juniper = { version = "0.14.2", default-features = false }
-kubos-service = { path = "../kubos-service", default-features = false }
+kubos-service = { path = "../kubos-service" }
 kubos-telemetry-db = { path = "../../apis/telemetry-db-api" }
 log = "^0.4.0"
 serde = { version = "1.0", features = ["derive"] }

@@ -107,9 +107,9 @@
 
 mod macros;
 
-#[cfg(feature = "http")]
+#[cfg(all(feature = "http", not(feature = "udp")))]
 mod http_service;
-#[cfg(feature = "http")]
+#[cfg(all(feature = "http", not(feature = "udp")))]
 pub use crate::http_service::{Context, Service};
 
 #[cfg(feature = "udp")]
