@@ -129,9 +129,8 @@ opt-level = 0
 panic = "abort"
 #codegen-units = 1
 
-#[patch.crates-io]
-# nix = { path = "../nix" }
-# libc = { path = "../libc" }
-#backtrace = { path = "../backtrace-rs" }
-#mio = { path = "../mio" }
-#filetime = { path = "../filetime" }
+[patch.crates-io]
+nix = { git = "https://github.com/kubos/nix", branch = "uclibc-fix"}
+libc = { git = "https://github.com/kubos/libc", branch = "uclibc-fixes"}
+backtrace = { git = "https://github.com/kubos/backtrace-rs", branch = "uclibc-fixes"}
+mio = { git = "https://github.com/kubos/mio", branch = "uclibc-fixes"}
