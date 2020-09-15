@@ -3004,7 +3004,6 @@ dependencies = [
  "juniper 0.14.2",
  "kubos-service",
  "log 0.4.11",
- "reqwest 0.10.8",
  "serde",
  "serde_json",
  "syslog",

@@ -16,7 +16,7 @@
 
 //! Service for scheduling tasks in the KubOS system.
 
-#![deny(warnings)]
+// #![deny(warnings)]
 #![deny(missing_docs)]
 
 mod app;
