@@ -21,6 +21,9 @@ The diagram below shows the typical architecture for a mission running KubOS:
 
 .. figure:: images/mission_diagram.png
     :align: center
+    :alt: block diagram depicting the software of a typical kubos-powered mission
+
+    The software powering a typical kubos-based mission with components provided by KubOS in blue and components that need to be implemented for the specific mission payload in red.
 
 Each of the boxes are independent processes, or *microservices*.
 For example, we can revise the communication service to support a new radio, and the binaries of *all other services* are unchanged.
