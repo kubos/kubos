@@ -18,6 +18,7 @@
 
 use crate::config::*;
 use crate::errors::*;
+use crate::frame::LinkFrame;
 use crate::packet::{LinkPacket, PayloadType};
 use crate::telemetry::*;
 use log::info;
@@ -130,7 +131,11 @@ pub struct CommsService;
 
 impl CommsService {
     /// Starts an instance of the Communication Service and its associated background threads.
-    pub fn start<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + 'static>(
+    pub fn start<
+        Connection: Clone + Send + 'static,
+        Frame: LinkFrame + Send + 'static,
+        Packet: LinkPacket + Send + 'static,
+    >(
         control: CommsControlBlock<Connection>,
         telem: &Arc<Mutex<CommsTelemetry>>,
     ) -> CommsResult<()> {
@@ -138,7 +143,9 @@ impl CommsService {
         if control.read.is_some() {
             let telem_ref = telem.clone();
             let control_ref = control.clone();
-            thread::spawn(move || read_thread::<Connection, Packet>(control_ref, &telem_ref));
+            thread::spawn(move || {
+                read_thread::<Connection, Frame, Packet>(control_ref, &telem_ref)
+            });
         }
 
         // For each provided `write()` function, spawn a downlink endpoint thread.
@@ -150,7 +157,7 @@ impl CommsService {
                 let write_ref = write.clone();
                 let ip = control.ip;
                 thread::spawn(move || {
-                    downlink_endpoint::<Connection, Packet>(
+                    downlink_endpoint::<Connection, Frame, Packet>(
                         &telem_ref, port_ref, conn_ref, &write_ref, ip,
                     );
                 });
@@ -163,7 +170,11 @@ impl CommsService {
 }
 
 // This thread reads from a gateway and passes received messages to message handlers.
-fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + 'static>(
+fn read_thread<
+    Connection: Clone + Send + 'static,
+    Frame: LinkFrame + Send + 'static,
+    Packet: LinkPacket + Send + 'static,
+>(
     comms: CommsControlBlock<Connection>,
     data: &Arc<Mutex<CommsTelemetry>>,
 ) {
@@ -183,8 +194,17 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
             }
         };
 
-        // Create a link packet from the received information.
-        let packet = match Packet::parse(&bytes) {
+        // Attempt to parse link frame from the received information.
+        let (frame, remainder) = match Frame::from_bytes(&bytes) {
+            Ok((Some(frame), remainder)) => (frame, remainder),
+            _ => {
+                error!("No frame found");
+                continue;
+            }
+        };
+
+        // Create a link packet from payload of the link frame
+        let packet = match Packet::parse(&frame.payload()) {
             Ok(packet) => packet,
             Err(e) => {
                 log_telemetry(&data, &TelemType::UpFailed).unwrap();
@@ -251,6 +271,7 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
                 let time_ref = comms.timeout;
                 let num_handlers_ref = num_handlers.clone();
                 thread::spawn(move || {
+                    // This needs LinkFrame associated with it somehow...
                     let res =
                         handle_graphql_request(conn_ref, &write_ref, packet, time_ref, sat_ref);
 
@@ -278,7 +299,7 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
 // This thread sends a query/mutation to its intended destination and waits for a response.
 // The thread then writes the response to the gateway.
 #[allow(clippy::boxed_local)]
-fn handle_graphql_request<Connection: Clone, Packet: LinkPacket>(
+fn handle_graphql_request<Connection: Clone, Frame: LinkFrame, Packet: LinkPacket>(
     write_conn: Connection,
     write: &Arc<WriteFn<Connection>>,
     message: Box<Packet>,
@@ -307,8 +328,21 @@ fn handle_graphql_request<Connection: Clone, Packet: LinkPacket>(
         .and_then(|packet| packet.to_bytes())
         .map_err(|e| e.to_string())?;
 
-    // Write packet to the gateway
-    write(&write_conn.clone(), &packet).map_err(|e| e.to_string())
+    // Now wrap up packet in LinkFrame
+    // Frame count, id, max_size need to be referenced from global source
+    let frame_count = 200;
+    let frame_id = 12;
+    let max_size = 2150;
+
+    // Break up into chunks if needed and transmit
+    let frames = Frame::build(frame_count, frame_id, max_size, &packet).unwrap();
+
+    for frame in frames {
+        // Write frame to the gateway
+        write(&write_conn.clone(), &frame.to_bytes().unwrap()).map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
 }
 
 // This function takes a Packet with PayloadType::UDP and sends the payload over a
@@ -328,7 +362,7 @@ fn handle_udp_passthrough<Packet: LinkPacket>(
 
 // This thread reads indefinitely from a UDP socket, creating link packets from
 // the UDP packet payload and then writes the link packets to a gateway.
-fn downlink_endpoint<Connection: Clone, Packet: LinkPacket>(
+fn downlink_endpoint<Connection: Clone, Frame: LinkFrame, Packet: LinkPacket>(
     data: &Arc<Mutex<CommsTelemetry>>,
     port: u16,
     write_conn: Connection,
@@ -366,17 +400,28 @@ fn downlink_endpoint<Connection: Clone, Packet: LinkPacket>(
             }
         };
 
-        // Write packet to the gateway and update telemetry.
-        match write(&write_conn.clone(), &packet) {
-            Ok(_) => {
-                log_telemetry(&data, &TelemType::Down).unwrap();
-                info!("Packet successfully downlinked");
-            }
-            Err(e) => {
-                log_telemetry(&data, &TelemType::DownFailed).unwrap();
-                log_error(&data, e.to_string()).unwrap();
-                error!("Packet failed to downlink");
-            }
-        };
+        // Now take the link packet and turn it into one or more link frames
+        // Frame count, id, max_size need to be referenced from global source
+        let frame_count = 0;
+        let frame_id = 2;
+        let max_size = 2150;
+
+        // Break up into chunks if needed and transmit
+        let frames = Frame::build(frame_count, frame_id, max_size, &packet).unwrap();
+
+        for frame in frames {
+            // Write frame to the gateway and update telemetry.
+            match write(&write_conn.clone(), &frame.to_bytes().unwrap()) {
+                Ok(_) => {
+                    log_telemetry(&data, &TelemType::Down).unwrap();
+                    info!("Packet successfully downlinked");
+                }
+                Err(e) => {
+                    log_telemetry(&data, &TelemType::DownFailed).unwrap();
+                    log_error(&data, e.to_string()).unwrap();
+                    error!("Packet failed to downlink");
+                }
+            };
+        }
     }
 }

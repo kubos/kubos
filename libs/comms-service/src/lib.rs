@@ -17,7 +17,7 @@
 //
 
 #![deny(missing_docs)]
-#![deny(warnings)]
+// #![deny(warnings)]
 
 //!
 //! This library allows users to define and start communication services within their hardware services.
@@ -81,8 +81,10 @@ extern crate failure;
 
 mod config;
 mod errors;
+mod frame;
 mod packet;
 mod service;
+mod simple_frame;
 mod spacepacket;
 mod telemetry;
 
