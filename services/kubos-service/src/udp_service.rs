@@ -16,12 +16,13 @@
 
 use juniper::{Context as JuniperContext, GraphQLType, RootNode};
 use kubos_system::Config;
-use log::info;
+use log::{error, info};
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::{Arc, RwLock};
-
-use warp::{filters::BoxedFilter, Filter};
+use juniper::{execute, Variables};
+use serde_json::json;
+use std::net::UdpSocket;
 
 /// Context struct used by a service to provide Juniper context,
 /// subsystem access and persistent storage.
@@ -102,13 +103,23 @@ impl<T> Context<T> {
 ///     schema::MutationRoot,
 /// ).start();
 /// ```
-pub struct Service {
+pub struct Service<'a, Query, Mutation, S>
+where
+    S: Send + Sync + 'static,
+    Query: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
+    Mutation: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
+{
     config: Config,
-    ///
-    pub filter: BoxedFilter<(warp::http::response::Response<std::vec::Vec<u8>>,)>,
+    context: Context<S>,
+    root_node: RootNode<'a, Query, Mutation>,
 }
 
-impl Service {
+impl<'a, Query, Mutation, S> Service<'a, Query, Mutation, S>
+where
+    S: Send + Sync + 'static,
+    Query: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
+    Mutation: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
+{
     /// Creates a new service instance
     ///
     /// # Arguments
@@ -117,38 +128,18 @@ impl Service {
     /// `subsystem` - An instance of the subsystem struct. This one instance will be used by all queries.
     /// `query` - The root query struct holding all other GraphQL queries.
     /// `mutation` - The root mutation struct holding all other GraphQL mutations.
-    pub fn new<Query, Mutation, S>(
-        config: Config,
-        subsystem: S,
-        query: Query,
-        mutation: Mutation,
-    ) -> Self
-    where
-        Query: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
-        Mutation: GraphQLType<Context = Context<S>, TypeInfo = ()> + Send + Sync + 'static,
-        S: Send + Sync + Clone + 'static,
-    {
+    pub fn new(config: Config, subsystem: S, query: Query, mutation: Mutation) -> Self {
         let root_node = RootNode::new(query, mutation);
         let context = Context {
             subsystem,
             storage: Arc::new(RwLock::new(HashMap::new())),
         };
 
-        // Make the subsystem and other persistent data available to all endpoints
-        let context = warp::any().map(move || context.clone()).boxed();
-
-        let graphql_filter = juniper_warp::make_graphql_filter(root_node, context);
-
-        // If the path ends in "graphiql" process the request using the graphiql interface
-        let filter = warp::path("graphiql")
-            .and(juniper_warp::graphiql_filter("/graphql"))
-            // Otherwise, just process the request as normal GraphQL
-            .or(graphql_filter)
-            // Wrap it all up nicely so we can save the filter for later
-            .unify()
-            .boxed();
-
-        Service { config, filter }
+        Service {
+            config,
+            context,
+            root_node,
+        }
     }
 
     /// Starts the service's GraphQL/UDP server. This function runs
@@ -164,19 +155,51 @@ impl Service {
             .config
             .hosturl()
             .ok_or_else(|| {
-                log::error!("Failed to load service URL");
+                error!("Failed to load service URL");
                 "Failed to load service URL"
             })
             .unwrap();
+
         let addr = hosturl
             .parse::<SocketAddr>()
             .map_err(|err| {
-                log::error!("Failed to parse SocketAddr: {:?}", err);
+                error!("Failed to parse SocketAddr: {:?}", err);
                 err
             })
             .unwrap();
+
+        let socket = UdpSocket::bind(&addr).unwrap();
         info!("Listening on: {}", addr);
 
-        warp::serve(self.filter).run(addr);
+        let mut buf = [0; 4096];
+        loop {
+            if let Ok((size, peer)) = socket.recv_from(&mut buf) {
+                if let Ok(query) = String::from_utf8(buf[0..size].to_vec()) {
+                    let resp = match execute(
+                        &query,
+                        None,
+                        &self.root_node,
+                        &Variables::new(),
+                        &self.context,
+                    ) {
+                        Ok((val, errs)) => {
+                            let errs_msg: String = errs
+                                .into_iter()
+                                .map(|x| serde_json::to_string(&x).unwrap())
+                                .collect();
+
+                            json!({
+                                "data": val,
+                                "errors": errs_msg})
+                            .to_string()
+                        }
+                        Err(e) => json!({ "errors": e }).to_string(),
+                    };
+                    if let Err(e) = socket.send_to(&resp.as_bytes(), &peer) {
+                        error!("Failed to send udp response: {:?}", e);
+                    };
+                }
+            }
+        }
     }
 }

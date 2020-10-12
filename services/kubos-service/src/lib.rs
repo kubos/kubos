@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-#![deny(missing_docs)]
-#![deny(warnings)]
+// #![deny(missing_docs)]
+// #![deny(warnings)]
 
 //! A collection of structures and functions used to create hardware services
 //! in the Kubos Linux ecosystem.
@@ -106,8 +106,16 @@
 //! ```
 
 mod macros;
-mod service;
 
-pub use crate::service::{Context, Service};
+#[cfg(all(feature = "http", not(feature = "udp")))]
+mod http_service;
+#[cfg(all(feature = "http", not(feature = "udp")))]
+pub use crate::http_service::{Context, Service};
+
+#[cfg(feature = "udp")]
+mod udp_service;
+#[cfg(feature = "udp")]
+pub use crate::udp_service::{Context, Service};
+
 pub use kubos_system::logger as Logger;
 pub use kubos_system::Config;

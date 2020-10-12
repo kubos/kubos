@@ -49,6 +49,7 @@ impl Database {
         if !::std::path::Path::new(path).exists() {
             info!("Creating database {}", path);
         }
+        info!("Return database");
         Database {
             connection: SqliteConnection::establish(&String::from(path)).unwrap_or_else(|_| {
                 panic!("Could not create SQLite database connection to: {}", path)
@@ -62,6 +63,7 @@ impl Database {
     ///
     /// Will `panic!` if fails to locate and/or create telemetry table
     pub fn setup(&self) {
+        info!("Begin setup");
         match select(sql::<Bool>(
             "EXISTS \
              (SELECT 1 \

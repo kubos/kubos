@@ -104,7 +104,7 @@ members=[
 "examples/rust-c-service/service",
 "services/iobc-supervisor-service",
 "services/isis-ants-service",
-"test/integration/linux/isis-ants",
+"test/integration/linux/isis-ants"
 ]
 
 exclude = [
@@ -114,12 +114,23 @@ exclude = [
 
 [profile.release]
 lto = true
-opt-level = "z"
+opt-level = 1
 panic = "abort"
 codegen-units = 1
 
-[profile.bench]
-lto = true
-opt-level = "z"
+[profile.dev]
 panic = "abort"
+lto = true
 codegen-units = 1
+
+[profile.bench]
+#lto = true
+opt-level = 0
+panic = "abort"
+#codegen-units = 1
+
+[patch.crates-io]
+nix = { git = "https://github.com/kubos/nix", branch = "uclibc-fix"}
+libc = { git = "https://github.com/kubos/libc", branch = "uclibc-fixes"}
+backtrace = { git = "https://github.com/kubos/backtrace-rs", branch = "uclibc-fixes"}
+mio = { git = "https://github.com/kubos/mio", branch = "uclibc-fixes"}
