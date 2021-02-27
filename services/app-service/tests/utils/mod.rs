@@ -100,8 +100,7 @@ impl MockAppBuilder {
 
     pub fn src(&self) -> String {
         format!(
-            r#"
-            #!/bin/bash
+            r#"#!/bin/bash
             if [ "$1" = "--metadata" ]; then
                 echo name = \"{name}\"
                 echo version = \"{version}\"
