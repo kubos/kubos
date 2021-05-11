@@ -37,8 +37,7 @@ fn start_app_good() {
 
         fs::create_dir_all(app_dir.clone()).unwrap();
 
-        let src = r#"
-            #!/bin/bash
+        let src = r#"#!/bin/bash
             exit 0
             "#;
 
@@ -177,8 +176,7 @@ fn start_app_nonzero_rc() {
 
         fs::create_dir_all(app_dir.clone()).unwrap();
 
-        let src = r#"
-            #!/bin/bash
+        let src = r#"#!/bin/bash
             exit 1
             "#;
 
