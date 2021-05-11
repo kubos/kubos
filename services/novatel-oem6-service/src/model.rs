@@ -102,10 +102,9 @@ pub fn log_thread(
                     // Our buffer is full, but the receiver should still be alive, so let's keep going
                     TrySendError::Full(_) => Ok(()),
                     TrySendError::Disconnected(_) => {
-                        let msg =
-                            "Error receiver disconnected. Assuming system has become corrupted";
+                        let msg = String::from("Error receiver disconnected. Assuming system has become corrupted");
                         error!("{}", msg);
-                        panic!(msg);
+                        panic!("{}", msg);
                     }
                 })
                 .unwrap(),
@@ -118,7 +117,7 @@ pub fn log_thread(
                         let msg =
                             "Version receiver disconnected. Assuming system has become corrupted";
                         error!("{}", msg);
-                        panic!(msg)
+                        panic!("{}" ,                 msg);
                     }
                 })
                 .unwrap(),

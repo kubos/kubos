@@ -17,7 +17,6 @@
 use failure::Fail;
 #[cfg(feature = "nos3")]
 use nosengine_rust::client::uart;
-use std::error::Error;
 #[cfg(feature = "nos3")]
 use std::sync;
 #[cfg(feature = "nos3")]
@@ -58,7 +57,7 @@ impl From<std::io::Error> for UartError {
     fn from(error: std::io::Error) -> Self {
         UartError::IoError {
             cause: error.kind(),
-            description: error.description().to_owned(),
+            description: error.to_string(),
         }
     }
 }
@@ -67,7 +66,7 @@ impl From<serial::Error> for UartError {
     fn from(error: serial::Error) -> Self {
         UartError::SerialError {
             cause: error.kind(),
-            description: error.description().to_owned(),
+            description: error.to_string(),
         }
     }
 }

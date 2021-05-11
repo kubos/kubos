@@ -365,7 +365,7 @@ impl MAI400 {
                             cause: ::std::io::ErrorKind::TimedOut,
                             ..
                         } => continue,
-                        _ => panic!(err),
+                        _ => panic!("{}", err),
                     },
                 };
 
@@ -383,7 +383,7 @@ impl MAI400 {
                             cause: ::std::io::ErrorKind::TimedOut,
                             ..
                         } => continue,
-                        _ => panic!(err),
+                        _ => panic!("{}", err),
                     },
                 };
 

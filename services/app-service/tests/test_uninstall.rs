@@ -97,10 +97,7 @@ fn uninstall_last_app() {
 
     // Make sure our app directory and active symlink exist
     assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
-    assert!(
-        fs::symlink_metadata(fixture.registry_dir.path().join("active/dummy")).is_ok(),
-        true
-    );
+    assert!(fs::symlink_metadata(fixture.registry_dir.path().join("active/dummy")).is_ok());
 
     let result = panic::catch_unwind(|| {
         let result = send_query(

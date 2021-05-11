@@ -165,6 +165,7 @@ pub fn operation_failure(channel_id: u32, error: &str) -> Result<Vec<u8>, Protoc
 }
 
 // Create sync message
+#[allow(dead_code)]
 pub fn sync(channel_id: u32, hash: &str) -> Result<Vec<u8>, ProtocolError> {
     info!("-> {{ {}, {} }}", channel_id, hash);
     ser::to_vec_packed(&(channel_id, hash)).map_err(|err| ProtocolError::MessageCreationError {
