@@ -15,22 +15,17 @@
 //
 
 use crate::udp::*;
-use diesel;
 use diesel::prelude::*;
 use flate2::write::GzEncoder;
 use flate2::Compression;
 use juniper::{FieldError, FieldResult, Value};
-use kubos_service;
-use kubos_telemetry_db;
 use serde_derive::Serialize;
-use serde_json;
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 use std::thread::spawn;
-use tar;
 
 type Context = kubos_service::Context<Subsystem>;
 
@@ -114,15 +109,15 @@ fn query_db(
         .load::<kubos_telemetry_db::Entry>(
             &database
                 .lock()
-                .or_else(|err| {
+                .map_err(|err| {
                     log::error!("Failed to get lock on database: {:?}", err);
-                    Err(err)
+                    err
                 })?
                 .connection,
         )
-        .or_else(|err| {
+        .map_err(|err| {
             log::error!("Failed to load database entries: {:?}", err);
-            Err(err)
+            err
         })?;
 
     let mut g_entries: Vec<Entry> = Vec::new();
@@ -253,14 +248,14 @@ struct InsertEntry {
 graphql_object!(MutationRoot: Context | &self | {
     field insert(&executor, timestamp: Option<f64>, subsystem: String, parameter: String, value: String) -> FieldResult<InsertResponse> {
         let result = match timestamp {
-            Some(time) => executor.context().subsystem().database.lock().or_else(|err| {
+            Some(time) => executor.context().subsystem().database.lock().map_err(|err| {
                     log::error!("insert - Failed to get lock on database: {:?}", err);
-                    Err(err)
+                    err
                 })?
             .insert(time, &subsystem, &parameter, &value),
-            None => executor.context().subsystem().database.lock().or_else(|err| {
+            None => executor.context().subsystem().database.lock().map_err(|err| {
                     log::error!("insert - Failed to get lock on database: {:?}", err);
-                    Err(err)
+                    err
                 })?
             .insert_systime(&subsystem, &parameter, &value),
         };
@@ -295,9 +290,9 @@ graphql_object!(MutationRoot: Context | &self | {
             });
         }
 
-        let result = executor.context().subsystem().database.lock().or_else(|err| {
+        let result = executor.context().subsystem().database.lock().map_err(|err| {
             log::error!("insert_bulk - Failed to get lock on database: {:?}", err);
-            Err(err)
+            err
         })?.insert_bulk(new_entries);
 
         Ok(InsertResponse {
@@ -339,9 +334,9 @@ graphql_object!(MutationRoot: Context | &self | {
             selection = selection.filter(dsl::timestamp.le(time_le));
         }
 
-        let result = selection.execute(&executor.context().subsystem().database.lock().or_else(|err| {
+        let result = selection.execute(&executor.context().subsystem().database.lock().map_err(|err| {
                     log::error!("delete - Failed to get lock on database: {:?}", err);
-                    Err(err)
+                    err
                 })?.connection);
 
         match result {

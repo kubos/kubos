@@ -98,7 +98,7 @@ pub fn download(
         },
     )?;
 
-    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), &state)?)
+    f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), &state)
 }
 
 pub fn download_partial(
@@ -139,7 +139,7 @@ pub fn download_partial(
 
     // Modify the reply so that we don't attempt to download
     // all of the chunks
-    let mut mod_reply = reply.clone();
+    let mut mod_reply = reply;
     let reply_vec = mod_reply.as_array_mut().unwrap();
     let channel = reply_vec.remove(0);
     // Pull out bool
@@ -160,7 +160,7 @@ pub fn download_partial(
         },
     )?;
 
-    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), &state)?)
+    f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), &state)
 }
 
 pub fn upload(
@@ -204,7 +204,7 @@ pub fn upload(
 
     // note: the original upload client function does not return the hash.
     // we're only doing it here so that we can manipulate the temporary storage
-    Ok(hash.to_owned())
+    Ok(hash)
 }
 
 pub fn upload_partial(
@@ -248,7 +248,7 @@ pub fn upload_partial(
 
     // Note: The original upload client function does not return the hash.
     // we're only doing it here so that we can manipulate the temporary storage
-    Ok(hash.to_owned())
+    Ok(hash)
 }
 
 pub fn cleanup(

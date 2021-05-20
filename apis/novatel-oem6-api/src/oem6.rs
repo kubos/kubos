@@ -19,10 +19,8 @@ use crate::messages::*;
 #[cfg(not(feature = "nos3"))]
 use byteorder::{LittleEndian, WriteBytesExt};
 use failure::Fail;
-use nom;
 use rust_uart::UartError;
 use rust_uart::*;
-use serial;
 use std::sync::mpsc::{Receiver, RecvTimeoutError, SyncSender, TrySendError};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
@@ -107,9 +105,7 @@ pub fn read_thread(
 
             // If message is abbrv. ascii message (starts with "<")
             if message[0] == 0x3c {
-                let mut ascii_message = vec![];
-                ascii_message.push(message[1]);
-                ascii_message.push(message[2]);
+                let mut ascii_message = vec![message[1], message[2]];
                 let mut ascii_char;
 
                 // Read response ASCII string byte by byte until it ends (no valid character is read)
@@ -119,9 +115,7 @@ pub fn read_thread(
                             _ if v[0] == SYNC[0] || v[0] == 0x23 => break,
                             _ => v,
                         },
-                        Err(err) => match err {
-                            _ => break,
-                        },
+                        Err(_err) => break,
                     };
 
                     ascii_message.append(&mut ascii_char);
@@ -714,7 +708,7 @@ impl OEM6 {
         if resp.resp_id != ResponseID::Ok {
             return Err(OEMError::CommandError {
                 id: resp.resp_id,
-                description: resp.resp_string.clone(),
+                description: resp.resp_string,
             });
         }
 

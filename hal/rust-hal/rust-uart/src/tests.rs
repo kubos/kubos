@@ -187,7 +187,7 @@ fn test_read_bad_multi() {
 
     let expected = vec![0, 1, 2, 3, 4, 5];
 
-    mock.read.set_output(expected.clone());
+    mock.read.set_output(expected);
 
     let connection = Connection {
         stream: Box::new(mock),
@@ -227,7 +227,7 @@ fn test_read_good_multi() {
 
     let expected = vec![0, 1, 2, 3, 4, 5];
 
-    mock.read.set_output(expected.clone());
+    mock.read.set_output(expected);
 
     let connection = Connection {
         stream: Box::new(mock),

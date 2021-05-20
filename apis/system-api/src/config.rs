@@ -19,7 +19,6 @@ use std::env;
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
-use toml;
 use toml::Value;
 
 /// The default configuration file path
@@ -106,11 +105,7 @@ impl Config {
     /// Returns the configured hosturl string in the following
     /// format (using IPv4 addresses) - 0.0.0.0:0000
     pub fn hosturl(&self) -> Option<String> {
-        if let Some(addr) = &self.addr {
-            Some(format!("{}:{}", addr.ip(), addr.port()))
-        } else {
-            None
-        }
+        self.addr.as_ref().map(|addr| format!("{}:{}", addr.ip(), addr.port()))
     }
 
     /// Returns the category's configuration information
@@ -136,10 +131,7 @@ impl Config {
     /// # Arguments
     /// `key` - Key of value to get from config
     pub fn get(&self, key: &str) -> Option<toml::Value> {
-        match self.raw.get(key) {
-            Some(v) => Some(v.clone()),
-            None => None,
-        }
+        self.raw.get(key).cloned()
     }
 }
 

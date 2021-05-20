@@ -69,7 +69,6 @@ impl StatusCode {
     ///
     pub fn to_vec(self) -> Vec<String> {
         format!("{:?}", self)
-            .to_owned()
             .split(" | ")
             .map(|x| x.to_string())
             .collect()

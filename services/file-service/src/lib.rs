@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#![allow(clippy::block_in_if_condition_stmt)]
+#![allow(clippy::blocks_in_if_conditions)]
 
 use file_protocol::{FileProtocol, FileProtocolConfig, ProtocolError, State};
 use kubos_system::Config as ServiceConfig;
@@ -111,7 +111,7 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
     let timeout = config
         .get("timeout")
         .and_then(|val| val.as_integer().map(|num| Duration::from_secs(num as u64)))
-        .unwrap_or(Duration::from_secs(2));
+        .unwrap_or_else(|| Duration::from_secs(2));
 
     // Setup map of channel IDs to thread channels
     let raw_threads: HashMap<u32, Sender<serde_cbor::Value>> = HashMap::new();

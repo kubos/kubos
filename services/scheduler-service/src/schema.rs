@@ -23,7 +23,6 @@ use crate::scheduler::{Scheduler, SAFE_MODE};
 use crate::task_list::{import_raw_task_list, import_task_list, remove_task_list};
 use juniper::FieldResult;
 use juniper::{graphql_object, GraphQLObject};
-use kubos_service;
 use serde::Deserialize;
 
 type Context = kubos_service::Context<Scheduler>;

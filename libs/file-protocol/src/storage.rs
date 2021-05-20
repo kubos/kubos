@@ -28,7 +28,6 @@ use std::path::Path;
 use std::str;
 use std::thread;
 use std::time::Duration;
-use time;
 
 const HASH_SIZE: usize = 16;
 
@@ -214,7 +213,7 @@ pub fn validate_file(
         })
         .collect();
 
-    converted_entries.sort();
+    converted_entries.sort_unstable();
 
     let mut max_entries = 186;
     for &entry_num in converted_entries.iter() {

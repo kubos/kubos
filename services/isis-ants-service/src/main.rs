@@ -28,10 +28,10 @@
 //! - `[isis-ants-service]`
 //!
 //!     - `bus` - Specifies the I2C bus the antenna system is connected to
-//! 	- `primary` - Specifies the I2C address of the antenna system's primary microcontroller
-//! 	- `secondary` - Specifies the I2C address of the secondary microcontroller. If no secondary contoller is present, this value should be `"0x00"`.
-//! 	- `antennas` - Specifies the number of antennas present in the system. Expected value: 2 or 4.
-//! 	- `wd_timeout` - Specifies the interval at which the AntS watchdog should be automatically kicked. To disable automatic kicking, this value should be `0`.
+//!     - `primary` - Specifies the I2C address of the antenna system's primary microcontroller
+//!     - `secondary` - Specifies the I2C address of the secondary microcontroller. If no secondary contoller is present, this value should be `"0x00"`.
+//!     - `antennas` - Specifies the number of antennas present in the system. Expected value: 2 or 4.
+//!     - `wd_timeout` - Specifies the interval at which the AntS watchdog should be automatically kicked. To disable automatic kicking, this value should be `0`.
 //!
 //! For example:
 //!
@@ -140,7 +140,7 @@
 //!             ant4StoppedTime: Boolean,
 //!             ant4Active: Boolean
 //!         },
-//!     	   debug {
+//!         debug {
 //!             ant1ActivationCount: Int,
 //!             ant1ActivationTime: Int,
 //!             ant2ActivationCount: Int,

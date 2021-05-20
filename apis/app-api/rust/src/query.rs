@@ -16,7 +16,6 @@
 
 use failure::format_err;
 use kubos_system::Config as ServiceConfig;
-use serde_json;
 use std::time::Duration;
 
 /// The result type used by `query`
@@ -42,8 +41,8 @@ type AppResult<T> = Result<T, failure::Error>;
 ///
 /// # fn func() -> Result<(), failure::Error> {
 /// let request = r#"{
-/// 		ping
-/// 	}"#;
+///         ping
+///     }"#;
 ///
 /// let result = query(&ServiceConfig::new_from_path("radio-service", "/home/kubos/config.toml".to_owned())?, request, Some(Duration::from_secs(1)))?;
 ///
@@ -61,8 +60,8 @@ type AppResult<T> = Result<T, failure::Error>;
 ///
 /// # fn func() -> Result<(), failure::Error> {
 /// let request = r#"{
-/// 		power
-/// 	}"#;
+///         power
+///     }"#;
 ///
 /// let result = query(&ServiceConfig::new("antenna-service")?, request, Some(Duration::from_secs(1)))?;
 ///

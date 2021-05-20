@@ -227,7 +227,7 @@ fn kill_app_not_running() {
 
     // Kill the app
     let result = send_query(
-        config.clone(),
+        config,
         r#"mutation {
             killApp(name: "rust-proj") {
                 errors,

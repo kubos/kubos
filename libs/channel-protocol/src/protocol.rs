@@ -175,6 +175,6 @@ impl Protocol {
     ///
     pub fn recv_message(&self, timeout: Option<Duration>) -> Result<Message, ProtocolError> {
         let raw = self.recv_raw(timeout)?;
-        Ok(parse_message(raw)?)
+        parse_message(raw)
     }
 }

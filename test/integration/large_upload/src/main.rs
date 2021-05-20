@@ -160,5 +160,5 @@ pub fn upload(
 
     // note: the original upload client function does not return the hash.
     // we're only doing it here so that we can manipulate the temporary storage
-    Ok(hash.to_owned())
+    Ok(hash)
 }

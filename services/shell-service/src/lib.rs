@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#![allow(clippy::block_in_if_condition_stmt)]
+#![allow(clippy::blocks_in_if_conditions)]
 
 use channel_protocol::{ChannelMessage, ChannelProtocol};
 use failure::bail;

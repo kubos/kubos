@@ -112,10 +112,6 @@ fn get_stdout_flag() -> bool {
     // Navigate to the "--stdout" option
     let config_arg_pos = args.position(|arg| arg == "--stdout");
 
-    if let Some(_pos) = config_arg_pos {
-        true
-    } else {
-        // The "--stdout" arg wasn't specified, so we can go ahead with the default
-        false
-    }
+    // Assert position() returns Some(), so we can go ahead with the default
+    matches!(config_arg_pos, Some(_pos))
 }

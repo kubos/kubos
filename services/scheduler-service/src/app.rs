@@ -56,11 +56,11 @@ pub fn service_query(query: &str, hosturl: &str) -> Result<StartAppGraphQL, Sche
         .send()
         .map_err(|e| SchedulerError::QueryError { err: e.to_string() })?;
 
-    Ok(from_str(
+    from_str(
         &res.text()
             .map_err(|e| SchedulerError::QueryError { err: e.to_string() })?,
     )
-    .map_err(|e| SchedulerError::QueryError { err: e.to_string() })?)
+    .map_err(|e| SchedulerError::QueryError { err: e.to_string() })
 }
 
 // Configuration used for execution of an app

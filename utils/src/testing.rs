@@ -202,14 +202,14 @@ impl ServiceListener {
                     .map_err(warp::reject::custom)
             }))
             .map(move |body: String| {
-                req_handle.lock().unwrap().push_back(body.to_owned());
+                req_handle.lock().unwrap().push_back(body);
                 "hi"
             });
 
         thread::spawn(move || warp::serve(listener).run(([127, 0, 0, 1], port)));
 
         ServiceListener {
-            requests: requests.clone(),
+            requests,
         }
     }
 

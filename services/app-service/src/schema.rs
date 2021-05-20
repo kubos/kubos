@@ -18,7 +18,6 @@ use crate::monitor::MonitorEntry;
 use crate::objects::*;
 use crate::registry::AppRegistry;
 use juniper::FieldResult;
-use kubos_service;
 
 type Context = kubos_service::Context<AppRegistry>;
 

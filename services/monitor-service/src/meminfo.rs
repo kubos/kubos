@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-use failure;
-
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::str::FromStr;

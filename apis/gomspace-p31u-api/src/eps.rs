@@ -75,15 +75,15 @@ fn powerstate_to_u8(powerstate: EpsPowerState) -> u8 {
 pub enum EpsChannels {
     /// EPS channel 0 => H1-47
     Output0,
-    /// EPS channel 1 => H1-49	    
+    /// EPS channel 1 => H1-49
     Output1,
-    /// EPS channel 2 => H1-51	    
+    /// EPS channel 2 => H1-51
     Output2,
-    /// EPS channel 3 => H1-48    
+    /// EPS channel 3 => H1-48
     Output3,
     /// EPS channel 4 => H1-50
     Output4,
-    /// EPS channel 5 => H1-52    
+    /// EPS channel 5 => H1-52
     Output5,
     /// BP4 heater switch
     Output6,
@@ -444,7 +444,7 @@ impl GsEps for Eps {
         let mut buff = ffi::EpsHk::default();
 
         convert_status(unsafe { ffi::k_eps_get_housekeeping(&mut buff) })?;
-        Ok(EpsHk::new(&buff)?)
+        EpsHk::new(&buff)
     }
 
     /// Query the system configuration (conf)
@@ -467,7 +467,7 @@ impl GsEps for Eps {
         let mut config = ffi::EpsSystemConfig::default();
 
         convert_status(unsafe { ffi::k_eps_get_system_config(&mut config) })?;
-        Ok(EpsSystemConfig::new(&config)?)
+        EpsSystemConfig::new(&config)
     }
 
     /// Get the battery configuration (conf2)
@@ -487,7 +487,7 @@ impl GsEps for Eps {
         let mut config = ffi::EpsBatteryConfig::default();
 
         convert_status(unsafe { ffi::k_eps_get_battery_config(&mut config) })?;
-        Ok(EpsBatteryConfig::new(&config)?)
+        EpsBatteryConfig::new(&config)
     }
 
     /// Get heater status

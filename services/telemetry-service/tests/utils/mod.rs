@@ -14,8 +14,6 @@
 // limitations under the License.
 //
 
-use serde_json;
-
 use std::env;
 use std::fs::File;
 use std::io::*;
@@ -25,14 +23,14 @@ use std::sync::mpsc::{channel, Receiver, Sender};
 use std::time::Duration;
 use std::{thread, thread::JoinHandle};
 
-static UP_SQL: &'static str = r"CREATE TABLE telemetry (
+static UP_SQL: &str = r"CREATE TABLE telemetry (
     timestamp INTEGER NOT NULL,
     subsystem VARCHAR(255) NOT NULL,
     parameter VARCHAR(255) NOT NULL,
     value VARCHAR(255) NOT NULL,
     PRIMARY KEY (timestamp, subsystem, parameter))";
 
-static DOWN_SQL: &'static str = r"DROP TABLE telemetry;";
+static DOWN_SQL: &str = r"DROP TABLE telemetry;";
 
 fn setup_db(db: &str, sql: Option<&str>) {
     Command::new("sqlite3")
@@ -74,7 +72,7 @@ fn start_telemetry(config: String) -> (JoinHandle<()>, Sender<bool>) {
         let mut run = true;
         while run {
             thread::sleep(Duration::from_millis(100));
-            if let Ok(_) = rx.try_recv() {
+            if rx.try_recv().is_ok() {
                 telem_proc.kill().unwrap();
                 run = false;
             }
@@ -83,7 +81,7 @@ fn start_telemetry(config: String) -> (JoinHandle<()>, Sender<bool>) {
 
     // Give the process a bit to actually start
     thread::sleep(Duration::from_millis(300));
-    return (telem_thread, tx);
+    (telem_thread, tx)
 }
 
 pub struct TelemetryServiceFixture {
@@ -127,10 +125,10 @@ impl TelemetryServiceFixture {
 
         let (join_handle, sender) = start_telemetry(config_path.to_str().unwrap().to_owned());
 
-        return Self {
+        Self {
             join_handle: Some(join_handle),
             sender: Some(sender),
-        };
+        }
     }
 }
 
@@ -151,13 +149,11 @@ pub fn do_query(service_port: Option<u16>, query: &str) -> serde_json::Value {
     let mut map = ::std::collections::HashMap::new();
     map.insert("query", query);
 
-    let response = client
+    client
         .post(&uri)
         .json(&map)
         .send()
         .expect("Couldn't send request")
         .json()
-        .expect("Couldn't deserialize response");
-
-    response
+        .expect("Couldn't deserialize response")
 }

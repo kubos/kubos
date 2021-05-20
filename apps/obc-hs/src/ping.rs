@@ -25,7 +25,6 @@ use failure::format_err;
 use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::prelude::*;
-use toml;
 use toml::Value;
 
 pub fn ping_services() -> Result<u8, Error> {

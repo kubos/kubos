@@ -39,20 +39,17 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
 pub fn to_cbor(channel_id: u32, data: Option<&str>) -> Result<Vec<u8>, ProtocolError> {
     info!("-> {{ {}, stdin, '{:?}' }}", channel_id, data);
 
-    Ok(
         ser::to_vec_packed(&(channel_id, "stdin", data)).map_err(|err| {
             ProtocolError::MessageCreationError {
                 message: "stdin".to_owned(),
                 err,
             }
-        })?,
-    )
+        })
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use channel_protocol;
     use serde_cbor::de;
 
     #[test]
@@ -67,7 +64,7 @@ mod tests {
         assert_eq!(
             msg.unwrap(),
             Message::Stdin {
-                channel_id: channel_id,
+                channel_id,
                 data: Some(data.to_owned()),
             }
         );

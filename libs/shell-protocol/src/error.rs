@@ -14,11 +14,7 @@
 // limitations under the License.
 //
 
-use cbor_protocol;
-use channel_protocol;
 use failure::Fail;
-use nix;
-use serde_cbor;
 use std::io;
 
 /// Errors which occur when using ShellProtocol

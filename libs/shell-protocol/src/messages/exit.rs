@@ -51,20 +51,17 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
 pub fn to_cbor(channel_id: u32, code: u32, signal: u32) -> Result<Vec<u8>, ProtocolError> {
     info!("-> {{ {}, exit, {}, {} }}", channel_id, code, signal);
 
-    Ok(
-        ser::to_vec_packed(&(channel_id, "exit", code, signal)).map_err(|err| {
-            ProtocolError::MessageCreationError {
-                message: "exit".to_owned(),
-                err,
-            }
-        })?,
-    )
+    ser::to_vec_packed(&(channel_id, "exit", code, signal)).map_err(|err| {
+        ProtocolError::MessageCreationError {
+            message: "exit".to_owned(),
+            err,
+        }
+    })
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use channel_protocol;
     use serde_cbor::de;
 
     #[test]
@@ -80,9 +77,9 @@ mod tests {
         assert_eq!(
             msg.unwrap(),
             Message::Exit {
-                channel_id: channel_id,
-                code: code,
-                signal: signal
+                channel_id,
+                code,
+                signal
             }
         );
     }

@@ -19,7 +19,6 @@ use crate::error::*;
 use crate::monitor::*;
 use chrono::Utc;
 use failure::format_err;
-use fs_extra;
 use log::*;
 use nix::sys::signal;
 use nix::unistd::Pid;
@@ -33,7 +32,6 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 use tempfile::TempDir;
-use toml;
 
 /// The default application registry directory in KubOS
 pub static K_APPS_DIR: &str = "/home/system/kubos/apps";
@@ -112,12 +110,10 @@ impl AppRegistry {
     fn discover_apps(&self) -> Result<Vec<AppRegistryEntry>, AppError> {
         let mut reg_entries: Vec<AppRegistryEntry> = Vec::new();
 
-        for entry in fs::read_dir(&self.apps_dir)? {
-            if let Ok(entry) = entry {
-                if let Ok(file_type) = entry.file_type() {
-                    if file_type.is_dir() && entry.file_name().to_str() != Some("active") {
-                        reg_entries.extend(self.discover_versions(entry.path())?);
-                    }
+        for entry in (fs::read_dir(&self.apps_dir)?).flatten() {
+            if let Ok(file_type) = entry.file_type() {
+                if file_type.is_dir() && entry.file_name().to_str() != Some("active") {
+                    reg_entries.extend(self.discover_versions(entry.path())?);
                 }
             }
         }
@@ -135,10 +131,7 @@ impl AppRegistry {
 
             let version = version.unwrap();
 
-            match version
-                .file_type()
-                .and_then(|file_type| Ok(file_type.is_dir()))
-            {
+            match version.file_type().map(|file_type| file_type.is_dir()) {
                 Ok(true) => {
                     if let Ok(entry) = AppRegistryEntry::from_dir(&version.path()) {
                         if entry.active_version {
@@ -347,13 +340,13 @@ impl AppRegistry {
         // Add the new registry entry
         entries.push(reg_entry);
         // Create the app.toml file and save the metadata information
-        entries[entries.len() - 1].save().or_else(|err| {
+        entries[entries.len() - 1].save().map_err(|err| {
             // Remove this new app version directory
             let _ = fs::remove_dir_all(app_dir);
             // Try to remove the parent directory. This will only work if no other versions of the
             // app exist.
             let _ = fs::remove_dir(format!("{}/{}", self.apps_dir, app_name));
-            Err(err)
+            err
         })?;
 
         // Mark the old version as inactive

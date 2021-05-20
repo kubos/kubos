@@ -153,7 +153,7 @@ fn parse_hms_field(field: String) -> Result<Duration, SchedulerError> {
     if field_parts.is_empty() {
         return Err(SchedulerError::HmsParseError {
             err: "No parts found".to_owned(),
-            field: field.to_owned(),
+            field,
         });
     }
     for mut part in field_parts {
@@ -173,14 +173,14 @@ fn parse_hms_field(field: String) -> Result<Duration, SchedulerError> {
                 _ => {
                     return Err(SchedulerError::HmsParseError {
                         err: "Found invalid unit".to_owned(),
-                        field: field.to_owned(),
+                        field,
                     });
                 }
             }
         } else {
             return Err(SchedulerError::HmsParseError {
                 err: "Failed to parse number".to_owned(),
-                field: field.to_owned(),
+                field,
             });
         }
     }
