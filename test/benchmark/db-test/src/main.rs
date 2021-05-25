@@ -232,7 +232,7 @@ impl DbTest {
 
         let port = self.config.get("direct_port").unwrap();
 
-        let host = self.config.hosturl().unwrap().to_owned();
+        let host = self.config.hosturl().unwrap();
         let ip: Vec<&str> = host.split(':').collect();
 
         let remote_addr = format!("{}:{}", ip[0], port);

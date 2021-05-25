@@ -19,7 +19,7 @@ mod utils;
 use crate::utils::*;
 use tempfile::TempDir;
 
-static SQL: &'static str = r"
+static SQL: &str = r"
 insert into telemetry values(1000, 'eps', 'voltage', '3.3');
 insert into telemetry values(1000, 'eps', 'voltage5', '3.5');
 insert into telemetry values(1001, 'eps', 'voltage', '3.4');

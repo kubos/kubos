@@ -654,7 +654,7 @@ impl Protocol {
     ///         &State::StartReceive {
     ///             path: "target/dir/file.bin".to_owned()
     ///         }
-    ///	    );
+    ///     );
     /// }
     /// ```
     ///

@@ -116,7 +116,7 @@ impl SchedulerFixture {
     }
 
     pub fn activate_safe(&self) -> serde_json::Value {
-        let mutation = r#"mutation {{ safeMode {{ errors, success }} }}"#.to_string();
+        let mutation = String::from("mutation { safeMode { errors, success } }");
 
         service_query(&mutation, &self.ip, self.port)
     }

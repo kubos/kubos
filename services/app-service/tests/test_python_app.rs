@@ -20,7 +20,6 @@
 // properly run these tests. You'll need to manually run these tests and verify the output by
 // checking for any extraneous error messages.
 
-use fs_extra;
 use kubos_app::ServiceConfig;
 use std::fs;
 use std::path::Path;

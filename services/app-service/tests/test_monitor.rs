@@ -208,7 +208,7 @@ fn monitor_existing() {
     send_query(config.clone(), start_app);
 
     // If we try to start the app a second time, it should fail
-    let result = send_query(config.clone(), start_app);
+    let result = send_query(config, start_app);
 
     assert_eq!(
         result["startApp"]["errors"].as_str().unwrap(),
