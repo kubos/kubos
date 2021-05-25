@@ -105,7 +105,9 @@ impl Config {
     /// Returns the configured hosturl string in the following
     /// format (using IPv4 addresses) - 0.0.0.0:0000
     pub fn hosturl(&self) -> Option<String> {
-        self.addr.as_ref().map(|addr| format!("{}:{}", addr.ip(), addr.port()))
+        self.addr
+            .as_ref()
+            .map(|addr| format!("{}:{}", addr.ip(), addr.port()))
     }
 
     /// Returns the category's configuration information

@@ -153,10 +153,9 @@ fn set_rv_good() {
 
     let mai = mock_new!(mock);
 
-    assert!(
-        mai.set_rv([1.1, 2.2, 3.3], [4.4, 5.5, 6.6], 1198800018)
-            .is_ok(),
-    );
+    assert!(mai
+        .set_rv([1.1, 2.2, 3.3], [4.4, 5.5, 6.6], 1198800018)
+        .is_ok(),);
 }
 
 #[test]

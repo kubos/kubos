@@ -431,7 +431,7 @@ impl Protocol {
             },
         };
 
-          self.recv_start(&buf[0..size])
+        self.recv_start(&buf[0..size])
     }
 
     // Parse the received CBOR message

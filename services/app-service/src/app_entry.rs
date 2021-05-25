@@ -18,7 +18,7 @@ use crate::error::*;
 use serde_derive::{Deserialize, Serialize};
 use std::fs;
 use std::io::Write;
-use std::path::{PathBuf};
+use std::path::PathBuf;
 
 /// The high level metadata of an application derived from the `manifest.toml` file during
 /// registration

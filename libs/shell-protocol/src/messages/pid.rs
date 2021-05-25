@@ -63,12 +63,6 @@ mod tests {
         let parsed = channel_protocol::parse_message(de::from_slice(&raw).unwrap()).unwrap();
         let msg = parse_message(&parsed);
 
-        assert_eq!(
-            msg.unwrap(),
-            Message::Pid {
-                channel_id,
-                pid,
-            }
-        );
+        assert_eq!(msg.unwrap(), Message::Pid { channel_id, pid });
     }
 }
