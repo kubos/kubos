@@ -60,7 +60,7 @@ fn download_single() {
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
-    assert_eq!(&contents[..], dest_contents.as_slice());
+    assert_eq!(contents, dest_contents.as_slice());
 
     // Cleanup the temporary files so that the test can be repeatable
     // The client folder is cleaned up by the protocol as a result

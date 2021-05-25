@@ -108,8 +108,10 @@ pub enum Message {
     Metadata(u32, String, u32),
     /// File data chunk message
     ReceiveChunk(u32, String, u32, Vec<u8>),
+    #[allow(clippy::clippy::upper_case_acronyms)]
     /// Receiver has successfully gotten all data chunks of the requested file
     ACK(u32, String),
+    #[allow(clippy::clippy::upper_case_acronyms)]
     /// Receiver is missing the specified file data chunks
     NAK(u32, String, Option<Vec<(u32, u32)>>),
     /// (Client Only) Message requesting the recipient to receive the specified file

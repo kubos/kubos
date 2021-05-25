@@ -59,6 +59,7 @@ pub struct AppRegistryEntry {
     pub app: App,
 }
 
+#[allow(clippy::ptr_arg)]
 impl AppRegistryEntry {
     // Fetch a registered apps entry information
     pub fn from_dir(dir: &PathBuf) -> Result<AppRegistryEntry, AppError> {

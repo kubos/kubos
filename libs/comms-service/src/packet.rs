@@ -21,6 +21,7 @@ use crate::CommsResult;
 /// Enum representing the different payload types handled
 /// by the communications service
 #[repr(u8)]
+#[allow(clippy::clippy::upper_case_acronyms)]
 pub enum PayloadType {
     /// Packet intended for GraphQL request/response
     GraphQL,

@@ -73,13 +73,13 @@ fn run_command(channel_proto: &ChannelProtocol, command: &str) -> Result<(), Err
                 break;
             }
             shell_protocol::messages::Message::Stdout { data, .. } => {
-                if let Some(data) = data {
-                    print!("{}", data);
+                if data.is_some() {
+                    print!("{:?}", data);
                 }
             }
             shell_protocol::messages::Message::Stderr { data, .. } => {
-                if let Some(data) = data {
-                    print!("{}", data);
+                if data.is_some() {
+                    print!("{:?}", data);
                 }
             }
             shell_protocol::messages::Message::Error { message, .. } => {

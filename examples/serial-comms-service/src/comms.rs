@@ -88,7 +88,7 @@ impl SerialComms {
 
 pub fn read_ser(socket: &Arc<Mutex<SerialComms>>) -> SerialServiceResult<Vec<u8>> {
     if let Ok(socket) = socket.lock() {
-        return Ok(socket.read()?);
+        return socket.read();
     }
     bail!("Failed to lock socket");
 }

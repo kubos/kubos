@@ -16,7 +16,6 @@
 
 use super::*;
 
-use serial;
 use serial::prelude::*;
 use std::io::prelude::*;
 

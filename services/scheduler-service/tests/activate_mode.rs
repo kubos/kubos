@@ -268,6 +268,7 @@ fn switch_to_nonexistant_mode() {
 
 #[test]
 fn assert_mutation_format(){
+    #[allow(clippy::useless_format)]
     let mutation_fmt = format!(r#"mutation {{ safeMode {{ errors, success }} }}"#,);
     let mutation_string = String::from("mutation { safeMode { errors, success } }");
     assert_eq!(mutation_fmt, mutation_string);

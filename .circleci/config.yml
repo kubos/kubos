@@ -94,7 +94,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: cargo clippy --workspace --all-targets
+        - run: cargo clippy --workspace --all-targets --exclude isis-ants-service --exclude novatel-oem6-service --exclude clyde-3g-eps-service --exclude gomspace-p31u-service --exclude mai400-service --exclude iobc-supervisor-service --exclude nsl-duplex-d2-comms-service
 
 
     # CLI, C and Python testing

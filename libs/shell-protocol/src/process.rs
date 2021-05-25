@@ -82,7 +82,7 @@ impl ProcessHandler {
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
-            .args(args.unwrap_or_else(|| vec![]))
+            .args(args.unwrap_or_else(Vec::new))
             .spawn()
         {
             Ok(process) => process,

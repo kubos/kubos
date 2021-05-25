@@ -37,7 +37,7 @@ fn reset_good() {
 
     let mai = mock_new!(mock);
 
-    assert_eq!(mai.reset().unwrap(), ());
+    assert!(mai.reset().is_ok());
 }
 
 #[test]
@@ -66,7 +66,7 @@ fn set_mode_good() {
 
     let mai = mock_new!(mock);
 
-    assert_eq!(mai.set_mode(0x01, [0x02, 0x03, 0x04, 0x05]).unwrap(), ());
+    assert!(mai.set_mode(0x01, [0x02, 0x03, 0x04, 0x05]).is_ok());
 }
 
 #[test]
@@ -95,7 +95,7 @@ fn set_mode_sun_good() {
 
     let mai = mock_new!(mock);
 
-    assert_eq!(mai.set_mode_sun(0x08, 1, 2.2).unwrap(), ());
+    assert!(mai.set_mode_sun(0x08, 1, 2.2).is_ok());
 }
 
 #[test]
@@ -124,7 +124,7 @@ fn set_gps_time_good() {
 
     let mai = mock_new!(mock);
 
-    assert_eq!(mai.set_gps_time(1198800018).unwrap(), ());
+    assert!(mai.set_gps_time(1198800018).is_ok());
 }
 
 #[test]
@@ -153,10 +153,9 @@ fn set_rv_good() {
 
     let mai = mock_new!(mock);
 
-    assert_eq!(
+    assert!(
         mai.set_rv([1.1, 2.2, 3.3], [4.4, 5.5, 6.6], 1198800018)
-            .unwrap(),
-        ()
+            .is_ok(),
     );
 }
 
@@ -184,7 +183,7 @@ fn passthrough_good() {
 
     let mai = mock_new!(mock);
 
-    assert_eq!(mai.passthrough(&msg).unwrap(), ());
+    assert!(mai.passthrough(&msg).is_ok());
 }
 
 #[test]

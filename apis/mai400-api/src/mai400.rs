@@ -19,7 +19,6 @@ use byteorder::{LittleEndian, WriteBytesExt};
 use failure::Fail;
 use rust_uart::UartError;
 use rust_uart::*;
-use serial;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 

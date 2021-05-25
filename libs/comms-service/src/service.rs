@@ -228,7 +228,7 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
                     Err(e) => {
                         log_telemetry(&data_ref, &TelemType::DownFailed).unwrap();
                         log_error(&data_ref, e.to_string()).unwrap();
-                        error!("UDP packet failed to uplink: {}", e.to_string());
+                        error!("UDP packet failed to uplink: {}", e);
                     }
                 });
             }
@@ -266,7 +266,7 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
                         Err(e) => {
                             log_telemetry(&data_ref, &TelemType::DownFailed).unwrap();
                             log_error(&data_ref, e.to_string()).unwrap();
-                            error!("GraphQL packet failed to downlink: {}", e.to_string());
+                            error!("GraphQL packet failed to downlink: {}", e);
                         }
                     }
                 });
@@ -308,7 +308,7 @@ fn handle_graphql_request<Connection: Clone, Packet: LinkPacket>(
         .map_err(|e| e.to_string())?;
 
     // Write packet to the gateway
-    write(&write_conn.clone(), &packet).map_err(|e| e.to_string())
+    write(&write_conn, &packet).map_err(|e| e.to_string())
 }
 
 // This function takes a Packet with PayloadType::UDP and sends the payload over a
