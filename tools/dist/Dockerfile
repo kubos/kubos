@@ -1,8 +1,8 @@
-# kubos/kubos-dev:1.20.0
+# kubos/kubos-dev:2.0.0-PRE
 
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
-MAINTAINER catherine@kubos.com, ryan@kubos.com
+MAINTAINER josh@kubos.co
 
 RUN apt-get update -y
 
@@ -34,7 +34,7 @@ RUN git clone https://github.com/kubos/kubos --depth 1 && pip3 install -r kubos/
 # Setup rust stuff
 ENV PATH "$PATH:/root/.cargo/bin"
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && rustup toolchain uninstall stable-x86_64-unknown-linux-gnu
-RUN rustup default 1.39.0 && rm -rf /root/.rustup/toolchains/*/share/doc
+RUN rustup default 1.52.1 && rm -rf /root/.rustup/toolchains/*/share/doc
 RUN rustup target install arm-unknown-linux-gnueabihf
 RUN rustup target install armv5te-unknown-linux-gnueabi
 RUN rustup component add clippy
