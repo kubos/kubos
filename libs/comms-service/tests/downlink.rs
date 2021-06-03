@@ -63,7 +63,7 @@ fn downlink_to_ground() {
         .unwrap();
 
     // Let the wheels turn
-    thread::sleep(Duration::from_millis(10));
+    thread::sleep(Duration::from_millis(100));
 
     // Pretend to be the ground and read the
     // packet which was written to the radio

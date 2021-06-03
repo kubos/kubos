@@ -84,6 +84,7 @@ fn download_multi_clean() {
 
     let storage_dir = format!("{}/service", test_dir_str);
     service_new!(service_port, downlink_port, 4096, storage_dir);
+    thread::sleep(Duration::from_millis(100));
 
     let result = download(
         "127.0.0.1",
