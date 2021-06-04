@@ -7,7 +7,7 @@ MAINTAINER josh@kubos.co
 RUN apt-get update -y
 
 RUN apt-get upgrade --no-install-recommends -y python3.7
-RUN apt-get install --no-install-recommends -y pkg-config build-essential git cmake unzip wget sqlite3 libsqlite3-dev libssl-dev curl git ssh
+RUN DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y pkg-config build-essential git cmake unzip wget sqlite3 libsqlite3-dev libssl-dev curl git ssh
 
 # Linux build dependencies
 RUN apt-get install --no-install-recommends -y python file rsync bc cpio ncurses-dev libc6-i386 lib32stdc++6 lib32z1
@@ -43,13 +43,14 @@ RUN /root/.cargo/bin/cargo install --git https://github.com/kubos/cargo-kubos
 COPY cargo_config /root/.cargo/config
 
 # Install NOS3 dependencies
-RUN apt-get --no-install-recommends install -y software-properties-common
-RUN add-apt-repository 'deb http://cz.archive.ubuntu.com/ubuntu xenial main universe'
-RUN apt-get install -y libboost-system1.58.0 libboost-program-options1.58.0 libxerces-c3.1
-RUN wget https://github.com/nasa/nos3/raw/master/support/packages/ubuntu/itc-common-cxx11-Release_1.9.1_amd64.deb && \
-apt-get install -y ./itc-common-cxx11-Release_1.9.1_amd64.deb && rm itc-common-cxx11-Release_1.9.1_amd64.deb
+#RUN apt-get --no-install-recommends install -y software-properties-common
+#RUN add-apt-repository 'deb http://cz.archive.ubuntu.com/ubuntu xenial main universe'
+#RUN apt-get install -y libboost-system1.58.0 libboost-program-options1.58.0 libxerces-c3.1
+# TODO: Following deb package 404s
+# RUN wget https://github.com/nasa/nos3/raw/master/support/packages/ubuntu/itc-common-cxx11-Release_1.9.1_amd64.deb && \
+#apt-get install -y ./itc-common-cxx11-Release_1.9.1_amd64.deb && rm itc-common-cxx11-Release_1.9.1_amd64.deb
 
-RUN wget https://github.com/nasa/nos3/raw/master/support/packages/ubuntu/nos-engine-cxx11-Release_1.4.0_amd64.deb && \
-apt-get install -y ./nos-engine-cxx11-Release_1.4.0_amd64.deb && rm nos-engine-cxx11-Release_1.4.0_amd64.deb
+#RUN wget https://github.com/nasa/nos3/raw/master/support/packages/ubuntu/nos-engine-cxx11-Release_1.4.0_amd64.deb && \
+#apt-get install -y ./nos-engine-cxx11-Release_1.4.0_amd64.deb && rm nos-engine-cxx11-Release_1.4.0_amd64.deb
 
 ENV PATH "$PATH:/usr/bin/iobc_toolchain/usr/bin:/usr/bin/bbb_toolchain/usr/bin"
