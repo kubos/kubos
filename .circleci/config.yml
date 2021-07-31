@@ -127,7 +127,6 @@ jobs:
       steps:
         - checkout
         - run: cd apis/app-api/python && pip3 install .
-        - run: ssh-keyscan docs.kubos.co >> ~/.ssh/known_hosts
         - run: pip3 install semantic-version
         - run: ./tools/docs/prep_docs.sh
         - run: ./tools/docs/deploy_docs.sh
