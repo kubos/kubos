@@ -111,7 +111,7 @@ jobs:
         - run: cd apis/app-api/python; python3 test_app_api.py
 
     # Create and push new git version tag (n.n.n+{new build number})
-    # Run when code is merged into master
+    # Run when code is merged into main
     deploy:
       docker:
         - image: kubos/kubos-dev:latest
@@ -120,7 +120,7 @@ jobs:
         - run: ./deploy_tag.sh
 
     # Generate and upload new docs
-    # Run when code is merged into master or when an official release tag is generated
+    # Run when code is merged into main or when an official release tag is generated
     docs:
       docker:
         - image: kubos/kubos-dev:latest
@@ -138,50 +138,50 @@ workflows:
       - rust_check_x86:
           filters:
             branches:
-              ignore: master
+              ignore: main
       - rust_check_mbm2:
           filters:
             branches:
-              ignore: master
+              ignore: main
       - rust_check_iobc:
           filters:
             branches:
-              ignore: master
+              ignore: main
       - rust_test:
           filters:
             branches:
-              ignore: master
+              ignore: main
       - rust_test_large_download:
           filters:
             branches:
-              ignore: master
+              ignore: main
       - rust_test_large_upload:
           filters:
             branches:
-              ignore: master
+              ignore: main
       - rust_test_nosengine:
           filters:
             branches:
-              ignore: master
+              ignore: main
       - rust_fmt:
           filters:
             branches:
-              ignore: master
+              ignore: main
       - rust_clippy:
           filters:
             branches:
-              ignore: master
+              ignore: main
       - non_rust_tests:
           filters:
             branches:
-              ignore: master
+              ignore: main
 
   deploy:
     jobs:
       - deploy:
           filters:
             branches:
-              only: master
+              only: main
       - docs:
           requires:
             - deploy
