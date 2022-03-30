@@ -332,7 +332,7 @@ To pass additional arguments to the underlying application, the ``args`` input a
 For example::
 
     mutation {
-        startApp(name: "mission-app", args: "--verbose --release") {
+        startApp(name: "mission-app", args: ["--verbose", "--release"]) {
             success
         }
     }
