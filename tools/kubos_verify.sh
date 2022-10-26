@@ -10,4 +10,7 @@ cargo test --package shell-service
 cargo test --package file-service
 
 python3 hal/python-hal/i2c/test_i2c.py
-cd apis/app-api/python; python3 test_app_api.py; cd ../../..
+
+pushd apis/app-api/python
+python3 test_app_api.py
+popd

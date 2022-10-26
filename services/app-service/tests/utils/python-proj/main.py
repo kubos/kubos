@@ -4,7 +4,7 @@
 # Licensed under the Apache License, Version 2.0
 # See LICENSE file for details.
 
-import app_api
+from kubos import app
 import argparse
 import logging
 from sub import sub
@@ -12,7 +12,7 @@ import sys
 
 def main():
     
-    logger = app_api.logging_setup("python-proj")
+    logger = app.logging_setup("python-proj")
 
     parser = argparse.ArgumentParser()
     
@@ -30,9 +30,9 @@ def main():
     
     if matches.config is not None:
         global SERVICES
-        SERVICES = app_api.Services(matches.config[0])
+        SERVICES = app.Services(matches.config[0])
     else:
-        SERVICES = app_api.Services()
+        SERVICES = app.Services()
     
     success = False
     

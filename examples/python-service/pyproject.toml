@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "python-service"
+version = "0.1.0"
+description = ""
+authors = []
+
+[tool.poetry.dependencies]
+python = "^3.7"
+kubos = { path = "../../libs/kubos/", develop = true }
+kubos-service = { path = "../../libs/kubos-service", develop = true }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.a# pi"
