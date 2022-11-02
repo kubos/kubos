@@ -105,7 +105,7 @@ pub fn log_thread(
                         let msg =
                             "Error receiver disconnected. Assuming system has become corrupted";
                         error!("{}", msg);
-                        panic!(msg);
+                        panic!("{}", msg);
                     }
                 })
                 .unwrap(),
@@ -118,7 +118,7 @@ pub fn log_thread(
                         let msg =
                             "Version receiver disconnected. Assuming system has become corrupted";
                         error!("{}", msg);
-                        panic!(msg)
+                        panic!("{}", msg)
                     }
                 })
                 .unwrap(),

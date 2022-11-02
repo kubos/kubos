@@ -194,7 +194,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
     }
 
     /// Set a single EPS output
-    field eps_set_single_output(&executor, channel:EpsChannels, power_state:EpsPowerState, delay:i32) -> FieldResult<(GenericResponse)>
+    field eps_set_single_output(&executor, channel:EpsChannels, power_state:EpsPowerState, delay:i32) -> FieldResult<GenericResponse>
     {
         let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
         *last_cmd = AckCommand::SetEpsChannels;
@@ -202,7 +202,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
     }
 
     /// Set EPS MPPT value for mode 2 (Non-Auto mode)
-    field eps_set_input_value(&executor, in1_voltage: i32,in2_voltage:i32,in3_voltage:i32) -> FieldResult<(GenericResponse)>
+    field eps_set_input_value(&executor, in1_voltage: i32,in2_voltage:i32,in3_voltage:i32) -> FieldResult<GenericResponse>
     {
         let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
         *last_cmd = AckCommand::EpsSetMPPTLevel;

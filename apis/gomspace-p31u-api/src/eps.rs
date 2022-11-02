@@ -182,11 +182,11 @@ pub trait GsEps: Send {
     /// Reset conuters
     fn reset_counters(&self) -> EpsResult<()>;
     /// Get the telemetry data
-    fn get_housekeeping(&self) -> EpsResult<(EpsHk)>;
+    fn get_housekeeping(&self) -> EpsResult<EpsHk>;
     /// Get the system configuration
-    fn get_system_config(&self) -> EpsResult<(EpsSystemConfig)>;
+    fn get_system_config(&self) -> EpsResult<EpsSystemConfig>;
     /// Get battery configuration
-    fn get_battery_config(&self) -> EpsResult<(EpsBatteryConfig)>;
+    fn get_battery_config(&self) -> EpsResult<EpsBatteryConfig>;
     /// Get the heater status
     fn get_heater(&self) -> EpsResult<i32>;
     /// Kick the hardware watchdog
@@ -440,7 +440,7 @@ impl GsEps for Eps {
     ///
     /// # Errors
     /// If this function encounters any errors, an [`EpsError`] variant will be returned.
-    fn get_housekeeping(&self) -> EpsResult<(EpsHk)> {
+    fn get_housekeeping(&self) -> EpsResult<EpsHk> {
         let mut buff = ffi::EpsHk::default();
 
         convert_status(unsafe { ffi::k_eps_get_housekeeping(&mut buff) })?;
@@ -463,7 +463,7 @@ impl GsEps for Eps {
     ///
     /// # Errors
     /// If this function encounters any errors, an [`EpsError`] variant will be returned.
-    fn get_system_config(&self) -> EpsResult<(EpsSystemConfig)> {
+    fn get_system_config(&self) -> EpsResult<EpsSystemConfig> {
         let mut config = ffi::EpsSystemConfig::default();
 
         convert_status(unsafe { ffi::k_eps_get_system_config(&mut config) })?;
@@ -483,7 +483,7 @@ impl GsEps for Eps {
     ///
     /// # Errors
     /// If this function encounters any errors, an [`EpsError`] variant will be returned.
-    fn get_battery_config(&self) -> EpsResult<(EpsBatteryConfig)> {
+    fn get_battery_config(&self) -> EpsResult<EpsBatteryConfig> {
         let mut config = ffi::EpsBatteryConfig::default();
 
         convert_status(unsafe { ffi::k_eps_get_battery_config(&mut config) })?;
