@@ -21,7 +21,7 @@ use std::process::Command;
 /// Performs all the setup, build and configuration neccesary
 /// to compile and link a C-based cmake project under Cargo
 pub fn build_module() {
-    let dst = cmake::Config::new("").build_target("").build();
+    let dst = cmake::Config::new("").no_build_target(true).build();
     setup_libraries(dst.to_str().unwrap());
 }
 

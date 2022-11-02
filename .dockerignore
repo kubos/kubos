@@ -1,0 +1,7 @@
+*.egg-info/
+
+__pycache__/
+app-registry/
+html/
+dist/
+target/
