@@ -12,6 +12,7 @@ import kubos_app
 import unittest
 import mock
 import responses
+import toml
 
 from requests.exceptions import ConnectionError, HTTPError
 
