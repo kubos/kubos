@@ -29,7 +29,7 @@ fn start_session(channel_proto: &ChannelProtocol) -> Result<(), Error> {
 
     channel_proto.send(&shell_protocol::messages::spawn::to_cbor(
         channel_id,
-        &"/bin/sh".to_owned(),
+        "/bin/sh",
         None,
     )?)?;
     run_shell(channel_proto, channel_id)?;
@@ -42,7 +42,7 @@ fn run_command(channel_proto: &ChannelProtocol, command: &str) -> Result<(), Err
 
     channel_proto.send(&shell_protocol::messages::spawn::to_cbor(
         channel_id,
-        &"/bin/sh".to_owned(),
+        "/bin/sh",
         None,
     )?)?;
 
@@ -72,15 +72,11 @@ fn run_command(channel_proto: &ChannelProtocol, command: &str) -> Result<(), Err
             shell_protocol::messages::Message::Exit { .. } => {
                 break;
             }
-            shell_protocol::messages::Message::Stdout { data, .. } => {
-                if let Some(data) = data {
-                    print!("{}", data);
-                }
+            shell_protocol::messages::Message::Stdout { data: Some(data), .. } => {
+                print!("{}", data);
             }
-            shell_protocol::messages::Message::Stderr { data, .. } => {
-                if let Some(data) = data {
-                    print!("{}", data);
-                }
+            shell_protocol::messages::Message::Stderr { data: Some(data), .. } => {
+                print!("{}", data);
             }
             shell_protocol::messages::Message::Error { message, .. } => {
                 eprintln!("Shell Protocol Error: {}", message);
