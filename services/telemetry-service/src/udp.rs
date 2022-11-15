@@ -69,14 +69,14 @@ impl DirectUdp {
                 }
             } else if let Ok(vec) = serde_json::from_slice::<Vec<DataPoint>>(&buf[0..(size)]) {
                 for val in vec.iter() {
-                    if let Err(err) = self.process(&val) {
+                    if let Err(err) = self.process(val) {
                         error!("Error {:?} storing message {:?}", err, val);
                     }
                 }
             } else {
                 error!(
                     "Couldn't deserialize JSON object or object array from {:?}",
-                    String::from_utf8_lossy(&buf[0..(size)].to_vec())
+                    String::from_utf8_lossy(&buf[0..size])
                 );
             }
         }
