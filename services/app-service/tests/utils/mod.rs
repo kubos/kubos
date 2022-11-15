@@ -117,7 +117,7 @@ impl MockAppBuilder {
     }
 
     pub fn install(&self, registry_dir: &Path) {
-        let mut parent_dir = registry_dir.to_path_buf().clone();
+        let mut parent_dir = registry_dir.to_path_buf();
         parent_dir.push(&self._name);
         parent_dir.push(self._version.as_ref().unwrap_or(&String::from("0.0.1")));
         assert!(fs::create_dir_all(parent_dir.clone()).is_ok());
@@ -130,7 +130,7 @@ impl MockAppBuilder {
         let mut app_toml = parent_dir.clone();
         app_toml.push("app.toml");
 
-        self.generate_toml(&registry_dir, &app_toml);
+        self.generate_toml(registry_dir, &app_toml);
     }
 
     pub fn generate_bin(&self, bin_dest: &Path) {
@@ -194,7 +194,7 @@ impl AppServiceFixture {
     pub fn setup() -> Self {
         let registry_dir = TempDir::new().expect("Failed to create registry dir");
 
-        let mut config_toml = registry_dir.path().to_path_buf().clone();
+        let mut config_toml = registry_dir.path().to_path_buf();
         config_toml.push("config.toml");
 
         let mut toml = fs::File::create(config_toml.clone()).unwrap();

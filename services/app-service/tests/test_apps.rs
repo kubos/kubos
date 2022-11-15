@@ -28,29 +28,29 @@ fn setup_apps(registry_dir: &Path) {
         .version("0.0.1")
         .active(false)
         .author("mham")
-        .install(&registry_dir);
+        .install(registry_dir);
     MockAppBuilder::new("app1")
         .version("0.0.2")
         .active(false)
         .config("/custom/config.toml")
-        .install(&registry_dir);
+        .install(registry_dir);
     MockAppBuilder::new("app2")
         .version("1.0.0")
         .active(false)
-        .install(&registry_dir);
+        .install(registry_dir);
     MockAppBuilder::new("app2")
         .version("1.0.1")
         .active(true)
-        .install(&registry_dir);
+        .install(registry_dir);
     MockAppBuilder::new("app3")
         .version("0.0.3")
         .active(true)
-        .install(&registry_dir);
+        .install(registry_dir);
     MockAppBuilder::new("app4")
         .version("1.0.0")
         .active(true)
         .author("user")
-        .install(&registry_dir);
+        .install(registry_dir);
 }
 
 fn apps_query(config: ServiceConfig, query: &str) -> Vec<serde_json::Value> {
@@ -65,8 +65,8 @@ fn apps_query(config: ServiceConfig, query: &str) -> Vec<serde_json::Value> {
     apps_sorted.sort_unstable_by_key(|a| {
         format!(
             "{}|{}",
-            a["app"]["name"].to_string(),
-            a["app"]["version"].to_string()
+            a["app"]["name"],
+            a["app"]["version"]
         )
     });
     apps_sorted

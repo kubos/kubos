@@ -20,7 +20,6 @@
 // properly run these tests. You'll need to manually run these tests and verify the output by
 // checking for any extraneous error messages.
 
-use fs_extra;
 use kubos_app::ServiceConfig;
 use std::fs;
 use std::path::Path;
@@ -84,7 +83,7 @@ fn app_single_pos_arg() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 
@@ -119,7 +118,7 @@ fn app_single_flag() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 
@@ -154,7 +153,7 @@ fn app_flag_arg() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 
@@ -190,7 +189,7 @@ fn app_failure() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 

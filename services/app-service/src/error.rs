@@ -16,7 +16,8 @@
 
 use failure::Fail;
 
-#[derive(Debug, Fail, PartialEq)]
+#[derive(Debug, Fail, PartialEq, Eq)]
+#[allow(clippy::enum_variant_names)]
 pub enum AppError {
     /// An error was encountered while interacting with the app registry
     #[fail(display = "Registry Error: {}", err)]

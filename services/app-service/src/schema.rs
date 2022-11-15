@@ -18,7 +18,7 @@ use crate::monitor::MonitorEntry;
 use crate::objects::*;
 use crate::registry::AppRegistry;
 use juniper::FieldResult;
-use kubos_service;
+
 
 type Context = kubos_service::Context<AppRegistry>;
 
@@ -46,7 +46,7 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
         -> FieldResult<Vec<KAppRegistryEntry>> as "Kubos Apps Query"
     {
         let entries = executor.context().subsystem().entries.lock()?;
-        let result = entries.iter().filter(|ref e| {
+        let result = entries.iter().filter(|e| {
             if name.is_some() && &e.app.name != name.as_ref().unwrap() {
                 return false;
             }

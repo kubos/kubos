@@ -92,15 +92,12 @@ fn uninstall_last_app() {
     let mut app = MockAppBuilder::new("dummy");
     app.active(true).version("0.0.1").author("user");
 
-    app.install(&fixture.registry_dir.path());
+    app.install(fixture.registry_dir.path());
     fixture.start_service();
 
     // Make sure our app directory and active symlink exist
-    assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
-    assert!(
-        fs::symlink_metadata(fixture.registry_dir.path().join("active/dummy")).is_ok(),
-        true
-    );
+    assert!(fixture.registry_dir.path().join("dummy").exists());
+    assert!(fs::symlink_metadata(fixture.registry_dir.path().join("active/dummy")).is_ok());
 
     let result = panic::catch_unwind(|| {
         let result = send_query(
@@ -130,7 +127,7 @@ fn uninstall_last_app() {
     });
 
     // Our app directory should now no longer exist
-    assert_eq!(fixture.registry_dir.path().join("dummy").exists(), false);
+    assert!(!fixture.registry_dir.path().join("dummy").exists());
 
     // The app's active version symlink should also no longer exist
     assert_eq!(
@@ -160,16 +157,16 @@ fn uninstall_notlast_app() {
     let mut app = MockAppBuilder::new("dummy");
     app.active(true).version("0.0.1").author("user");
 
-    app.install(&fixture.registry_dir.path());
+    app.install(fixture.registry_dir.path());
 
     let mut app = MockAppBuilder::new("dummy");
     app.active(true).version("0.0.2").author("user");
 
-    app.install(&fixture.registry_dir.path());
+    app.install(fixture.registry_dir.path());
     fixture.start_service();
 
     // Make sure our app directory exists
-    assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
+    assert!(fixture.registry_dir.path().join("dummy").exists());
 
     let result = panic::catch_unwind(|| {
         let result = send_query(
@@ -189,11 +186,11 @@ fn uninstall_notlast_app() {
             "{ registeredApps { active } }",
         );
 
-        assert_eq!(result["registeredApps"][0]["active"], true);
+        assert_eq!(result["registeredApps"][0]["active"].as_bool(), Some(true));
     });
 
     // Our app directory should still exist since there's a version left in the registry
-    assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
+    assert!(fixture.registry_dir.path().join("dummy").exists());
 
     assert!(result.is_ok());
 }
@@ -212,16 +209,16 @@ fn uninstall_all_app() {
     let mut app = MockAppBuilder::new("dummy");
     app.active(true).version("0.0.1").author("user");
 
-    app.install(&fixture.registry_dir.path());
+    app.install(fixture.registry_dir.path());
 
     let mut app = MockAppBuilder::new("dummy");
     app.active(true).version("0.0.2").author("user");
 
-    app.install(&fixture.registry_dir.path());
+    app.install(fixture.registry_dir.path());
     fixture.start_service();
 
     // Make sure our app directory exists
-    assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
+    assert!(fixture.registry_dir.path().join("dummy").exists());
 
     let result = panic::catch_unwind(|| {
         let result = send_query(
@@ -251,7 +248,7 @@ fn uninstall_all_app() {
     });
 
     // Our app directory should now no longer exist
-    assert_eq!(fixture.registry_dir.path().join("dummy").exists(), false);
+    assert!(!fixture.registry_dir.path().join("dummy").exists());
 
     assert!(result.is_ok());
 }
@@ -272,17 +269,17 @@ fn uninstall_new_app() {
     let mut app = MockAppBuilder::new("dummy");
     app.active(true).version("0.0.2").author("user");
 
-    app.install(&fixture.registry_dir.path());
+    app.install(fixture.registry_dir.path());
 
     let mut app = MockAppBuilder::new("dummy");
     app.active(true).version("0.0.3").author("user");
 
-    app.install(&fixture.registry_dir.path());
+    app.install(fixture.registry_dir.path());
 
     let mut app = MockAppBuilder::new("dummy2");
     app.active(true).version("0.0.2").author("user");
 
-    app.install(&fixture.registry_dir.path());
+    app.install(fixture.registry_dir.path());
     fixture.start_service();
 
     // Create a new version of our app to be installed
@@ -342,7 +339,7 @@ fn uninstall_new_app() {
     });
 
     // Our app directory should still exist since there's a version left in the registry
-    assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
+    assert!(fixture.registry_dir.path().join("dummy").exists());
 
     assert!(result.is_ok());
 }
@@ -361,12 +358,12 @@ fn uninstall_unmonitor() {
     let mut app = MockAppBuilder::new("dummy");
     app.active(true).version("0.0.1").author("user");
 
-    app.install(&fixture.registry_dir.path());
+    app.install(fixture.registry_dir.path());
 
     fixture.start_service();
 
     // Make sure our app directory exists
-    assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
+    assert!(fixture.registry_dir.path().join("dummy").exists());
 
     // Run the app so that a monitoring entry will be created
     let result = send_query(
@@ -379,7 +376,7 @@ fn uninstall_unmonitor() {
         }"#,
     );
 
-    assert_eq!(result["startApp"]["success"].as_bool().unwrap(), true);
+    assert!(result["startApp"]["success"].as_bool().unwrap());
 
     let result = panic::catch_unwind(|| {
         let result = send_query(
@@ -423,16 +420,16 @@ fn uninstall_all_unmonitor() {
     let mut app = MockAppBuilder::new("dummy");
     app.active(true).version("0.0.1").author("user");
 
-    app.install(&fixture.registry_dir.path());
+    app.install(fixture.registry_dir.path());
 
     let mut app = MockAppBuilder::new("dummy");
     app.active(true).version("0.0.2").author("user");
 
-    app.install(&fixture.registry_dir.path());
+    app.install(fixture.registry_dir.path());
     fixture.start_service();
 
     // Make sure our app directory exists
-    assert_eq!(fixture.registry_dir.path().join("dummy").exists(), true);
+    assert!(fixture.registry_dir.path().join("dummy").exists());
 
     // Run the app so that a monitoring entry will be created
     let result = send_query(
@@ -445,7 +442,7 @@ fn uninstall_all_unmonitor() {
         }"#,
     );
 
-    assert_eq!(result["startApp"]["success"].as_bool().unwrap(), true);
+    assert!(result["startApp"]["success"].as_bool().unwrap());
 
     let result = panic::catch_unwind(|| {
         let result = send_query(
@@ -486,7 +483,7 @@ fn uninstall_all_unmonitor() {
     });
 
     // Our app directory should now no longer exist
-    assert_eq!(fixture.registry_dir.path().join("dummy").exists(), false);
+    assert!(!fixture.registry_dir.path().join("dummy").exists());
 
     assert!(result.is_ok());
 }
@@ -507,7 +504,7 @@ fn uninstall_running() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 
@@ -568,7 +565,7 @@ fn uninstall_all_running() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 
@@ -629,7 +626,7 @@ fn uninstall_kill() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 
@@ -671,5 +668,5 @@ fn uninstall_kill() {
     thread::sleep(Duration::from_secs(3));
 
     // Now it should be dead
-    assert!(!signal::kill(pid, None).is_ok());
+    assert!(signal::kill(pid, None).is_err());
 }
