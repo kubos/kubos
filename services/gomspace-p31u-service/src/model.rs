@@ -197,12 +197,13 @@ impl Subsystem {
         output_initial_off_delay: Vec<i32>,
         vboost_settings: Vec<i32>,
     ) -> EpsResult<GenericResponse> {
-        let mut sysconf = EpsSystemConfig::default();
-
-        sysconf.ppt_mode = ppt_mode as u8;
-        sysconf.battheater_mode = battheater_mode as u8;
-        sysconf.battheater_low = battheater_low as i8;
-        sysconf.battheater_high = battheater_high as i8;
+        let mut sysconf = EpsSystemConfig {
+            ppt_mode: ppt_mode as u8,
+            battheater_mode: battheater_mode as u8,
+            battheater_low: battheater_low as i8,
+            battheater_high: battheater_high as i8,
+            ..EpsSystemConfig::default()
+        };
 
         for i in 0..8 {
             sysconf.output_normal_value[i] = output_normal_value[i] as u8;

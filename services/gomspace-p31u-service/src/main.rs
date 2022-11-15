@@ -93,20 +93,13 @@ fn main() -> EpsResult<()> {
     let bus = bus.as_str().unwrap();
 
     let addr = config
-        .get("i2c_addr")
+        .get_hex("i2c_addr")
         .ok_or_else(|| {
             error!("Failed to load 'addr' config value");
             format_err!("Failed to load 'addr' config value");
         })
         .unwrap();
-    let addr = addr.as_str().unwrap();
-
-    let addr: u8 = if addr.starts_with("0x") {
-        u8::from_str_radix(&addr[2..], 16).unwrap()
-    } else {
-        u8::from_str_radix(addr, 16).unwrap()
-    };
-
+    
     Service::new(config, Subsystem::new(bus, addr)?, QueryRoot, MutationRoot).start();
 
     Ok(())

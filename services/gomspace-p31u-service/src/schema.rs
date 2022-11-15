@@ -20,7 +20,6 @@ use crate::model::*;
 use crate::objects::*;
 use gomspace_p31u_api::*;
 use juniper::FieldResult;
-use kubos_service;
 
 type Context = kubos_service::Context<Subsystem>;
 
