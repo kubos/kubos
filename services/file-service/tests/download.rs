@@ -42,7 +42,7 @@ fn download_single() {
 
     let contents = "download_single".as_bytes();
 
-    let hash = create_test_file(&source, &contents);
+    let hash = create_test_file(&source, contents);
 
     let storage_dir = format!("{}/service", test_dir_str);
     service_new!(service_port, downlink_port, 4096, storage_dir);
@@ -60,7 +60,7 @@ fn download_single() {
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
-    assert_eq!(&contents[..], dest_contents.as_slice());
+    assert_eq!(contents, dest_contents.as_slice());
 
     // Cleanup the temporary files so that the test can be repeatable
     // The client folder is cleaned up by the protocol as a result
@@ -172,7 +172,7 @@ fn download_multi_complete() {
 
     let contents = "download_multi_complete".as_bytes();
 
-    let hash = create_test_file(&source, &contents);
+    let hash = create_test_file(&source, contents);
 
     let storage_dir = format!("{}/service", test_dir_str);
     service_new!(service_port, downlink_port, 4096, storage_dir);
@@ -206,7 +206,7 @@ fn download_multi_complete() {
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
-    assert_eq!(&contents[..], dest_contents.as_slice());
+    assert_eq!(contents, dest_contents.as_slice());
 
     // Cleanup the temporary files so that the test can be repeatable
     // The client folder is cleaned up by the protocol as a result
@@ -226,7 +226,7 @@ fn download_bad_hash() {
 
     let contents = "download_bad_hash".as_bytes();
 
-    let hash = create_test_file(&source, &contents);
+    let hash = create_test_file(&source, contents);
 
     let storage_dir = format!("{}/service", test_dir_str);
     service_new!(service_port, downlink_port, 4096, storage_dir);

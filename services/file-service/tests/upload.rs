@@ -43,7 +43,7 @@ fn upload_single() {
 
     let contents = "upload_single".as_bytes();
 
-    let hash = create_test_file(&source, &contents);
+    let hash = create_test_file(&source, contents);
 
     let storage_dir = format!("{}/service", test_dir_str);
     service_new!(service_port, downlink_port, 4096, storage_dir);
@@ -67,7 +67,7 @@ fn upload_single() {
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
 
-    assert_eq!(&contents[..], dest_contents.as_slice());
+    assert_eq!(contents, dest_contents.as_slice());
 
     // Cleanup the temporary files so that the test can be repeatable
     // The client folder is cleaned up by the protocol as a result
@@ -228,7 +228,7 @@ fn upload_bad_hash() {
 
     let contents = "upload_bad_hash".as_bytes();
 
-    let _ = create_test_file(&source, &contents);
+    let _ = create_test_file(&source, contents);
 
     let storage_dir = format!("{}/service", test_dir_str);
     service_new!(service_port, downlink_port, 4096, storage_dir);
@@ -299,7 +299,7 @@ fn upload_single_after_bad_input() {
 
     let contents = "upload_single_after_bad_input".as_bytes();
 
-    let hash = create_test_file(&source, &contents);
+    let hash = create_test_file(&source, contents);
 
     let storage_dir = format!("{}/service", test_dir_str);
     service_new!(service_port, downlink_port, 4096, storage_dir);
@@ -307,7 +307,7 @@ fn upload_single_after_bad_input() {
     {
         let send_socket = UdpSocket::bind("127.0.0.1:0").unwrap();
         let send_buf = "{ping}".as_bytes();
-        send_socket.send_to(&send_buf, "127.0.0.1:7007").unwrap();
+        send_socket.send_to(send_buf, "127.0.0.1:7007").unwrap();
     }
 
     let result = upload(
@@ -328,7 +328,7 @@ fn upload_single_after_bad_input() {
 
     // Verify the final file's contents
     let dest_contents = fs::read(dest).unwrap();
-    assert_eq!(&contents[..], dest_contents.as_slice());
+    assert_eq!(contents, dest_contents.as_slice());
 
     // Cleanup the temporary files so that the test can be repeatable
     // The client folder is cleaned up by the protocol as a result
