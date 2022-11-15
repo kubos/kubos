@@ -73,11 +73,11 @@ fn to_error(error_code: ErrorCode) -> Error {
     }
 }
 
-impl Into<ErrorData> for LastError {
-    fn into(self) -> ErrorData {
+impl From<LastError> for ErrorData {
+    fn from(val: LastError) -> Self {
         ErrorData {
-            motherboard: to_error(self.motherboard),
-            daughterboard: self.daughterboard.map(to_error),
+            motherboard: to_error(val.motherboard),
+            daughterboard: val.daughterboard.map(to_error),
         }
     }
 }
