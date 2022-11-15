@@ -104,7 +104,7 @@ impl Protocol {
     /// ```
     ///
     pub fn send(&self, vec: &[u8]) -> Result<(), ProtocolError> {
-        self.cbor_proto.send_message(&vec, self.remote_addr.get())?;
+        self.cbor_proto.send_message(vec, self.remote_addr.get())?;
         Ok(())
     }
 
@@ -175,6 +175,6 @@ impl Protocol {
     ///
     pub fn recv_message(&self, timeout: Option<Duration>) -> Result<Message, ProtocolError> {
         let raw = self.recv_raw(timeout)?;
-        Ok(parse_message(raw)?)
+        parse_message(raw)
     }
 }

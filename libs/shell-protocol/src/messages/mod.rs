@@ -126,15 +126,15 @@ pub mod stdout;
 /// Parse a ChannelMessage into a ShellMessage
 pub fn parse_message(message: &ChannelMessage) -> Result<Message, ProtocolError> {
     match message.name.as_ref() {
-        "exit" => Ok(exit::from_cbor(&message)?),
-        "error" => Ok(error::from_cbor(&message)?),
-        "kill" => Ok(kill::from_cbor(&message)?),
-        "list" => Ok(list::from_cbor(&message)?),
-        "pid" => Ok(pid::from_cbor(&message)?),
-        "spawn" => Ok(spawn::from_cbor(&message)?),
-        "stderr" => Ok(stderr::from_cbor(&message)?),
-        "stdin" => Ok(stdin::from_cbor(&message)?),
-        "stdout" => Ok(stdout::from_cbor(&message)?),
+        "exit" => Ok(exit::from_cbor(message)?),
+        "error" => Ok(error::from_cbor(message)?),
+        "kill" => Ok(kill::from_cbor(message)?),
+        "list" => Ok(list::from_cbor(message)?),
+        "pid" => Ok(pid::from_cbor(message)?),
+        "spawn" => Ok(spawn::from_cbor(message)?),
+        "stderr" => Ok(stderr::from_cbor(message)?),
+        "stdin" => Ok(stdin::from_cbor(message)?),
+        "stdout" => Ok(stdout::from_cbor(message)?),
         _ => Err(ProtocolError::MessageParseError {
             err: "No message found".to_owned(),
         }),

@@ -38,14 +38,12 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
 pub fn to_cbor(channel_id: u32, signal: Option<u32>) -> Result<Vec<u8>, ProtocolError> {
     info!("-> {{ {}, kill, {:?} }}", channel_id, signal);
 
-    Ok(
-        ser::to_vec_packed(&(channel_id, "kill", signal)).map_err(|err| {
+    ser::to_vec_packed(&(channel_id, "kill", signal)).map_err(|err| {
             ProtocolError::MessageCreationError {
                 message: "kill".to_owned(),
                 err,
             }
-        })?,
-    )
+        })
 }
 
 #[cfg(test)]
@@ -66,7 +64,7 @@ mod tests {
         assert_eq!(
             msg.unwrap(),
             Message::Kill {
-                channel_id: channel_id,
+                channel_id,
                 signal: Some(signal)
             }
         );
@@ -83,7 +81,7 @@ mod tests {
         assert_eq!(
             msg.unwrap(),
             Message::Kill {
-                channel_id: channel_id,
+                channel_id,
                 signal: None
             }
         );

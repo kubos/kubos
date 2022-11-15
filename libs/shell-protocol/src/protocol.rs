@@ -138,7 +138,7 @@ impl Protocol {
     }
 
     fn process_message(&mut self, message: &ChannelMessage) -> Result<(), ProtocolError> {
-        let parsed_message = messages::parse_message(&message)?;
+        let parsed_message = messages::parse_message(message)?;
 
         match parsed_message {
             messages::Message::Stdin { channel_id, data } => {
@@ -146,7 +146,7 @@ impl Protocol {
                 {
                     let process = self.process.as_mut();
                     match data {
-                        Some(data) => process.write_stdin(&data.as_bytes())?,
+                        Some(data) => process.write_stdin(data.as_bytes())?,
                         None => process.close_stdin()?,
                     }
                 }
