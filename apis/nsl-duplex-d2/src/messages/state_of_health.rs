@@ -16,7 +16,7 @@
 
 use nom::{be_u32, be_u8, take_until_and_consume, IResult};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 /// Struct for storing state of health records
 pub struct StateOfHealth {
     /// (4 byte integer) Current epoch reset count, starts at 0,
