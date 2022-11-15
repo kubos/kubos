@@ -17,7 +17,6 @@
 use crate::ants::*;
 use crate::ffi;
 use nom::{bits, do_parse, named, take_bits, tuple};
-use std::mem::transmute;
 
 /// Specific antenna to control
 ///
@@ -139,7 +138,7 @@ named!(parse_status<&[u8], DeployStatus>,
 impl AntsTelemetry {
     #[doc(hidden)]
     pub fn new(c_telem: &ffi::AntsTelemetry) -> Result<AntsTelemetry, AntsError> {
-        let raw_status: [u8; 2] = unsafe { transmute(c_telem.deploy_status) };
+        let raw_status: [u8; 2] =  c_telem.deploy_status.to_ne_bytes();
 
         let status = DeployStatus::new(&raw_status)?;
 

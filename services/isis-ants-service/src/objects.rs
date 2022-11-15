@@ -139,7 +139,7 @@ pub struct ControlPowerResponse {
 }
 
 /// Enum for 'deployStatus' response field of 'deploymentStatus' query
-#[derive(GraphQLEnum, Clone, Debug, PartialEq)]
+#[derive(GraphQLEnum, Clone, Debug, PartialEq, Eq)]
 pub enum DeploymentStatus {
     /// All antennas have been successfully deployed
     Deployed,
@@ -321,7 +321,7 @@ pub struct Telemetry {
 }
 
 /// Nominal telemetry data
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct TelemetryNominal(pub AntsTelemetry);
 
 graphql_object!(TelemetryNominal: () where Scalar = <S> |&self| {
@@ -396,7 +396,7 @@ graphql_object!(TelemetryNominal: () where Scalar = <S> |&self| {
 });
 
 /// Debug telemetry data
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct TelemetryDebug {
     /// Antenna 1 status
     pub ant1: AntennaStats,
@@ -409,7 +409,7 @@ pub struct TelemetryDebug {
 }
 
 /// Antenna status data
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct AntennaStats {
     /// Number of times deployment has been attempted without success
     pub act_count: u8,

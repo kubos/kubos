@@ -129,7 +129,7 @@ impl IAntS for AntS {
     /// * bus - The I<sup>2</sup>C bus to use to communicate with the device
     /// * primary - The I<sup>2</sup>C address of the system's primary microcontroller
     /// * secondary - The I<sup>2</sup>C address of the system's secondary microcontroller
-    ///	  (should be `0x00` if no secondary microcontroller is available)
+    ///      (should be `0x00` if no secondary microcontroller is available)
     /// * ant_count - The number of antennas present in the antenna system
     /// * timeout - The watchdog timeout interval, in seconds
     ///
