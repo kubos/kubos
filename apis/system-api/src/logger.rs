@@ -110,12 +110,5 @@ fn get_stdout_flag() -> bool {
     let mut args = env::args();
 
     // Navigate to the "--stdout" option
-    let config_arg_pos = args.position(|arg| arg == "--stdout");
-
-    if let Some(_pos) = config_arg_pos {
-        true
-    } else {
-        // The "--stdout" arg wasn't specified, so we can go ahead with the default
-        false
-    }
+    args.any(|arg| arg == "--stdout")
 }

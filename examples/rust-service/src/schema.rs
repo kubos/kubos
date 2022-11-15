@@ -16,7 +16,6 @@
 
 use crate::model::{CalibrateThermometer, ResetUptime, SetPower, Subsystem};
 use juniper::FieldResult;
-use kubos_service;
 use log::info;
 
 type Context = kubos_service::Context<Subsystem>;

@@ -21,7 +21,7 @@
 use failure::Fail;
 
 /// Errors for ADCS devices
-#[derive(Fail, Debug, PartialEq)]
+#[derive(Fail, Debug, PartialEq, Eq)]
 pub enum AdcsError {
     /// Generic error
     #[fail(display = "Generic error")]

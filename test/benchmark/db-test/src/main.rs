@@ -91,7 +91,7 @@ impl DbTest {
             .expect("No database path found in config file");
         let db_path = db_path.as_str().unwrap();
 
-        let db = Database::new(&db_path);
+        let db = Database::new(db_path);
         db.setup();
 
         let mut times: Vec<i64> = Vec::new();
@@ -123,7 +123,7 @@ impl DbTest {
             .expect("No database path found in config file");
         let db_path = db_path.as_str().unwrap();
 
-        let db = Database::new(&db_path);
+        let db = Database::new(db_path);
         db.setup();
 
         let mut entries: Vec<Entry> = Vec::new();
@@ -232,7 +232,7 @@ impl DbTest {
 
         let port = self.config.get("direct_port").unwrap();
 
-        let host = self.config.hosturl().unwrap().to_owned();
+        let host = self.config.hosturl().unwrap();
         let ip: Vec<&str> = host.split(':').collect();
 
         let remote_addr = format!("{}:{}", ip[0], port);

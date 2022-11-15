@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-use cmake;
 use glob::glob;
 use std::process::Command;
 

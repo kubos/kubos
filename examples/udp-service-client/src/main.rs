@@ -99,7 +99,7 @@ fn main() {
     };
 
     // Send our query to the requested service IP
-    let result = socket.send_to(&query.as_bytes(), &service_addr);
+    let result = socket.send_to(query.as_bytes(), &service_addr);
     match result {
         Ok(amt) => println!("Sent {} bytes", amt),
         Err(err) => {

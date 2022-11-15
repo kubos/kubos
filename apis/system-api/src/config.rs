@@ -19,7 +19,7 @@ use std::env;
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
-use toml;
+
 use toml::Value;
 
 /// The default configuration file path
@@ -106,11 +106,7 @@ impl Config {
     /// Returns the configured hosturl string in the following
     /// format (using IPv4 addresses) - 0.0.0.0:0000
     pub fn hosturl(&self) -> Option<String> {
-        if let Some(addr) = &self.addr {
-            Some(format!("{}:{}", addr.ip(), addr.port()))
-        } else {
-            None
-        }
+      self.addr.as_ref().map(|addr| format!("{}:{}", addr.ip(), addr.port()))
     }
 
     /// Returns the category's configuration information
@@ -136,10 +132,18 @@ impl Config {
     /// # Arguments
     /// `key` - Key of value to get from config
     pub fn get(&self, key: &str) -> Option<toml::Value> {
-        match self.raw.get(key) {
-            Some(v) => Some(v.clone()),
-            None => None,
-        }
+        self.raw.get(key).cloned()
+    }
+
+    //// Get config data encoded as a hexadecimal string
+    ///
+    /// * Arguments
+    /// `key` - Key of value to get from config
+    pub fn get_hex(&self, key: &str) -> Option<u8> {
+      let val = self.raw.get(key)?.as_str()?;
+      let val = val.strip_prefix("0x").unwrap_or(val);
+
+      u8::from_str_radix(val, 16).ok()
     }
 }
 
@@ -178,7 +182,7 @@ fn parse_config_file(name: &str, path: String) -> Result<Config, Error> {
 }
 
 fn parse_config_str(name: &str, contents: &str) -> Result<Config, Error> {
-    let data: Value = toml::from_str(&contents)?;
+    let data: Value = toml::from_str(contents)?;
     let mut config = Config::default();
 
     if let Some(data) = data.get(name) {

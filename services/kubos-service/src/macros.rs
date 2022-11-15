@@ -40,20 +40,20 @@
 ///     },
 /// }
 ///
-/// fn main() {
-///     let chain: TopError = TopError::Error {
-///         cause: RootError::RootError { message: "root".to_owned() },
-///         message: "top".to_owned(),
-///     };
+/// # fn main() {
+/// let chain: TopError = TopError::Error {
+///     cause: RootError::RootError { message: "root".to_owned() },
+///     message: "top".to_owned(),
+/// };
 ///
-///     let chain_clone = chain.clone();
+/// let chain_clone = chain.clone();
 ///
-///     let errors = process_errors!(chain);
-///     assert_eq!(errors, "TopError: top, RootError: root");
+/// let errors = process_errors!(chain);
+/// assert_eq!(errors, "TopError: top, RootError: root");
 ///
-///     let errors = process_errors!(chain_clone, '\n');
-///     assert_eq!(errors, "TopError: top\nRootError: root");
-/// }
+/// let errors = process_errors!(chain_clone, '\n');
+/// assert_eq!(errors, "TopError: top\nRootError: root");
+/// # }
 /// ```
 ///
 #[macro_export]

@@ -52,7 +52,7 @@ impl TestCommand {
     /// spawned in the background, allowing the test
     /// to continue on.
     pub fn spawn(&self) {
-        let child = Command::new(self.command.to_owned())
+        let child = Command::new(&self.command)
             .args(&self.args)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
@@ -114,7 +114,7 @@ impl TestService {
         Command::new("cargo")
             .arg("build")
             .arg("--package")
-            .arg(self.name.to_owned())
+            .arg(&self.name)
             .output()
             .expect("Failed to build service");
     }
@@ -202,14 +202,14 @@ impl ServiceListener {
                     .map_err(warp::reject::custom)
             }))
             .map(move |body: String| {
-                req_handle.lock().unwrap().push_back(body.to_owned());
+                req_handle.lock().unwrap().push_back(body);
                 "hi"
             });
 
         thread::spawn(move || warp::serve(listener).run(([127, 0, 0, 1], port)));
 
         ServiceListener {
-            requests: requests.clone(),
+            requests,
         }
     }
 
