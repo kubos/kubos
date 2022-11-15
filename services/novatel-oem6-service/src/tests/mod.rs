@@ -21,7 +21,7 @@ use novatel_oem6_api::*;
 /// Mock a service for the OEM6.
 macro_rules! service_new {
     ($mock:ident) => {{
-        use crate::objects::AckCommand;
+        use $crate::objects::AckCommand;
         use novatel_oem6_api::Connection;
         use std::sync::{Arc, Mutex, RwLock};
         use std::thread;

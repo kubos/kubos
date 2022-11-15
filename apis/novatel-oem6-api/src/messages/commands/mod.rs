@@ -29,7 +29,7 @@ pub trait Message {
     fn serialize(&self) -> Vec<u8>;
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Response {
     pub resp_id: ResponseID,
     pub resp_string: String,
@@ -38,7 +38,7 @@ pub struct Response {
 #[allow(dead_code)]
 impl Response {
     pub fn new(msg: &[u8]) -> Option<Self> {
-        match le_u32(&msg) {
+        match le_u32(msg) {
             Ok(conv) => {
                 let mut resp: Response = Response {
                     // Convert the bytes we just read into the response ID
@@ -47,7 +47,7 @@ impl Response {
                 };
 
                 // Add the actual response message
-                resp.resp_string.push_str(&String::from_utf8_lossy(&conv.0));
+                resp.resp_string.push_str(&String::from_utf8_lossy(conv.0));
 
                 Some(resp)
             }
@@ -61,7 +61,7 @@ impl Response {
 /// Error values will be returned as part of the [`OEMError::CommandError`] variant.
 ///
 /// [`OEMError::CommandError`]: enum.OEMError.html#variant.CommandError
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ResponseID {
     /// Command was received correctly
     Ok = 1,

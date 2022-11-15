@@ -168,7 +168,7 @@ impl Subsystem {
             oem,
             last_cmd: Arc::new(RwLock::new(AckCommand::None)),
             errors: Arc::new(RwLock::new(vec![])),
-            lock_data: data.clone(),
+            lock_data: data,
             error_recv: Arc::new(Mutex::new(error_recv)),
             version_recv: Arc::new(Mutex::new(version_recv)),
         })
@@ -183,7 +183,7 @@ impl Subsystem {
                 .recv_timeout(RECV_TIMEOUT)
             {
                 Ok(log) => Ok(log),
-                Err(err) => Err(format!("Failed to receive version info - {}", err).to_owned()),
+                Err(err) => Err(format!("Failed to receive version info - {}", err)),
             },
             Err(err) => Err(process_errors!(err)),
         };
@@ -257,7 +257,7 @@ impl Subsystem {
         let status = match self.get_version_log() {
             Ok(log) => log.recv_status,
             Err(err) => {
-                errors.push(format!("System Status: {}", err).to_owned());
+                errors.push(format!("System Status: {}", err));
                 /* My first thought was to use ReceiverStatusFlags::empty(),
                  * but I'm worried that that is easily mistaken for this function
                  * actually having succeeded
@@ -285,9 +285,9 @@ impl Subsystem {
 
         Ok(IntegrationTestResults {
             success: telem.debug.is_some(),
-            errors: telem.nominal.system_status.errors.clone().join("; "),
+            errors: telem.nominal.system_status.errors.join("; "),
             telemetry_debug: telem.debug.clone(),
-            telemetry_nominal: telem.nominal.clone(),
+            telemetry_nominal: telem.nominal,
         })
     }
 

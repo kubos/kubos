@@ -77,7 +77,7 @@ impl BestXYZLog {
         ms: i32,
         raw: &[u8],
     ) -> Option<Self> {
-        let mut log = match parse_bestxyz(&raw) {
+        let mut log = match parse_bestxyz(raw) {
             Ok(conv) => conv.1,
             _ => return None,
         };
