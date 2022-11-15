@@ -47,9 +47,9 @@ impl Imtq<ImtqRaw> {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn imtq(bus: &str, addr: u16, timeout: i32) -> AdcsResult<Self> {
+    pub fn new(bus: &str, addr: u16, timeout: i32) -> AdcsResult<Self> {
         let handle = ImtqRaw {};
-        Imtq::new(&handle, bus, addr, timeout)
+        Imtq::new_internal(&handle, bus, addr, timeout)
     }
 }
 
@@ -59,7 +59,7 @@ impl<T: ImtqFFI> Imtq<T> {
     /// appropriate ImtqFFI object.
     ///
     /// The one argument *must* implement the `ImtqFFI` trait.
-    fn new(handle: &T, bus: &str, addr: u16, timeout: i32) -> AdcsResult<Self> {
+    fn new_internal(handle: &T, bus: &str, addr: u16, timeout: i32) -> AdcsResult<Self> {
         adcs_status_to_err(&handle.k_adcs_init(bus.as_ptr(), addr, timeout))?;
         adcs_status_to_err(&handle.k_imtq_watchdog_start())?;
         Ok(Imtq {
@@ -187,7 +187,7 @@ mod tests {
         let mock = MockImtq::default();
         mock.k_adcs_init.return_value(KADCSStatus::Ok);
 
-        let imtq = Imtq::new(&mock, "/dev/i2c-0", 0x40, 60);
+        let imtq = Imtq::new_internal(&mock, "/dev/i2c-0", 0x40, 60);
         assert!(imtq.is_ok());
         assert_eq!(1, mock.k_adcs_init.num_calls());
         assert_eq!(1, mock.k_imtq_watchdog_start.num_calls());
@@ -198,7 +198,7 @@ mod tests {
         let mock = MockImtq::default();
         mock.k_adcs_init.return_value(KADCSStatus::Error);
 
-        let imtq = Imtq::new(&mock, "/dev/i2c-0", 0x40, 60);
+        let imtq = Imtq::new_internal(&mock, "/dev/i2c-0", 0x40, 60);
         assert!(imtq.is_err());
     }
 
@@ -206,7 +206,7 @@ mod tests {
     fn test_on_drop() {
         let mock = MockImtq::default();
 
-        let imtq = Imtq::new(&mock, "/dev/i2c-0", 0x40, 60);
+        let imtq = Imtq::new_internal(&mock, "/dev/i2c-0", 0x40, 60);
         drop(imtq);
         assert_eq!(1, mock.k_adcs_terminate.num_calls());
         assert_eq!(1, mock.k_imtq_watchdog_stop.num_calls());
@@ -234,7 +234,7 @@ mod tests {
                 KADCSStatus::Ok
             },
         ));
-        let imtq = Imtq::new(&mock, "/dev/i2c-0", 0x40, 60).unwrap();
+        let imtq = Imtq::new_internal(&mock, "/dev/i2c-0", 0x40, 60).unwrap();
 
         let cmd = vec![0, 1, 1, 1];
         let result = imtq.passthrough(&cmd, 4, 0, 100);
@@ -245,14 +245,14 @@ mod tests {
     #[test]
     fn test_reset() {
         let mock = MockImtq::default();
-        let imtq = Imtq::new(&mock, "/dev/i2c-0", 0x40, 60).unwrap();
+        let imtq = Imtq::new_internal(&mock, "/dev/i2c-0", 0x40, 60).unwrap();
         assert_eq!(Ok(()), imtq.reset());
     }
 
     #[test]
     fn test_watchdog_stop() {
         let mock = MockImtq::default();
-        let imtq = Imtq::new(&mock, "/dev/i2c-0", 0x40, 60).unwrap();
+        let imtq = Imtq::new_internal(&mock, "/dev/i2c-0", 0x40, 60).unwrap();
         assert_eq!(Ok(()), imtq.watchdog_stop());
     }
 }

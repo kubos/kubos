@@ -16,11 +16,11 @@
 
 use crate::model::{Supervisor, SupervisorEnableStatus, SupervisorHousekeeping, SupervisorVersion};
 use juniper::FieldResult;
-use kubos_service;
+
 
 type Context = kubos_service::Context<Supervisor>;
 
-/// GraphQL model annotations for SupervisorVersion
+// GraphQL model annotations for SupervisorVersion
 graphql_object!(SupervisorVersion: Context as "SupervisorVersion" |&self| {
     description: "Supervisor Version Information"
     // The GraphQL spec only defines an Integer and Float type
@@ -199,7 +199,7 @@ graphql_object!(SupervisorHousekeeping: Context as "SupervisorHousekeeping" |&se
     }
 });
 
-/// GraphQL model for Subsystem
+// GraphQL model for Subsystem
 graphql_object!(Supervisor: Context as "Supervisor" |&self| {
     description: "iOBC Supervisor"
 
@@ -218,7 +218,7 @@ graphql_object!(Supervisor: Context as "Supervisor" |&self| {
 
 pub struct QueryRoot;
 
-/// Base GraphQL query model
+// Base GraphQL query model
 graphql_object!(QueryRoot : Context as "Query" |&self| {
     field ping() -> FieldResult<String>
         as "Test service query"
@@ -235,7 +235,7 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
 
 pub struct MutationRoot;
 
-/// Base GraphQL mutation model
+// Base GraphQL mutation model
 graphql_object!(MutationRoot : Context as "Mutation" |&self| {
 
     field reset(&executor) -> FieldResult<()>

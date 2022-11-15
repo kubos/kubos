@@ -119,6 +119,7 @@ fn convert_raw_version(raw: &ffi::supervisor_version) -> SupervisorVersion {
 }
 
 /// Interface for retrieving iOBC supervisor version data
+#[allow(clippy::uninit_assumed_init)]
 pub fn supervisor_version() -> Result<SupervisorVersion, String> {
     let mut version: ffi::supervisor_version =
         unsafe { mem::MaybeUninit::<ffi::supervisor_version>::uninit().assume_init() };
@@ -178,6 +179,7 @@ fn convert_raw_housekeeping(raw: &ffi::supervisor_housekeeping) -> SupervisorHou
 }
 
 /// Interface for fetching iOBC supervisor housekeeping data
+#[allow(clippy::uninit_assumed_init)]
 pub fn supervisor_housekeeping() -> Result<SupervisorHousekeeping, String> {
     let mut raw: ffi::supervisor_housekeeping =
         unsafe { mem::MaybeUninit::<ffi::supervisor_housekeeping>::uninit().assume_init() };
