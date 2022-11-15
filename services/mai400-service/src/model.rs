@@ -153,7 +153,7 @@ impl Subsystem {
             mai,
             last_cmd: Arc::new(RwLock::new(AckCommand::None)),
             errors: Arc::new(RwLock::new(vec![])),
-            persistent: data.clone(),
+            persistent: data,
             receiver: Arc::new(Mutex::new(receiver)),
         })
     }

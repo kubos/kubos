@@ -371,7 +371,7 @@ pub struct TelemetryDebug {
 }
 
 /// IR Earth horizon sensor telemetry values
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct IREHSTelem(pub IREHSTelemetry);
 
 /// Thermopile telemetry values
@@ -503,7 +503,7 @@ graphql_object!(IREHSTelem: () where Scalar = <S> |&self| {
 });
 
 /// Raw IMU telemetry values
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct RawIMUTelem(pub RawIMU);
 
 graphql_object!(RawIMUTelem: () where Scalar = <S> |&self| {

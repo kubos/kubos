@@ -21,20 +21,11 @@ pub trait Message {
     fn serialize(&self) -> Vec<u8>;
 }
 
+#[derive(Default)]
 pub struct SetAcsMode {
     pub id: u8,
     pub mode: u8,
     pub qbi_cmd: [i16; 4],
-}
-
-impl Default for SetAcsMode {
-    fn default() -> Self {
-        SetAcsMode {
-            id: 0,
-            mode: 0,
-            qbi_cmd: [0; 4],
-        }
-    }
 }
 
 impl Message for SetAcsMode {

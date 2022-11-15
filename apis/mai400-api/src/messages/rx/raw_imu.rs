@@ -21,7 +21,7 @@ use nom::*;
 use std::io::Cursor;
 
 /// Raw accelerometer and gyroscope data
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct RawIMU {
     /// Accelerometer (X, Y, Z)  (3.9 mg/lsb)
     pub accel: [i16; 3],
