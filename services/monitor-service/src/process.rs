@@ -25,7 +25,7 @@ use std::str::FromStr;
 use lazy_static::lazy_static;
 
 /// Stats provided by the Linux /proc/<pid>/stat file format
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct ProcStat {
     pid: i32,                   // %d
     comm: String,               // %s
