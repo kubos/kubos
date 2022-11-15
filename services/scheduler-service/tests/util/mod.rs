@@ -116,9 +116,9 @@ impl SchedulerFixture {
     }
 
     pub fn activate_safe(&self) -> serde_json::Value {
-        let mutation = format!(r#"mutation {{ safeMode {{ errors, success }} }}"#,);
+        let mutation = r#"mutation {{ safeMode {{ errors, success }} }}"#;
 
-        service_query(&mutation, &self.ip, self.port)
+        service_query(mutation, &self.ip, self.port)
     }
 
     pub fn import_task_list(&self, name: &str, path: &str, mode: &str) -> serde_json::Value {
@@ -149,6 +149,6 @@ impl SchedulerFixture {
     }
 
     pub fn query(&self, query: &str) -> serde_json::Value {
-        service_query(&query, &self.ip, self.port)
+        service_query(query, &self.ip, self.port)
     }
 }

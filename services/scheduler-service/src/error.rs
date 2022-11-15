@@ -22,6 +22,7 @@ use failure::Fail;
 
 /// Errors which occur when using the scheduler
 #[derive(Debug, Eq, Fail, PartialEq)]
+#[allow(clippy::enum_variant_names)]
 pub enum SchedulerError {
     /// An error was raised while activating a mode
     #[fail(display = "Failed to activate '{}': {}", name, err)]

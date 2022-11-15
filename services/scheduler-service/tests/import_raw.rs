@@ -246,7 +246,7 @@ fn import_raw_bad_json() {
     // Create some schedule with an init task
     let schedule = "this is not json";
     assert_eq!(
-        fixture.import_raw_task_list("first", "operational", &schedule),
+        fixture.import_raw_task_list("first", "operational", schedule),
         json!({
             "data" : {
                 "importRawTaskList": {
