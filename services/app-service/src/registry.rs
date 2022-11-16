@@ -604,6 +604,7 @@ impl AppRegistry {
         let app = {
             let entries = self.entries.lock().map_err(|err| AppError::StartError {
                 err: format!("Couldn't get entries mutex: {:?}", err),
+                cause: StartErrorKind::NoActiveVersion,
             })?;
             match entries
                 .iter()
@@ -613,23 +614,25 @@ impl AppRegistry {
                 None => {
                     return Err(AppError::StartError {
                         err: format!("No active version found for app {}", app_name),
+                        cause: StartErrorKind::NoActiveVersion,
                     });
                 }
             }
         };
 
         let app_path = PathBuf::from(&app.executable);
+        info!("app executable exists? {}: {}", app_path.display(), app_path.exists());
         if !app_path.exists() {
-            let msg = match self.uninstall(&app.name, &app.version) {
-                Ok(_) => format!(
+            let (msg, uninstalled) = match self.uninstall(&app.name, &app.version) {
+                Ok(_) => (format!(
                     "{} does not exist. {} version {} automatically uninstalled",
                     app.executable, app.name, app.version
-                ),
-                Err(error) => format!("{} does not exist. {}", app.executable, error),
+                ), true),
+                Err(error) => (format!("{} does not exist. {}", app.executable, error), false),
             };
 
             error!("{}", msg);
-            return Err(AppError::StartError { err: msg });
+            return Err(AppError::StartError { err: msg, cause: StartErrorKind::NoExecutable { uninstalled } });
         }
 
         // Change our current directory to the app's directory so that it can access any
@@ -653,6 +656,7 @@ impl AppRegistry {
             Ok(Some(_)) => {
                 return Err(AppError::StartError {
                     err: format!("Instance of {} already running", app_name),
+                    cause: StartErrorKind::AlreadyRunning,
                 });
             }
             Err(err) => {
@@ -679,10 +683,13 @@ impl AppRegistry {
             cmd.args(&add_args);
         }
 
+        debug!("{:?} {:?}", cmd.get_program(), cmd.get_args());
+
         let mut child = cmd.spawn().map_err(|err| {
             error!("Failed to spawn app {}: {:?}", app_name, err);
             AppError::StartError {
                 err: format!("Failed to spawn app: {:?}", err),
+                cause: StartErrorKind::SpawnError(err.kind())
             }
         })?;
 
@@ -729,6 +736,7 @@ impl AppRegistry {
                 if !status.success() {
                     Err(AppError::StartError {
                         err: format!("App returned {}", status),
+                        cause: StartErrorKind::NonZeroExit,
                     })
                 } else {
                     Ok(None)
@@ -755,6 +763,7 @@ impl AppRegistry {
                     "Started app, but failed to fetch status information: {:?}",
                     err
                 ),
+                cause: StartErrorKind::NoStatus,
             }),
         }
     }

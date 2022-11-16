@@ -99,6 +99,7 @@ fn app_single_pos_arg() {
 
     thread::sleep(Duration::from_millis(400));
 
+    println!("{}", result);
     assert!(result["startApp"]["success"].as_bool().unwrap());
 }
 
@@ -134,6 +135,7 @@ fn app_single_flag() {
 
     thread::sleep(Duration::from_millis(400));
 
+    println!("{}", result);
     assert!(result["startApp"]["success"].as_bool().unwrap());
 }
 
@@ -169,6 +171,7 @@ fn app_flag_arg() {
 
     thread::sleep(Duration::from_millis(400));
 
+    println!("{}", result);
     assert!(result["startApp"]["success"].as_bool().unwrap());
 }
 

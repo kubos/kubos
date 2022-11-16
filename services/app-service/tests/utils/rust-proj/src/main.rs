@@ -67,7 +67,7 @@ fn main() -> Result<(), Error> {
 
     let matches = match opts.parse(&args[1..]) {
         Ok(r) => r,
-        Err(f) => panic!(f.to_string()),
+        Err(f) => panic!("{}", f.to_string()),
     };
 
     if matches.opt_present("h") {
