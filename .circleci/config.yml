@@ -45,7 +45,7 @@ jobs:
       resource_class: xlarge
       steps:
         - checkout
-        - run: cd apis/app-api/python && pip3 install .
+        - run: cd libs/kubos && poetry install --no-interaction --no-ansi
         - run: cargo test --workspace --release
         - run: cargo test --package kubos-app-service --test test_python_app --release -- --ignored
 
@@ -106,9 +106,9 @@ jobs:
         - checkout
         - run: python3 tools/ci_c.py
         - run: python3 hal/python-hal/i2c/test_i2c.py
-        - run: cd hal/python-hal/i2c; python3 setup.py install
-        - run: cd apis/pumpkin-mcu-api; python3 test_mcu_api.py
-        - run: cd apis/app-api/python; python3 test_app_api.py
+        - run: cd hal/python-hal/i2c && poetry install --no-interaction --no-ansi
+        - run: cd apis/pumpkin-mcu-api && python3 test_mcu_api.py
+        - run: cd apis/app-api/python && python3 test_app_api.py
 
     # Create and push new git version tag (n.n.n+{new build number})
     # Run when code is merged into master
@@ -126,9 +126,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: cd apis/app-api/python && pip3 install .
         - run: ssh-keyscan docs.kubos.co >> ~/.ssh/known_hosts
-        - run: pip3 install semantic-version
         - run: ./tools/docs/prep_docs.sh
         - run: ./tools/docs/deploy_docs.sh
 

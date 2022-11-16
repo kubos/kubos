@@ -24,7 +24,9 @@ import datetime
 # These are injected into the system path so Sphinx can find them
 python_modules = [
     'apis/pumpkin-mcu-api',
-    'apis/python-app-api',
+    'apis/app-api/python',
+    'libs/kubos',
+    'libs/kubos-service',
     'hal/python-hal/i2c'
 ]
 
@@ -32,6 +34,9 @@ for path in python_modules:
     sys.path.insert(0, os.path.abspath("../%s" % path))
 
 import sphinx_rtd_theme
+
+# Ignore these dependencies of our python API when generating w/ autodoc
+autodoc_mock_imports = ["toml", "flask", "graphql_server"]
 
 # -- General configuration ------------------------------------------------
 
@@ -75,7 +80,7 @@ release = u'0.0.0'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -131,6 +136,5 @@ extensions += [
     'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
-    'sphinxjsondomain',
     'sphinxcontrib.plantuml'
 ]

@@ -84,12 +84,12 @@
 //! use schema::{MutationRoot, QueryRoot};
 //!
 //! let config = Config::new("example-service").unwrap();
-//! let subsystem = Subsystem { bus = config["bus"] ) };
+//! let subsystem = Subsystem { bus: config["bus"] };
 //! Service::new(
 //!     config,
 //!     subsystem,
-//!     query,
-//!     mutation
+//!     QueryRoot,
+//!     MutationRoot,
 //! ).start();
 //! ```
 //!

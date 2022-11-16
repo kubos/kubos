@@ -117,8 +117,8 @@ impl ProcStat {
         Self::parse(BufReader::new(file))
     }
 
-    /// Parse a String with the format of a /proc/[pid]/stat file
-    /// See http://man7.org/linux/man-pages/man5/proc.5.html for more information
+    /// Parse a String with the format of a /proc/pid/stat file
+    /// See <http://man7.org/linux/man-pages/man5/proc.5.html> for more information
     pub fn parse<R>(stat: R) -> Result<Self, failure::Error>
     where
         R: Read,
@@ -234,7 +234,7 @@ impl ProcStat {
     }
 
     /// Attempts to read the command line arguments used to execute this process, and falls
-    /// back to the raw process name if /proc/[pid]/cmdline does not exist or is empty
+    /// back to the raw process name if /proc/pid/cmdline does not exist or is empty
     pub fn cmd(&self) -> Result<Vec<String>, failure::Error> {
         let file = File::open(root_path!("proc", self.pid, "cmdline"))?;
         let mut reader = BufReader::new(file);
