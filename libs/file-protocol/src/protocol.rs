@@ -677,12 +677,7 @@ impl Protocol {
                     "<- {{ {}, {}, {}, chunk_data }}",
                     channel_id, hash, chunk_num
                 );
-                storage::store_chunk(
-                    &self.config.storage_prefix,
-                    hash,
-                    *chunk_num,
-                    data,
-                )?;
+                storage::store_chunk(&self.config.storage_prefix, hash, *chunk_num, data)?;
                 state.clone()
             }
             Message::ACK(_channel_id, ack_hash) => {
@@ -785,11 +780,7 @@ impl Protocol {
                 }
 
                 // TODO: handle channel_id mismatch
-                match storage::validate_file(
-                    &self.config.storage_prefix,
-                    hash,
-                    Some(*num_chunks),
-                ) {
+                match storage::validate_file(&self.config.storage_prefix, hash, Some(*num_chunks)) {
                     Ok((true, _)) => {
                         self.send(&messages::ack(*channel_id, hash, Some(*num_chunks))?)?;
                         match state.clone() {

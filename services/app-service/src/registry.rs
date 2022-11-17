@@ -131,9 +131,7 @@ impl AppRegistry {
 
             let version = version.unwrap();
 
-            match version
-                .file_type().map(|file_type| file_type.is_dir())
-            {
+            match version.file_type().map(|file_type| file_type.is_dir()) {
                 Ok(true) => {
                     if let Ok(entry) = AppRegistryEntry::from_dir(&version.path()) {
                         if entry.active_version {
@@ -621,18 +619,31 @@ impl AppRegistry {
         };
 
         let app_path = PathBuf::from(&app.executable);
-        info!("app executable exists? {}: {}", app_path.display(), app_path.exists());
+        info!(
+            "app executable exists? {}: {}",
+            app_path.display(),
+            app_path.exists()
+        );
         if !app_path.exists() {
             let (msg, uninstalled) = match self.uninstall(&app.name, &app.version) {
-                Ok(_) => (format!(
-                    "{} does not exist. {} version {} automatically uninstalled",
-                    app.executable, app.name, app.version
-                ), true),
-                Err(error) => (format!("{} does not exist. {}", app.executable, error), false),
+                Ok(_) => (
+                    format!(
+                        "{} does not exist. {} version {} automatically uninstalled",
+                        app.executable, app.name, app.version
+                    ),
+                    true,
+                ),
+                Err(error) => (
+                    format!("{} does not exist. {}", app.executable, error),
+                    false,
+                ),
             };
 
             error!("{}", msg);
-            return Err(AppError::StartError { err: msg, cause: StartErrorKind::NoExecutable { uninstalled } });
+            return Err(AppError::StartError {
+                err: msg,
+                cause: StartErrorKind::NoExecutable { uninstalled },
+            });
         }
 
         // Change our current directory to the app's directory so that it can access any
@@ -689,7 +700,7 @@ impl AppRegistry {
             error!("Failed to spawn app {}: {:?}", app_name, err);
             AppError::StartError {
                 err: format!("Failed to spawn app: {:?}", err),
-                cause: StartErrorKind::SpawnError(err.kind())
+                cause: StartErrorKind::SpawnError(err.kind()),
             }
         })?;
 

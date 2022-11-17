@@ -62,13 +62,7 @@ fn apps_query(config: ServiceConfig, query: &str) -> Vec<serde_json::Value> {
     let mut apps_sorted = apps.as_array().unwrap().clone();
 
     // Sort by name/version to make testing deterministic
-    apps_sorted.sort_unstable_by_key(|a| {
-        format!(
-            "{}|{}",
-            a["app"]["name"],
-            a["app"]["version"]
-        )
-    });
+    apps_sorted.sort_unstable_by_key(|a| format!("{}|{}", a["app"]["name"], a["app"]["version"]));
     apps_sorted
 }
 

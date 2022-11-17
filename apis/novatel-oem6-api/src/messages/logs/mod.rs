@@ -45,9 +45,16 @@ impl Log {
         raw: Vec<u8>,
     ) -> Option<Log> {
         match id {
-            MessageID::BestXYZ => BestXYZLog::new(recv_status, time_status, week, ms, &raw).map(Log::BestXYZ),
-            MessageID::RxStatusEvent => RxStatusEventLog::new(recv_status, time_status, week, ms, &raw).map(Log::RxStatusEvent),
-            MessageID::Version => VersionLog::new(recv_status, time_status, week, ms, raw).map(Log::Version),
+            MessageID::BestXYZ => {
+                BestXYZLog::new(recv_status, time_status, week, ms, &raw).map(Log::BestXYZ)
+            }
+            MessageID::RxStatusEvent => {
+                RxStatusEventLog::new(recv_status, time_status, week, ms, &raw)
+                    .map(Log::RxStatusEvent)
+            }
+            MessageID::Version => {
+                VersionLog::new(recv_status, time_status, week, ms, raw).map(Log::Version)
+            }
             _ => None,
         }
     }

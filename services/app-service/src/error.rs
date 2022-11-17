@@ -19,9 +19,7 @@ use failure::Fail;
 #[derive(Debug, PartialEq, Eq)]
 pub enum StartErrorKind {
     NoActiveVersion,
-    NoExecutable {
-        uninstalled: bool,
-    },
+    NoExecutable { uninstalled: bool },
     AlreadyRunning,
     SpawnError(std::io::ErrorKind),
     NonZeroExit,

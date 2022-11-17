@@ -106,7 +106,9 @@ impl Config {
     /// Returns the configured hosturl string in the following
     /// format (using IPv4 addresses) - 0.0.0.0:0000
     pub fn hosturl(&self) -> Option<String> {
-      self.addr.as_ref().map(|addr| format!("{}:{}", addr.ip(), addr.port()))
+        self.addr
+            .as_ref()
+            .map(|addr| format!("{}:{}", addr.ip(), addr.port()))
     }
 
     /// Returns the category's configuration information
@@ -140,10 +142,10 @@ impl Config {
     /// * Arguments
     /// `key` - Key of value to get from config
     pub fn get_hex(&self, key: &str) -> Option<u8> {
-      let val = self.raw.get(key)?.as_str()?;
-      let val = val.strip_prefix("0x").unwrap_or(val);
+        let val = self.raw.get(key)?.as_str()?;
+        let val = val.strip_prefix("0x").unwrap_or(val);
 
-      u8::from_str_radix(val, 16).ok()
+        u8::from_str_radix(val, 16).ok()
     }
 }
 

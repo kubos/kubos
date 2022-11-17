@@ -74,11 +74,11 @@ pub fn to_cbor(
     }
 
     ser::to_vec_packed(&(channel_id, "spawn", command, options)).map_err(|err| {
-            ProtocolError::MessageCreationError {
-                message: "spawn".to_owned(),
-                err,
-            }
-        })
+        ProtocolError::MessageCreationError {
+            message: "spawn".to_owned(),
+            err,
+        }
+    })
 }
 
 #[cfg(test)]

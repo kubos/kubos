@@ -74,7 +74,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //         state: PowerState,
     //         uptime: Int
     //     }
-    // }        
+    // }
     field power(&executor) -> FieldResult<GetPowerResponse>
         as "Antenna System Power State"
     {

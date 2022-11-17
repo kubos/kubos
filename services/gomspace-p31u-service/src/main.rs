@@ -99,7 +99,7 @@ fn main() -> EpsResult<()> {
             format_err!("Failed to load 'addr' config value");
         })
         .unwrap();
-    
+
     Service::new(config, Subsystem::new(bus, addr)?, QueryRoot, MutationRoot).start();
 
     Ok(())

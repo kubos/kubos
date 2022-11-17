@@ -208,9 +208,7 @@ impl ServiceListener {
 
         thread::spawn(move || warp::serve(listener).run(([127, 0, 0, 1], port)));
 
-        ServiceListener {
-            requests,
-        }
+        ServiceListener { requests }
     }
 
     /// Pops a request body from the collected queue

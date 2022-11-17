@@ -41,7 +41,7 @@ fn app_toml(path: &Path) -> String {
 }
 
 fn app_script(exit_code: i8) -> String {
-    format!("#!/bin/bash\nexit {exit_code}") 
+    format!("#!/bin/bash\nexit {exit_code}")
 }
 
 #[test]
@@ -99,7 +99,13 @@ fn start_app_bad_permissions() {
 
     let result = registry.start_app("tiny-app", None, None);
 
-    assert!(matches!(result, Err(AppError::StartError { cause: StartErrorKind::SpawnError(std::io::ErrorKind::PermissionDenied), .. })));
+    assert!(matches!(
+        result,
+        Err(AppError::StartError {
+            cause: StartErrorKind::SpawnError(std::io::ErrorKind::PermissionDenied),
+            ..
+        })
+    ));
 }
 
 #[test]
@@ -119,7 +125,13 @@ fn start_app_bad_install() {
 
     let result = registry.start_app("tiny-app", None, None);
 
-    assert!(matches!(result, Err(AppError::StartError { cause: StartErrorKind::NoExecutable { uninstalled: true }, .. })));
+    assert!(matches!(
+        result,
+        Err(AppError::StartError {
+            cause: StartErrorKind::NoExecutable { uninstalled: true },
+            ..
+        })
+    ));
 
     // Make sure our bad app entry was removed from the registry directory
     assert!(!app_dir.exists());
@@ -155,5 +167,11 @@ fn start_app_nonzero_exit() {
     // the system finishes calling it
     thread::sleep(Duration::from_millis(10));
 
-    assert!(matches!(result, Err(AppError::StartError { cause: StartErrorKind::NonZeroExit, .. })));
+    assert!(matches!(
+        result,
+        Err(AppError::StartError {
+            cause: StartErrorKind::NonZeroExit,
+            ..
+        })
+    ));
 }

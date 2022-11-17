@@ -206,12 +206,7 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
             });
         }
 
-        if let Some(sender) = threads
-            .lock()
-            .map_err(err_logger)
-            .unwrap()
-            .get(&channel_id)
-        {
+        if let Some(sender) = threads.lock().map_err(err_logger).unwrap().get(&channel_id) {
             if let Err(e) = sender.send(first_message) {
                 warn!("Error when sending to channel {}: {:?}", channel_id, e);
             }

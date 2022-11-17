@@ -17,7 +17,6 @@
 use crate::model::{Supervisor, SupervisorEnableStatus, SupervisorHousekeeping, SupervisorVersion};
 use juniper::FieldResult;
 
-
 type Context = kubos_service::Context<Supervisor>;
 
 // GraphQL model annotations for SupervisorVersion

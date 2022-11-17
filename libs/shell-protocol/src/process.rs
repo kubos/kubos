@@ -94,17 +94,20 @@ impl ProcessHandler {
             }
         };
 
-        let stdout_reader = process.stdout.take().map(|stdout| {
-          BufReader::new(TimeoutReader::new(stdout, Duration::from_millis(5)))
-        });
+        let stdout_reader = process
+            .stdout
+            .take()
+            .map(|stdout| BufReader::new(TimeoutReader::new(stdout, Duration::from_millis(5))));
 
-        let stderr_reader = process.stderr.take().map(|stderr| {
-          BufReader::new(TimeoutReader::new(stderr, Duration::from_millis(5)))
-        });
+        let stderr_reader = process
+            .stderr
+            .take()
+            .map(|stderr| BufReader::new(TimeoutReader::new(stderr, Duration::from_millis(5))));
 
-        let stdin_writer = process.stdin.take().map(|stdin| {
-          BufWriter::new(TimeoutWriter::new(stdin, Duration::from_millis(5)))
-        });
+        let stdin_writer = process
+            .stdin
+            .take()
+            .map(|stdin| BufWriter::new(TimeoutWriter::new(stdin, Duration::from_millis(5))));
 
         Ok(ProcessHandler {
             process,

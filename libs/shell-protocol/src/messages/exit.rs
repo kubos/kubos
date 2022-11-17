@@ -52,11 +52,11 @@ pub fn to_cbor(channel_id: u32, code: u32, signal: u32) -> Result<Vec<u8>, Proto
     info!("-> {{ {}, exit, {}, {} }}", channel_id, code, signal);
 
     ser::to_vec_packed(&(channel_id, "exit", code, signal)).map_err(|err| {
-            ProtocolError::MessageCreationError {
-                message: "exit".to_owned(),
-                err,
-            }
-        })
+        ProtocolError::MessageCreationError {
+            message: "exit".to_owned(),
+            err,
+        }
+    })
 }
 
 #[cfg(test)]

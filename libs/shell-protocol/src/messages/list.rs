@@ -67,11 +67,11 @@ pub fn to_cbor(
     info!("-> {{ {}, list, '{:?}' }}", channel_id, process_list);
 
     ser::to_vec_packed(&(channel_id, "list", process_list)).map_err(|err| {
-            ProtocolError::MessageCreationError {
-                message: "list".to_owned(),
-                err,
-            }
-        })
+        ProtocolError::MessageCreationError {
+            message: "list".to_owned(),
+            err,
+        }
+    })
 }
 
 #[cfg(test)]

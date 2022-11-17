@@ -28,9 +28,7 @@ fn start_session(channel_proto: &ChannelProtocol) -> Result<(), Error> {
     println!("Starting shell session -> {}", channel_id);
 
     channel_proto.send(&shell_protocol::messages::spawn::to_cbor(
-        channel_id,
-        "/bin/sh",
-        None,
+        channel_id, "/bin/sh", None,
     )?)?;
     run_shell(channel_proto, channel_id)?;
     Ok(())
@@ -41,9 +39,7 @@ fn run_command(channel_proto: &ChannelProtocol, command: &str) -> Result<(), Err
     let command = format!("{}\n", command);
 
     channel_proto.send(&shell_protocol::messages::spawn::to_cbor(
-        channel_id,
-        "/bin/sh",
-        None,
+        channel_id, "/bin/sh", None,
     )?)?;
 
     channel_proto.send(&shell_protocol::messages::stdin::to_cbor(
@@ -72,10 +68,14 @@ fn run_command(channel_proto: &ChannelProtocol, command: &str) -> Result<(), Err
             shell_protocol::messages::Message::Exit { .. } => {
                 break;
             }
-            shell_protocol::messages::Message::Stdout { data: Some(data), .. } => {
+            shell_protocol::messages::Message::Stdout {
+                data: Some(data), ..
+            } => {
                 print!("{}", data);
             }
-            shell_protocol::messages::Message::Stderr { data: Some(data), .. } => {
+            shell_protocol::messages::Message::Stderr {
+                data: Some(data), ..
+            } => {
                 print!("{}", data);
             }
             shell_protocol::messages::Message::Error { message, .. } => {
