@@ -76,6 +76,7 @@ target/
 # python packages
 *.egg-info/
 dist/
+!tools/dist/
 
 # During local SDK development, the following directories may be created
 app-registry/
