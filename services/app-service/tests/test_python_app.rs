@@ -21,11 +21,8 @@
 // checking for any extraneous error messages.
 
 use kubos_app::ServiceConfig;
-use std::fs;
 use std::path::Path;
-use std::thread;
-use std::time::Duration;
-
+use std::{fs, thread, time::Duration};
 mod utils;
 pub use crate::utils::*;
 
@@ -97,8 +94,6 @@ fn app_single_pos_arg() {
         }"#,
     );
 
-    thread::sleep(Duration::from_millis(400));
-
     println!("{}", result);
     assert!(result["startApp"]["success"].as_bool().unwrap());
 }
@@ -132,8 +127,6 @@ fn app_single_flag() {
             }
         }"#,
     );
-
-    thread::sleep(Duration::from_millis(400));
 
     println!("{}", result);
     assert!(result["startApp"]["success"].as_bool().unwrap());
@@ -169,14 +162,11 @@ fn app_flag_arg() {
         }"#,
     );
 
-    thread::sleep(Duration::from_millis(400));
-
     println!("{}", result);
     assert!(result["startApp"]["success"].as_bool().unwrap());
 }
 
 #[test]
-#[ignore]
 fn app_failure() {
     let mut fixture = AppServiceFixture::setup();
     let config = ServiceConfig::new_from_path(
@@ -198,7 +188,7 @@ fn app_failure() {
 
     // -e forces an error.
     let result = send_query(
-        config,
+        config.clone(),
         r#"mutation {
             startApp(name: "python-proj", config: "config.toml", args: ["-e"]) {
                 errors,
@@ -207,10 +197,42 @@ fn app_failure() {
         }"#,
     );
 
-    thread::sleep(Duration::from_millis(400));
-
-    assert_eq!(
-        result["startApp"]["errors"].as_str().unwrap(),
-        "Failed to start app: App returned exit code: 123"
-    );
+    println!("{}", result);
+    // Sometimes the script executes slower than the app service can detect it, so we need to check manually
+    if result["startApp"]["success"] == serde_json::json!(true) {
+        let mut running = true;
+        while running {
+            let result = send_query(
+                config.clone(),
+                r#"query {
+                appStatus(name: "python-proj") {
+                    running,
+                    lastRc
+                }
+            }"#,
+            );
+            println!("{}", result);
+            if result["appStatus"][0]["running"].is_boolean() {
+                running = result["appStatus"][0]["running"].as_bool().unwrap();
+            }
+            if !running {
+                assert_eq!(
+                    result,
+                    serde_json::json!({
+                        "appStatus": [{
+                            "running": false,
+                            "lastRc": 123,
+                        }]
+                    })
+                );
+            } else {
+                thread::sleep(Duration::from_millis(400));
+            }
+        }
+    } else {
+        assert_eq!(
+            result["startApp"]["errors"].as_str().unwrap(),
+            "Failed to start app: App returned exit status: 123"
+        );
+    }
 }

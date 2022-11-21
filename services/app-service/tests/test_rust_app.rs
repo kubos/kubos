@@ -106,7 +106,7 @@ fn app_no_args() {
     // as expected
     assert_eq!(
         result["startApp"]["errors"].as_str().unwrap(),
-        "Failed to start app: App returned exit code: 1"
+        "Failed to start app: App returned exit status: 1"
     );
 }
 

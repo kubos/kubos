@@ -43,7 +43,7 @@ impl Imtq<ImtqRaw> {
     /// # fn main() { func(); }
     ///
     /// # fn func() -> AdcsResult<()> {
-    /// let imtq = Imtq::imtq("/dev/i2c-0", 0x40, 60)?;
+    /// let imtq = Imtq::new("/dev/i2c-0", 0x40, 60)?;
     /// # Ok(())
     /// # }
     /// ```
@@ -87,7 +87,7 @@ impl<T: ImtqFFI> Imtq<T> {
     /// # fn main() { func(); }
     ///
     /// # fn func() -> AdcsResult<()> {
-    /// let imtq = Imtq::imtq("/dev/i2c-0", 0x40, 60)?;
+    /// let imtq = Imtq::new("/dev/i2c-0", 0x40, 60)?;
     /// let cmd = vec![10, 10, 10, 10];
     /// let result = imtq.passthrough(&cmd, 10, 0, 0)?;
     /// # Ok(())
@@ -131,7 +131,7 @@ impl<T: ImtqFFI> Imtq<T> {
     /// # fn main() { func(); }
     ///
     /// # fn func() -> AdcsResult<()> {
-    /// let imtq = Imtq::imtq("/dev/i2c-0", 0x40, 60)?;
+    /// let imtq = Imtq::new("/dev/i2c-0", 0x40, 60)?;
     /// imtq.reset()?;
     /// # Ok(())
     /// # }

@@ -5,6 +5,8 @@ authors = ["Ryan Plauche <ryan@kubos.co>"]
 edition = "2018"
 
 [dependencies]
+env_logger = "0.9"
+log = "^0.4.0"
 tempfile = "3"
 reqwest = "0.9.9"
 serde_json = "1.0"

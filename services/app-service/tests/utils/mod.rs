@@ -19,7 +19,7 @@ use kubos_app::ServiceConfig;
 use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
-use std::process::{Command, Stdio};
+use std::process::Command;
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::time::Duration;
 use std::{env, fs};
@@ -100,8 +100,7 @@ impl MockAppBuilder {
 
     pub fn src(&self) -> String {
         format!(
-            r#"
-            #!/bin/bash
+            r#"#!/bin/bash
             if [ "$1" = "--metadata" ]; then
                 echo name = \"{name}\"
                 echo version = \"{version}\"
@@ -241,11 +240,13 @@ impl AppServiceFixture {
         let handle = thread::spawn(move || {
             let mut service = Command::new(app_service);
 
-            service
-                .arg("-c")
-                .arg(config_toml.to_str().unwrap())
-                .stdin(Stdio::piped())
-                .stdout(Stdio::piped());
+            service.arg("-c").arg(config_toml.to_str().unwrap());
+            if log::log_enabled!(log::Level::Info) {
+                service
+                    .arg("--stdout")
+                    .arg("-l")
+                    .arg(log::max_level().as_str().to_ascii_lowercase());
+            }
 
             let mut service_proc = service.spawn().unwrap();
 

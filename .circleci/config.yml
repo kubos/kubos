@@ -45,9 +45,9 @@ jobs:
       resource_class: xlarge
       steps:
         - checkout
-        - run: cd libs/kubos && poetry install --no-interaction --no-ansi
-        - run: cargo test --workspace --release
-        - run: cargo test --package kubos-app-service --test test_python_app --release -- --ignored
+        - run: ./tools/ci/rust_test.sh
+        - store_test_results:
+            path: test-results
 
     # Rust testing - large upload test
     # Run for all PR commits

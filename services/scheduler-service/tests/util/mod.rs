@@ -14,12 +14,33 @@
 // limitations under the License.
 //
 
+use log::info;
+use serde_json::json;
 use std::cell::RefCell;
 use std::io::Write;
 use std::thread;
 use std::time::Duration;
 use tempfile::{NamedTempFile, TempDir};
-use utils::testing::{service_query, TestService};
+use utils::testing::{service_query, ServiceResponder, TestService};
+
+#[allow(dead_code)]
+#[derive(Clone)]
+pub struct BasicAppResponder;
+impl ServiceResponder for BasicAppResponder {
+    fn respond(&self, _body: &str) -> String {
+        let s = json!({
+            "data": {
+                "startApp": {
+                    "success": true,
+                    "errors": "",
+                }
+            }
+        })
+        .to_string();
+        info!("responding with {}", &s);
+        s
+    }
+}
 
 pub struct SchedulerFixture {
     service: RefCell<TestService>,
@@ -116,7 +137,7 @@ impl SchedulerFixture {
     }
 
     pub fn activate_safe(&self) -> serde_json::Value {
-        let mutation = r#"mutation {{ safeMode {{ errors, success }} }}"#;
+        let mutation = r#"mutation { safeMode { errors, success } }"#;
 
         service_query(mutation, &self.ip, self.port)
     }

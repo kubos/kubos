@@ -80,3 +80,6 @@ dist/
 
 # During local SDK development, the following directories may be created
 app-registry/
+
+# test results created when running tools/ci/rust_test.sh
+test-results/

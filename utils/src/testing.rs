@@ -16,6 +16,7 @@
 
 extern crate tempfile;
 
+use log::debug;
 use serde_json::Value;
 use std::cell::RefCell;
 use std::collections::VecDeque;
@@ -124,17 +125,19 @@ impl TestService {
     /// spawned in the background, allowing the test
     /// to continue on.
     pub fn spawn(&self) {
-        let child = Command::new("cargo")
-            .arg("run")
+        let mut cmd = Command::new("cargo");
+        cmd.arg("run")
             .arg("--package")
             .arg(self.name.clone())
             .arg("--")
             .arg("-c")
-            .arg(self.config_path.clone())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
-            .expect("Failed to start");
+            .arg(self.config_path.clone());
+        if log::log_enabled!(log::Level::Info) {
+            cmd.arg("--stdout")
+                .arg("-l")
+                .arg(log::max_level().as_str().to_ascii_lowercase());
+        }
+        let child = cmd.spawn().expect("Failed to start");
 
         let mut child_handle = self.child_handle.borrow_mut();
         *child_handle = Box::new(Some(child));
@@ -181,6 +184,19 @@ pub fn service_query(query: &str, ip: &str, port: u16) -> Value {
     panic!("Service query failed - {}:{}", ip, port);
 }
 
+pub trait ServiceResponder {
+    fn respond(&self, body: &str) -> String;
+}
+
+#[derive(Clone)]
+struct DefaultServiceResponder;
+
+impl ServiceResponder for DefaultServiceResponder {
+    fn respond(&self, _body: &str) -> String {
+        "{}".to_string()
+    }
+}
+
 pub struct ServiceListener {
     requests: Arc<Mutex<VecDeque<String>>>,
 }
@@ -189,7 +205,14 @@ impl ServiceListener {
     /// Spawns a new dummy service listener
     /// This listener will just listen for posts and save off
     /// the request bodies for examination in tests
-    pub fn spawn(_ip: &str, port: u16) -> ServiceListener {
+    pub fn spawn(_ip: &str, port: u16) -> Self {
+        Self::spawn_with_responder(_ip, port, DefaultServiceResponder)
+    }
+
+    pub fn spawn_with_responder<R>(_ip: &str, port: u16, responder: R) -> ServiceListener
+    where
+        R: ServiceResponder + Send + Sync + Clone + 'static,
+    {
         let requests = Arc::new(Mutex::new(VecDeque::<String>::new()));
 
         let req_handle = requests.clone();
@@ -202,8 +225,10 @@ impl ServiceListener {
                     .map_err(warp::reject::custom)
             }))
             .map(move |body: String| {
+                debug!("service_listener, body: {}", body);
+                let response = responder.respond(&body);
                 req_handle.lock().unwrap().push_back(body);
-                "hi"
+                response
             });
 
         thread::spawn(move || warp::serve(listener).run(([127, 0, 0, 1], port)));
