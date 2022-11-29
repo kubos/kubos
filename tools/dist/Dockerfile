@@ -60,10 +60,10 @@ ENV PATH "$PATH:/usr/bin/iobc_toolchain/usr/bin:/usr/bin/bbb_toolchain/usr/bin"
 RUN apt-get --no-install-recommends install -y software-properties-common
 RUN add-apt-repository 'deb http://archive.ubuntu.com/ubuntu xenial main universe' && apt-key update
 RUN apt-get update -y
+RUN apt-get install -y libboost-system1.58.0 libboost-program-options1.58.0 libxerces-c3.1
 RUN wget https://github.com/nasa/nos3/raw/59568804a8271672a53ae7ea09c4dae76dad3ba3/support/packages/ubuntu/itc-common-cxx11-Release_1.9.1_amd64.deb && \
     apt-get install -y ./itc-common-cxx11-Release_1.9.1_amd64.deb && \
     rm itc-common-cxx11-Release_1.9.1_amd64.deb
 RUN wget https://github.com/nasa/nos3/raw/59568804a8271672a53ae7ea09c4dae76dad3ba3/support/packages/ubuntu/nos-engine-cxx11-Release_1.4.0_amd64.deb && \
     apt-get install -y ./nos-engine-cxx11-Release_1.4.0_amd64.deb && \
     rm nos-engine-cxx11-Release_1.4.0_amd64.deb
-RUN apt-get install -y libboost-system1.58.0 libboost-program-options1.58.0 
