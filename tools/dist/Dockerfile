@@ -67,3 +67,4 @@ RUN wget https://github.com/nasa/nos3/raw/59568804a8271672a53ae7ea09c4dae76dad3b
 RUN wget https://github.com/nasa/nos3/raw/59568804a8271672a53ae7ea09c4dae76dad3ba3/support/packages/ubuntu/nos-engine-cxx11-Release_1.4.0_amd64.deb && \
     apt-get install -y ./nos-engine-cxx11-Release_1.4.0_amd64.deb && \
     rm nos-engine-cxx11-Release_1.4.0_amd64.deb
+RUN ldconfig
