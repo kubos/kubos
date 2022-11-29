@@ -21,7 +21,6 @@
 
 use super::ffi::uart;
 use libc;
-use std::error::Error;
 use std::ffi;
 use std::ffi::CString;
 use std::fmt;
@@ -46,7 +45,7 @@ pub enum UARTError {
 impl From<ffi::NulError> for UARTError {
     fn from(err: ffi::NulError) -> Self {
         UARTError::StringError {
-            description: String::from(err.description()),
+            description: err.to_string(),
             position: err.nul_position(),
         }
     }
@@ -262,13 +261,13 @@ impl UART {
     {
         extern "C" fn c_callback(data: *const u8, len: usize, user: *mut libc::c_void) {
             unsafe {
-                let func = user as *mut Box<FnMut(&[u8])>;
+                let func = user as *mut Box<dyn FnMut(&[u8])>;
                 let data = slice::from_raw_parts(data, len);
                 (*func)(data);
             }
         }
 
-        let func = Box::new(func) as Box<FnMut(&[u8])>;
+        let func = Box::new(func) as Box<dyn FnMut(&[u8])>;
         let func = Box::into_raw(Box::new(func));
 
         uart::uart_set_read_callback(self.uart_ptr, c_callback, func as *mut libc::c_void);

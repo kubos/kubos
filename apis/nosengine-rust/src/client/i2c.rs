@@ -51,7 +51,6 @@
 
 use super::ffi::i2c;
 use failure::Fail;
-use std::error::Error;
 use std::ffi;
 use std::ffi::CString;
 
@@ -94,7 +93,7 @@ pub enum I2CError {
 impl From<ffi::NulError> for I2CError {
     fn from(err: ffi::NulError) -> Self {
         I2CError::StringError {
-            description: String::from(err.description()),
+            description: err.to_string(),
             position: err.nul_position(),
         }
     }
