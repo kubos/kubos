@@ -1,5 +1,13 @@
 version: 2
 jobs:
+    # shared setup to build a stable source of truth docker image 
+    build_docker_img:
+      machine:
+        image: ubuntu-2204:2022.04.2
+      steps:
+        - checkout
+        - run: docker build -t kubos/kubos-dev:testing . 
+
     # Rust build + tests
     # Run for all PR commits
     rust_check_x86:
@@ -132,6 +140,10 @@ jobs:
 
 workflows:
   version: 2
+  build_docker_img:
+    jobs:
+      - build_docker_img
+            
   build:
     jobs:
       - rust_check_x86:
