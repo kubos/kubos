@@ -10,7 +10,7 @@ jobs:
         - checkout
         - run: docker build -t $IMAGE_NAME:$CIRCLECI_SHA1 . 
         - run: 
-          command: |
+          command:
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
             docker push $IMAGE_NAME:$CIRCLECI_SHA1
 
