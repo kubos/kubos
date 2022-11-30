@@ -7,8 +7,13 @@ jobs:
     machine:
       image: ubuntu-2204:2022.04.2
     steps:
+      - docker/check:
+          docker-username: DOCKERHUB_USERNAME  # DOCKER_LOGIN is the default value, if it exists, it automatically would be used.
+          docker-password: DOCKERHUB_PASS  # DOCKER_PASSWORD is the default value
       - checkout
       - run: docker build -t $IMAGE_NAME:$CIRCLE_SHA1 . 
+      - docker/push:
+          images: $IMAGE_NAME:$CIRCLE_SHA1
       - run: |
           docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASS
           docker push $IMAGE_NAME:$CIRCLE_SHA1
