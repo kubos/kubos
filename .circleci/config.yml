@@ -11,8 +11,8 @@ jobs:
         - run:
             name: Publish Docker Image to Docker Hub
             command: |
-              echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-              docker push $IMAGE_NAME:$CIRCLE_SHA1
+                echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+                docker push $IMAGE_NAME:$CIRCLE_SHA1
         - run: docker build -t $IMAGE_NAME:$CIRCLE_SHA1 . 
         - run: echo $DOCKERHUB_PASS | docker login --username $DOCKERHUB_USERNAME --password-stdin
         - run:
