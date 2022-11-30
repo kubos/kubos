@@ -140,49 +140,68 @@ jobs:
 
 workflows:
   version: 2
-  build_docker_img:
-    jobs:
-      - build_docker_img
-            
+
   build:
     jobs:
+      - build_docker_img
+
       - rust_check_x86:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - rust_check_mbm2:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - rust_check_iobc:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - rust_test:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - rust_test_large_download:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - rust_test_large_upload:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - rust_test_nosengine:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - rust_fmt:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - rust_clippy:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - non_rust_tests:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
