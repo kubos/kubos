@@ -12,7 +12,7 @@ jobs:
     # Run for all PR commits
     rust_check_x86:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:testing
       steps:
         - checkout
         - run: cargo check --workspace --all-targets
@@ -20,7 +20,7 @@ jobs:
     # Run for all PR commits
     rust_check_mbm2:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:testing
       steps:
         - checkout
         - run:
@@ -34,7 +34,7 @@ jobs:
     # Run for all PR commits
     rust_check_iobc:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:testing
       steps:
         - checkout
         - run:
@@ -49,7 +49,7 @@ jobs:
     # Run for all PR commits
     rust_test:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:testing
       resource_class: xlarge
       steps:
         - checkout
@@ -61,7 +61,7 @@ jobs:
     # Run for all PR commits
     rust_test_large_upload:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:testing
       steps:
         - checkout
         - run: cargo run --bin large_upload --release
@@ -70,7 +70,7 @@ jobs:
     # Run for all PR commits
     rust_test_large_download:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:testing
       steps:
         - checkout
         - run: cargo run --bin large_download --release
@@ -79,7 +79,7 @@ jobs:
     # Run for all PR commits
     rust_test_nosengine:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:testing
       steps:
         - checkout
         - run: cd apis/nosengine-rust && cargo check
@@ -89,7 +89,7 @@ jobs:
     # Run for all PR commits
     rust_fmt:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:testing
       steps:
         - checkout
         - run: cargo fmt --all -- --check
@@ -99,7 +99,7 @@ jobs:
     # Run for all PR commits
     rust_clippy:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:testing
       steps:
         - checkout
         - run: cargo clippy --workspace --all-targets
@@ -109,7 +109,7 @@ jobs:
     # Run for all PR commits
     non_rust_tests:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:testing
       steps:
         - checkout
         - run: python3 tools/ci_c.py
@@ -122,7 +122,7 @@ jobs:
     # Run when code is merged into master
     deploy:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:testing
       steps:
         - checkout
         - run: ./deploy_tag.sh
@@ -131,7 +131,7 @@ jobs:
     # Run when code is merged into master or when an official release tag is generated
     docs:
       docker:
-        - image: kubos/kubos-dev:latest
+        - image: kubos/kubos-dev:testing
       steps:
         - checkout
         - run: ssh-keyscan docs.kubos.co >> ~/.ssh/known_hosts
