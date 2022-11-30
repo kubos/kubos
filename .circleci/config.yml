@@ -9,11 +9,11 @@ jobs:
     steps:
       - checkout
       - run: |
-          echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+          echo "$DOCKERHUB_PASS" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
           docker push $IMAGE_NAME:$CIRCLE_SHA1
       - run: docker build -t $IMAGE_NAME:$CIRCLE_SHA1 . 
       - run: |
-          echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+          echo "$DOCKERHUB_PASS" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
           docker push $IMAGE_NAME:$CIRCLE_SHA1
 
   # Rust build + tests
