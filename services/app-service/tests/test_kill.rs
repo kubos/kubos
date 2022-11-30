@@ -91,7 +91,7 @@ fn kill_good() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 
@@ -105,7 +105,7 @@ fn kill_good() {
         }"#,
     );
 
-    assert_eq!(result["startApp"]["success"].as_bool().unwrap(), true);
+    assert!(result["startApp"]["success"].as_bool().unwrap());
 
     // Query the app service to make sure the app is still running
     let result = send_query(
@@ -117,7 +117,7 @@ fn kill_good() {
         }"#,
     );
 
-    assert_eq!(result["appStatus"][0]["running"].as_bool().unwrap(), true);
+    assert!(result["appStatus"][0]["running"].as_bool().unwrap());
 
     // Kill the app
     let result = send_query(
@@ -130,7 +130,7 @@ fn kill_good() {
         }"#,
     );
 
-    assert_eq!(result["killApp"]["success"].as_bool().unwrap(), true);
+    assert!(result["killApp"]["success"].as_bool().unwrap());
 
     // Give the service just a sec to figure out the app has stopped
     thread::sleep(Duration::from_millis(10));
@@ -152,7 +152,7 @@ fn kill_good() {
         result["appStatus"][0]["name"].as_str().unwrap(),
         "rust-proj"
     );
-    assert_eq!(result["appStatus"][0]["running"].as_bool().unwrap(), false);
+    assert!(!result["appStatus"][0]["running"].as_bool().unwrap());
     assert_eq!(result["appStatus"][0]["lastRc"], serde_json::Value::Null);
     // The default kill signal value is 15 (SIGTERM)
     assert_eq!(result["appStatus"][0]["lastSignal"].as_i64().unwrap(), 15);
@@ -211,7 +211,7 @@ fn kill_app_not_running() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 
@@ -227,7 +227,7 @@ fn kill_app_not_running() {
 
     // Kill the app
     let result = send_query(
-        config.clone(),
+        config,
         r#"mutation {
             killApp(name: "rust-proj") {
                 errors,
@@ -262,7 +262,7 @@ fn kill_custom_signal() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 
@@ -277,7 +277,7 @@ fn kill_custom_signal() {
         }"#,
     );
 
-    assert_eq!(result["startApp"]["success"].as_bool().unwrap(), true);
+    assert!(result["startApp"]["success"].as_bool().unwrap());
 
     // Query the app service to make sure the app is still running
     let result = send_query(
@@ -289,7 +289,7 @@ fn kill_custom_signal() {
         }"#,
     );
 
-    assert_eq!(result["appStatus"][0]["running"].as_bool().unwrap(), true);
+    assert!(result["appStatus"][0]["running"].as_bool().unwrap());
 
     // Kill the app
     let result = send_query(
@@ -302,7 +302,7 @@ fn kill_custom_signal() {
         }"#,
     );
 
-    assert_eq!(result["killApp"]["success"].as_bool().unwrap(), true);
+    assert!(result["killApp"]["success"].as_bool().unwrap());
 
     // Give the service just a sec to figure out the app has stopped
     thread::sleep(Duration::from_millis(10));
@@ -324,7 +324,7 @@ fn kill_custom_signal() {
         result["appStatus"][0]["name"].as_str().unwrap(),
         "rust-proj"
     );
-    assert_eq!(result["appStatus"][0]["running"].as_bool().unwrap(), false);
+    assert!(!result["appStatus"][0]["running"].as_bool().unwrap());
     assert_eq!(result["appStatus"][0]["lastRc"], serde_json::Value::Null);
     assert_eq!(result["appStatus"][0]["lastSignal"].as_i64().unwrap(), 2);
 }

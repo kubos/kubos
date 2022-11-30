@@ -67,7 +67,7 @@ pub fn monitor_app(
             err: format!("Failed to wait for {} to finish: {:?}", name, err),
         })?;
 
-    finish_entry(&registry, &name, &version, status)
+    finish_entry(&registry, name, version, status)
 }
 
 // Update/add an entry to denote the start of a new execution of an app
@@ -86,7 +86,7 @@ pub fn start_entry(
     // Otherwise, add the entry to the registry
     if let Some(index) = entries
         .iter()
-        .position(|ref e| e.name == new_entry.name && e.version == new_entry.version)
+        .position(|e| e.name == new_entry.name && e.version == new_entry.version)
     {
         debug!(
             "Updating existing entry for {} {}",
@@ -136,7 +136,7 @@ pub fn finish_entry(
     // Find the monitoring entry and update it with the return code/exit signal and the end time
     if let Some(index) = entries
         .iter()
-        .position(|ref e| e.name == name && e.version == version)
+        .position(|e| e.name == name && e.version == version)
     {
         entries[index].running = false;
         entries[index].last_rc = last_rc;
@@ -165,7 +165,7 @@ pub fn remove_entry(
     })?;
     if let Some(index) = entries
         .iter()
-        .position(|ref e| e.name == name && e.version == version)
+        .position(|e| e.name == name && e.version == version)
     {
         entries.remove(index);
     }

@@ -31,17 +31,12 @@ fn run_onetime_future() {
 
     fixture.create_mode("init");
 
-    let now_time: DateTime<Utc> = Utc::now()
-        .checked_add_signed(chrono::Duration::seconds(1))
-        .unwrap();
-    let now_time = now_time.format("%Y-%m-%d %H:%M:%S").to_string();
-
     // Create some schedule with a task starting now
     let schedule = json!({
         "tasks": [
             {
                 "description": "basic-task",
-                "time": now_time,
+                "delay": "1s",
                 "app": {
                     "name": "basic-app"
                 }

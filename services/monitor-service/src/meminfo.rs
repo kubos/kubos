@@ -14,13 +14,11 @@
 // limitations under the License.
 //
 
-use failure;
-
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::str::FromStr;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MemInfo {
     total: Option<u32>,
     free: Option<u32>,

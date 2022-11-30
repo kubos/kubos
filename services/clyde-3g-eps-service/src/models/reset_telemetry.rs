@@ -30,11 +30,11 @@ pub struct Data {
     pub daughterboard: Option<i32>,
 }
 
-impl Into<Data> for ResetTelemetryData {
-    fn into(self) -> Data {
+impl From<ResetTelemetryData> for Data {
+    fn from(data: ResetTelemetryData) -> Self {
         Data {
-            motherboard: i32::from(self.motherboard),
-            daughterboard: self.daughterboard.map(i32::from),
+            motherboard: i32::from(data.motherboard),
+            daughterboard: data.daughterboard.map(i32::from),
         }
     }
 }
@@ -52,9 +52,9 @@ pub enum Type {
     Watchdog,
 }
 
-impl Into<ResetTelemetryType> for Type {
-    fn into(self) -> ResetTelemetryType {
-        match self {
+impl From<Type> for ResetTelemetryType {
+    fn from(t: Type) -> Self {
+        match t {
             Type::BrownOut => ResetTelemetryType::BrownOut,
             Type::AutomaticSoftware => ResetTelemetryType::AutomaticSoftware,
             Type::Manual => ResetTelemetryType::Manual,

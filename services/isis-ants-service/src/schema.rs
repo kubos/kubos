@@ -17,7 +17,6 @@
 use crate::model::*;
 use crate::objects::*;
 use juniper::FieldResult;
-use kubos_service;
 
 type Context = kubos_service::Context<Subsystem>;
 
@@ -75,7 +74,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
     //         state: PowerState,
     //         uptime: Int
     //     }
-    // }        
+    // }
     field power(&executor) -> FieldResult<GetPowerResponse>
         as "Antenna System Power State"
     {

@@ -5,6 +5,9 @@ import os
 import shutil
 from distutils import dir_util
 
+this_dir = os.path.abspath(os.path.dirname(__file__))
+kubos_dir = os.path.dirname(os.path.dirname(this_dir))
+
 GENERATE_XML = """
 (cat {0};
 echo "";
@@ -36,19 +39,19 @@ def main():
 
     doc_tags = {}
 
-    doc_dirs = [d for d in DOCS_DIRS if os.path.isdir(d)]
+    doc_dirs = [d for d in DOCS_DIRS if os.path.isdir(os.path.join(kubos_dir, d))]
 
     for dir in doc_dirs:
-        doc_dir = os.path.join(os.getcwd(), args.output, dir)
+        doc_dir = os.path.join(kubos_dir, args.output, dir)
         if not os.path.isdir(doc_dir):
             os.makedirs(doc_dir)
-        gendocs_xml(dir, "docs/Doxyfile", args.version, doc_dir)
+        gendocs_xml(os.path.join(kubos_dir, dir), "docs/Doxyfile", args.version, doc_dir)
 
-    subprocess.call("sphinx-build docs/ html/", shell=True)
-    shutil.rmtree("./xml")
+    subprocess.call("poetry run sphinx-build ../docs/ ../html/", shell=True, cwd=os.path.dirname(this_dir))
+    shutil.rmtree(os.path.join(kubos_dir, "xml"))
 
-    subprocess.call("cargo doc --all --no-deps", shell=True)
-    dir_util.copy_tree("target/doc", "html/rust-docs")
+    subprocess.call("cargo doc --all --no-deps", shell=True, cwd=kubos_dir)
+    dir_util.copy_tree(os.path.join(kubos_dir, "target/doc"), os.path.join(kubos_dir, "html/rust-docs"))
 
 if __name__ == '__main__':
     main()

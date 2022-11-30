@@ -178,7 +178,7 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
         let bytes = match (read)(&comms.read_conn.clone()) {
             Ok(bytes) => bytes,
             Err(e) => {
-                log_error(&data, e.to_string()).unwrap();
+                log_error(data, e.to_string()).unwrap();
                 continue;
             }
         };
@@ -187,8 +187,8 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
         let packet = match Packet::parse(&bytes) {
             Ok(packet) => packet,
             Err(e) => {
-                log_telemetry(&data, &TelemType::UpFailed).unwrap();
-                log_error(&data, CommsServiceError::HeaderParsing.to_string()).unwrap();
+                log_telemetry(data, &TelemType::UpFailed).unwrap();
+                log_error(data, CommsServiceError::HeaderParsing.to_string()).unwrap();
                 error!("Failed to parse packet header {}", e);
                 continue;
             }
@@ -196,21 +196,21 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
 
         // Validate the link packet
         if !packet.validate() {
-            log_telemetry(&data, &TelemType::UpFailed).unwrap();
-            log_error(&data, CommsServiceError::InvalidChecksum.to_string()).unwrap();
+            log_telemetry(data, &TelemType::UpFailed).unwrap();
+            log_error(data, CommsServiceError::InvalidChecksum.to_string()).unwrap();
             error!("Packet checksum failed");
             continue;
         }
 
         // Update number of packets up.
-        log_telemetry(&data, &TelemType::Up).unwrap();
+        log_telemetry(data, &TelemType::Up).unwrap();
         info!("Packet successfully uplinked");
 
         // Check link type for appropriate message handling path
         match packet.payload_type() {
             PayloadType::Unknown(value) => {
                 log_error(
-                    &data,
+                    data,
                     CommsServiceError::UnknownPayloadType(value).to_string(),
                 )
                 .unwrap();
@@ -228,14 +228,14 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
                     Err(e) => {
                         log_telemetry(&data_ref, &TelemType::DownFailed).unwrap();
                         log_error(&data_ref, e.to_string()).unwrap();
-                        error!("UDP packet failed to uplink: {}", e.to_string());
+                        error!("UDP packet failed to uplink: {}", e);
                     }
                 });
             }
             PayloadType::GraphQL => {
                 if let Ok(mut num_handlers) = num_handlers.lock() {
                     if *num_handlers >= comms.max_num_handlers {
-                        log_error(&data, CommsServiceError::NoAvailablePorts.to_string()).unwrap();
+                        log_error(data, CommsServiceError::NoAvailablePorts.to_string()).unwrap();
                         error!("No message handler ports available");
                         continue;
                     } else {
@@ -266,7 +266,7 @@ fn read_thread<Connection: Clone + Send + 'static, Packet: LinkPacket + Send + '
                         Err(e) => {
                             log_telemetry(&data_ref, &TelemType::DownFailed).unwrap();
                             log_error(&data_ref, e.to_string()).unwrap();
-                            error!("GraphQL packet failed to downlink: {}", e.to_string());
+                            error!("GraphQL packet failed to downlink: {}", e);
                         }
                     }
                 });
@@ -308,7 +308,7 @@ fn handle_graphql_request<Connection: Clone, Packet: LinkPacket>(
         .map_err(|e| e.to_string())?;
 
     // Write packet to the gateway
-    write(&write_conn.clone(), &packet).map_err(|e| e.to_string())
+    write(&write_conn, &packet).map_err(|e| e.to_string())
 }
 
 // This function takes a Packet with PayloadType::UDP and sends the payload over a
@@ -338,7 +338,7 @@ fn downlink_endpoint<Connection: Clone, Packet: LinkPacket>(
     // Bind the downlink endpoint to a UDP socket.
     let socket = match UdpSocket::bind((sat_ip, port)) {
         Ok(sock) => sock,
-        Err(e) => return log_error(&data, e.to_string()).unwrap(),
+        Err(e) => return log_error(data, e.to_string()).unwrap(),
     };
 
     loop {
@@ -348,7 +348,7 @@ fn downlink_endpoint<Connection: Clone, Packet: LinkPacket>(
         let (size, _address) = match socket.recv_from(&mut buf) {
             Ok(tuple) => tuple,
             Err(e) => {
-                log_error(&data, e.to_string()).unwrap();
+                log_error(data, e.to_string()).unwrap();
                 continue;
             }
         };
@@ -361,7 +361,7 @@ fn downlink_endpoint<Connection: Clone, Packet: LinkPacket>(
         {
             Ok(packet) => packet,
             Err(e) => {
-                log_error(&data, e.to_string()).unwrap();
+                log_error(data, e.to_string()).unwrap();
                 continue;
             }
         };
@@ -369,12 +369,12 @@ fn downlink_endpoint<Connection: Clone, Packet: LinkPacket>(
         // Write packet to the gateway and update telemetry.
         match write(&write_conn.clone(), &packet) {
             Ok(_) => {
-                log_telemetry(&data, &TelemType::Down).unwrap();
+                log_telemetry(data, &TelemType::Down).unwrap();
                 info!("Packet successfully downlinked");
             }
             Err(e) => {
-                log_telemetry(&data, &TelemType::DownFailed).unwrap();
-                log_error(&data, e.to_string()).unwrap();
+                log_telemetry(data, &TelemType::DownFailed).unwrap();
+                log_error(data, e.to_string()).unwrap();
                 error!("Packet failed to downlink");
             }
         };

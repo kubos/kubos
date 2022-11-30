@@ -32,10 +32,10 @@ macro_rules! service_new {
         service_new!($mock, data)
     }};
     ($mock:ident, $data:ident) => {{
-        use crate::objects::AckCommand;
         use mai400_api::Connection;
         use std::sync::{Arc, Mutex, RwLock};
         use std::thread;
+        use $crate::objects::AckCommand;
 
         let (sender, receiver) = channel();
 
@@ -76,10 +76,10 @@ macro_rules! service_new {
 #[macro_export]
 macro_rules! service_new_with_read {
     ($mock:ident, $data:ident) => {{
-        use crate::objects::AckCommand;
         use mai400_api::Connection;
         use std::sync::{Arc, Mutex, RwLock};
         use std::thread;
+        use $crate::objects::AckCommand;
 
         let (sender, receiver) = channel();
 

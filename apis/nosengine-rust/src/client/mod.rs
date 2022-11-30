@@ -131,7 +131,7 @@ pub enum NosError {
 impl From<std::ffi::NulError> for NosError {
     fn from(err: std::ffi::NulError) -> Self {
         NosError::StringError {
-            description: String::from(err.description()),
+            description: err.to_string(),
             position: err.nul_position(),
         }
     }

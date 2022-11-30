@@ -29,11 +29,11 @@ pub struct BoardData {
     pub daughterboard: Option<Vec<String>>,
 }
 
-impl Into<BoardData> for BoardStatus {
-    fn into(self) -> BoardData {
+impl From<BoardStatus> for BoardData {
+    fn from(val: BoardStatus) -> Self {
         BoardData {
-            motherboard: self.motherboard.to_vec(),
-            daughterboard: self.daughterboard.map(|flags| flags.to_vec()),
+            motherboard: val.motherboard.to_vec(),
+            daughterboard: val.daughterboard.map(|flags| flags.to_vec()),
         }
     }
 }

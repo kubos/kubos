@@ -98,7 +98,7 @@ pub fn download(
         },
     )?;
 
-    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), &state)?)
+    f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), &state)
 }
 
 pub fn download_partial(
@@ -132,15 +132,14 @@ pub fn download_partial(
     // Note/TODO: We don't use a timeout here because we don't know how long it will
     // take the server to prepare the file we've requested.
     // Larger files (> 100MB) can take over a minute to process.
-    let reply = match f_protocol.recv(None) {
+    let mut reply = match f_protocol.recv(None) {
         Ok(message) => message,
         Err(error) => return Err(error),
     };
 
     // Modify the reply so that we don't attempt to download
     // all of the chunks
-    let mut mod_reply = reply.clone();
-    let reply_vec = mod_reply.as_array_mut().unwrap();
+    let reply_vec = reply.as_array_mut().unwrap();
     let channel = reply_vec.remove(0);
     // Pull out bool
     reply_vec.remove(0);
@@ -160,7 +159,7 @@ pub fn download_partial(
         },
     )?;
 
-    Ok(f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), &state)?)
+    f_protocol.message_engine(|d| f_protocol.recv(Some(d)), Duration::from_secs(2), &state)
 }
 
 pub fn upload(
@@ -185,7 +184,7 @@ pub fn upload(
         FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     // copy file to upload to temp storage. calculate the hash and chunk info
-    let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
+    let (hash, num_chunks, mode) = f_protocol.initialize_file(source_path)?;
 
     let channel = f_protocol.generate_channel()?;
 
@@ -193,7 +192,7 @@ pub fn upload(
     f_protocol.send_metadata(channel, &hash, num_chunks)?;
 
     // send export command for file
-    f_protocol.send_export(channel, &hash, &target_path, mode)?;
+    f_protocol.send_export(channel, &hash, target_path, mode)?;
 
     // start the engine to send the file data chunks
     f_protocol.message_engine(
@@ -204,7 +203,7 @@ pub fn upload(
 
     // note: the original upload client function does not return the hash.
     // we're only doing it here so that we can manipulate the temporary storage
-    Ok(hash.to_owned())
+    Ok(hash)
 }
 
 pub fn upload_partial(
@@ -229,7 +228,7 @@ pub fn upload_partial(
         FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     // Copy file to upload to temp storage. calculate the hash and chunk info
-    let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
+    let (hash, num_chunks, mode) = f_protocol.initialize_file(source_path)?;
 
     let channel = f_protocol.generate_channel()?;
 
@@ -237,7 +236,7 @@ pub fn upload_partial(
     f_protocol.send_metadata(channel, &hash, num_chunks - 1)?;
 
     // Send export command for file
-    f_protocol.send_export(channel, &hash, &target_path, mode)?;
+    f_protocol.send_export(channel, &hash, target_path, mode)?;
 
     // Start the engine to send the file data chunks
     f_protocol.message_engine(
@@ -248,7 +247,7 @@ pub fn upload_partial(
 
     // Note: The original upload client function does not return the hash.
     // we're only doing it here so that we can manipulate the temporary storage
-    Ok(hash.to_owned())
+    Ok(hash)
 }
 
 pub fn cleanup(

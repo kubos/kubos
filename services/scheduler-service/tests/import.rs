@@ -16,7 +16,7 @@
 
 mod util;
 
-use chrono::Utc;
+use chrono::NaiveDateTime;
 use serde_json::json;
 use std::thread;
 use std::time::Duration;
@@ -254,6 +254,22 @@ fn import_two_schedules() {
     );
 }
 
+macro_rules! assert_result {
+    ($e:expr) => {{
+        let res = $e;
+        assert!(res.is_ok());
+        res.unwrap()
+    }};
+}
+
+macro_rules! assert_option {
+    ($e:expr) => {{
+        let res = $e;
+        assert!(res.is_some());
+        res.unwrap()
+    }};
+}
+
 #[test]
 fn import_two_schedules_check_revised() {
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8025);
@@ -263,65 +279,52 @@ fn import_two_schedules_check_revised() {
     let schedule_one_path = fixture.create_task_list(Some(schedule.to_string()));
     let schedule_two_path = fixture.create_task_list(Some(schedule.to_string()));
 
-    let sched_one_time = Utc::now();
-    let sched_one_time = sched_one_time.format("%Y-%m-%d %H:%M:%S").to_string();
     fixture.import_task_list("solar", &schedule_one_path, "flight");
-
-    assert_eq!(
-        fixture.query(
-            r#"{ availableModes(name: "flight") { name, active, lastRevised, schedule { filename, timeImported } } }"#
-        ),
-        json!({
-            "data": {
-                "availableModes": [
-                    {
-                        "name": "flight",
-                        "active": false,
-                        "lastRevised": sched_one_time,
-                        "schedule": [
-                            {
-                                "filename": "solar",
-                                "timeImported": sched_one_time
-                            }
-                        ]
-                    }
-                ]
-            }
-        })
+    let sched_one_result = fixture.query(
+        r#"{ availableModes(name: "flight") { name, active, lastRevised, schedule { filename, timeImported } } }"#
     );
+
+    let mode = &sched_one_result["data"]["availableModes"][0];
+    assert!(mode.is_object());
+    assert_eq!(mode["name"], "flight");
+    assert_eq!(mode["active"], false);
+    assert!(mode["lastRevised"].is_string());
+    assert_eq!(mode["schedule"][0]["filename"], "solar");
+    assert!(mode["schedule"][0]["timeImported"].is_string());
+
+    let sched_one_time = assert_option!(mode["lastRevised"].as_str());
+    let sched_one_dt = assert_result!(NaiveDateTime::parse_from_str(
+        sched_one_time,
+        "%Y-%m-%d %H:%M:%S"
+    ));
 
     thread::sleep(Duration::from_secs(1));
 
     fixture.import_task_list("imaging", &schedule_two_path, "flight");
-    let sched_two_time = Utc::now();
-    let sched_two_time = sched_two_time.format("%Y-%m-%d %H:%M:%S").to_string();
 
-    assert_eq!(
-        fixture.query(
-            r#"{ availableModes(name: "flight") { name, active, lastRevised, schedule { filename, timeImported } } }"#
-        ),
-        json!({
-            "data": {
-                "availableModes": [
-                    {
-                        "name": "flight",
-                        "active": false,
-                        "lastRevised": sched_two_time,
-                        "schedule": [
-                            {
-                                "filename": "imaging",
-                                "timeImported": sched_two_time
-                            },
-                            {
-                                "filename": "solar",
-                                "timeImported": sched_one_time
-                            }
-                        ]
-                    }
-                ]
-            }
-        })
+    let sched_two_result = fixture.query(
+        r#"{ availableModes(name: "flight") { name, active, lastRevised, schedule { filename, timeImported } } }"#
     );
+
+    let mode = &sched_two_result["data"]["availableModes"][0];
+    assert!(mode.is_object());
+    assert_eq!(mode["name"], "flight");
+    assert_eq!(mode["active"], false);
+    assert!(mode["lastRevised"].is_string());
+    assert_eq!(mode["schedule"][0]["filename"], "imaging");
+    assert!(mode["schedule"][0]["timeImported"].is_string());
+    assert_eq!(mode["schedule"][1]["filename"], "solar");
+    assert_eq!(mode["schedule"][1]["timeImported"], sched_one_time);
+
+    let sched_two_time = assert_option!(mode["lastRevised"].as_str());
+    assert_eq!(mode["lastRevised"], mode["schedule"][0]["timeImported"]);
+
+    let sched_two_dt = assert_result!(NaiveDateTime::parse_from_str(
+        sched_two_time,
+        "%Y-%m-%d %H:%M:%S"
+    ));
+
+    assert!(sched_one_dt < sched_two_dt);
 }
 
 #[test]

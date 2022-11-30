@@ -15,7 +15,6 @@
 //
 
 use juniper::{self, FieldError, FieldResult};
-use kubos_service;
 
 use crate::meminfo;
 use crate::objects::*;

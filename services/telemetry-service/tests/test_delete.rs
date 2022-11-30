@@ -20,7 +20,7 @@ use crate::utils::*;
 use serde_json::json;
 use tempfile::TempDir;
 
-static SQL: &'static str = r"
+static SQL: &str = r"
 insert into telemetry values(1000, 'eps', 'voltage', '3.3');
 insert into telemetry values(1001, 'mcu', 'voltage', '3.4');
 insert into telemetry values(1002, 'gps', 'voltage', '3.2');

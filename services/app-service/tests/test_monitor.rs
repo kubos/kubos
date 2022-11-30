@@ -90,7 +90,7 @@ fn monitor_good() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 
@@ -138,7 +138,7 @@ fn monitor_good() {
         "rust-proj"
     );
     assert_eq!(result["appStatus"][0]["version"].as_str().unwrap(), "1.0");
-    assert_eq!(result["appStatus"][0]["running"].as_bool().unwrap(), true);
+    assert!(result["appStatus"][0]["running"].as_bool().unwrap());
     assert_eq!(result["appStatus"][0]["pid"].as_i64().unwrap(), pid);
     assert_eq!(
         result["appStatus"][0]["config"].as_str().unwrap(),
@@ -169,7 +169,7 @@ fn monitor_good() {
         result["appStatus"][0]["name"].as_str().unwrap(),
         "rust-proj"
     );
-    assert_eq!(result["appStatus"][0]["running"].as_bool().unwrap(), false);
+    assert!(!result["appStatus"][0]["running"].as_bool().unwrap());
     assert_eq!(result["appStatus"][0]["pid"], serde_json::Value::Null);
     assert_eq!(result["appStatus"][0]["lastRc"].as_i64().unwrap(), 0);
     assert_eq!(
@@ -195,7 +195,7 @@ fn monitor_existing() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 
@@ -208,7 +208,7 @@ fn monitor_existing() {
     send_query(config.clone(), start_app);
 
     // If we try to start the app a second time, it should fail
-    let result = send_query(config.clone(), start_app);
+    let result = send_query(config, start_app);
 
     assert_eq!(
         result["startApp"]["errors"].as_str().unwrap(),

@@ -18,8 +18,7 @@ use crate::error::*;
 use serde_derive::{Deserialize, Serialize};
 use std::fs;
 use std::io::Write;
-use std::path::PathBuf;
-use toml;
+use std::path::{Path, PathBuf};
 
 /// The high level metadata of an application derived from the `manifest.toml` file during
 /// registration
@@ -62,8 +61,8 @@ pub struct AppRegistryEntry {
 
 impl AppRegistryEntry {
     // Fetch a registered apps entry information
-    pub fn from_dir(dir: &PathBuf) -> Result<AppRegistryEntry, AppError> {
-        let mut app_toml = dir.clone();
+    pub fn from_dir(dir: &Path) -> Result<AppRegistryEntry, AppError> {
+        let mut app_toml = PathBuf::from(dir);
         app_toml.push("app.toml");
         if !app_toml.exists() {
             return Err(AppError::FileError {

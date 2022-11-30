@@ -67,8 +67,7 @@ impl MockComms {
     // "Ground is reading a packet from the radio"
     pub fn pop_write(&self) -> Option<Vec<u8>> {
         let mut buffer = self.write_buff.borrow_mut();
-        let ret_data = buffer.pop();
-        ret_data
+        buffer.pop()
     }
 }
 

@@ -10,6 +10,9 @@ echo "Tag for docs: $latest_tag"
 sed -i "s/0.0.0/$latest_tag/g" docs/conf.py
 
 echo "Generating new docs"
-./tools/docs/gendocs.py --version $latest_tag
+pushd tools
+poetry install --no-interaction --no-ansi
+poetry run ./docs/gendocs.py --version $latest_tag
+popd
 
 chmod a+rw -R html/

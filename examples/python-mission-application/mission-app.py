@@ -16,7 +16,7 @@ without the environment indicator at the top of the file:
 """
 
 import argparse
-import app_api
+from kubos import app
 import sys
 import time
 import toml
@@ -92,7 +92,7 @@ def get_telemetry(logger):
         
 def main():
    
-    logger = app_api.logging_setup("mission-app")
+    logger = app.logging_setup("mission-app")
     
     parser = argparse.ArgumentParser()
 
@@ -124,9 +124,9 @@ def main():
     
     if args.config is not None:
         global SERVICES
-        SERVICES = app_api.Services(args.config[0])
+        SERVICES = app.Services(args.config[0])
     else:
-        SERVICES = app_api.Services()
+        SERVICES = app.Services()
 
     if args.mode == 'safemode':
         safe_mode(logger, args.time)

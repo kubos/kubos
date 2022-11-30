@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-#![allow(clippy::block_in_if_condition_stmt)]
+#![allow(clippy::blocks_in_if_conditions)]
 
 use channel_protocol::{ChannelMessage, ChannelProtocol};
 use failure::bail;
@@ -160,7 +160,7 @@ fn get_message(
 
     let channel_message = channel_protocol::parse_message(message)?;
 
-    let shell_message = shell_protocol::parse_message(&channel_message.clone())?;
+    let shell_message = shell_protocol::parse_message(&channel_message)?;
 
     Ok((channel_message, shell_message, source))
 }

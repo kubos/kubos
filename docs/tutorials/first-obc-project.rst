@@ -71,9 +71,9 @@ Logging should be setup like so:
 
 .. code-block:: python
 
-    import app_api
+    from kubos import app
     
-    logger = app_api.logging_setup("mission-app")
+    logger = app.logging_setup("mission-app")
     
     # Write a test message
     logger.info("Test Message")
@@ -86,12 +86,12 @@ Our resulting project code should look like this::
     #!/usr/bin/env python3
     
     import argparse
-    import app_api
+    from kubos import app
     import sys
     
     def main():
     
-        logger = app_api.logging_setup("my-mission-app")
+        logger = app.logging_setup("my-mission-app")
         
         parser = argparse.ArgumentParser()
         
@@ -101,9 +101,9 @@ Our resulting project code should look like this::
         
         if args.config is not None:
             global SERVICES
-            SERVICES = app_api.Services(args.config)
+            SERVICES = app.Services(args.config)
         else:
-            SERVICES = app_api.Services()
+            SERVICES = app.Services()
 
         args = parser.parse_args()
         

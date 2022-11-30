@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-use crc16;
 use nom::{be_u16, map_res, take, take_str, take_until_and_consume, IResult};
 use std::io::Write;
 use std::str::FromStr;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 /// Structure for files
 pub struct File {
     /// Name of file
@@ -57,7 +56,7 @@ impl File {
         let name = self.name.as_bytes();
         write!(&mut output, "GU{:03}{:06}", name.len(), self.body.len(),)
             .expect("Problem encoding lengths");
-        output.extend_from_slice(&name);
+        output.extend_from_slice(name);
         output.extend_from_slice(&self.body);
         let crc = crc16::State::<crc16::XMODEM>::calculate(&output);
         output.push((crc >> 8) as u8);

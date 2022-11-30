@@ -235,7 +235,7 @@ For each request, it:
 
 To start, we'll import the API::
 
-    import app_api
+    from kubos import app
 
 Then, we'll add a new command line option ``-c`` to allow us to pass a non-default config file for
 testing purposes::
@@ -248,9 +248,9 @@ testing purposes::
     args = parser.parse_args()
     
     if args.config is not None:
-        SERVICES = app_api.Services(args.config)
+        SERVICES = app.Services(args.config)
     else:
-        SERVICES = app_api.Services()
+        SERVICES = app.Services()
     
 Then, we'll create the query we want to send::
 
@@ -275,7 +275,7 @@ After adding proper structure, our program should look like this:
     #!/usr/bin/env python3
 
     import argparse
-    import app_api
+    from kubos import app
     
     def main():
     
@@ -286,9 +286,9 @@ After adding proper structure, our program should look like this:
         args = parser.parse_args()
         
         if args.config is not None:
-            SERVICES = app_api.Services(args.config)
+            SERVICES = app.Services(args.config)
         else:
-            SERVICES = app_api.services()
+            SERVICES = app.services()
         
         request = '{ ping }'
         
@@ -375,7 +375,7 @@ With some error handling, our final application looks like this:
     #!/usr/bin/env python3
     
     import argparse
-    import app_api
+    from kubos import app
     import sys
     
     def main():
@@ -387,9 +387,9 @@ With some error handling, our final application looks like this:
         args = parser.parse_args()
         
         if args.config is not None:
-            SERVICES = app_api.Services(args.config)
+            SERVICES = app.Services(args.config)
         else:
-            SERVICES = app_api.Services()
+            SERVICES = app.Services()
             
         request = '{ ping }'
         

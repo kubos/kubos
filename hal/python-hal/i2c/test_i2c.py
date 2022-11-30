@@ -10,7 +10,7 @@ Unit testing for the I2C library.
 
 import unittest
 import i2c
-import mock
+from unittest import mock
 
 class TestI2C(unittest.TestCase):
 

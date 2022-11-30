@@ -55,7 +55,7 @@ pub enum EpsError {
 }
 
 /// Power state enum
-#[derive(Clone, Debug, GraphQLEnum, PartialEq)]
+#[derive(Clone, Debug, GraphQLEnum, PartialEq, Eq)]
 pub enum EpsPowerState {
     /// Power Off
     Off,
@@ -71,15 +71,15 @@ fn powerstate_to_u8(powerstate: EpsPowerState) -> u8 {
 }
 
 /// Enum for EPS power channels
-#[derive(Clone, Debug, GraphQLEnum, PartialEq)]
+#[derive(Clone, Debug, GraphQLEnum, PartialEq, Eq)]
 pub enum EpsChannels {
     /// EPS channel 0 => H1-47
     Output0,
-    /// EPS channel 1 => H1-49	    
+    /// EPS channel 1 => H1-49
     Output1,
-    /// EPS channel 2 => H1-51	    
+    /// EPS channel 2 => H1-51        
     Output2,
-    /// EPS channel 3 => H1-48    
+    /// EPS channel 3 => H1-48
     Output3,
     /// EPS channel 4 => H1-50
     Output4,
@@ -105,7 +105,7 @@ fn epschn_to_u8(epschn: EpsChannels) -> u8 {
 }
 
 ///Enum for heater selection
-#[derive(Clone, Debug, GraphQLEnum, PartialEq)]
+#[derive(Clone, Debug, GraphQLEnum, PartialEq, Eq)]
 pub enum HeaterSelect {
     ///Heater on BP4
     BP4,
@@ -182,11 +182,11 @@ pub trait GsEps: Send {
     /// Reset conuters
     fn reset_counters(&self) -> EpsResult<()>;
     /// Get the telemetry data
-    fn get_housekeeping(&self) -> EpsResult<(EpsHk)>;
+    fn get_housekeeping(&self) -> EpsResult<EpsHk>;
     /// Get the system configuration
-    fn get_system_config(&self) -> EpsResult<(EpsSystemConfig)>;
+    fn get_system_config(&self) -> EpsResult<EpsSystemConfig>;
     /// Get battery configuration
-    fn get_battery_config(&self) -> EpsResult<(EpsBatteryConfig)>;
+    fn get_battery_config(&self) -> EpsResult<EpsBatteryConfig>;
     /// Get the heater status
     fn get_heater(&self) -> EpsResult<i32>;
     /// Kick the hardware watchdog
@@ -440,11 +440,11 @@ impl GsEps for Eps {
     ///
     /// # Errors
     /// If this function encounters any errors, an [`EpsError`] variant will be returned.
-    fn get_housekeeping(&self) -> EpsResult<(EpsHk)> {
+    fn get_housekeeping(&self) -> EpsResult<EpsHk> {
         let mut buff = ffi::EpsHk::default();
 
         convert_status(unsafe { ffi::k_eps_get_housekeeping(&mut buff) })?;
-        Ok(EpsHk::new(&buff)?)
+        EpsHk::new(&buff)
     }
 
     /// Query the system configuration (conf)
@@ -463,11 +463,11 @@ impl GsEps for Eps {
     ///
     /// # Errors
     /// If this function encounters any errors, an [`EpsError`] variant will be returned.
-    fn get_system_config(&self) -> EpsResult<(EpsSystemConfig)> {
+    fn get_system_config(&self) -> EpsResult<EpsSystemConfig> {
         let mut config = ffi::EpsSystemConfig::default();
 
         convert_status(unsafe { ffi::k_eps_get_system_config(&mut config) })?;
-        Ok(EpsSystemConfig::new(&config)?)
+        EpsSystemConfig::new(&config)
     }
 
     /// Get the battery configuration (conf2)
@@ -483,11 +483,11 @@ impl GsEps for Eps {
     ///
     /// # Errors
     /// If this function encounters any errors, an [`EpsError`] variant will be returned.
-    fn get_battery_config(&self) -> EpsResult<(EpsBatteryConfig)> {
+    fn get_battery_config(&self) -> EpsResult<EpsBatteryConfig> {
         let mut config = ffi::EpsBatteryConfig::default();
 
         convert_status(unsafe { ffi::k_eps_get_battery_config(&mut config) })?;
-        Ok(EpsBatteryConfig::new(&config)?)
+        EpsBatteryConfig::new(&config)
     }
 
     /// Get heater status

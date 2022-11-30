@@ -1,7 +1,7 @@
 Python Applications API
 =======================
 
-.. automodule:: app_api
+.. automodule:: kubos_app
     :members:
     :undoc-members:
     :show-inheritance:

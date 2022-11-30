@@ -14,7 +14,8 @@
 // limitations under the License.
 //
 
-#![allow(clippy::block_in_if_condition_stmt)]
+#![allow(clippy::blocks_in_if_conditions)]
+#![allow(clippy::map_entry)]
 
 use file_protocol::{FileProtocol, FileProtocolConfig, ProtocolError, State};
 use kubos_system::Config as ServiceConfig;
@@ -118,6 +119,11 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
     // Create thread sharable wrapper
     let threads = Arc::new(Mutex::new(raw_threads));
 
+    let err_logger = |err| {
+        error!("Failed to get threads mutex: {:?}", err);
+        err
+    };
+
     loop {
         // Listen on UDP port
         let (_source, first_message) = match c_protocol.recv_message_peer() {
@@ -142,10 +148,7 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
 
         if !threads
             .lock()
-            .map_err(|err| {
-                error!("Failed to get threads mutex: {:?}", err);
-                err
-            })
+            .map_err(err_logger)
             .unwrap()
             .contains_key(&channel_id)
         {
@@ -154,10 +157,7 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
 
             threads
                 .lock()
-                .map_err(|err| {
-                    error!("Failed to get threads mutex: {:?}", err);
-                    err
-                })
+                .map_err(err_logger)
                 .unwrap()
                 .insert(channel_id, sender.clone());
 
@@ -206,15 +206,7 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
             });
         }
 
-        if let Some(sender) = threads
-            .lock()
-            .map_err(|err| {
-                error!("Failed to get threads mutex: {:?}", err);
-                err
-            })
-            .unwrap()
-            .get(&channel_id)
-        {
+        if let Some(sender) = threads.lock().map_err(err_logger).unwrap().get(&channel_id) {
             if let Err(e) = sender.send(first_message) {
                 warn!("Error when sending to channel {}: {:?}", channel_id, e);
             }
@@ -222,20 +214,14 @@ pub fn recv_loop(config: &ServiceConfig) -> Result<(), failure::Error> {
 
         if !threads
             .lock()
-            .map_err(|err| {
-                error!("Failed to get threads mutex: {:?}", err);
-                err
-            })
+            .map_err(err_logger)
             .unwrap()
             .contains_key(&channel_id)
         {
             warn!("No sender found for {}", channel_id);
             threads
                 .lock()
-                .map_err(|err| {
-                    error!("Failed to get threads mutex: {:?}", err);
-                    err
-                })
+                .map_err(err_logger)
                 .unwrap()
                 .remove(&channel_id);
         }

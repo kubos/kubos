@@ -73,14 +73,12 @@ pub fn to_cbor(
         options.insert(ObjectKey::String("args".to_owned()), Value::Array(args_vec));
     }
 
-    Ok(
-        ser::to_vec_packed(&(channel_id, "spawn", command, options)).map_err(|err| {
-            ProtocolError::MessageCreationError {
-                message: "spawn".to_owned(),
-                err,
-            }
-        })?,
-    )
+    ser::to_vec_packed(&(channel_id, "spawn", command, options)).map_err(|err| {
+        ProtocolError::MessageCreationError {
+            message: "spawn".to_owned(),
+            err,
+        }
+    })
 }
 
 #[cfg(test)]
@@ -101,7 +99,7 @@ mod tests {
         assert_eq!(
             msg.unwrap(),
             Message::Spawn {
-                channel_id: channel_id,
+                channel_id,
                 command: command.to_owned(),
                 args: None
             }
@@ -121,7 +119,7 @@ mod tests {
         assert_eq!(
             msg.unwrap(),
             Message::Spawn {
-                channel_id: channel_id,
+                channel_id,
                 command: command.to_owned(),
                 args: Some(args)
             }
@@ -141,7 +139,7 @@ mod tests {
         assert_eq!(
             msg.unwrap(),
             Message::Spawn {
-                channel_id: channel_id,
+                channel_id,
                 command: command.to_owned(),
                 args: Some(args)
             }

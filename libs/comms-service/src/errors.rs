@@ -19,7 +19,7 @@
 use failure::{Error, Fail};
 
 /// This enum defines all errors that can occur within the `comms-service`.
-#[derive(Fail, Debug, PartialEq)]
+#[derive(Fail, Debug, PartialEq, Eq)]
 pub enum CommsServiceError {
     /// A component of the service's configuration was incorrect
     #[fail(display = "Config error: {}", _0)]

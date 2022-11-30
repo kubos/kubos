@@ -1,178 +1,217 @@
 version: 2
 jobs:
-    # Rust build + tests
-    # Run for all PR commits
-    rust_check_x86:
-      docker:
-        - image: kubos/kubos-dev:latest
-      steps:
-        - checkout
-        - run: cargo check --workspace --all-targets
+  # shared setup to build a stable source of truth docker image 
+  build_docker_img:
+    environment:
+      IMAGE_NAME: kubos/kubos-dev
+    machine:
+      image: ubuntu-2204:2022.04.2
+    steps:
+      - docker/check:
+          docker-username: DOCKERHUB_USERNAME  # DOCKER_LOGIN is the default value, if it exists, it automatically would be used.
+          docker-password: DOCKERHUB_PASS  # DOCKER_PASSWORD is the default value
+      - checkout
+      - run: docker build -t $IMAGE_NAME:$CIRCLE_SHA1 . 
+      - docker/push:
+          images: $IMAGE_NAME:$CIRCLE_SHA1
+      - run: |
+          docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASS
+          docker push $IMAGE_NAME:$CIRCLE_SHA1
 
-    # Run for all PR commits
-    rust_check_mbm2:
-      docker:
-        - image: kubos/kubos-dev:latest
-      steps:
-        - checkout
-        - run:
-            name: Cargo check for BBB
-            command: cargo check --workspace --all-targets --target arm-unknown-linux-gnueabihf
-            environment:
-              PKG_CONFIG_ALLOW_CROSS: 1
-              CC: /usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc
-              CXX: /usr/bin/bbb_toolchain/usr/bin/arm-linux-g++
+  # Rust build + tests
+  # Run for all PR commits
+  rust_check_x86:
+    docker:
+      - image: kubos/kubos-dev:$CIRCLE_SHA1
+    steps:
+      - checkout
+      - run: cargo check --workspace --all-targets
 
-    # Run for all PR commits
-    rust_check_iobc:
-      docker:
-        - image: kubos/kubos-dev:latest
-      steps:
-        - checkout
-        - run:
-            name: Cargo check for iOBC
-            command: cargo check --workspace --all-targets --target armv5te-unknown-linux-gnueabi
-            environment:
-              PKG_CONFIG_ALLOW_CROSS: 1
-              CC: /usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc
-              CXX: /usr/bin/iobc_toolchain/usr/bin/arm-linux-g++
+  # Run for all PR commits
+  rust_check_mbm2:
+    docker:
+      - image: kubos/kubos-dev:$CIRCLE_SHA1
+    steps:
+      - checkout
+      - run:
+          name: Cargo check for BBB
+          command: cargo check --workspace --all-targets --target arm-unknown-linux-gnueabihf
+          environment:
+            PKG_CONFIG_ALLOW_CROSS: 1
+            CC: /usr/bin/bbb_toolchain/usr/bin/arm-linux-gcc
+            CXX: /usr/bin/bbb_toolchain/usr/bin/arm-linux-g++
 
-    # Rust testing
-    # Run for all PR commits
-    rust_test:
-      docker:
-        - image: kubos/kubos-dev:latest
-      resource_class: xlarge
-      steps:
-        - checkout
-        - run: cd apis/app-api/python && pip3 install .
-        - run: cargo test --workspace --release
-        - run: cargo test --package kubos-app-service --test test_python_app --release -- --ignored
+  # Run for all PR commits
+  rust_check_iobc:
+    docker:
+      - image: kubos/kubos-dev:$CIRCLE_SHA1
+    steps:
+      - checkout
+      - run:
+          name: Cargo check for iOBC
+          command: cargo check --workspace --all-targets --target armv5te-unknown-linux-gnueabi
+          environment:
+            PKG_CONFIG_ALLOW_CROSS: 1
+            CC: /usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc
+            CXX: /usr/bin/iobc_toolchain/usr/bin/arm-linux-g++
 
-    # Rust testing - large upload test
-    # Run for all PR commits
-    rust_test_large_upload:
-      docker:
-        - image: kubos/kubos-dev:latest
-      steps:
-        - checkout
-        - run: cargo run --bin large_upload --release
+  # Rust 
+  # Run for all PR commits
+  rust_test:
+    docker:
+      - image: kubos/kubos-dev:$CIRCLE_SHA1
+    resource_class: xlarge
+    steps:
+      - checkout
+      - run: ./tools/ci/rust_test.sh
+      - store_test_results:
+          path: test-results
 
-    # Rust testing - large download
-    # Run for all PR commits
-    rust_test_large_download:
-      docker:
-        - image: kubos/kubos-dev:latest
-      steps:
-        - checkout
-        - run: cargo run --bin large_download --release
+  # Rust  - large upload test
+  # Run for all PR commits
+  rust_test_large_upload:
+    docker:
+      - image: kubos/kubos-dev:$CIRCLE_SHA1
+    steps:
+      - checkout
+      - run: cargo run --bin large_upload --release
 
-    # Rust testing - NOS compile check & integration tests
-    # Run for all PR commits
-    rust_test_nosengine:
-      docker:
-        - image: kubos/kubos-dev:latest
-      steps:
-        - checkout
-        - run: cd apis/nosengine-rust && cargo check
-        - run: cd test/integration/nosengine-rust && cargo run
+  # Rust  - large download
+  # Run for all PR commits
+  rust_test_large_download:
+    docker:
+      - image: kubos/kubos-dev:$CIRCLE_SHA1
+    steps:
+      - checkout
+      - run: cargo run --bin large_download --release
 
-    # Rust testing - Check formatting
-    # Run for all PR commits
-    rust_fmt:
-      docker:
-        - image: kubos/kubos-dev:latest
-      steps:
-        - checkout
-        - run: cargo fmt --all -- --check
+  # Rust  - NOS compile check & integration tests
+  # Run for all PR commits
+  rust_test_nosengine:
+    docker:
+      - image: kubos/kubos-dev:$CIRCLE_SHA1
+    steps:
+      - checkout
+      - run: cd apis/nosengine-rust && cargo check
+      - run: cd test/integration/nosengine-rust && cargo run
+
+  # Rust  - Check formatting
+  # Run for all PR commits
+  rust_fmt:
+    docker:
+      - image: kubos/kubos-dev:$CIRCLE_SHA1
+    steps:
+      - checkout
+      - run: cargo fmt --all -- --check
 
 
-    # Rust testing - Clippy linter
-    # Run for all PR commits
-    rust_clippy:
-      docker:
-        - image: kubos/kubos-dev:latest
-      steps:
-        - checkout
-        - run: cargo clippy --workspace --all-targets
+  # Rust  - Clippy linter
+  # Run for all PR commits
+  rust_clippy:
+    docker:
+      - image: kubos/kubos-dev:$CIRCLE_SHA1
+    steps:
+      - checkout
+      - run: cargo clippy --workspace --all-targets
 
 
-    # CLI, C and Python testing
-    # Run for all PR commits
-    non_rust_tests:
-      docker:
-        - image: kubos/kubos-dev:latest
-      steps:
-        - checkout
-        - run: python3 tools/ci_c.py
-        - run: python3 hal/python-hal/i2c/test_i2c.py
-        - run: cd hal/python-hal/i2c; python3 setup.py install
-        - run: cd apis/pumpkin-mcu-api; python3 test_mcu_api.py
-        - run: cd apis/app-api/python; python3 test_app_api.py
+  # CLI, C and Python 
+  # Run for all PR commits
+  non_rust_tests:
+    docker:
+      - image: kubos/kubos-dev:$CIRCLE_SHA1
+    steps:
+      - checkout
+      - run: python3 tools/ci_c.py
+      - run: python3 hal/python-hal/i2c/test_i2c.py
+      - run: cd hal/python-hal/i2c && poetry install --no-interaction --no-ansi
+      - run: cd apis/pumpkin-mcu-api && python3 test_mcu_api.py
+      - run: cd apis/app-api/python && python3 test_app_api.py
 
-    # Create and push new git version tag (n.n.n+{new build number})
-    # Run when code is merged into master
-    deploy:
-      docker:
-        - image: kubos/kubos-dev:latest
-      steps:
-        - checkout
-        - run: ./deploy_tag.sh
+  # Create and push new git version tag (n.n.n+{new build number})
+  # Run when code is merged into master
+  deploy:
+    docker:
+      - image: kubos/kubos-dev:$CIRCLE_SHA1
+    steps:
+      - checkout
+      - run: ./deploy_tag.sh
 
-    # Generate and upload new docs
-    # Run when code is merged into master or when an official release tag is generated
-    docs:
-      docker:
-        - image: kubos/kubos-dev:latest
-      steps:
-        - checkout
-        - run: cd apis/app-api/python && pip3 install .
-        - run: ssh-keyscan docs.kubos.co >> ~/.ssh/known_hosts
-        - run: pip3 install semantic-version
-        - run: ./tools/docs/prep_docs.sh
-        - run: ./tools/docs/deploy_docs.sh
+  # Generate and upload new docs
+  # Run when code is merged into master or when an official release tag is generated
+  docs:
+    docker:
+      - image: kubos/kubos-dev:$CIRCLE_SHA1
+    steps:
+      - checkout
+      - run: ssh-keyscan docs.kubos.co >> ~/.ssh/known_hosts
+      - run: ./tools/docs/prep_docs.sh
+      - run: ./tools/docs/deploy_docs.sh
 
 workflows:
   version: 2
+
   build:
     jobs:
+      - build_docker_img
+
       - rust_check_x86:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - rust_check_mbm2:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - rust_check_iobc:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - rust_test:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - rust_test_large_download:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - rust_test_large_upload:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - rust_test_nosengine:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - rust_fmt:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - rust_clippy:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master
       - non_rust_tests:
+          requires:
+            - build_docker_img
           filters:
             branches:
               ignore: master

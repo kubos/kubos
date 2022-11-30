@@ -64,7 +64,7 @@
 //!
 //! ```json
 //! {
-//! 	ack: Mutation!
+//!     ack: Mutation!
 //! }
 //! ```
 //!
@@ -74,7 +74,7 @@
 //!
 //! ```json
 //! {
-//! 	errors: [String]
+//!     errors: [String]
 //! }
 //! ```
 //!
@@ -85,10 +85,10 @@
 //!
 //! ```json
 //! {
-//!		power {
-//! 		motherboard: PowerState,
-//!      	daughterboard: PowerState,
-//!    	}
+//!        power {
+//!         motherboard: PowerState,
+//!          daughterboard: PowerState,
+//!        }
 //! }
 //! ```
 //!
@@ -100,18 +100,18 @@
 //!
 //! ```json
 //! {
-//! 	telemetry {
-//! 		version {
-//! 			motherboard {
-//! 				revision: Int!,
-//! 				firmwareNumber: Int!
-//! 			},
-//! 			daughterboard {
-//! 				revision: Int,
-//! 				firmwareNumber: Int
-//! 			}
-//! 		}
-//! 	}
+//!     telemetry {
+//!         version {
+//!             motherboard {
+//!                 revision: Int!,
+//!                 firmwareNumber: Int!
+//!             },
+//!             daughterboard {
+//!                 revision: Int,
+//!                 firmwareNumber: Int
+//!             }
+//!         }
+//!     }
 //! }
 //! ```
 //!
@@ -122,22 +122,22 @@
 //!
 //! ```json
 //! {
-//! 	telemetry {
-//! 		reset {
-//! 			brownOut
-//! 				motherboard: Int!
-//! 				daughterboard: Int
-//! 			automaticSoftware
-//! 				motherboard: Int!
-//! 				daughterboard: Int
-//! 			manual
-//! 				motherboard: Int!
-//! 				daughterboard: Int
-//! 			watchdog
-//! 				motherboard: Int!
-//! 				daughterboard: Int
-//! 		}
-//! 	}
+//!     telemetry {
+//!         reset {
+//!             brownOut
+//!                 motherboard: Int!
+//!                 daughterboard: Int
+//!             automaticSoftware
+//!                 motherboard: Int!
+//!                 daughterboard: Int
+//!             manual
+//!                 motherboard: Int!
+//!                 daughterboard: Int
+//!             watchdog
+//!                 motherboard: Int!
+//!                 daughterboard: Int
+//!         }
+//!     }
 //! }
 //! ```
 //!
@@ -148,64 +148,64 @@
 //!
 //!  ```json
 //! {
-//! 	telemetry {
-//! 		motherboard {
-//! 			VoltageFeedingBcr1: Float!
-//! 			CurrentBcr1Sa1a: Float!
-//! 			CurrentBcr1Sa1b: Float!
-//! 			ArrayTempSa1a: Float!
-//! 			ArrayTempSa1b: Float!
-//! 			SunDetectorSa1a: Float!
-//! 			SunDetectorSa1b: Float!
-//! 			VoltageFeedingBcr2: Float!
-//! 			CurrentBcr2Sa2a: Float!
-//! 			CurrentBcr2Sa2b: Float!
-//! 			ArrayTempSa2a: Float!
-//! 			ArrayTempSa2b: Float!
-//! 			SunDetectorSa2a: Float!
-//! 			SunDetectorSa2b: Float!
-//! 			VoltageFeedingBcr3: Float!
-//! 			CurrentBcr3Sa3a: Float!
-//! 			CurrentBcr3Sa3b: Float!
-//! 			ArrayTempSa3a: Float!
-//! 			ArrayTempSa3b: Float!
-//! 			SunDetectorSa3a: Float!
-//! 			SunDetectorSa3b: Float!
-//! 			BcrOutputCurrent: Float!
-//! 			BcrOutputVoltage: Float!
-//! 			CurrentDraw3V3: Float!
-//! 			CurrentDraw5V: Float!
-//! 			OutputCurrent12V: Float!
-//! 			OutputVoltage12V: Float!
-//! 			OutputCurrentBattery: Float!
-//! 			OutputVoltageBattery: Float!
-//! 			OutputCurrent5v: Float!
-//! 			OutputVoltage5v: Float!
-//! 			OutputCurrent33v: Float!
-//! 			OutputVoltage33v: Float!
-//! 			OutputVoltageSwitch1: Float!
-//! 			OutputCurrentSwitch1: Float!
-//! 			OutputVoltageSwitch2: Float!
-//! 			OutputCurrentSwitch2: Float!
-//! 			OutputVoltageSwitch3: Float!
-//! 			OutputCurrentSwitch3: Float!
-//! 			OutputVoltageSwitch4: Float!
-//! 			OutputCurrentSwitch4: Float!
-//! 			OutputVoltageSwitch5: Float!
-//! 			OutputCurrentSwitch5: Float!
-//! 			OutputVoltageSwitch6: Float!
-//! 			OutputCurrentSwitch6: Float!
-//! 			OutputVoltageSwitch7: Float!
-//! 			OutputCurrentSwitch7: Float!
-//! 			OutputVoltageSwitch8: Float!
-//! 			OutputCurrentSwitch8: Float!
-//! 			OutputVoltageSwitch9: Float!
-//! 			OutputCurrentSwitch9: Float!
-//! 			OutputVoltageSwitch10: Float!
-//! 			OutputCurrentSwitch10: Float!
-//! 			BoardTemperature: Float!
-//! 		}
-//! 	}
+//!     telemetry {
+//!         motherboard {
+//!             VoltageFeedingBcr1: Float!
+//!             CurrentBcr1Sa1a: Float!
+//!             CurrentBcr1Sa1b: Float!
+//!             ArrayTempSa1a: Float!
+//!             ArrayTempSa1b: Float!
+//!             SunDetectorSa1a: Float!
+//!             SunDetectorSa1b: Float!
+//!             VoltageFeedingBcr2: Float!
+//!             CurrentBcr2Sa2a: Float!
+//!             CurrentBcr2Sa2b: Float!
+//!             ArrayTempSa2a: Float!
+//!             ArrayTempSa2b: Float!
+//!             SunDetectorSa2a: Float!
+//!             SunDetectorSa2b: Float!
+//!             VoltageFeedingBcr3: Float!
+//!             CurrentBcr3Sa3a: Float!
+//!             CurrentBcr3Sa3b: Float!
+//!             ArrayTempSa3a: Float!
+//!             ArrayTempSa3b: Float!
+//!             SunDetectorSa3a: Float!
+//!             SunDetectorSa3b: Float!
+//!             BcrOutputCurrent: Float!
+//!             BcrOutputVoltage: Float!
+//!             CurrentDraw3V3: Float!
+//!             CurrentDraw5V: Float!
+//!             OutputCurrent12V: Float!
+//!             OutputVoltage12V: Float!
+//!             OutputCurrentBattery: Float!
+//!             OutputVoltageBattery: Float!
+//!             OutputCurrent5v: Float!
+//!             OutputVoltage5v: Float!
+//!             OutputCurrent33v: Float!
+//!             OutputVoltage33v: Float!
+//!             OutputVoltageSwitch1: Float!
+//!             OutputCurrentSwitch1: Float!
+//!             OutputVoltageSwitch2: Float!
+//!             OutputCurrentSwitch2: Float!
+//!             OutputVoltageSwitch3: Float!
+//!             OutputCurrentSwitch3: Float!
+//!             OutputVoltageSwitch4: Float!
+//!             OutputCurrentSwitch4: Float!
+//!             OutputVoltageSwitch5: Float!
+//!             OutputCurrentSwitch5: Float!
+//!             OutputVoltageSwitch6: Float!
+//!             OutputCurrentSwitch6: Float!
+//!             OutputVoltageSwitch7: Float!
+//!             OutputCurrentSwitch7: Float!
+//!             OutputVoltageSwitch8: Float!
+//!             OutputCurrentSwitch8: Float!
+//!             OutputVoltageSwitch9: Float!
+//!             OutputCurrentSwitch9: Float!
+//!             OutputVoltageSwitch10: Float!
+//!             OutputCurrentSwitch10: Float!
+//!             BoardTemperature: Float!
+//!         }
+//!     }
 //! }
 //! ```
 //!
@@ -216,53 +216,53 @@
 //!
 //! ```json
 //! {
-//! 	telemetry {
-//! 		daughterboard {
-//! 			VoltageFeedingBcr4: Float
-//! 			CurrentBcr4Sa4a: Float
-//! 			CurrentBcr4Sa4b: Float
-//! 			ArrayTempSa4a: Float
-//! 			ArrayTempSa4b: Float
-//! 			SunDetectorSa4a: Float
-//! 			SunDetectorSa4b: Float
-//! 			VoltageFeedingBcr5: Float
-//! 			CurrentBcr5Sa5a: Float
-//! 			CurrentBcr5Sa5b: Float
-//! 			ArrayTempSa5a: Float
-//! 			ArrayTempSa5b: Float
-//! 			SunDetectorSa5a: Float
-//! 			SunDetectorSa5b: Float
-//! 			VoltageFeedingBcr6: Float
-//! 			CurrentBcr6Sa6a: Float
-//! 			CurrentBcr6Sa6b: Float
-//! 			ArrayTempSa6a: Float
-//! 			ArrayTempSa6b: Float
-//! 			SunDetectorSa6a: Float
-//! 			SunDetectorSa6b: Float
-//! 			VoltageFeedingBcr7: Float
-//! 			CurrentBcr7Sa7a: Float
-//! 			CurrentBcr7Sa7b: Float
-//! 			ArrayTempSa7a: Float
-//! 			ArrayTempSa7b: Float
-//! 			SunDetectorSa7a: Float
-//! 			SunDetectorSa7b: Float
-//! 			VoltageFeedingBcr8: Float
-//! 			CurrentBcr8Sa8a: Float
-//! 			CurrentBcr8Sa8b: Float
-//! 			ArrayTempSa8a: Float
-//! 			ArrayTempSa8b: Float
-//! 			SunDetectorSa8a: Float
-//! 			SunDetectorSa8b: Float
-//! 			VoltageFeedingBcr9: Float
-//! 			CurrentBcr9Sa9a: Float
-//! 			CurrentBcr9Sa9b: Float
-//! 			ArrayTempSa9a: Float
-//! 			ArrayTempSa9b: Float
-//! 			SunDetectorSa9a: Float
-//! 			SunDetectorSa9b: Float
-//! 			BoardTemperature: Float
-//! 		}
-//! 	}
+//!     telemetry {
+//!         daughterboard {
+//!             VoltageFeedingBcr4: Float
+//!             CurrentBcr4Sa4a: Float
+//!             CurrentBcr4Sa4b: Float
+//!             ArrayTempSa4a: Float
+//!             ArrayTempSa4b: Float
+//!             SunDetectorSa4a: Float
+//!             SunDetectorSa4b: Float
+//!             VoltageFeedingBcr5: Float
+//!             CurrentBcr5Sa5a: Float
+//!             CurrentBcr5Sa5b: Float
+//!             ArrayTempSa5a: Float
+//!             ArrayTempSa5b: Float
+//!             SunDetectorSa5a: Float
+//!             SunDetectorSa5b: Float
+//!             VoltageFeedingBcr6: Float
+//!             CurrentBcr6Sa6a: Float
+//!             CurrentBcr6Sa6b: Float
+//!             ArrayTempSa6a: Float
+//!             ArrayTempSa6b: Float
+//!             SunDetectorSa6a: Float
+//!             SunDetectorSa6b: Float
+//!             VoltageFeedingBcr7: Float
+//!             CurrentBcr7Sa7a: Float
+//!             CurrentBcr7Sa7b: Float
+//!             ArrayTempSa7a: Float
+//!             ArrayTempSa7b: Float
+//!             SunDetectorSa7a: Float
+//!             SunDetectorSa7b: Float
+//!             VoltageFeedingBcr8: Float
+//!             CurrentBcr8Sa8a: Float
+//!             CurrentBcr8Sa8b: Float
+//!             ArrayTempSa8a: Float
+//!             ArrayTempSa8b: Float
+//!             SunDetectorSa8a: Float
+//!             SunDetectorSa8b: Float
+//!             VoltageFeedingBcr9: Float
+//!             CurrentBcr9Sa9a: Float
+//!             CurrentBcr9Sa9b: Float
+//!             ArrayTempSa9a: Float
+//!             ArrayTempSa9b: Float
+//!             SunDetectorSa9a: Float
+//!             SunDetectorSa9b: Float
+//!             BoardTemperature: Float
+//!         }
+//!     }
 //! }
 //! ```
 //!
@@ -272,9 +272,9 @@
 //!
 //! ```json
 //! {
-//! 	telemetry {
-//! 		watchdogPeriod: Int!
-//! 	}
+//!     telemetry {
+//!         watchdogPeriod: Int!
+//!     }
 //! }
 //! ```
 //!
@@ -285,12 +285,12 @@
 //!
 //! ```json
 //! {
-//! 	telemetry {
-//! 		lastEpsError {
-//! 			motherboard: Error!
-//! 			daughterboard: Error
-//! 		}
-//! 	}
+//!     telemetry {
+//!         lastEpsError {
+//!             motherboard: Error!
+//!             daughterboard: Error
+//!         }
+//!     }
 //! }
 //! ```
 //!
@@ -301,12 +301,12 @@
 //!
 //! ```json
 //! {
-//! 	telemetry {
-//! 		boardStatus {
-//! 			motherboard: Status!
-//! 			daugherboard: Status
-//! 		}
-//! 	}
+//!     telemetry {
+//!         boardStatus {
+//!             motherboard: Status!
+//!             daugherboard: Status
+//!         }
+//!     }
 //! }
 //! ```
 //!
@@ -318,10 +318,10 @@
 //!
 //! ```json
 //! mutation {
-//! 	noop {
-//! 		success: Boolean!
-//! 		errors: String!
-//! 	}
+//!     noop {
+//!         success: Boolean!
+//!         errors: String!
+//!     }
 //! }
 //! ```
 //!
@@ -331,10 +331,10 @@
 //!
 //! ```json
 //! mutation {
-//! 	manualReset {
-//! 		success: Boolean!
-//! 		errors: String!
-//! 	}
+//!     manualReset {
+//!         success: Boolean!
+//!         errors: String!
+//!     }
 //! }
 //! ```
 //!
@@ -344,10 +344,10 @@
 //!
 //! ```json
 //! mutation {
-//! 	resetWatchdog {
-//! 		success: Boolean!
-//! 		errors: String!
-//! 	}
+//!     resetWatchdog {
+//!         success: Boolean!
+//!         errors: String!
+//!     }
 //! }
 //! ```
 //!
@@ -359,10 +359,10 @@
 //!
 //! ```json
 //! mutation {
-//! 	setWatchdogPeriod(period: Int!) {
-//! 		success: Boolean!
-//! 		errors: String!
-//! 	}
+//!     setWatchdogPeriod(period: Int!) {
+//!         success: Boolean!
+//!         errors: String!
+//!     }
 //! }
 //! ```
 //!
@@ -375,10 +375,10 @@
 //!
 //! ```json
 //! mutation {
-//! 	issueRawCommand(command: Int!, data: [Int!]) {
-//! 		success: Boolean!
-//! 		errors: String!
-//! 	}
+//!     issueRawCommand(command: Int!, data: [Int!]) {
+//!         success: Boolean!
+//!         errors: String!
+//!     }
 //! }
 //! ```
 //!
@@ -390,10 +390,10 @@
 //!
 //! ```json
 //!  mutation {
-//!  	testHardware(test: TestType) {
-//!  		success: Boolean!
-//!  		errors: String!
-//!  	}
+//!      testHardware(test: TestType) {
+//!          success: Boolean!
+//!          errors: String!
+//!      }
 //!  }
 //! ```
 

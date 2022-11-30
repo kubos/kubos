@@ -20,7 +20,7 @@ use nom::*;
 const COMPONENT_SIZE: usize = 108;
 
 /// Log message containing version information
-#[derive(Clone, Default, Debug, PartialEq)]
+#[derive(Clone, Default, Debug, PartialEq, Eq)]
 pub struct VersionLog {
     /// Current status of receiver
     pub recv_status: ReceiverStatusFlags,
@@ -72,7 +72,7 @@ impl VersionLog {
 }
 
 /// Version information about a specific system component
-#[derive(Clone, Default, Debug, PartialEq)]
+#[derive(Clone, Default, Debug, PartialEq, Eq)]
 pub struct Component {
     /// The component type which the version info is about
     pub comp_type: u32,

@@ -24,7 +24,7 @@ fn get_telemetry_nominal() {
     mock.write.set_input(LOG_VERSION_COMMAND.to_vec());
 
     let mut output = POSITION_LOG_GOOD.to_vec();
-    output.extend_from_slice(&LOG_RESPONSE_GOOD.to_vec());
+    output.extend_from_slice(LOG_RESPONSE_GOOD.as_ref());
     output.extend_from_slice(&VERSION_LOG);
     mock.read.set_output(output);
 
@@ -151,7 +151,7 @@ fn get_telemetry_both() {
     mock.write.set_input(LOG_VERSION_COMMAND.to_vec());
 
     let mut output = POSITION_LOG_GOOD.to_vec();
-    output.extend_from_slice(&LOG_RESPONSE_GOOD.to_vec());
+    output.extend_from_slice(LOG_RESPONSE_GOOD.as_ref());
     output.extend_from_slice(&VERSION_LOG);
     mock.read.set_output(output);
 

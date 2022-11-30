@@ -44,7 +44,7 @@ pub struct AntsTelemetry {
     pub uptime: u32,
 }
 
-/// Bring in C functions from isis-ants-api
+// Bring in C functions from isis-ants-api
 extern "C" {
     pub fn k_ants_init(
         bus: *const u8,

@@ -8,17 +8,18 @@
 Unit testing for the Kubos App API.
 """
 
-import app_api
+import kubos_app
 import unittest
 import mock
 import responses
+import toml
 
 from requests.exceptions import ConnectionError, HTTPError
 
 class TestAppAPI(unittest.TestCase):
 
     def setUp(self):
-        self.api = app_api.Services("test_config.toml")
+        self.api = kubos_app.Services("test_config.toml")
 
     def test_query_servicetype(self):
         bad_service = 1

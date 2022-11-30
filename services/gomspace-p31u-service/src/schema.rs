@@ -20,21 +20,20 @@ use crate::model::*;
 use crate::objects::*;
 use gomspace_p31u_api::*;
 use juniper::FieldResult;
-use kubos_service;
 
 type Context = kubos_service::Context<Subsystem>;
 
 pub struct QueryRoot;
 // Base GraphQL query model
 graphql_object!(QueryRoot : Context as "Query" |&self| {
-    
+
 
     //----- Test Queries -----//
 
     /// Verify service is running without communicating with the underlying subsystem
 
     field ping() -> FieldResult<String>{
-        Ok(String::from("pong"))    
+        Ok(String::from("pong"))
     }
 
     //----- Generic Queries -----//
@@ -77,7 +76,7 @@ graphql_object!(QueryRoot : Context as "Query" |&self| {
         Ok(executor.context().subsystem().eps_get_housekeeping()?)
     }
 
-    /// Query EPS system configuration      
+    /// Query EPS system configuration
     field epssystemconfig(&executor) -> FieldResult<SchEpsSystemConfig>
     {
         Ok(executor.context().subsystem().eps_get_system_config()?)
@@ -104,7 +103,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
 
     // Each field represents functionality available
     // through the GraphQL mutations
-    
+
     /// Reset the EPS
     field reset(&executor) -> FieldResult<GenericResponse>{
         let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
@@ -132,7 +131,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
                 vboost_settings:Vec<i32>) -> FieldResult<GenericResponse>{
         let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
         *last_cmd = AckCommand::SetSystemConfig;
-        Ok(executor.context().subsystem().eps_set_system_config(   
+        Ok(executor.context().subsystem().eps_set_system_config(
                 ppt_mode,
                 battheater_mode,
                 battheater_low,
@@ -181,20 +180,20 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
     field reset_battery_config(&executor) -> FieldResult<GenericResponse>
     {
         let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
-        *last_cmd = AckCommand::BatteryConfigReset;        
+        *last_cmd = AckCommand::BatteryConfigReset;
         Ok(executor.context().subsystem().eps_reset_battery_config()?)
     }
 
-    /// Reset all counters including watchdogs and reboot counters to 0 
+    /// Reset all counters including watchdogs and reboot counters to 0
     field reset_counter(&executor) -> FieldResult<GenericResponse>
     {
         let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
-        *last_cmd = AckCommand::ResetCounters;    
+        *last_cmd = AckCommand::ResetCounters;
         Ok(executor.context().subsystem().eps_reset_counters()?)
     }
 
     /// Set a single EPS output
-    field eps_set_single_output(&executor, channel:EpsChannels, power_state:EpsPowerState, delay:i32) -> FieldResult<(GenericResponse)>
+    field eps_set_single_output(&executor, channel:EpsChannels, power_state:EpsPowerState, delay:i32) -> FieldResult<GenericResponse>
     {
         let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
         *last_cmd = AckCommand::SetEpsChannels;
@@ -202,7 +201,7 @@ graphql_object!(MutationRoot : Context as "Mutation" |&self| {
     }
 
     /// Set EPS MPPT value for mode 2 (Non-Auto mode)
-    field eps_set_input_value(&executor, in1_voltage: i32,in2_voltage:i32,in3_voltage:i32) -> FieldResult<(GenericResponse)>
+    field eps_set_input_value(&executor, in1_voltage: i32,in2_voltage:i32,in3_voltage:i32) -> FieldResult<GenericResponse>
     {
         let mut last_cmd = executor.context().subsystem().last_cmd.write()?;
         *last_cmd = AckCommand::EpsSetMPPTLevel;

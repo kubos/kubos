@@ -29,7 +29,7 @@ pub struct supervisor_version(pub [u8; LENGTH_TELEMETRY_GET_VERSION]);
 #[repr(C)]
 pub struct supervisor_housekeeping(pub [u8; LENGTH_TELEMETRY_HOUSEKEEPING]);
 
-/// Bring in C functions from isis-iobc-supervisor
+// Bring in C functions from isis-iobc-supervisor
 extern "C" {
     pub fn supervisor_emergency_reset() -> bool;
     pub fn supervisor_reset() -> bool;

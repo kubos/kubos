@@ -17,7 +17,7 @@
 //!
 //! KISS encoding and decoding functionality to provide framing
 //! over the serial link.
-//! An overview of KISS can be found here: https://en.wikipedia.org/wiki/KISS_(TNC)
+//! An overview of KISS can be found here: <https://en.wikipedia.org/wiki/KISS_(TNC)>
 //!
 
 use failure::Error;

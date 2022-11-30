@@ -88,7 +88,7 @@ fn app_no_args() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 
@@ -106,7 +106,7 @@ fn app_no_args() {
     // as expected
     assert_eq!(
         result["startApp"]["errors"].as_str().unwrap(),
-        "Failed to start app: App returned exit code: 1"
+        "Failed to start app: App returned exit status: 1"
     );
 }
 
@@ -126,7 +126,7 @@ fn app_single_pos_arg() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 
@@ -159,7 +159,7 @@ fn app_single_flag() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 
@@ -192,7 +192,7 @@ fn app_flag_arg() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 
@@ -225,7 +225,7 @@ fn app_custom_config() {
     )
     .unwrap();
 
-    setup_app(&fixture.registry_dir.path());
+    setup_app(fixture.registry_dir.path());
 
     fixture.start_service();
 

@@ -34,7 +34,7 @@ impl Clyde3gEps for MockBadEps {
     fn get_checksum(&self) -> EpsResult<Checksum> {
         let mut checksum = self.checksum.lock().unwrap();
         checksum.motherboard += 1;
-        checksum.daughterboard = Some(checksum.daughterboard.clone().unwrap() + 1);
+        checksum.daughterboard = Some(checksum.daughterboard.unwrap() + 1);
         Ok(checksum.clone())
     }
     fn get_version_info(&self) -> EpsResult<VersionInfo> {

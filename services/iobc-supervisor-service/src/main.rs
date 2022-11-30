@@ -48,45 +48,45 @@
 //! ```json
 //! query {
 //!     ping: "pong",
-//! 	supervisor: {
-//! 		version: {
-//! 			dummy,
-//! 			spiCommandStatus,
-//! 			indexOfSubsystem,
-//! 			majorVersion,
-//! 			minorVersion,
-//! 			patchVersion,
-//! 			gitHeadVersion,
-//! 			serialNumber,
-//! 			compileInformation,
-//! 			clockSpeed,
-//! 			codeType,
-//! 			crc
-//! 		},
-//! 		housekeeping: {
-//! 			dummy,
-//! 			spiCommandStatus,
-//! 			enableStatus: {
-//! 				powerObc,
-//! 				powerRtc,
-//! 				supervisorMode,
-//! 				busyRtc,
-//! 				powerOffRtc
-//! 			},
-//! 			supervisorUptime,
-//! 			iobcUptime,
-//! 			iobcResetCount,
-//! 			adcData,
-//! 			adcUpdateFlag,
-//! 			crc8
-//! 		}
-//! 	}
+//!     supervisor: {
+//!         version: {
+//!             dummy,
+//!             spiCommandStatus,
+//!             indexOfSubsystem,
+//!             majorVersion,
+//!             minorVersion,
+//!             patchVersion,
+//!             gitHeadVersion,
+//!             serialNumber,
+//!             compileInformation,
+//!             clockSpeed,
+//!             codeType,
+//!             crc
+//!         },
+//!         housekeeping: {
+//!             dummy,
+//!             spiCommandStatus,
+//!             enableStatus: {
+//!                 powerObc,
+//!                 powerRtc,
+//!                 supervisorMode,
+//!                 busyRtc,
+//!                 powerOffRtc
+//!             },
+//!             supervisorUptime,
+//!             iobcUptime,
+//!             iobcResetCount,
+//!             adcData,
+//!             adcUpdateFlag,
+//!             crc8
+//!         }
+//!     }
 //! }
 //!
 //! mutation {
-//! 	reset,
-//! 	emergencyReset,
-//! 	powercycle
+//!     reset,
+//!     emergencyReset,
+//!     powercycle
 //! }
 //! ```
 //!

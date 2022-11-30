@@ -27,7 +27,7 @@ pub const SYNC: [u8; 3] = [0xAA, 0x44, 0x12];
 pub const HDR_LEN: u8 = 28;
 
 /// Supported message types
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum MessageID {
     /// Log command message
     Log = 1,
@@ -66,7 +66,7 @@ impl From<u16> for MessageID {
 }
 
 /// Common header structure for all messages
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Header {
     pub sync: [u8; 3],
     pub hdr_len: u8,
@@ -135,7 +135,7 @@ impl Message for Header {
 }
 
 /// Device communication ports
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Port {
     COM1 = 32,
     ThisPort = 192,
@@ -256,7 +256,6 @@ impl ReceiverStatusFlags {
     ///
     pub fn to_vec(self) -> Vec<String> {
         format!("{:?}", self)
-            .to_owned()
             .split(" | ")
             .map(|x| x.to_string())
             .collect()

@@ -18,7 +18,7 @@ use super::*;
 use nom::*;
 
 /// Event/error log message
-#[derive(Clone, Default, Debug, PartialEq)]
+#[derive(Clone, Default, Debug, PartialEq, Eq)]
 pub struct RxStatusEventLog {
     /// Current status of receiver
     pub recv_status: ReceiverStatusFlags,
@@ -47,7 +47,7 @@ impl RxStatusEventLog {
         ms: i32,
         raw: &[u8],
     ) -> Option<Self> {
-        let mut log = match parse_rxstatusevent(&raw) {
+        let mut log = match parse_rxstatusevent(raw) {
             Ok(conv) => conv.1,
             _ => return None,
         };

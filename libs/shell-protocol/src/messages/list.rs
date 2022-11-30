@@ -66,14 +66,12 @@ pub fn to_cbor(
 ) -> Result<Vec<u8>, ProtocolError> {
     info!("-> {{ {}, list, '{:?}' }}", channel_id, process_list);
 
-    Ok(
-        ser::to_vec_packed(&(channel_id, "list", process_list)).map_err(|err| {
-            ProtocolError::MessageCreationError {
-                message: "list".to_owned(),
-                err,
-            }
-        })?,
-    )
+    ser::to_vec_packed(&(channel_id, "list", process_list)).map_err(|err| {
+        ProtocolError::MessageCreationError {
+            message: "list".to_owned(),
+            err,
+        }
+    })
 }
 
 #[cfg(test)]
@@ -96,7 +94,7 @@ mod tests {
         assert_eq!(
             msg.unwrap(),
             Message::List {
-                channel_id: channel_id,
+                channel_id,
                 process_list: Some(process_list),
             }
         );
@@ -113,7 +111,7 @@ mod tests {
         assert_eq!(
             msg.unwrap(),
             Message::List {
-                channel_id: channel_id,
+                channel_id,
                 process_list: None,
             }
         );

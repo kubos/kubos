@@ -34,7 +34,7 @@ fn upload(
     );
 
     // Copy file to upload to temp storage. Calculate the hash and chunk info
-    let (hash, num_chunks, mode) = protocol_instance.initialize_file(&source_path)?;
+    let (hash, num_chunks, mode) = protocol_instance.initialize_file(source_path)?;
 
     // Generate channel id for transaction
     let channel = protocol_instance.generate_channel()?;
@@ -43,7 +43,7 @@ fn upload(
     protocol_instance.send_metadata(channel, &hash, num_chunks)?;
 
     // Send export command for file
-    protocol_instance.send_export(channel, &hash, &target_path, mode)?;
+    protocol_instance.send_export(channel, &hash, target_path, mode)?;
 
     // Start the engine to send the file data chunks
     protocol_instance.message_engine(
@@ -288,28 +288,28 @@ fn main() {
             let source_path = upload_args.value_of("source_path").unwrap();
             let target_path = match upload_args.value_of("target_path") {
                 Some(path) => path.to_owned(),
-                None => Path::new(&source_path)
+                None => Path::new(source_path)
                     .file_name()
                     .unwrap()
                     .to_string_lossy()
                     .into_owned(),
             };
 
-            upload(protocol_instance, &source_path, &target_path)
+            upload(protocol_instance, source_path, &target_path)
         }
         Some("download") => {
             let download_args = args.subcommand_matches("download").unwrap();
             let source_path = download_args.value_of("source_path").unwrap();
             let target_path = match download_args.value_of("target_path") {
                 Some(path) => path.to_owned(),
-                None => Path::new(&source_path)
+                None => Path::new(source_path)
                     .file_name()
                     .unwrap()
                     .to_string_lossy()
                     .into_owned(),
             };
 
-            download(protocol_instance, &source_path, &target_path)
+            download(protocol_instance, source_path, &target_path)
         }
         Some("cleanup") => {
             let hash = args

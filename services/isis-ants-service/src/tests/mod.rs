@@ -180,9 +180,8 @@ impl IAntS for MockAntS {
 
     fn watchdog_stop(&self) -> AntSResult<()> {
         if self.state {
-            assert_eq!(
+            assert!(
                 self.watchdog_thread.get(),
-                true,
                 "Trying to re-stop watchdog thread"
             );
             self.watchdog_thread.set(false);

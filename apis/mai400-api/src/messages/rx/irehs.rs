@@ -22,7 +22,7 @@ use nom::*;
 use std::io::Cursor;
 
 /// IR Earth Horizon Sensor telemetry data
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct IREHSTelemetry {
     /// IREHS A Thermopile Sensors 12-bit ADC (0.8059 mV per lsb)
     /// [earth limb, earth reference, space reference, wide FOV]
@@ -189,7 +189,6 @@ impl ThermopileFlags {
     ///
     pub fn to_vec(self) -> Vec<String> {
         format!("{:?}", self)
-            .to_owned()
             .split(" | ")
             .map(|x| x.to_string())
             .collect()
