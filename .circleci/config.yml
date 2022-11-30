@@ -11,8 +11,7 @@ jobs:
         - run: docker build -t $IMAGE_NAME:$CIRCLECI_SHA1 . 
         - run: 
           command:
-            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-            docker push $IMAGE_NAME:$CIRCLECI_SHA1
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin && docker push $IMAGE_NAME:$CIRCLECI_SHA1
 
     # Rust build + tests
     # Run for all PR commits
