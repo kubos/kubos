@@ -2,17 +2,23 @@ version: 2
 jobs:
     # shared setup to build a stable source of truth docker image 
     build_docker_img:
+      environment:
+        IMAGE_NAME: kubos/kubos-dev
       machine:
         image: ubuntu-2204:2022.04.2
       steps:
         - checkout
-        - run: docker build -t kubos/kubos-dev:testing . 
+        - run: docker build -t $IMAGE_NAME:$CIRCLECI_SHA1 . 
+        - run: 
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            docker push $IMAGE_NAME:$CIRCLECI_SHA1
 
     # Rust build + tests
     # Run for all PR commits
     rust_check_x86:
       docker:
-        - image: kubos/kubos-dev:testing
+        - image: kubos/kubos-dev:$CIRCLECI_SHA1
       steps:
         - checkout
         - run: cargo check --workspace --all-targets
@@ -20,7 +26,7 @@ jobs:
     # Run for all PR commits
     rust_check_mbm2:
       docker:
-        - image: kubos/kubos-dev:testing
+        - image: kubos/kubos-dev:$CIRCLECI_SHA1
       steps:
         - checkout
         - run:
@@ -34,7 +40,7 @@ jobs:
     # Run for all PR commits
     rust_check_iobc:
       docker:
-        - image: kubos/kubos-dev:testing
+        - image: kubos/kubos-dev:$CIRCLECI_SHA1
       steps:
         - checkout
         - run:
@@ -45,11 +51,11 @@ jobs:
               CC: /usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc
               CXX: /usr/bin/iobc_toolchain/usr/bin/arm-linux-g++
 
-    # Rust testing
+    # Rust 
     # Run for all PR commits
     rust_test:
       docker:
-        - image: kubos/kubos-dev:testing
+        - image: kubos/kubos-dev:$CIRCLECI_SHA1
       resource_class: xlarge
       steps:
         - checkout
@@ -57,59 +63,59 @@ jobs:
         - store_test_results:
             path: test-results
 
-    # Rust testing - large upload test
+    # Rust  - large upload test
     # Run for all PR commits
     rust_test_large_upload:
       docker:
-        - image: kubos/kubos-dev:testing
+        - image: kubos/kubos-dev:$CIRCLECI_SHA1
       steps:
         - checkout
         - run: cargo run --bin large_upload --release
 
-    # Rust testing - large download
+    # Rust  - large download
     # Run for all PR commits
     rust_test_large_download:
       docker:
-        - image: kubos/kubos-dev:testing
+        - image: kubos/kubos-dev:$CIRCLECI_SHA1
       steps:
         - checkout
         - run: cargo run --bin large_download --release
 
-    # Rust testing - NOS compile check & integration tests
+    # Rust  - NOS compile check & integration tests
     # Run for all PR commits
     rust_test_nosengine:
       docker:
-        - image: kubos/kubos-dev:testing
+        - image: kubos/kubos-dev:$CIRCLECI_SHA1
       steps:
         - checkout
         - run: cd apis/nosengine-rust && cargo check
         - run: cd test/integration/nosengine-rust && cargo run
 
-    # Rust testing - Check formatting
+    # Rust  - Check formatting
     # Run for all PR commits
     rust_fmt:
       docker:
-        - image: kubos/kubos-dev:testing
+        - image: kubos/kubos-dev:$CIRCLECI_SHA1
       steps:
         - checkout
         - run: cargo fmt --all -- --check
 
 
-    # Rust testing - Clippy linter
+    # Rust  - Clippy linter
     # Run for all PR commits
     rust_clippy:
       docker:
-        - image: kubos/kubos-dev:testing
+        - image: kubos/kubos-dev:$CIRCLECI_SHA1
       steps:
         - checkout
         - run: cargo clippy --workspace --all-targets
 
 
-    # CLI, C and Python testing
+    # CLI, C and Python 
     # Run for all PR commits
     non_rust_tests:
       docker:
-        - image: kubos/kubos-dev:testing
+        - image: kubos/kubos-dev:$CIRCLECI_SHA1
       steps:
         - checkout
         - run: python3 tools/ci_c.py
@@ -122,7 +128,7 @@ jobs:
     # Run when code is merged into master
     deploy:
       docker:
-        - image: kubos/kubos-dev:testing
+        - image: kubos/kubos-dev:$CIRCLECI_SHA1
       steps:
         - checkout
         - run: ./deploy_tag.sh
@@ -131,7 +137,7 @@ jobs:
     # Run when code is merged into master or when an official release tag is generated
     docs:
       docker:
-        - image: kubos/kubos-dev:testing
+        - image: kubos/kubos-dev:$CIRCLECI_SHA1
       steps:
         - checkout
         - run: ssh-keyscan docs.kubos.co >> ~/.ssh/known_hosts
