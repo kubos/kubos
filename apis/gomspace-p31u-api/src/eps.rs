@@ -77,13 +77,13 @@ pub enum EpsChannels {
     Output0,
     /// EPS channel 1 => H1-49
     Output1,
-    /// EPS channel 2 => H1-51        
+    /// EPS channel 2 => H1-51
     Output2,
     /// EPS channel 3 => H1-48
     Output3,
     /// EPS channel 4 => H1-50
     Output4,
-    /// EPS channel 5 => H1-52    
+    /// EPS channel 5 => H1-52
     Output5,
     /// BP4 heater switch
     Output6,

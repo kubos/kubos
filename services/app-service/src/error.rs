@@ -18,8 +18,11 @@ use failure::Fail;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum StartErrorKind {
+    /// An error occurred in startup
     NoActiveVersion,
-    NoExecutable { uninstalled: bool },
+    NoExecutable {
+        uninstalled: bool,
+    },
     AlreadyRunning,
     SpawnError(std::io::ErrorKind),
     NonZeroExit,
