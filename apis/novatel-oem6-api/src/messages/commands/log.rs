@@ -137,7 +137,7 @@ impl Message for LogCmd {
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum LogTrigger {
     OnChanged = 1,
     OnTime = 2,

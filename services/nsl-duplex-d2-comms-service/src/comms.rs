@@ -67,7 +67,7 @@ impl DuplexComms {
     pub fn write(&mut self, data: &[u8]) -> NslDuplexCommsResult<()> {
         let file_name = format!("udp{:03}", self.downlink_counter);
         self.downlink_counter += 1;
-        let file = File::new(&file_name, &data);
+        let file = File::new(&file_name, data);
         match self.radio.put_download_file(&file) {
             Ok(true) => Ok(()),
             Ok(false) => {
@@ -97,7 +97,7 @@ impl DuplexComms {
 pub fn ping_loop(radio: Arc<Mutex<DuplexComms>>) -> NslDuplexCommsResult<()> {
     let ping_freq = radio
         .lock()
-        .and_then(|radio| Ok(radio.ping_freq))
+        .map(|radio| radio.ping_freq)
         .unwrap_or(DEFAULT_PING_FREQ);
     loop {
         if let Ok(mut radio) = radio.lock() {

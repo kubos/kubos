@@ -17,7 +17,6 @@
 use crate::ants::*;
 use crate::ffi;
 use nom::{bits, do_parse, named, take_bits, tuple};
-use std::mem::transmute;
 
 /// Specific antenna to control
 ///
@@ -94,52 +93,52 @@ pub struct DeployStatus {
 }
 
 named!(parse_status<&[u8], DeployStatus>,
-	do_parse!(
-		bits: bits!(
-				tuple!(
-				    take_bits!(u8, 1),
-				    take_bits!(u8, 1),
-				    take_bits!(u8, 1),
-				    take_bits!(u8, 1),
-				    take_bits!(u8, 1),
-				    take_bits!(u8, 1),
-				    take_bits!(u8, 1),
-				    take_bits!(u8, 1),
-				    take_bits!(u8, 1),
-				    take_bits!(u8, 1),
-				    take_bits!(u8, 1),
-				    take_bits!(u8, 1),
-				    take_bits!(u8, 1),
-				    take_bits!(u8, 1),
-				    take_bits!(u8, 1),
-				    take_bits!(u8, 1)
-				)
-		) >>
-	    (DeployStatus {
-	         //Note: Bit 11 is unused
-	         sys_burn_active: bits.3 == 1,
-	         sys_ignore_deploy: bits.15 == 1,
-	         sys_armed: bits.7 == 1,
-	         ant_1_not_deployed: bits.8 == 1,
-	         ant_1_stopped_time: bits.9 == 1,
-	         ant_1_active: bits.10 == 1,
-	         ant_2_not_deployed: bits.12 == 1,
-	         ant_2_stopped_time: bits.13 == 1,
-	         ant_2_active: bits.14 == 1,
-	         ant_3_not_deployed: bits.0 == 1,
-	         ant_3_stopped_time: bits.1 == 1,
-	         ant_3_active: bits.2 == 1,
-	         ant_4_not_deployed: bits.4 == 1,
-	         ant_4_stopped_time: bits.5 == 1,
-	         ant_4_active: bits.6 == 1,
-	     })
-	)
+    do_parse!(
+        bits: bits!(
+                tuple!(
+                    take_bits!(u8, 1),
+                    take_bits!(u8, 1),
+                    take_bits!(u8, 1),
+                    take_bits!(u8, 1),
+                    take_bits!(u8, 1),
+                    take_bits!(u8, 1),
+                    take_bits!(u8, 1),
+                    take_bits!(u8, 1),
+                    take_bits!(u8, 1),
+                    take_bits!(u8, 1),
+                    take_bits!(u8, 1),
+                    take_bits!(u8, 1),
+                    take_bits!(u8, 1),
+                    take_bits!(u8, 1),
+                    take_bits!(u8, 1),
+                    take_bits!(u8, 1)
+                )
+        ) >>
+        (DeployStatus {
+             //Note: Bit 11 is unused
+             sys_burn_active: bits.3 == 1,
+             sys_ignore_deploy: bits.15 == 1,
+             sys_armed: bits.7 == 1,
+             ant_1_not_deployed: bits.8 == 1,
+             ant_1_stopped_time: bits.9 == 1,
+             ant_1_active: bits.10 == 1,
+             ant_2_not_deployed: bits.12 == 1,
+             ant_2_stopped_time: bits.13 == 1,
+             ant_2_active: bits.14 == 1,
+             ant_3_not_deployed: bits.0 == 1,
+             ant_3_stopped_time: bits.1 == 1,
+             ant_3_active: bits.2 == 1,
+             ant_4_not_deployed: bits.4 == 1,
+             ant_4_stopped_time: bits.5 == 1,
+             ant_4_active: bits.6 == 1,
+         })
+    )
 );
 
 impl AntsTelemetry {
     #[doc(hidden)]
     pub fn new(c_telem: &ffi::AntsTelemetry) -> Result<AntsTelemetry, AntsError> {
-        let raw_status: [u8; 2] = unsafe { transmute(c_telem.deploy_status) };
+        let raw_status: [u8; 2] = c_telem.deploy_status.to_ne_bytes();
 
         let status = DeployStatus::new(&raw_status)?;
 

@@ -23,7 +23,7 @@ use std::fs::{self, File};
 use std::io::Read;
 use tempfile::TempDir;
 
-static SQL: &'static str = r"
+static SQL: &str = r"
 insert into telemetry values(1000, 'eps', 'voltage', '3.3');
 insert into telemetry values(1001, 'eps', 'current', '3.4');
 insert into telemetry values(1002, 'eps', 'voltage', '3.2');

@@ -16,7 +16,21 @@
 
 use failure::Fail;
 
-#[derive(Debug, Fail, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
+pub enum StartErrorKind {
+    /// An error occurred in startup
+    NoActiveVersion,
+    NoExecutable {
+        uninstalled: bool,
+    },
+    AlreadyRunning,
+    SpawnError(std::io::ErrorKind),
+    NonZeroExit,
+    NoStatus,
+}
+
+#[derive(Debug, Fail, PartialEq, Eq)]
+#[allow(clippy::enum_variant_names)]
 pub enum AppError {
     /// An error was encountered while interacting with the app registry
     #[fail(display = "Registry Error: {}", err)]
@@ -47,6 +61,7 @@ pub enum AppError {
     StartError {
         /// Underlying error encountered
         err: String,
+        cause: StartErrorKind,
     },
     /// An error was encountered while parsing data
     #[fail(display = "Failed to parse {}: {}", entity, err)]

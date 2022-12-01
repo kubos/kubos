@@ -19,7 +19,6 @@ use byteorder::{LittleEndian, WriteBytesExt};
 use failure::Fail;
 use rust_uart::UartError;
 use rust_uart::*;
-use serial;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -365,7 +364,7 @@ impl MAI400 {
                             cause: ::std::io::ErrorKind::TimedOut,
                             ..
                         } => continue,
-                        _ => panic!(err),
+                        _ => panic!("{}", err),
                     },
                 };
 
@@ -383,7 +382,7 @@ impl MAI400 {
                             cause: ::std::io::ErrorKind::TimedOut,
                             ..
                         } => continue,
-                        _ => panic!(err),
+                        _ => panic!("{}", err),
                     },
                 };
 
@@ -410,7 +409,7 @@ impl MAI400 {
 }
 
 /// Common Error for MAI Actions
-#[derive(Fail, Debug, Clone, PartialEq)]
+#[derive(Fail, Debug, Clone, PartialEq, Eq)]
 pub enum MAIError {
     /// Catch-all error
     #[fail(display = "Generic Error")]

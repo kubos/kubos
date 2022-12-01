@@ -466,14 +466,14 @@ KRadioStatus kprv_radio_rx_reset(KRadioReset type);
 /**
  * File descriptor for the radio's I2C bus
  */
-int radio_bus;
+extern int radio_bus;
 /**
  * Radio transmitter properties
  */
-trx_prop radio_tx;
+extern trx_prop radio_tx;
 /**
  * Radio receiver properties
  */
-trx_prop radio_rx;
+extern trx_prop radio_rx;
 
 /* @} */

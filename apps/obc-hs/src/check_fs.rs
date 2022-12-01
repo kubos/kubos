@@ -30,7 +30,7 @@ pub fn check_fs() -> Result<(), Error> {
     if check_write(test_file, test_string)
         .and(check_read(test_file, test_string))
         .is_err()
-        && COMMS_SERVICE != ""
+        && !COMMS_SERVICE.is_empty()
     {
         let _ = send_error();
     }

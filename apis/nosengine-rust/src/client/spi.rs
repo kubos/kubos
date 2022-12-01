@@ -52,7 +52,6 @@
 //! ```
 
 use super::ffi::spi;
-use std::error::Error;
 use std::ffi;
 use std::ffi::CString;
 use std::fmt;
@@ -79,7 +78,7 @@ pub enum SPIError {
 impl From<ffi::NulError> for SPIError {
     fn from(err: ffi::NulError) -> Self {
         SPIError::StringError {
-            description: String::from(err.description()),
+            description: err.to_string(),
             position: err.nul_position(),
         }
     }

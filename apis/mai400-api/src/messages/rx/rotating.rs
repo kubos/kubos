@@ -128,7 +128,7 @@ impl RotatingTelemetry {
     ///
     /// let (std, _imu, _irehs) = mai.get_message()?;
     /// if std.is_some() {
-    /// 	rotating.update(&std.unwrap());
+    ///     rotating.update(&std.unwrap());
     /// }
     /// # Ok(())
     /// # }

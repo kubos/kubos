@@ -21,7 +21,7 @@
 use crate::error::SchedulerError;
 use crate::schema::GenericResponse;
 use juniper::GraphQLObject;
-use log::{error, info};
+use log::{debug, error, info};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::from_str;
@@ -41,11 +41,14 @@ pub struct StartAppGraphQL {
 
 // Helper function for sending query to app service
 pub fn service_query(query: &str, hosturl: &str) -> Result<StartAppGraphQL, SchedulerError> {
+    debug!("service query {}, url: {}", query, hosturl);
     // The app service will wait 300ms to see if an app completes before returning its response to us
     let client = Client::builder()
         .timeout(Duration::from_millis(350))
         .build()
-        .map_err(|e| SchedulerError::QueryError { err: e.to_string() })?;
+        .map_err(|e| SchedulerError::QueryError {
+            err: format!("Error building client: {}", e),
+        })?;
     let mut map = HashMap::new();
     map.insert("query", query);
     let url = format!("http://{}", hosturl);
@@ -54,13 +57,18 @@ pub fn service_query(query: &str, hosturl: &str) -> Result<StartAppGraphQL, Sche
         .post(&url)
         .json(&map)
         .send()
-        .map_err(|e| SchedulerError::QueryError { err: e.to_string() })?;
+        .map_err(|e| SchedulerError::QueryError {
+            err: format!("Error posting query: {}", e),
+        })?;
 
-    Ok(from_str(
-        &res.text()
-            .map_err(|e| SchedulerError::QueryError { err: e.to_string() })?,
-    )
-    .map_err(|e| SchedulerError::QueryError { err: e.to_string() })?)
+    let text = res.text().map_err(|e| SchedulerError::QueryError {
+        err: format!("Error extracting response: {}", e),
+    })?;
+    debug!("service response: {}", text);
+
+    from_str(&text).map_err(|e| SchedulerError::QueryError {
+        err: format!("Error parsing response as JSON: {}", e),
+    })
 }
 
 // Configuration used for execution of an app
@@ -88,7 +96,7 @@ impl App {
             r#"mutation {{ startApp({}) {{ success, errors }} }}"#,
             query_args
         );
-        match service_query(&query, &service_url) {
+        match service_query(&query, service_url) {
             Err(e) => {
                 error!("Failed to send start app query: {}", e);
             }

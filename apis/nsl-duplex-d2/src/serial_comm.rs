@@ -15,7 +15,6 @@
  */
 
 use radio_api::{Connection, RadioResult, Stream};
-use serial;
 use serial::prelude::*;
 use std::io;
 use std::io::prelude::*;

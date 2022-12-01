@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "kubos"
+version = "1.22.0"
+description = ""
+authors = ["Marshall Culpepper <marshall@xplore.com>"]
+packages = [ { include = "kubos" } ]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+kubos-app = { path = "../../apis/app-api/python/", develop = true }
+kubos-service = { path = "../kubos-service/", develop = true }
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

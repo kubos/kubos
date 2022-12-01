@@ -9,7 +9,7 @@ Boilerplate Flask setup for service application.
 """
 
 from flask import Flask
-from flask_graphql import GraphQLView
+from graphql_server.flask import GraphQLView
 from .schema import schema
 
 

@@ -50,7 +50,7 @@ pub fn parse_channel_id(message: &Value) -> Result<u32, ProtocolError> {
 /// Parses raw cbor message into ChannelMessage
 pub fn parse_message(message: Value) -> Result<Message, ProtocolError> {
     let data = match message {
-        Value::Array(val) => val.to_owned(),
+        Value::Array(val) => val,
         _ => {
             return Err(ProtocolError::MessageParseError {
                 err: "Data not an array".to_owned(),

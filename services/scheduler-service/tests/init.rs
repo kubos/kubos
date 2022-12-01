@@ -393,7 +393,7 @@ fn run_init_after_import() {
 
     // Import task_list then confirm task is run afterwards
     fixture.import_task_list("first", &schedule_path, "init");
-    thread::sleep(Duration::from_millis(100));
+    thread::sleep(Duration::from_millis(1000));
 
     // Check if the task ran
     let query = r#"{"query":"mutation { startApp(name: \"first-app\") { success, errors } }"}"#;
@@ -411,7 +411,7 @@ fn run_init_check_remove() {
         "tasks": [
             {
                 "description": "basic-task",
-                "delay": "1s",
+                "delay": "3s",
                 "app": {
                     "name": "delay-app"
                 }
@@ -430,7 +430,7 @@ fn run_init_check_remove() {
 
     // Remove the task_list
     fixture.remove_task_list("first", "init");
-    thread::sleep(Duration::from_millis(1100));
+    thread::sleep(Duration::from_millis(3100));
 
     // Verify task did not run
     assert_eq!(listener.get_request(), None);

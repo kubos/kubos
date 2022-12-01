@@ -169,12 +169,10 @@ pub fn get_available_modes(
 pub fn create_mode(scheduler_dir: &str, name: &str) -> Result<(), SchedulerError> {
     let name = name.to_lowercase();
     let mode_dir = format!("{}/{}", scheduler_dir, name);
-    Ok(
-        fs::create_dir(mode_dir).map_err(|e| SchedulerError::CreateError {
-            err: e.to_string(),
-            path: name.to_owned(),
-        })?,
-    )
+    fs::create_dir(mode_dir).map_err(|e| SchedulerError::CreateError {
+        err: e.to_string(),
+        path: name.to_owned(),
+    })
 }
 
 pub fn remove_mode(scheduler_dir: &str, name: &str) -> Result<(), SchedulerError> {
@@ -183,24 +181,22 @@ pub fn remove_mode(scheduler_dir: &str, name: &str) -> Result<(), SchedulerError
     if name == SAFE_MODE {
         return Err(SchedulerError::RemoveError {
             err: "The safe mode cannot be removed".to_owned(),
-            name: name.to_owned(),
+            name,
         });
     }
 
-    if is_mode_active(&scheduler_dir, &name) {
+    if is_mode_active(scheduler_dir, &name) {
         return Err(SchedulerError::RemoveError {
             err: "Cannot remove active mode".to_owned(),
-            name: name.to_owned(),
+            name,
         });
     }
 
     let mode_dir = format!("{}/{}", scheduler_dir, name);
-    Ok(
-        fs::remove_dir_all(mode_dir).map_err(|e| SchedulerError::RemoveError {
-            err: e.to_string(),
-            name: name.to_owned(),
-        })?,
-    )
+    fs::remove_dir_all(mode_dir).map_err(|e| SchedulerError::RemoveError {
+        err: e.to_string(),
+        name: name.to_owned(),
+    })
 }
 
 pub fn activate_mode(scheduler_dir: &str, name: &str) -> Result<(), SchedulerError> {
@@ -214,8 +210,8 @@ pub fn activate_mode(scheduler_dir: &str, name: &str) -> Result<(), SchedulerErr
         if name == SAFE_MODE {
             error!("Failed to activate safe mode, directory not found.");
             return Err(SchedulerError::ActivateError {
-                err: "Safe mode not found".to_owned(),
-                name: name.to_owned(),
+                err: "Safe mode not found".to_string(),
+                name,
             });
         } else {
             warn!("Attempted to activate non-existant mode. Falling back to safe mode.");

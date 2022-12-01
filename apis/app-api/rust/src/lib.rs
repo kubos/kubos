@@ -27,11 +27,11 @@
 //! fn main() -> Result<(), Error> {
 //!     logging_setup!("my-app")?;
 //!
-//! 	let request = r#"mutation {
-//! 		power(state: ON) {
-//! 			success
-//! 		}
-//! 	}"#;
+//!     let request = r#"mutation {
+//!         power(state: ON) {
+//!             success
+//!         }
+//!     }"#;
 //!
 //!     match query(&ServiceConfig::new("radio-service")?, request, Some(Duration::from_secs(1))) {
 //!         Err(error) => bail!("Failed to communicate with radio service: {}", error),

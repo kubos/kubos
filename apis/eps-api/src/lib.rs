@@ -22,7 +22,6 @@
 //! by other crates implementing EPS APIs.
 
 use failure::Fail;
-use std::error::Error;
 use std::io;
 
 /// EpsError
@@ -73,7 +72,7 @@ impl From<io::Error> for EpsError {
     fn from(error: std::io::Error) -> Self {
         EpsError::IoError {
             cause: error.kind(),
-            description: error.description().to_owned(),
+            description: error.to_string(),
         }
     }
 }

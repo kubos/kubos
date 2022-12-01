@@ -28,10 +28,10 @@
 //! - `[isis-ants-service]`
 //!
 //!     - `bus` - Specifies the I2C bus the antenna system is connected to
-//! 	- `primary` - Specifies the I2C address of the antenna system's primary microcontroller
-//! 	- `secondary` - Specifies the I2C address of the secondary microcontroller. If no secondary contoller is present, this value should be `"0x00"`.
-//! 	- `antennas` - Specifies the number of antennas present in the system. Expected value: 2 or 4.
-//! 	- `wd_timeout` - Specifies the interval at which the AntS watchdog should be automatically kicked. To disable automatic kicking, this value should be `0`.
+//!     - `primary` - Specifies the I2C address of the antenna system's primary microcontroller
+//!     - `secondary` - Specifies the I2C address of the secondary microcontroller. If no secondary contoller is present, this value should be `"0x00"`.
+//!     - `antennas` - Specifies the number of antennas present in the system. Expected value: 2 or 4.
+//!     - `wd_timeout` - Specifies the interval at which the AntS watchdog should be automatically kicked. To disable automatic kicking, this value should be `0`.
 //!
 //! For example:
 //!
@@ -140,7 +140,7 @@
 //!             ant4StoppedTime: Boolean,
 //!             ant4Active: Boolean
 //!         },
-//!     	   debug {
+//!            debug {
 //!             ant1ActivationCount: Int,
 //!             ant1ActivationTime: Int,
 //!             ant2ActivationCount: Int,
@@ -386,32 +386,20 @@ fn main() -> AntSResult<()> {
     let bus = bus.as_str().unwrap();
 
     let primary = config
-        .get("primary")
+        .get_hex("primary")
         .ok_or_else(|| {
             error!("No 'primary' value found in 'isis-ants-service' section of config");
             format_err!("No 'primary' value found in 'isis-ants-service' section of config")
         })
         .unwrap();
-    let primary = primary.as_str().unwrap();
-    let primary: u8 = if primary.starts_with("0x") {
-        u8::from_str_radix(&primary[2..], 16).unwrap()
-    } else {
-        u8::from_str_radix(primary, 16).unwrap()
-    };
 
     let secondary = config
-        .get("secondary")
+        .get_hex("secondary")
         .ok_or_else(|| {
             error!("No 'secondary' value found in 'isis-ants-service' section of config");
             format_err!("No 'secondary' value found in 'isis-ants-service' section of config")
         })
         .unwrap();
-    let secondary = secondary.as_str().unwrap();
-    let secondary: u8 = if secondary.starts_with("0x") {
-        u8::from_str_radix(&secondary[2..], 16).unwrap()
-    } else {
-        u8::from_str_radix(secondary, 16).unwrap()
-    };
 
     let antennas = config
         .get("antennas")

@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "kubos-service"
+version = "1.22.0"
+description = ""
+authors = ["Marshall Culpepper <marshall@xplore.com>"]
+license = "Apache Public License v2"
+readme = "README.md"
+packages = [{include = "kubos_service"}]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+toml = "^0.10.2"
+graphene = "^3.1.1"
+flask = "^2.2.2"
+graphql-server = "^3.0.0b5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

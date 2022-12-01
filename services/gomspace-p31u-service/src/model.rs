@@ -197,12 +197,13 @@ impl Subsystem {
         output_initial_off_delay: Vec<i32>,
         vboost_settings: Vec<i32>,
     ) -> EpsResult<GenericResponse> {
-        let mut sysconf = EpsSystemConfig::default();
-
-        sysconf.ppt_mode = ppt_mode as u8;
-        sysconf.battheater_mode = battheater_mode as u8;
-        sysconf.battheater_low = battheater_low as i8;
-        sysconf.battheater_high = battheater_high as i8;
+        let mut sysconf = EpsSystemConfig {
+            ppt_mode: ppt_mode as u8,
+            battheater_mode: battheater_mode as u8,
+            battheater_low: battheater_low as i8,
+            battheater_high: battheater_high as i8,
+            ..EpsSystemConfig::default()
+        };
 
         for i in 0..8 {
             sysconf.output_normal_value[i] = output_normal_value[i] as u8;
@@ -334,7 +335,7 @@ impl Subsystem {
         eps_channel: EpsChannels,
         eps_value: EpsPowerState,
         eps_delay: i32,
-    ) -> EpsResult<(GenericResponse)> {
+    ) -> EpsResult<GenericResponse> {
         let delay = eps_delay as u16;
         let result = run!(
             self.eps
@@ -359,7 +360,7 @@ impl Subsystem {
         in1_voltage: i32,
         in2_voltage: i32,
         in3_voltage: i32,
-    ) -> EpsResult<(GenericResponse)> {
+    ) -> EpsResult<GenericResponse> {
         let in1 = in1_voltage as u16;
         let in2 = in2_voltage as u16;
         let in3 = in3_voltage as u16;
@@ -378,7 +379,7 @@ impl Subsystem {
     }
 
     /// Set MPPT mode
-    pub fn eps_set_input_mode(&self, mode: i32) -> EpsResult<(GenericResponse)> {
+    pub fn eps_set_input_mode(&self, mode: i32) -> EpsResult<GenericResponse> {
         let eps_mode = mode as u8;
         let result = run!(
             self.eps.lock().unwrap().set_input_mode(eps_mode),
@@ -399,7 +400,7 @@ impl Subsystem {
         &self,
         heater: HeaterSelect,
         mode: EpsPowerState,
-    ) -> EpsResult<(GenericResponse)> {
+    ) -> EpsResult<GenericResponse> {
         let result = run!(
             self.eps.lock().unwrap().set_heater(heater, mode),
             self.errors

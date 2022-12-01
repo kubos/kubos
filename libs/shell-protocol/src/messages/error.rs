@@ -41,14 +41,12 @@ pub fn from_cbor(message: &ChannelMessage) -> Result<Message, ProtocolError> {
 pub fn to_cbor(channel_id: u32, message: &str) -> Result<Vec<u8>, ProtocolError> {
     info!("-> {{ {}, error, {} }}", channel_id, message);
 
-    Ok(
-        ser::to_vec_packed(&(channel_id, "error", message)).map_err(|err| {
-            ProtocolError::MessageCreationError {
-                message: "error".to_owned(),
-                err,
-            }
-        })?,
-    )
+    ser::to_vec_packed(&(channel_id, "error", message)).map_err(|err| {
+        ProtocolError::MessageCreationError {
+            message: "error".to_owned(),
+            err,
+        }
+    })
 }
 
 #[cfg(test)]
@@ -69,8 +67,8 @@ mod tests {
         assert_eq!(
             msg.unwrap(),
             Message::Error {
-                channel_id: channel_id,
-                message: message
+                channel_id,
+                message
             }
         );
     }

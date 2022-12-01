@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-import app_api
+from kubos import app
 import argparse
 import sys
 
 def main():
 
-    logger = app_api.logging_setup("mission-framework")
+    logger = app.logging_setup("mission-framework")
     
     parser = argparse.ArgumentParser()
     
@@ -16,9 +16,9 @@ def main():
     
     if args.config is not None:
         global SERVICES
-        SERVICES = app_api.Services(args.config[0])
+        SERVICES = app.Services(args.config[0])
     else:
-        SERVICES = app_api.Services()
+        SERVICES = app.Services()
     
     logger.info("Starting mission logic")
     

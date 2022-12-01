@@ -28,7 +28,6 @@ use std::path::Path;
 use std::str;
 use std::thread;
 use std::time::Duration;
-use time;
 
 const HASH_SIZE: usize = 16;
 
@@ -282,7 +281,7 @@ pub fn initialize_file(
     })?;
 
     // Calculate hash of temp file
-    let hash = calc_file_hash(&source_path, hash_chunk_size)?;
+    let hash = calc_file_hash(source_path, hash_chunk_size)?;
 
     // Chunk and store temp file into hash directory
     let mut output = File::open(&temp_path).map_err(|err| ProtocolError::StorageError {
@@ -385,14 +384,14 @@ pub fn finalize_file(
     }
 
     // Calculate hash of exported file
-    let calc_hash_str = calc_file_hash(&target_path, hash_chunk_size)?;
+    let calc_hash_str = calc_file_hash(target_path, hash_chunk_size)?;
 
     // Final determination if file was correctly received and assembled
     if calc_hash_str == hash {
         Ok(())
     } else {
         // If the hash doesn't match then we start over
-        delete_file(&prefix, &hash)?;
+        delete_file(prefix, hash)?;
         Err(ProtocolError::HashMismatch)
     }
 }
@@ -452,7 +451,7 @@ fn calc_file_hash(path: &str, hash_chunk_size: usize) -> Result<String, Protocol
             if chunk.is_empty() {
                 break;
             }
-            hasher.update(&chunk);
+            hasher.update(chunk);
             chunk.len()
         };
         reader.consume(length);

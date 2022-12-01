@@ -10,7 +10,7 @@ Testing library for KubOS.
 Currently only implements integration testing for hardware services.
 """
 
-import app_api
+import kubos_app
 import socket
 
 DEFAULT_CONFIG_PATH = "/etc/kubos-config.toml"
@@ -23,7 +23,7 @@ class IntegrationTest:
 
     def __init__(self,
                  config_filepath=DEFAULT_CONFIG_PATH):
-        self.api = app_api.Services(config_filepath)
+        self.api = kubos_app.Services(config_filepath)
 
     def test_services(self, query=SERVICE_MUTATION):
         for service in self.api.config:

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-use cbor_protocol;
 use failure::Fail;
 
 /// Errors which occur when using ChannelProtocol

@@ -16,11 +16,11 @@
 
 mod util;
 
-use chrono::{DateTime, Utc};
+use log::info;
 use serde_json::json;
 use std::thread;
 use std::time::Duration;
-use util::SchedulerFixture;
+use util::{BasicAppResponder, SchedulerFixture};
 use utils::testing::ServiceListener;
 
 #[test]
@@ -160,23 +160,20 @@ fn import_raw_run_two_tasks() {
 
 #[test]
 fn import_raw_run_onetime_future() {
-    let listener = ServiceListener::spawn("127.0.0.1", 9023);
+    utils::init_logger();
+
+    let listener = ServiceListener::spawn_with_responder("127.0.0.1", 9023, BasicAppResponder);
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8023);
 
     fixture.create_mode("init");
     fixture.activate_mode("init");
-
-    let now_time: DateTime<Utc> = Utc::now()
-        .checked_add_signed(chrono::Duration::seconds(1))
-        .unwrap();
-    let now_time = now_time.format("%Y-%m-%d %H:%M:%S").to_string();
 
     // Create some schedule with a task starting now
     let schedule: String = json!({
         "tasks": [
             {
                 "description": "basic-task",
-                "time": now_time,
+                "delay": "2s",
                 "app": {
                     "name": "basic-app"
                 }
@@ -186,13 +183,15 @@ fn import_raw_run_onetime_future() {
     .to_string()
     .escape_default()
     .collect();
-    fixture.import_raw_task_list("imaging", "init", &schedule);
+
+    let res = fixture.import_raw_task_list("imaging", "init", &schedule);
+    info!("import result: {}", res);
 
     // Check if the task actually ran
     assert_eq!(listener.get_request(), None);
 
     // Wait for the service to restart the scheduler
-    thread::sleep(Duration::from_millis(2000));
+    thread::sleep(Duration::from_millis(3000));
 
     let query = r#"{"query":"mutation { startApp(name: \"basic-app\") { success, errors } }"}"#;
 
@@ -202,7 +201,7 @@ fn import_raw_run_onetime_future() {
 
 #[test]
 fn import_raw_run_recurring_no_delay() {
-    let listener = ServiceListener::spawn("127.0.0.1", 9024);
+    let listener = ServiceListener::spawn_with_responder("127.0.0.1", 9024, BasicAppResponder);
     let fixture = SchedulerFixture::spawn("127.0.0.1", 8024);
 
     fixture.create_mode("init");
@@ -246,7 +245,7 @@ fn import_raw_bad_json() {
     // Create some schedule with an init task
     let schedule = "this is not json";
     assert_eq!(
-        fixture.import_raw_task_list("first", "operational", &schedule),
+        fixture.import_raw_task_list("first", "operational", schedule),
         json!({
             "data" : {
                 "importRawTaskList": {

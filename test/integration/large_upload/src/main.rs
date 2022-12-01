@@ -141,7 +141,7 @@ pub fn upload(
         FileProtocol::new(&format!("{}:{}", host_ip, host_port), remote_addr, f_config);
 
     // copy file to upload to temp storage. calculate the hash and chunk info
-    let (hash, num_chunks, mode) = f_protocol.initialize_file(&source_path)?;
+    let (hash, num_chunks, mode) = f_protocol.initialize_file(source_path)?;
 
     let channel = f_protocol.generate_channel()?;
 
@@ -149,7 +149,7 @@ pub fn upload(
     f_protocol.send_metadata(channel, &hash, num_chunks)?;
 
     // send export command for file
-    f_protocol.send_export(channel, &hash, &target_path, mode)?;
+    f_protocol.send_export(channel, &hash, target_path, mode)?;
 
     // start the engine to send the file data chunks
     f_protocol.message_engine(
@@ -160,5 +160,5 @@ pub fn upload(
 
     // note: the original upload client function does not return the hash.
     // we're only doing it here so that we can manipulate the temporary storage
-    Ok(hash.to_owned())
+    Ok(hash)
 }

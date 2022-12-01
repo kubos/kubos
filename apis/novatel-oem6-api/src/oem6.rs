@@ -19,10 +19,8 @@ use crate::messages::*;
 #[cfg(not(feature = "nos3"))]
 use byteorder::{LittleEndian, WriteBytesExt};
 use failure::Fail;
-use nom;
 use rust_uart::UartError;
 use rust_uart::*;
-use serial;
 use std::sync::mpsc::{Receiver, RecvTimeoutError, SyncSender, TrySendError};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
@@ -101,7 +99,7 @@ pub fn read_thread(
                         cause: ::std::io::ErrorKind::TimedOut,
                         ..
                     } => continue,
-                    _ => panic!(err),
+                    _ => panic!("{}", err),
                 },
             };
 
@@ -119,9 +117,7 @@ pub fn read_thread(
                             _ if v[0] == SYNC[0] || v[0] == 0x23 => break,
                             _ => v,
                         },
-                        Err(err) => match err {
-                            _ => break,
-                        },
+                        Err(_) => break,
                     };
 
                     ascii_message.append(&mut ascii_char);
@@ -160,7 +156,7 @@ pub fn read_thread(
                         cause: ::std::io::ErrorKind::TimedOut,
                         ..
                     } => continue,
-                    _ => panic!(err),
+                    _ => panic!("{}", err),
                 },
             };
             message.append(&mut hdr);
@@ -180,7 +176,7 @@ pub fn read_thread(
                         cause: ::std::io::ErrorKind::TimedOut,
                         ..
                     } => continue,
-                    _ => panic!(err),
+                    _ => panic!("{}", err),
                 },
             };
             message.append(&mut body);
@@ -247,7 +243,7 @@ pub struct OEM6 {
     /// Channel for receiveing response messages
     pub response_recv: Arc<Mutex<Receiver<(Header, Vec<u8>)>>>,
     /// Channel for receiving abbreviated response messages
-    pub response_abbrv_recv: Arc<Mutex<Receiver<(Vec<u8>)>>>,
+    pub response_abbrv_recv: Arc<Mutex<Receiver<Vec<u8>>>>,
 }
 
 impl OEM6 {
@@ -714,7 +710,7 @@ impl OEM6 {
         if resp.resp_id != ResponseID::Ok {
             return Err(OEMError::CommandError {
                 id: resp.resp_id,
-                description: resp.resp_string.clone(),
+                description: resp.resp_string,
             });
         }
 
@@ -838,7 +834,7 @@ impl OEM6 {
 }
 
 /// Common Error for OEM Actions
-#[derive(Fail, Debug, Clone, PartialEq)]
+#[derive(Fail, Debug, Clone, PartialEq, Eq)]
 pub enum OEMError {
     /// Catch-all error
     #[fail(display = "Generic Error")]

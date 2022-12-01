@@ -38,10 +38,10 @@ macro_rules! make_telemetry {
             )+
         }
 
-        impl Into<DaughterboardTelemetryType> for Type {
-            fn into(self) -> DaughterboardTelemetryType {
-                match self {
-                    $(Type::$type => DaughterboardTelemetryType::$type,)+
+        impl From<Type> for DaughterboardTelemetryType {
+            fn from(t: Type) -> Self {
+                match t {
+                    $(Type::$type => Self::$type,)+
                 }
             }
         }

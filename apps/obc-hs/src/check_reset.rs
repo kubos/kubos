@@ -44,7 +44,7 @@ pub fn check_reset() -> Result<(), Error> {
             .next()
             .ok_or_else(|| err_msg("Failed to get system uptime"))?;
         // Convert it to a useable number
-        let uptime = ::std::str::from_utf8(&temp)?;
+        let uptime = ::std::str::from_utf8(temp)?;
         uptime.parse::<f32>()?
     } else {
         bail!("Failed to get system uptime");

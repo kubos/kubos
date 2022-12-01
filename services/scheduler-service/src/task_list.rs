@@ -162,7 +162,7 @@ pub fn import_task_list(
     if !Path::new(&format!("{}/{}", scheduler_dir, mode)).is_dir() {
         return Err(SchedulerError::ImportError {
             err: "Mode not found".to_owned(),
-            name: name.to_owned(),
+            name,
         });
     }
 
@@ -194,7 +194,7 @@ pub fn import_raw_task_list(
     if !Path::new(&format!("{}/{}", scheduler_dir, mode)).is_dir() {
         return Err(SchedulerError::ImportError {
             err: "Mode not found".to_owned(),
-            name: name.to_owned(),
+            name,
         });
     }
 
@@ -234,14 +234,14 @@ pub fn remove_task_list(scheduler_dir: &str, name: &str, mode: &str) -> Result<(
     if !Path::new(&format!("{}/{}", scheduler_dir, mode)).is_dir() {
         return Err(SchedulerError::RemoveError {
             err: "Mode not found".to_owned(),
-            name: name.to_owned(),
+            name,
         });
     }
 
     if !Path::new(&sched_path).is_file() {
         return Err(SchedulerError::RemoveError {
             err: "File not found".to_owned(),
-            name: name.to_owned(),
+            name,
         });
     }
 

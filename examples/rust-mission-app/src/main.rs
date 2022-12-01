@@ -26,7 +26,7 @@ fn main() -> Result<(), Error> {
     // Parse the command args
     let matches = match opts.parse(args) {
         Ok(r) => r,
-        Err(f) => panic!(f.to_string()),
+        Err(f) => panic!("{}", f.to_string()),
     };
 
     // Check for subcommand to run

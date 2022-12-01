@@ -156,7 +156,7 @@ fn deploy_status_deployed_2_antennas() {
             ip = "127.0.0.1"
             port = 9999"#;
     let service = Service::new(
-        Config::new_from_str("isis-ants-service", &config).unwrap(),
+        Config::new_from_str("isis-ants-service", config).unwrap(),
         Subsystem {
             ants: Arc::new(Mutex::new(Box::new(mock))),
             controller: Arc::new(RwLock::new(ConfigureController::Primary)),
@@ -231,7 +231,7 @@ fn deploy_status_stowed_2_antennas() {
             ip = "127.0.0.1"
             port = 9999"#;
     let service = Service::new(
-        Config::new_from_str("isis-ants-service", &config).unwrap(),
+        Config::new_from_str("isis-ants-service", config).unwrap(),
         Subsystem {
             ants: Arc::new(Mutex::new(Box::new(mock))),
             controller: Arc::new(RwLock::new(ConfigureController::Primary)),

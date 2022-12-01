@@ -49,7 +49,7 @@ fn parse_date(input: &[u8]) -> IResult<&[u8], i64> {
     let (input, date) = map_res!(input, take_until!("\n"), from_utf8)?;
     let dt = DateTime::<Utc>::from_utc(
         NaiveDateTime::parse_from_str(date, "%d %m %Y %H:%M:%S")
-            .or_else(|_| Err(Err::Error(Context::Code(input, ErrorKind::Tag))))?,
+            .map_err(|_| Err::Error(Context::Code(input, ErrorKind::Tag)))?,
         Utc,
     );
     Ok((input, dt.timestamp()))

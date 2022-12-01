@@ -36,20 +36,20 @@ pub struct VersionData {
     pub daughterboard: Option<VersionNum>,
 }
 
-impl Into<VersionNum> for Version {
-    fn into(self) -> VersionNum {
-        VersionNum {
-            revision: i32::from(self.revision),
-            firmware_number: i32::from(self.firmware_number),
+impl From<Version> for VersionNum {
+    fn from(version: Version) -> Self {
+        Self {
+            revision: i32::from(version.revision),
+            firmware_number: i32::from(version.firmware_number),
         }
     }
 }
 
-impl Into<VersionData> for VersionInfo {
-    fn into(self) -> VersionData {
-        VersionData {
-            motherboard: self.motherboard.into(),
-            daughterboard: self.daughterboard.map(|d| d.into()),
+impl From<VersionInfo> for VersionData {
+    fn from(info: VersionInfo) -> Self {
+        Self {
+            motherboard: info.motherboard.into(),
+            daughterboard: info.daughterboard.map(|d| d.into()),
         }
     }
 }

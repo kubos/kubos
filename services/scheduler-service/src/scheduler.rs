@@ -130,7 +130,7 @@ impl Scheduler {
         if is_mode_active(&self.scheduler_dir, &mode) {
             let list_path = format!("{}/{}/{}.json", self.scheduler_dir, mode, name);
             let list_path = Path::new(&list_path);
-            let list = TaskList::from_path(&list_path)?;
+            let list = TaskList::from_path(list_path)?;
 
             Ok(self.start_task_list(list)?)
         } else {
@@ -150,7 +150,7 @@ impl Scheduler {
     // Validation and error returning is done here and caught in
     // start() for fail over.
     fn check_start(&self, mode_path: &str) -> Result<(), SchedulerError> {
-        for list in get_mode_task_lists(&mode_path)? {
+        for list in get_mode_task_lists(mode_path)? {
             match validate_task_list(&list.path) {
                 Err(SchedulerError::TaskTimeError { description, .. }) => warn!(
                     "Found task '{}' in task list '{}' with out of bounds time",
@@ -176,7 +176,7 @@ impl Scheduler {
                         "Failed to start mode '{}', failing over: {}",
                         active_mode.name, err
                     );
-                    activate_mode(&self.scheduler_dir, &SAFE_MODE)?;
+                    activate_mode(&self.scheduler_dir, SAFE_MODE)?;
                     self.start()?;
                 }
             }

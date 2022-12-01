@@ -19,7 +19,6 @@ use crate::error::*;
 use crate::monitor::*;
 use chrono::Utc;
 use failure::format_err;
-use fs_extra;
 use log::*;
 use nix::sys::signal;
 use nix::unistd::Pid;
@@ -33,7 +32,6 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 use tempfile::TempDir;
-use toml;
 
 /// The default application registry directory in KubOS
 pub static K_APPS_DIR: &str = "/home/system/kubos/apps";
@@ -112,12 +110,10 @@ impl AppRegistry {
     fn discover_apps(&self) -> Result<Vec<AppRegistryEntry>, AppError> {
         let mut reg_entries: Vec<AppRegistryEntry> = Vec::new();
 
-        for entry in fs::read_dir(&self.apps_dir)? {
-            if let Ok(entry) = entry {
-                if let Ok(file_type) = entry.file_type() {
-                    if file_type.is_dir() && entry.file_name().to_str() != Some("active") {
-                        reg_entries.extend(self.discover_versions(entry.path())?);
-                    }
+        for entry in fs::read_dir(&self.apps_dir)?.flatten() {
+            if let Ok(file_type) = entry.file_type() {
+                if file_type.is_dir() && entry.file_name().to_str() != Some("active") {
+                    reg_entries.extend(self.discover_versions(entry.path())?);
                 }
             }
         }
@@ -135,10 +131,7 @@ impl AppRegistry {
 
             let version = version.unwrap();
 
-            match version
-                .file_type()
-                .and_then(|file_type| Ok(file_type.is_dir()))
-            {
+            match version.file_type().map(|file_type| file_type.is_dir()) {
                 Ok(true) => {
                     if let Ok(entry) = AppRegistryEntry::from_dir(&version.path()) {
                         if entry.active_version {
@@ -227,7 +220,7 @@ impl AppRegistry {
         } else if !app_path.is_dir() {
             // Handle tgz archives.
             return match app_path.extension().and_then(OsStr::to_str) {
-                Some("tgz") => extract_archive(&self, path),
+                Some("tgz") => extract_archive(self, path),
                 Some(extension) => Err(AppError::RegisterError {
                                             err: format!("Provided file with extension {} is neither a directory nor a tgz archive file", extension)
                                          }),
@@ -288,7 +281,7 @@ impl AppRegistry {
         let old_active = if Path::new(&format!("{}/{}", self.apps_dir, app_name)).exists() {
             entries
                 .iter()
-                .position(|ref e| e.active_version && e.app.name == app_name)
+                .position(|e| e.active_version && e.app.name == app_name)
         } else {
             None
         };
@@ -347,13 +340,13 @@ impl AppRegistry {
         // Add the new registry entry
         entries.push(reg_entry);
         // Create the app.toml file and save the metadata information
-        entries[entries.len() - 1].save().or_else(|err| {
+        entries[entries.len() - 1].save().map_err(|err| {
             // Remove this new app version directory
             let _ = fs::remove_dir_all(app_dir);
             // Try to remove the parent directory. This will only work if no other versions of the
             // app exist.
             let _ = fs::remove_dir(format!("{}/{}", self.apps_dir, app_name));
-            Err(err)
+            err
         })?;
 
         // Mark the old version as inactive
@@ -416,7 +409,7 @@ impl AppRegistry {
 
         match entries
             .iter()
-            .position(|ref e| e.app.name == app_name && e.app.version == version)
+            .position(|e| e.app.name == app_name && e.app.version == version)
         {
             Some(index) => {
                 entries.remove(index);
@@ -541,7 +534,7 @@ impl AppRegistry {
         // Get the current active version of the application
         let curr_active = entries
             .iter()
-            .position(|ref e| e.active_version && e.app.name == app_name);
+            .position(|e| e.active_version && e.app.name == app_name);
 
         if let Some(index) = curr_active {
             if entries[index].app.version == version {
@@ -552,7 +545,7 @@ impl AppRegistry {
         // Get the desired active version of the application
         let new_active = entries
             .iter()
-            .position(|ref e| e.app.name == app_name && e.app.version == version)
+            .position(|e| e.app.name == app_name && e.app.version == version)
             .ok_or(AppError::RegistryError {
                 err: format!("App {} version {} not found in registry", app_name, version),
             })?;
@@ -577,7 +570,7 @@ impl AppRegistry {
 
         // Update the active app symlink
         self.set_active(
-            &app_name,
+            app_name,
             &format!("{}/{}/{}", self.apps_dir, app_name, version),
         )?;
 
@@ -609,32 +602,48 @@ impl AppRegistry {
         let app = {
             let entries = self.entries.lock().map_err(|err| AppError::StartError {
                 err: format!("Couldn't get entries mutex: {:?}", err),
+                cause: StartErrorKind::NoActiveVersion,
             })?;
             match entries
                 .iter()
-                .find(|ref e| e.active_version && e.app.name == app_name)
+                .find(|e| e.active_version && e.app.name == app_name)
             {
                 Some(entry) => entry.app.clone(),
                 None => {
                     return Err(AppError::StartError {
                         err: format!("No active version found for app {}", app_name),
+                        cause: StartErrorKind::NoActiveVersion,
                     });
                 }
             }
         };
 
         let app_path = PathBuf::from(&app.executable);
+        info!(
+            "app executable exists? {}: {}",
+            app_path.display(),
+            app_path.exists()
+        );
         if !app_path.exists() {
-            let msg = match self.uninstall(&app.name, &app.version) {
-                Ok(_) => format!(
-                    "{} does not exist. {} version {} automatically uninstalled",
-                    app.executable, app.name, app.version
+            let (msg, uninstalled) = match self.uninstall(&app.name, &app.version) {
+                Ok(_) => (
+                    format!(
+                        "{} does not exist. {} version {} automatically uninstalled",
+                        app.executable, app.name, app.version
+                    ),
+                    true,
                 ),
-                Err(error) => format!("{} does not exist. {}", app.executable, error),
+                Err(error) => (
+                    format!("{} does not exist. {}", app.executable, error),
+                    false,
+                ),
             };
 
             error!("{}", msg);
-            return Err(AppError::StartError { err: msg });
+            return Err(AppError::StartError {
+                err: msg,
+                cause: StartErrorKind::NoExecutable { uninstalled },
+            });
         }
 
         // Change our current directory to the app's directory so that it can access any
@@ -658,6 +667,7 @@ impl AppRegistry {
             Ok(Some(_)) => {
                 return Err(AppError::StartError {
                     err: format!("Instance of {} already running", app_name),
+                    cause: StartErrorKind::AlreadyRunning,
                 });
             }
             Err(err) => {
@@ -684,10 +694,13 @@ impl AppRegistry {
             cmd.args(&add_args);
         }
 
+        debug!("{:?} {:?}", cmd.get_program(), cmd.get_args());
+
         let mut child = cmd.spawn().map_err(|err| {
             error!("Failed to spawn app {}: {:?}", app_name, err);
             AppError::StartError {
                 err: format!("Failed to spawn app: {:?}", err),
+                cause: StartErrorKind::SpawnError(err.kind()),
             }
         })?;
 
@@ -734,6 +747,7 @@ impl AppRegistry {
                 if !status.success() {
                     Err(AppError::StartError {
                         err: format!("App returned {}", status),
+                        cause: StartErrorKind::NonZeroExit,
                     })
                 } else {
                     Ok(None)
@@ -760,6 +774,7 @@ impl AppRegistry {
                     "Started app, but failed to fetch status information: {:?}",
                     err
                 ),
+                cause: StartErrorKind::NoStatus,
             }),
         }
     }

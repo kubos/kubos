@@ -8,9 +8,9 @@ Usage of the API is shown in the example below
 
 ```
 
-    import app_api
+    from kubos import app
 
-    service_api = app_api.Services()
+    service_api = app.Services()
 
     query_response = service_api.query(
         service = "service-name",
