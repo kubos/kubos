@@ -271,12 +271,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bytes"
-version = "1.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec8a7b6a70fde80372154c65702f00a0f56f3e1c36abbc6c440484be248856db"
-
-[[package]]
 name = "cbor-protocol"
 version = "0.1.0"
 dependencies = [
@@ -372,7 +366,7 @@ dependencies = [
  "clyde-3g-eps-api",
  "eps-api",
  "failure",
- "juniper 0.11.1",
+ "juniper",
  "kubos-service",
  "log 0.4.17",
  "rust-i2c",
@@ -401,12 +395,12 @@ dependencies = [
 
 [[package]]
 name = "comms-service"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "byteorder",
- "bytes 1.2.1",
+ "bytes",
  "failure",
- "juniper 0.9.2",
+ "juniper",
  "kubos-system",
  "log 0.4.17",
  "pnet",
@@ -797,7 +791,7 @@ name = "example-rust-c-service"
 version = "0.1.0"
 dependencies = [
  "extern-lib",
- "juniper 0.11.1",
+ "juniper",
  "kubos-service",
  "log 0.4.17",
 ]
@@ -806,7 +800,7 @@ dependencies = [
 name = "example-rust-service"
 version = "0.1.0"
 dependencies = [
- "juniper 0.11.1",
+ "juniper",
  "kubos-service",
  "log 0.4.17",
  "mount",
@@ -1150,7 +1144,7 @@ name = "gomspace-p31u-api"
 version = "0.1.0"
 dependencies = [
  "failure",
- "juniper 0.11.1",
+ "juniper",
  "kubos-build-helper",
 ]
 
@@ -1160,7 +1154,7 @@ version = "0.1.0"
 dependencies = [
  "failure",
  "gomspace-p31u-api",
- "juniper 0.11.1",
+ "juniper",
  "kubos-service",
  "log 0.4.17",
  "rust-i2c",
@@ -1176,7 +1170,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a5b34c246847f938a410a03c5458c7fee2274436675e76d8b903c08efc29c462"
 dependencies = [
  "byteorder",
- "bytes 0.4.12",
+ "bytes",
  "fnv",
  "futures 0.1.31",
  "http",
@@ -1201,7 +1195,7 @@ checksum = "882ca7d8722f33ce2c2db44f95425d6267ed59ca96ce02acbe58320054ceb642"
 dependencies = [
  "base64 0.10.1",
  "bitflags 1.3.2",
- "bytes 0.4.12",
+ "bytes",
  "headers-core",
  "http",
  "mime 0.3.16",
@@ -1215,7 +1209,7 @@ version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "967131279aaa9f7c20c7205b45a391638a83ab118e6509b2d0ccbe08de044237"
 dependencies = [
- "bytes 0.4.12",
+ "bytes",
  "http",
 ]
 
@@ -1234,7 +1228,7 @@ version = "0.1.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d6ccf5ede3a895d8856620237b2f02972c1bbc78d2965ad7fe8838d4a0ed41f0"
 dependencies = [
- "bytes 0.4.12",
+ "bytes",
  "fnv",
  "itoa 0.4.8",
 ]
@@ -1245,7 +1239,7 @@ version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6741c859c1b2463a423a1dbce98d418e6c3c3fc720fb0d45528657320920292d"
 dependencies = [
- "bytes 0.4.12",
+ "bytes",
  "futures 0.1.31",
  "http",
  "tokio-buf",
@@ -1297,7 +1291,7 @@ version = "0.12.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5c843caf6296fc1f93444735205af9ed4e109a539005abb2564ae1d6fad34c52"
 dependencies = [
- "bytes 0.4.12",
+ "bytes",
  "futures 0.1.31",
  "futures-cpupool",
  "h2",
@@ -1327,7 +1321,7 @@ version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3a800d6aa50af4b5850b2b0f659625ce9504df908e9733b635720483be26174f"
 dependencies = [
- "bytes 0.4.12",
+ "bytes",
  "futures 0.1.31",
  "hyper 0.12.36",
  "native-tls",
@@ -1429,7 +1423,7 @@ version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8e1b822cc844905551931d6f81608ed5f50a79c1078a4e2b4d42dbc7c1eedfbf"
 dependencies = [
- "bytes 0.4.12",
+ "bytes",
 ]
 
 [[package]]
@@ -1446,7 +1440,7 @@ name = "iobc-supervisor-service"
 version = "0.1.0"
 dependencies = [
  "isis-iobc-supervisor",
- "juniper 0.11.1",
+ "juniper",
  "kubos-service",
  "log 0.4.17",
 ]
@@ -1522,7 +1516,7 @@ version = "0.1.0"
 dependencies = [
  "failure",
  "isis-ants-api",
- "juniper 0.11.1",
+ "juniper",
  "kubos-service",
  "log 0.4.17",
  "serde",
@@ -1571,22 +1565,6 @@ dependencies = [
 
 [[package]]
 name = "juniper"
-version = "0.9.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc520ae5efce621611ad03aa0ad6ebec0aabc60efa1e47df7d835609c079dd31"
-dependencies = [
- "chrono",
- "fnv",
- "juniper_codegen 0.9.2",
- "ordermap",
- "serde",
- "serde_derive",
- "url 1.7.2",
- "uuid 0.5.1",
-]
-
-[[package]]
-name = "juniper"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d95deabb0bc5e15f508d48017b3791502e734a3d64c261d8ef9658899f04f351"
@@ -1594,21 +1572,11 @@ dependencies = [
  "chrono",
  "fnv",
  "indexmap",
- "juniper_codegen 0.11.1",
+ "juniper_codegen",
  "serde",
  "serde_derive",
  "url 1.7.2",
  "uuid 0.7.4",
-]
-
-[[package]]
-name = "juniper_codegen"
-version = "0.9.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2605e2fd568ff0ad62e2e6ca985950bbe53708c0e75b08d4fc640f05a564c9e"
-dependencies = [
- "quote 0.3.15",
- "syn 0.11.11",
 ]
 
 [[package]]
@@ -1632,7 +1600,7 @@ checksum = "259767494d67be410780359d08a325138c86223b653f483c6cbe43352b8eed7c"
 dependencies = [
  "failure",
  "futures 0.1.31",
- "juniper 0.11.1",
+ "juniper",
  "serde",
  "serde_derive",
  "serde_json",
@@ -1656,7 +1624,7 @@ version = "0.1.0"
 dependencies = [
  "failure",
  "getopts",
- "juniper 0.11.1",
+ "juniper",
  "kubos-service",
  "kubos-system",
  "log 0.4.17",
@@ -1674,7 +1642,7 @@ dependencies = [
  "chrono",
  "failure",
  "fs_extra",
- "juniper 0.11.1",
+ "juniper",
  "kubos-app",
  "kubos-service",
  "kubos-system",
@@ -1714,7 +1682,7 @@ name = "kubos-service"
 version = "0.1.0"
 dependencies = [
  "failure",
- "juniper 0.11.1",
+ "juniper",
  "juniper_warp",
  "kubos-system",
  "log 0.4.17",
@@ -1952,7 +1920,7 @@ name = "mai400-service"
 version = "0.1.0"
 dependencies = [
  "failure",
- "juniper 0.11.1",
+ "juniper",
  "kubos-service",
  "log 0.4.17",
  "mai400-api",
@@ -2094,7 +2062,7 @@ name = "monitor-service"
 version = "0.1.0"
 dependencies = [
  "failure",
- "juniper 0.11.1",
+ "juniper",
  "kubos-service",
  "lazy_static 1.4.0",
  "log 0.4.17",
@@ -2180,7 +2148,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b7fd5681d13fda646462cfbd4e5f2051279a89a544d50eb98c365b507246839f"
 dependencies = [
  "bitflags 1.3.2",
- "bytes 0.4.12",
+ "bytes",
  "cfg-if 0.1.10",
  "gcc",
  "libc",
@@ -2248,7 +2216,7 @@ name = "novatel-oem6-service"
 version = "0.1.0"
 dependencies = [
  "failure",
- "juniper 0.11.1",
+ "juniper",
  "kubos-service",
  "log 0.4.17",
  "novatel-oem6-api",
@@ -2274,7 +2242,7 @@ version = "0.1.0"
 dependencies = [
  "comms-service",
  "failure",
- "juniper 0.11.1",
+ "juniper",
  "kubos-service",
  "log 0.4.17",
  "nsl-duplex-d2",
@@ -2425,15 +2393,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3305af35278dd29f46fcdd139e0b1fbfae2153f0e5928b39b035542dd31e37b7"
 dependencies = [
  "num-traits",
-]
-
-[[package]]
-name = "ordermap"
-version = "0.2.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b81cf3b8cb96aa0e73bbedfcdc9708d09fec2854ba8d474be4e6f666d7379e8b"
-dependencies = [
- "serde",
 ]
 
 [[package]]
@@ -2973,7 +2932,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f88643aea3c1343c804950d7bf983bd2067f5ab59db6d613a08e05572f2714ab"
 dependencies = [
  "base64 0.10.1",
- "bytes 0.4.12",
+ "bytes",
  "cookie",
  "cookie_store",
  "encoding_rs",
@@ -3107,7 +3066,7 @@ dependencies = [
  "chrono",
  "failure",
  "futures 0.3.25",
- "juniper 0.11.1",
+ "juniper",
  "kubos-service",
  "log 0.4.17",
  "reqwest",
@@ -3285,7 +3244,7 @@ version = "0.1.0"
 dependencies = [
  "comms-service",
  "failure",
- "juniper 0.11.1",
+ "juniper",
  "kubos-service",
  "kubos-system",
  "log 0.4.17",
@@ -3464,7 +3423,7 @@ version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d24114bfcceb867ca7f71a0d3fe45d45619ec47a6fbfa98cb14e14250bfa5d6d"
 dependencies = [
- "bytes 0.4.12",
+ "bytes",
 ]
 
 [[package]]
@@ -3572,7 +3531,7 @@ version = "0.1.0"
 dependencies = [
  "diesel",
  "flate2",
- "juniper 0.11.1",
+ "juniper",
  "kubos-service",
  "kubos-telemetry-db",
  "log 0.4.17",
@@ -3756,7 +3715,7 @@ version = "0.1.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5a09c0b5bb588872ab2f09afa13ee6e9dac11e10a0ec9e8e3ba39a5a5d530af6"
 dependencies = [
- "bytes 0.4.12",
+ "bytes",
  "futures 0.1.31",
  "mio",
  "num_cpus",
@@ -3780,7 +3739,7 @@ version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8fb220f46c53859a4b7ec083e41dec9778ff0b1851c0942b211edb89e0ccdc46"
 dependencies = [
- "bytes 0.4.12",
+ "bytes",
  "either",
  "futures 0.1.31",
 ]
@@ -3791,7 +3750,7 @@ version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "25b2998660ba0e70d18684de5d06b70b70a3a747469af9dea7618cc59e75976b"
 dependencies = [
- "bytes 0.4.12",
+ "bytes",
  "futures 0.1.31",
  "tokio-io",
 ]
@@ -3833,7 +3792,7 @@ version = "0.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "57fc868aae093479e3131e3d165c93b1c7474109d13c90ec0dda2a1bbfff0674"
 dependencies = [
- "bytes 0.4.12",
+ "bytes",
  "futures 0.1.31",
  "log 0.4.17",
 ]
@@ -3873,7 +3832,7 @@ version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "98df18ed66e3b72e742f185882a9e201892407957e45fbff8da17ae7a7c51f72"
 dependencies = [
- "bytes 0.4.12",
+ "bytes",
  "futures 0.1.31",
  "iovec",
  "mio",
@@ -3916,7 +3875,7 @@ version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2a0b10e610b39c38b031a2fcab08e4b82f16ece36504988dcbd81dbba650d82"
 dependencies = [
- "bytes 0.4.12",
+ "bytes",
  "futures 0.1.31",
  "log 0.4.17",
  "mio",
@@ -3931,7 +3890,7 @@ version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ab57a4ac4111c8c9dbcf70779f6fc8bc35ae4b2454809febac840ad19bd7e4e0"
 dependencies = [
- "bytes 0.4.12",
+ "bytes",
  "futures 0.1.31",
  "iovec",
  "libc",
@@ -3981,7 +3940,7 @@ checksum = "8a0c2bd5aeb7dcd2bb32e472c8872759308495e5eccc942e929a513cd8d36110"
 dependencies = [
  "base64 0.11.0",
  "byteorder",
- "bytes 0.4.12",
+ "bytes",
  "http",
  "httparse",
  "input_buffer",
@@ -4172,12 +4131,6 @@ dependencies = [
 
 [[package]]
 name = "uuid"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bcc7e3b898aa6f6c08e5295b6c89258d1331e9ac578cc992fb818759951bdc22"
-
-[[package]]
-name = "uuid"
 version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e1436e58182935dcd9ce0add9ea0b558e8a87befe01c1a301e6020aeb0876363"
@@ -4242,7 +4195,7 @@ version = "0.1.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e69d5878a40400a1d1cd8af276d1ac038c4a6ea648be30990dce293c3cbdbbaf"
 dependencies = [
- "bytes 0.4.12",
+ "bytes",
  "futures 0.1.31",
  "headers",
  "http",
