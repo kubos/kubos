@@ -1304,7 +1304,7 @@ dependencies = [
  "net2",
  "rustc_version",
  "time 0.1.44",
- "tokio",
+ "tokio 0.1.22",
  "tokio-buf",
  "tokio-executor",
  "tokio-io",
@@ -2949,7 +2949,7 @@ dependencies = [
  "serde_json",
  "serde_urlencoded 0.5.5",
  "time 0.1.44",
- "tokio",
+ "tokio 0.1.22",
  "tokio-executor",
  "tokio-io",
  "tokio-threadpool",
@@ -3074,7 +3074,7 @@ dependencies = [
  "serde_json",
  "syslog",
  "tempfile",
- "tokio",
+ "tokio 1.8.4",
  "utils",
 ]
 
@@ -3734,6 +3734,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "tokio"
+version = "1.8.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "50dae83881bc9b0403dd5b44ea9deed3e939856cc8722d5be37f0d6e5c6d53dd"
+dependencies = [
+ "autocfg 1.1.0",
+ "pin-project-lite",
+]
+
+[[package]]
 name = "tokio-buf"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4208,7 +4218,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_urlencoded 0.6.1",
- "tokio",
+ "tokio 0.1.22",
  "tokio-io",
  "tokio-threadpool",
  "tungstenite",
