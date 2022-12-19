@@ -18,7 +18,7 @@ use crate::meminfo::MemInfo;
 use crate::process::ProcStat;
 use crate::userinfo::UserInfo;
 
-pub struct LoadAvgResponse{
+pub struct LoadAvgResponse {
     pub avgs: LoadAvg,
 }
 

@@ -132,7 +132,7 @@ mod tests {
     const RAW_PARTIAL: &[u8] = b"0.19 0.13 2.6 \n";
     const RAW_BAD: &[u8] = b"bad data 12.0\n";
     const RAW_WEIRD: &[u8] = b"0.19 0.13 2.6 bobloblaw 11348\n";
-    const EMPTY : &[u8] = b"   ";
+    const EMPTY: &[u8] = b"   ";
 
     #[test]
     fn loadavg_parse() {
