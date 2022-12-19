@@ -23,7 +23,7 @@ pub struct LoadAvg {
     load_5m: Option<f64>,
     load_15m: Option<f64>,
     processes_active: Option<u64>,
-    processes_total:  Option<u64>,
+    processes_total: Option<u64>,
     last_pid: Option<u64>,
 }
 
@@ -46,7 +46,7 @@ impl LoadAvg {
         }
     }
 
-    fn parse_u64(s: &str) -> Option<u64>{
+    fn parse_u64(s: &str) -> Option<u64> {
         match s.parse::<u64>() {
             Ok(v) => Some(v),
             Err(_) => None,
@@ -62,14 +62,25 @@ impl LoadAvg {
         let _len = raw.read_line(&mut buf)?;
         let ws = buf.split_whitespace();
         let split_vec = ws.collect::<Vec<_>>().to_owned();
-        let split_procs = split_vec[3].split('/').collect::<Vec<_>>();
 
-        load_avg.load_1m = Self::parse_f64(split_vec[0]);
-        load_avg.load_5m = Self::parse_f64(split_vec[1]);
-        load_avg.load_15m = Self::parse_f64(split_vec[2]);
-        load_avg.processes_active =Self::parse_u64(split_procs[0]);
-        load_avg.processes_total = Self::parse_u64(split_procs[1]);
-        load_avg.last_pid = Self::parse_u64(split_vec[4]);
+        // Parsers which can safely fail
+        if split_vec.len() >= 3 {
+            load_avg.load_1m = Self::parse_f64(split_vec[0]);
+            load_avg.load_5m = Self::parse_f64(split_vec[1]);
+            load_avg.load_15m = Self::parse_f64(split_vec[2]);
+        }
+
+        if split_vec.len() > 3 {
+            let split_procs = split_vec[3].split('/').collect::<Vec<_>>();
+            if split_procs.len() > 1 {
+                load_avg.processes_active = Self::parse_u64(split_procs[0]);
+                load_avg.processes_total = Self::parse_u64(split_procs[1]);
+            }
+        }
+
+        if split_vec.len() > 4 {
+            load_avg.last_pid = Self::parse_u64(split_vec[4]);
+        }
 
         Ok(load_avg)
     }
@@ -101,7 +112,6 @@ impl LoadAvg {
         self.processes_active
     }
 
-
     // System total number of processes
     pub fn processes_total(&self) -> Option<u64> {
         self.processes_total
@@ -111,7 +121,7 @@ impl LoadAvg {
     pub fn last_pid(&self) -> Option<u64> {
         self.last_pid
     }
-} 
+}
 
 #[cfg(test)]
 #[allow(clippy::unreadable_literal)]
@@ -119,8 +129,10 @@ mod tests {
     use super::*;
 
     const RAW0: &[u8] = b"0.03 0.05 0.06 1/541 6275\n";
-    //const RAW1: &[u8] = b"0.19 0.13 0.09 1/543 11348\n";
-    //const RAW_PARTIAL: &[u8] = b"0.19 0.13 \n";
+    const RAW_PARTIAL: &[u8] = b"0.19 0.13 2.6 \n";
+    const RAW_BAD: &[u8] = b"bad data 12.0\n";
+    const RAW_WEIRD: &[u8] = b"0.19 0.13 2.6 bobloblaw 11348\n";
+    const EMPTY : &[u8] = b"   ";
 
     #[test]
     fn loadavg_parse() {
@@ -134,6 +146,70 @@ mod tests {
                 processes_active: Some(1),
                 processes_total: Some(541),
                 last_pid: Some(6275),
+            })
+        );
+    }
+
+    #[test]
+    fn loadavg_partial() {
+        let info: Result<LoadAvg, failure::Error> = LoadAvg::parse(RAW_PARTIAL);
+        assert_eq!(
+            info.ok(),
+            Some(LoadAvg {
+                load_1m: Some(0.19),
+                load_5m: Some(0.13),
+                load_15m: Some(2.6),
+                processes_active: None,
+                processes_total: None,
+                last_pid: None,
+            })
+        );
+    }
+
+    #[test]
+    fn loadavg_weird() {
+        let info: Result<LoadAvg, failure::Error> = LoadAvg::parse(RAW_WEIRD);
+        assert_eq!(
+            info.ok(),
+            Some(LoadAvg {
+                load_1m: Some(0.19),
+                load_5m: Some(0.13),
+                load_15m: Some(2.6),
+                processes_active: None,
+                processes_total: None,
+                last_pid: Some(11348),
+            })
+        );
+    }
+
+    #[test]
+    fn bad_data() {
+        let info: Result<LoadAvg, failure::Error> = LoadAvg::parse(RAW_BAD);
+        assert_eq!(
+            info.ok(),
+            Some(LoadAvg {
+                load_1m: None,
+                load_5m: None,
+                load_15m: Some(12.0),
+                processes_active: None,
+                processes_total: None,
+                last_pid: None,
+            })
+        );
+    }
+
+    #[test]
+    fn no_data() {
+        let info: Result<LoadAvg, failure::Error> = LoadAvg::parse(EMPTY);
+        assert_eq!(
+            info.ok(),
+            Some(LoadAvg {
+                load_1m: None,
+                load_5m: None,
+                load_15m: None,
+                processes_active: None,
+                processes_total: None,
+                last_pid: None,
             })
         );
     }
