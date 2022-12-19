@@ -117,7 +117,7 @@ impl LoadAvg {
         self.processes_total
     }
 
-    // Total threads launched on the system
+    // Last process ID launched on the system
     pub fn last_pid(&self) -> Option<u64> {
         self.last_pid
     }

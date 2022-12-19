@@ -23,13 +23,13 @@ pub struct LoadAvgResponse {
 }
 
 graphql_object!(LoadAvgResponse: () |&self| {
-    field one_minute_avg() -> Option<f64> {
+    field load_1m() -> Option<f64> {
         self.avgs.load_1m().map(|v| v as f64)
     }
-    field five_minute_avg() -> Option<f64> {
+    field load_5m() -> Option<f64> {
         self.avgs.load_5m().map(|v| v as f64)
     }
-    field fifteen_minute_avg() -> Option<f64> {
+    field load_15m() -> Option<f64> {
         self.avgs.load_15m().map(|v| v as f64)
     }
     field processes_active() -> Option<f64> {

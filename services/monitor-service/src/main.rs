@@ -36,9 +36,9 @@
 //!     load_1m: Float
 //!     load_5m: Float
 //!     load_15m: Float
-//!     processes_active: Int
-//!     processes_total: Int
-//!     last_pid: Int
+//!     processes_active: Float
+//!     processes_total: Float
+//!     last_pid: Float
 //! }
 //!
 //! type MemInfo {
