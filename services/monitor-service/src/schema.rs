@@ -16,6 +16,7 @@
 
 use juniper::{self, FieldError, FieldResult};
 
+use crate::loadavg;
 use crate::meminfo;
 use crate::objects::*;
 use crate::process;
@@ -46,6 +47,12 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
         };
 
         Ok(pids_vec.into_iter().map(PSResponse::new).collect())
+    }
+
+    field load_avg(&executor) -> FieldResult<LoadAvgResponse> {
+        loadavg::LoadAvg::from_proc()
+            .map(|avgs| LoadAvgResponse{ avgs })
+            .map_err(|err| FieldError::new(err, juniper::Value::null()))
     }
 });
 
