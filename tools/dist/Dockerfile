@@ -6,17 +6,29 @@ MAINTAINER marshall@xplore.com
 
 RUN apt-get update -y
 
-RUN apt-get upgrade --no-install-recommends -y python3
-RUN apt-get install --no-install-recommends -y pkg-config build-essential git cmake unzip wget sqlite3 libsqlite3-dev libssl-dev curl git ssh
-
-# Linux build dependencies
-RUN apt-get install --no-install-recommends -y file rsync bc cpio ncurses-dev 
+RUN apt-get upgrade --no-install-recommends -y \
+    bc \
+    build-essential \
+    cmake \
+    cpio \
+    curl \
+    libsqlite3-dev \
+    libssl-dev \
+    ncurses-dev \
+    file \
+    git \
+    pkg-config \
+    python3 \
+    python3-pip \
+    python3-setuptools \
+    rsync \
+    sqlite3 \
+    ssh \
+    unzip \
+    wget
 
 #Tools to generate docs
 RUN apt-get install --no-install-recommends -y doxygen graphviz plantuml
-
-# Install pip for Python2 and Python3
-RUN apt-get install --no-install-recommends -y python3-pip python3-setuptools
 
 # So that we have bdist_wheel available when installing other packages
 RUN python3 -m pip install wheel poetry==1.2.0
