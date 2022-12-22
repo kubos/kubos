@@ -29,28 +29,15 @@ pub struct LoadAvg {
 
 impl LoadAvg {
     pub fn new() -> Self {
-        Self {
-            load_1m: None,
-            load_5m: None,
-            load_15m: None,
-            processes_active: None,
-            processes_total: None,
-            last_pid: None,
-        }
+        Default::default()
     }
 
     fn parse_f64(avg: &str) -> Option<f64> {
-        match avg.parse::<f64>() {
-            Ok(v) => Some(v),
-            Err(_) => None,
-        }
+        avg.parse().ok()
     }
 
     fn parse_u64(s: &str) -> Option<u64> {
-        match s.parse::<u64>() {
-            Ok(v) => Some(v),
-            Err(_) => None,
-        }
+        s.parse().ok()
     }
 
     pub fn parse<R>(mut raw: R) -> Result<LoadAvg, failure::Error>
