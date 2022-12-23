@@ -51,7 +51,7 @@ graphql_object!(QueryRoot: Context as "Query" |&self| {
 
     field load_avg(&executor) -> FieldResult<LoadAvgResponse> {
         loadavg::LoadAvg::from_proc()
-            .map(|avgs| LoadAvgResponse{ avgs })
+            .map(|avgs| LoadAvgResponse { avgs })
             .map_err(|err| FieldError::new(err, juniper::Value::null()))
     }
 });

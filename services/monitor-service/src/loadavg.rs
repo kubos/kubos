@@ -32,7 +32,7 @@ impl LoadAvg {
         Default::default()
     }
 
-    fn parse_f64(avg: &str) -> Option<f64> {
+    fn parse_avg(avg: &str) -> Option<f64> {
         avg.parse().ok()
     }
 
@@ -52,9 +52,9 @@ impl LoadAvg {
 
         // Parsers which can safely fail
         if split_vec.len() >= 3 {
-            load_avg.load_1m = Self::parse_f64(split_vec[0]);
-            load_avg.load_5m = Self::parse_f64(split_vec[1]);
-            load_avg.load_15m = Self::parse_f64(split_vec[2]);
+            load_avg.load_1m = Self::parse_avg(split_vec[0]);
+            load_avg.load_5m = Self::parse_avg(split_vec[1]);
+            load_avg.load_15m = Self::parse_avg(split_vec[2]);
         }
 
         if split_vec.len() > 3 {
@@ -123,7 +123,7 @@ mod tests {
 
     #[test]
     fn loadavg_parse() {
-        let info: Result<LoadAvg, failure::Error> = LoadAvg::parse(RAW0);
+        let info = LoadAvg::parse(RAW0);
         assert_eq!(
             info.ok(),
             Some(LoadAvg {
@@ -139,7 +139,7 @@ mod tests {
 
     #[test]
     fn loadavg_partial() {
-        let info: Result<LoadAvg, failure::Error> = LoadAvg::parse(RAW_PARTIAL);
+        let info = LoadAvg::parse(RAW_PARTIAL);
         assert_eq!(
             info.ok(),
             Some(LoadAvg {
@@ -155,7 +155,7 @@ mod tests {
 
     #[test]
     fn loadavg_weird() {
-        let info: Result<LoadAvg, failure::Error> = LoadAvg::parse(RAW_WEIRD);
+        let info = LoadAvg::parse(RAW_WEIRD);
         assert_eq!(
             info.ok(),
             Some(LoadAvg {
@@ -171,7 +171,7 @@ mod tests {
 
     #[test]
     fn bad_data() {
-        let info: Result<LoadAvg, failure::Error> = LoadAvg::parse(RAW_BAD);
+        let info = LoadAvg::parse(RAW_BAD);
         assert_eq!(
             info.ok(),
             Some(LoadAvg {
@@ -187,7 +187,7 @@ mod tests {
 
     #[test]
     fn no_data() {
-        let info: Result<LoadAvg, failure::Error> = LoadAvg::parse(EMPTY);
+        let info = LoadAvg::parse(EMPTY);
         assert_eq!(
             info.ok(),
             Some(LoadAvg {
