@@ -1,2 +1,2 @@
 -f ../../apis/app-api/python app_api==0.1.0
-setuptools==40.6.3
+setuptools==65.5.1
