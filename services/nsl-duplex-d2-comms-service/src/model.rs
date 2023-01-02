@@ -20,7 +20,7 @@
 //!
 
 use crate::comms::DuplexComms;
-use comms_service::CommsTelemetry;
+use kubos_comms::CommsTelemetry;
 use nsl_duplex_d2::{GeoRecord, StateOfHealth};
 use std::convert::From;
 use std::sync::{Arc, Mutex};

@@ -22,9 +22,9 @@
 //! service to allow transfer of udp packets over a serial link to the satellite.
 //!
 
-extern crate comms_service;
 #[macro_use]
 extern crate failure;
+extern crate kubos_comms;
 extern crate kubos_service;
 extern crate kubos_system;
 #[macro_use]
@@ -42,8 +42,8 @@ mod schema;
 use crate::comms::*;
 use crate::model::Subsystem;
 use crate::schema::{MutationRoot, QueryRoot};
-use comms_service::*;
 use failure::Error;
+use kubos_comms::*;
 use kubos_service::{Config, Logger, Service};
 use std::sync::{Arc, Mutex};
 

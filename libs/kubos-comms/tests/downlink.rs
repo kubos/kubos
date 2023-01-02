@@ -19,7 +19,7 @@ extern crate failure;
 
 mod util;
 
-use comms_service::*;
+use kubos_comms::*;
 use std::net::UdpSocket;
 use std::sync::{Arc, Mutex};
 use std::thread;

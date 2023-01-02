@@ -108,7 +108,7 @@ Cargo.toml
 
 Edit the ``Cargo.toml`` file to have the following dependencies::
 
-    comms-service = { git = "https://github.com/kubos/kubos" }
+    kubos-comms = { git = "https://github.com/kubos/kubos" }
     failure = "0.1.2"
     juniper =  "0.11"
     kubos-service = { git = "https://github.com/kubos/kubos" }
@@ -488,7 +488,7 @@ All together, our code so far should look like this:
     // Return type for this service.
     type ServiceResult<T> = Result<T, Error>;
     
-    use comms_service::*;
+    use kubos_comms::*;
     use failure::*;
     use kubos_service::Logger;
     use log::*;
@@ -840,7 +840,7 @@ The file should look like this:
 
 .. code-block:: rust
 
-    use comms_service::CommsTelemetry;
+    use kubos_comms::CommsTelemetry;
     use std::sync::{Arc, Mutex};
 
     #[derive(Clone)]
@@ -958,12 +958,12 @@ Now that the code is complete, we can use our communications service to send a q
 
 .. |comms-service-start| raw:: html
 
-    <a href="../rust-docs/comms_service/struct.CommsService.html#method.start" target="_blank">CommsService::start</a>
+    <a href="../rust-docs/kubos_comms/struct.CommsService.html#method.start" target="_blank">CommsService::start</a>
 
 .. |CommsControlBlock| raw:: html
 
-    <a href="../rust-docs/comms_service/struct.CommsControlBlock.html" target="_blank">CommsControlBlock</a>
+    <a href="../rust-docs/kubos_comms/struct.CommsControlBlock.html" target="_blank">CommsControlBlock</a>
 
 .. |CommsTelemetry| raw:: html
 
-    <a href="../rust-docs/comms_service/struct.CommsTelemetry.html" target="_blank">CommsTelemetry</a>
+    <a href="../rust-docs/kubos_comms/struct.CommsTelemetry.html" target="_blank">CommsTelemetry</a>
