@@ -104,7 +104,7 @@ jobs:
         - image: kubos/kubos-dev:latest
       steps:
         - checkout
-        - run: python3 tools/ci_c.py
+        - run: python3 tools/ci/c_build.py
         - run: python3 hal/python-hal/i2c/test_i2c.py
         - run: cd hal/python-hal/i2c && poetry install --no-interaction --no-ansi
         - run: cd apis/pumpkin-mcu-api && python3 test_mcu_api.py
@@ -120,7 +120,7 @@ jobs:
             fingerprints:
               - "5f:25:ab:69:3f:51:e1:e9:e9:36:82:fb:d0:8d:3b:bf"
         - checkout
-        - run: ./deploy_tag.sh
+        - run: ./tools/ci/deploy_tag.sh
 
     # Generate and upload new docs
     # Run when code is merged into master or when an official release tag is generated

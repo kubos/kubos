@@ -211,11 +211,11 @@
 #![deny(warnings)]
 #![deny(missing_docs)]
 
-extern crate comms_service;
 #[macro_use]
 extern crate failure;
 #[macro_use]
 extern crate juniper;
+extern crate kubos_comms;
 extern crate kubos_service;
 #[macro_use]
 extern crate log;
@@ -228,8 +228,8 @@ mod schema;
 use crate::comms::*;
 use crate::model::Subsystem;
 use crate::schema::{MutationRoot, QueryRoot};
-use comms_service::*;
 use failure::Error;
+use kubos_comms::*;
 use kubos_service::{Config, Logger, Service};
 use std::sync::{Arc, Mutex};
 

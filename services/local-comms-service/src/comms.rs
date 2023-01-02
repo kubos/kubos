@@ -16,8 +16,8 @@
 // Contributed by: William Greer (wgreer184@gmail.com) and Sam Justice (sam.justice1@gmail.com)
 //
 
-use comms_service::CommsResult;
 use failure::bail;
+use kubos_comms::CommsResult;
 use std::net::UdpSocket;
 use std::sync::{Arc, Mutex};
 

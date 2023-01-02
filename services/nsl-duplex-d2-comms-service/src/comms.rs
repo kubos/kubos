@@ -20,7 +20,7 @@
 //!
 
 use crate::NslDuplexCommsResult;
-use comms_service::CommsServiceError;
+use kubos_comms::CommsServiceError;
 use nsl_duplex_d2::{serial_connection, DuplexD2, File};
 use std::sync::{Arc, Mutex};
 use std::thread;

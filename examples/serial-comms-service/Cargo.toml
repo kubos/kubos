@@ -5,9 +5,9 @@ authors = ["Ryan Plauche <ryan@kubos.com>"]
 edition = "2018"
 
 [dependencies]
-comms-service = { path = "../../libs/comms-service" }
 failure = "0.1.3"
 juniper =  "0.11"
+kubos-comms = { path = "../../libs/kubos-comms" }
 kubos-system = { path = "../../apis/system-api" }
 kubos-service = { path = "../../services/kubos-service" }
 log = "^0.4.0"

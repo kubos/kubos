@@ -19,7 +19,7 @@
 //! information over the GraphQL interface.
 //!
 
-use comms_service::CommsTelemetry;
+use kubos_comms::CommsTelemetry;
 use std::sync::{Arc, Mutex};
 
 #[derive(Clone)]

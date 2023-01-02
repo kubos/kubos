@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-use comms_service::*;
+use kubos_comms::*;
 use std::cell::RefCell;
 use std::str;
 use std::sync::{Arc, Barrier, Mutex};
