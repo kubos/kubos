@@ -6,3 +6,6 @@ edition = "2018"
 
 [dependencies]
 failure = "0.1.2"
+
+[package.metadata.release]
+release = false

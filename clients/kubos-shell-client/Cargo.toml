@@ -9,3 +9,6 @@ clap = "2.32"
 failure = "0.1.2"
 shell-protocol = { path = "../../libs/shell-protocol" }
 channel-protocol = { path = "../../libs/channel-protocol" }
+
+[package.metadata.release]
+release = false

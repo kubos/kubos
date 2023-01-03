@@ -13,3 +13,6 @@ failure = "0.1.2"
 nosengine-rust = { path = "../../../apis/nosengine-rust", optional = true }
 toml = "0.4.0"
 display_derive = "0.0.0"
+
+[package.metadata.release]
+release = false

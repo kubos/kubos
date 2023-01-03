@@ -16,3 +16,6 @@ rust-i2c = { path = "../../hal/rust-hal/rust-i2c", optional = true }
 
 [build-dependencies]
 kubos-build-helper = {path = "../../kubos-build-helper"}
+
+[package.metadata.release]
+release = false

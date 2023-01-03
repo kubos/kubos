@@ -9,3 +9,6 @@ juniper =  "0.11"
 isis-iobc-supervisor = { path = "../../apis/isis-iobc-supervisor" }
 kubos-service = { path = "../kubos-service" }
 log = "^0.4.0"
+
+[package.metadata.release]
+release = false

@@ -12,3 +12,6 @@ kubos-comms = { path = "../../libs/kubos-comms" }
 pnet = "0.31.0"
 serde_json = "1.0"
 serial = "0.4"
+
+[package.metadata.release]
+release = false

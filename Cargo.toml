@@ -131,3 +131,6 @@ lto = true
 opt-level = "z"
 panic = "abort"
 codegen-units = 1
+
+[workspace.metadata.release]
+tag-name = "{{version}}"

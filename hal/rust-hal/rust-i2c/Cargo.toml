@@ -11,3 +11,6 @@ nos3 = ["nosengine-rust", "toml"]
 i2c-linux = "0.1"
 nosengine-rust = { path = "../../../apis/nosengine-rust", optional = true }
 toml = { version = "0.4.0", optional = true }
+
+[package.metadata.release]
+release = false
