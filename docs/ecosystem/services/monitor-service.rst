@@ -126,6 +126,37 @@ The query has the following response fields:
       without swapping
     - ``lowFree`` - The amount of free memory which can be used by the kernel
 
+LoadAvg Query
+-------------
+
+The ``loadAvg`` query can be used to get information about the system's processor utilization. It
+operates by reading `/proc/loadavg` and parsing available values to return averaged processor
+load, counts of active processes, and last process ID status.
+
+All values are recorded in double precision floats to avoid any potential truncation, and simplify output.
+
+It has the following schema::
+
+    {
+        loadAvg {
+            load1m: Float
+            load5m: Float
+            load15m: Float
+            processesActive: Float
+            processesTotal: Float
+            lastPid: Float
+        }
+    }
+
+The response fields:
+
+    - ``load1m`` - System load averaged over the past minute
+    - ``load5m`` - System load averaged over the past five minutes
+    - ``load15m`` - System load averaged over the past fifteen minutes 
+    - ``processesActive`` - Processes active at the instant of reading /proc/loadavg 
+    - ``processesTotal`` - Processes running on the system in total
+    - ``lastPid`` - Last spawned Process ID on the system
+
 .. note::
 
     Not all response fields are available on all systems.

@@ -32,6 +32,15 @@
 //!     ps(pids: [Int!] = null): [ProcInfo!]!
 //! }
 //!
+//! type LoadAvg {
+//!     load_1m: Float
+//!     load_5m: Float
+//!     load_15m: Float
+//!     processes_active: Float
+//!     processes_total: Float
+//!     last_pid: Float
+//! }
+//!
 //! type MemInfo {
 //!     total: Int
 //!     free: Int
@@ -61,6 +70,7 @@ use crate::schema::{MutationRoot, QueryRoot};
 use kubos_service::{Config, Logger, Service};
 use log::error;
 
+mod loadavg;
 mod meminfo;
 mod objects;
 #[macro_use]

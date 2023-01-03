@@ -13,9 +13,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+use crate::loadavg::LoadAvg;
 use crate::meminfo::MemInfo;
 use crate::process::ProcStat;
 use crate::userinfo::UserInfo;
+
+pub struct LoadAvgResponse {
+    pub avgs: LoadAvg,
+}
+
+graphql_object!(LoadAvgResponse: () |&self| {
+    field load_1m() -> Option<f64> {
+        self.avgs.load_1m()
+    }
+    field load_5m() -> Option<f64> {
+        self.avgs.load_5m()
+    }
+    field load_15m() -> Option<f64> {
+        self.avgs.load_15m()
+    }
+    field processes_active() -> Option<f64> {
+        self.avgs.processes_active().map(|v| v as f64)
+    }
+    field processes_total() -> Option<f64> {
+        self.avgs.processes_total().map(|v| v as f64)
+    }
+    field last_pid() -> Option<f64> {
+        self.avgs.last_pid().map(|v| v as f64)
+    }
+});
 
 pub struct MemInfoResponse {
     pub info: MemInfo,
