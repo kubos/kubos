@@ -19,3 +19,6 @@ serial = "0.4"
 
 [build-dependencies]
 kubos-build-helper = {path = "../../kubos-build-helper"}
+
+[package.metadata.release]
+release = false

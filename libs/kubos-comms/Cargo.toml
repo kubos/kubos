@@ -3,6 +3,10 @@ name = "kubos-comms"
 authors = ["Josh Roppo <joshua.roppo@xplore.com>", "William Greer <wgreer184@gmail.com>", "Sam Justice <sam.justice1@gmail.com"]
 edition = "2018"
 version.workspace = true
+description.workspace = true
+license.workspace = true
+documentation.workspace = true
+repository.workspace = true
 
 [dependencies]
 byteorder = "1.2.7"

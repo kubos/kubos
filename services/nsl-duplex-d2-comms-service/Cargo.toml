@@ -11,3 +11,6 @@ kubos-comms = { path = "../../libs/kubos-comms" }
 kubos-service = { path = "../../services/kubos-service" }
 log = "^0.4.0"
 nsl-duplex-d2 = { path = "../../apis/nsl-duplex-d2" }
+
+[package.metadata.release]
+release = false

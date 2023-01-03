@@ -3,6 +3,10 @@ name = "kubos-service"
 authors = ["Marshall Culpepper <marshall@xplore.com>", "Ryan Plauche <ryan@kubos.co>"]
 edition = "2018"
 version.workspace = true
+description.workspace = true
+license.workspace = true
+documentation.workspace = true
+repository.workspace = true
 
 [dependencies]
 serde = "1.0"

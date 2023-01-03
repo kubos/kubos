@@ -7,3 +7,6 @@ edition = "2018"
 [dependencies]
 nom = "4.0.0-beta1"
 failure = "0.1.2"
+
+[package.metadata.release]
+release = false

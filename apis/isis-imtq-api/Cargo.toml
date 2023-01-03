@@ -12,3 +12,6 @@ double = "0.2.2"
 
 [build-dependencies]
 kubos-build-helper = {path = "../../kubos-build-helper"}
+
+[package.metadata.release]
+release = false

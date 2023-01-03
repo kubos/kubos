@@ -11,3 +11,6 @@ tempfile = "3"
 reqwest = "0.9.9"
 serde_json = "1.0"
 warp = "0.1.12"
+
+[package.metadata.release]
+release = false
