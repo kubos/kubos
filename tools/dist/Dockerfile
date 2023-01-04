@@ -1,23 +1,33 @@
-# kubos/kubos-dev:1.22.0
+# kubos/kubos-dev:1.23.0
 
 FROM ubuntu:22.04
 
 MAINTAINER marshall@xplore.com
 
 RUN apt-get update -y
+RUN apt-get install --no-install-recommends -y \
+    software-properties-common
 
-RUN apt-get upgrade --no-install-recommends -y \
+RUN add-apt-repository 'deb http://archive.ubuntu.com/ubuntu xenial main universe' && apt-key update
+
+RUN apt-get update -y
+RUN apt-get install --no-install-recommends -y \
     bc \
     build-essential \
     cmake \
     cpio \
     curl \
+    doxygen \
+    libboost-program-options1.58.0 \
+    libboost-system1.58.0 \
     libsqlite3-dev \
     libssl-dev \
     ncurses-dev \
     file \
     git \
+    graphviz \
     pkg-config \
+    plantuml \
     python3 \
     python3-pip \
     python3-setuptools \
@@ -27,20 +37,20 @@ RUN apt-get upgrade --no-install-recommends -y \
     unzip \
     wget
 
-#Tools to generate docs
-RUN apt-get install --no-install-recommends -y doxygen graphviz plantuml
+# Custom gcc toolchains
+RUN wget https://s3.amazonaws.com/kubos-world-readable-assets/iobc_toolchain.tar.gz && \
+    tar -xf ./iobc_toolchain.tar.gz -C /usr/bin && \
+    rm ./iobc_toolchain.tar.gz
 
-# So that we have bdist_wheel available when installing other packages
-RUN python3 -m pip install wheel poetry==1.2.0
+RUN wget https://s3.amazonaws.com/kubos-world-readable-assets/bbb_toolchain.tar.gz && \
+    tar -xf ./bbb_toolchain.tar.gz -C /usr/bin && \
+    rm ./bbb_toolchain.tar.gz
 
-#Kubos Linux setup
-RUN echo "Installing Kubos Linux Toolchain"
-
-RUN wget https://s3.amazonaws.com/kubos-world-readable-assets/iobc_toolchain.tar.gz && tar -xf ./iobc_toolchain.tar.gz -C /usr/bin && rm ./iobc_toolchain.tar.gz
-
-RUN wget https://s3.amazonaws.com/kubos-world-readable-assets/bbb_toolchain.tar.gz && tar -xf ./bbb_toolchain.tar.gz -C /usr/bin && rm ./bbb_toolchain.tar.gz
+ENV PATH "$PATH:/usr/bin/iobc_toolchain/usr/bin:/usr/bin/bbb_toolchain/usr/bin"
 
 # Install all Kubos Python dependencies
+RUN python3 -m pip install wheel poetry==1.2.0
+
 WORKDIR /kubos-py
 COPY apis /kubos-py/apis
 COPY libs /kubos-py/libs
@@ -54,7 +64,7 @@ RUN poetry install --no-interaction --no-ansi
 WORKDIR /root
 RUN rm -rf /kubos-py
 
-# Setup rust stuff
+# Setup rust targets and build tools
 ENV PATH "$PATH:/root/.cargo/bin"
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && rustup toolchain uninstall stable-x86_64-unknown-linux-gnu
 RUN rustup default 1.64.0 && rm -rf /root/.rustup/toolchains/*/share/doc
@@ -64,18 +74,23 @@ RUN rustup target install aarch64-unknown-linux-gnu
 RUN rustup component add clippy
 RUN rustup component add rustfmt
 RUN /root/.cargo/bin/cargo install --git https://github.com/kubos/cargo-kubos
+RUN /root/.cargo/bin/cargo install cross --git https://github.com/cross-rs/cross
 COPY tools/dist/cargo_config /root/.cargo/config
 
-ENV PATH "$PATH:/usr/bin/iobc_toolchain/usr/bin:/usr/bin/bbb_toolchain/usr/bin"
-
 # Install NOS3 dependencies
-RUN apt-get --no-install-recommends install -y software-properties-common
-RUN add-apt-repository 'deb http://archive.ubuntu.com/ubuntu xenial main universe' && apt-key update
-RUN apt-get update -y
-RUN wget https://github.com/nasa/nos3/raw/59568804a8271672a53ae7ea09c4dae76dad3ba3/support/packages/ubuntu/itc-common-cxx11-Release_1.9.1_amd64.deb && \
-    apt-get install -y ./itc-common-cxx11-Release_1.9.1_amd64.deb && \
-    rm itc-common-cxx11-Release_1.9.1_amd64.deb
-RUN wget https://github.com/nasa/nos3/raw/59568804a8271672a53ae7ea09c4dae76dad3ba3/support/packages/ubuntu/nos-engine-cxx11-Release_1.4.0_amd64.deb && \
-    apt-get install -y ./nos-engine-cxx11-Release_1.4.0_amd64.deb && \
-    rm nos-engine-cxx11-Release_1.4.0_amd64.deb
-RUN apt-get install -y libboost-system1.58.0 libboost-program-options1.58.0 
+ENV NOS3_PKGS "https://github.com/nasa/nos3/raw/59568804a8271672a53ae7ea09c4dae76dad3ba3/support/packages/ubuntu"
+ENV NOS3_ITC_COMMON "itc-common-cxx11-Release_1.9.1_amd64.deb"
+ENV NOS3_NOS_ENGINE "nos-engine-cxx11-Release_1.4.0_amd64.deb"
+
+RUN wget $NOS3_PKGS/$NOS3_ITC_COMMON && \
+    apt-get install -y ./$NOS3_ITC_COMMON && \
+    rm $NOS3_ITC_COMMON
+RUN wget $NOS3_PKGS/$NOS3_NOS_ENGINE && \
+    apt-get install -y ./$NOS3_NOS_ENGINE && \
+    rm $NOS3_NOS_ENGINE
+
+# Docker engine for cross-rs builds
+RUN wget https://get.docker.com -O get-docker.sh && \
+    chmod 755 get-docker.sh && \
+    ./get-docker.sh && \
+    rm get-docker.sh

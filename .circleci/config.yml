@@ -37,6 +37,20 @@ jobs:
               CC: /usr/bin/iobc_toolchain/usr/bin/arm-linux-gcc
               CXX: /usr/bin/iobc_toolchain/usr/bin/arm-linux-g++
 
+    rust_check_aarch64:
+      machine:
+        - image: ubuntu-2204:2022.10.2
+          docker_layer_caching: true
+      steps:
+        - checkout
+        - run: 'docker run --rm
+            -v /var/run/docker.sock:/var/run/docker.sock
+            -v $PWD:$PWD
+            -w $PWD
+            -e CROSS_CONTAINER_IN_CONTAINER=true
+            kubos/kubos-dev:latest
+            cross check --workspace --all-targets --target aarch64-unknown-linux-gnu'
+
     # Rust testing
     # Run for all PR commits
     rust_test:
@@ -150,6 +164,10 @@ workflows:
             branches:
               ignore: master
       - rust_check_iobc:
+          filters:
+            branches:
+              ignore: master
+      - rust_check_aarch64:
           filters:
             branches:
               ignore: master
