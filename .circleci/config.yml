@@ -118,7 +118,7 @@ jobs:
       steps:
         - add_ssh_keys:
             fingerprints:
-              - "5f:25:ab:69:3f:51:e1:e9:e9:36:82:fb:d0:8d:3b:bf"
+              - "ec:c9:58:e1:d6:73:78:cd:1f:e7:11:08:d7:a8:70:9f"
         - checkout
         - run: ./deploy_tag.sh
 
@@ -130,7 +130,8 @@ jobs:
       steps:
         - add_ssh_keys:
             fingerprints:
-              - "5f:25:ab:69:3f:51:e1:e9:e9:36:82:fb:d0:8d:3b:bf"
+              - "ec:c9:58:e1:d6:73:78:cd:1f:e7:11:08:d7:a8:70:9f"
+              - "df:9c:88:0c:cf:75:c4:d3:ee:5f:77:ee:96:92:31:4b"
         - checkout
         - run: ssh-keyscan docs.kubos.co >> ~/.ssh/known_hosts
         - run: ./tools/docs/prep_docs.sh
