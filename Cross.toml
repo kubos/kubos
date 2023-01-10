@@ -1,0 +1,2 @@
+[target.aarch64-unknown-linux-gnu]
+dockerfile = "./tools/dist/Dockerfile.aarch64"
