@@ -526,6 +526,7 @@ impl Protocol {
                         path,
                         mode,
                     } => {
+                        info!("timed out while receiving");
                         match storage::validate_file(&self.config.storage_prefix, &hash, None) {
                             Ok((true, _)) => {
                                 self.send(&messages::ack(channel_id, &hash, None)?)?;
@@ -662,11 +663,11 @@ impl Protocol {
         let parsed_message = parsers::parse_message(message)?;
         let new_state = match &parsed_message {
             Message::Sync(channel_id, hash) => {
-                info!("<- {{ {}, {} }}", channel_id, hash);
+                info!("<- sync {{ {}, {} }}", channel_id, hash);
                 state.clone()
             }
             Message::Metadata(channel_id, hash, num_chunks) => {
-                info!("<- {{ {}, {}, {} }}", channel_id, hash, num_chunks);
+                info!("<- metadata {{ {}, {}, {} }}", channel_id, hash, num_chunks);
                 storage::store_meta(&self.config.storage_prefix, hash, *num_chunks)?;
                 State::StartReceive {
                     path: hash.to_owned(),
@@ -674,20 +675,35 @@ impl Protocol {
             }
             Message::ReceiveChunk(channel_id, hash, chunk_num, data) => {
                 info!(
-                    "<- {{ {}, {}, {}, chunk_data }}",
+                    "<- recv_chunk {{ {}, {}, {}, chunk_data }}",
                     channel_id, hash, chunk_num
                 );
                 storage::store_chunk(&self.config.storage_prefix, hash, *chunk_num, data)?;
+                if let State::Receiving { path, mode, .. } = state {
+                    if let Ok((true, _)) =
+                        storage::validate_file(&self.config.storage_prefix, hash, None)
+                    {
+                        // We've already got all the file data in temporary storage
+                        //self.send(&messages::ack(*channel_id, hash, None)?)?;
+
+                        return Ok(State::ReceivingDone {
+                            channel_id: *channel_id,
+                            hash: hash.to_string(),
+                            path: path.to_string(),
+                            mode: *mode,
+                        });
+                    }
+                }
                 state.clone()
             }
             Message::ACK(_channel_id, ack_hash) => {
-                info!("<- {{ {}, true }}", ack_hash);
+                info!("<- ack {{ {}, true }}", ack_hash);
                 // TODO: Figure out hash verification here
                 State::TransmittingDone
             }
             Message::NAK(channel_id, hash, Some(missing_chunks)) => {
                 info!(
-                    "<- {{ {}, {}, false, {:?} }}",
+                    "<- nak {{ {}, {}, false, {:?} }}",
                     channel_id, hash, missing_chunks
                 );
                 match self.send_chunks(*channel_id, hash, missing_chunks) {
@@ -700,13 +716,13 @@ impl Protocol {
                 State::Transmitting
             }
             Message::NAK(channel_id, hash, None) => {
-                info!("<- {{ {}, {}, false }}", channel_id, hash);
+                info!("<- nak {{ {}, {}, false }}", channel_id, hash);
                 // TODO: Maybe trigger a failure?
                 state.clone()
             }
             Message::ReqReceive(channel_id, hash, path, mode) => {
                 info!(
-                    "<- {{ {}, export, {}, {}, {:?} }}",
+                    "<- export_req {{ {}, export, {}, {}, {:?} }}",
                     channel_id, hash, path, mode
                 );
                 // The client wants to send us a file.
@@ -737,7 +753,7 @@ impl Protocol {
                 }
             }
             Message::ReqTransmit(channel_id, path) => {
-                info!("<- {{ {}, import, {} }}", channel_id, path);
+                info!("<- export_req {{ {}, import, {} }}", channel_id, path);
                 // Set up the requested file for transmission
                 match self.initialize_file(path) {
                     Ok((hash, num_chunks, mode)) => {
@@ -764,18 +780,21 @@ impl Protocol {
                 }
             }
             Message::SuccessReceive(channel_id, hash) => {
-                info!("<- {{ {}, true }}", channel_id);
+                info!("<- operation_success {{ {}, true }}", channel_id);
                 storage::delete_file(&self.config.storage_prefix, hash)?;
                 State::Done
             }
             Message::SuccessTransmit(channel_id, hash, num_chunks, mode) => {
                 match mode {
                     Some(value) => info!(
-                        "<- {{ {}, true, {}, {}, {} }}",
+                        "<- import_success {{ {}, true, {}, {}, {} }}",
                         channel_id, hash, num_chunks, value
                     ),
                     None => {
-                        info!("<- {{ {}, true, {}, {} }}", channel_id, hash, num_chunks)
+                        info!(
+                            "<- import_success {{ {}, true, {}, {} }}",
+                            channel_id, hash, num_chunks
+                        )
                     }
                 }
 
@@ -809,19 +828,22 @@ impl Protocol {
                 }
             }
             Message::Failure(channel_id, error_message) => {
-                info!("<- {{ {}, false, {} }}", channel_id, error_message);
+                info!(
+                    "<- operation_failure {{ {}, false, {} }}",
+                    channel_id, error_message
+                );
                 return Err(ProtocolError::TransmissionError {
                     channel_id: *channel_id,
                     error_message: error_message.to_string(),
                 });
             }
             Message::Cleanup(channel_id, Some(hash)) => {
-                info!("<- {{ {}, cleanup, {} }}", channel_id, hash);
+                info!("<- cleanup {{ {}, cleanup, {} }}", channel_id, hash);
                 storage::delete_file(&self.config.storage_prefix, hash)?;
                 State::Done
             }
             Message::Cleanup(channel_id, None) => {
-                info!("< {{ {}, cleanup }}", channel_id);
+                info!("<- cleanup {{ {}, cleanup }}", channel_id);
                 storage::delete_storage(&self.config.storage_prefix)?;
                 State::Done
             }

@@ -26,7 +26,7 @@ pub fn export_request(
     mode: u32,
 ) -> Result<Vec<u8>, ProtocolError> {
     info!(
-        "-> {{ {}, export, {}, {}, {} }}",
+        "-> export_req {{ {}, export, {}, {}, {} }}",
         channel_id, hash, target_path, mode
     );
 
@@ -40,7 +40,7 @@ pub fn export_request(
 
 // Create import message
 pub fn import_request(channel_id: u32, source_path: &str) -> Result<Vec<u8>, ProtocolError> {
-    info!("-> {{ import, {} }}", source_path);
+    info!("-> import_req {{ import, {} }}", source_path);
     ser::to_vec_packed(&(channel_id, "import", source_path)).map_err(|err| {
         ProtocolError::MessageCreationError {
             message: "import".to_owned(),
@@ -51,7 +51,7 @@ pub fn import_request(channel_id: u32, source_path: &str) -> Result<Vec<u8>, Pro
 
 // Create sync message
 pub fn metadata(channel_id: u32, hash: &str, num_chunks: u32) -> Result<Vec<u8>, ProtocolError> {
-    info!("-> {{ {}, {}, {} }}", channel_id, hash, num_chunks);
+    info!("-> metadata {{ {}, {}, {} }}", channel_id, hash, num_chunks);
     ser::to_vec_packed(&(channel_id, hash, num_chunks)).map_err(|err| {
         ProtocolError::MessageCreationError {
             message: "metadata".to_owned(),
@@ -62,7 +62,10 @@ pub fn metadata(channel_id: u32, hash: &str, num_chunks: u32) -> Result<Vec<u8>,
 
 // Send an acknowledge to the remote address
 pub fn ack(channel_id: u32, hash: &str, num_chunks: Option<u32>) -> Result<Vec<u8>, ProtocolError> {
-    info!("-> {{ {}, {}, true, {:?} }}", channel_id, hash, num_chunks);
+    info!(
+        "-> ack {{ {}, {}, true, {:?} }}",
+        channel_id, hash, num_chunks
+    );
     ser::to_vec_packed(&(channel_id, hash, true, num_chunks)).map_err(|err| {
         ProtocolError::MessageCreationError {
             message: "ACK".to_owned(),
@@ -79,7 +82,7 @@ pub fn nak(channel_id: u32, hash: &str, missing_chunks: &[u32]) -> Result<Vec<u8
         missing_chunks
     };
 
-    info!("-> {{ {}, {}, false, {:?} }}", channel_id, hash, chunks);
+    info!("-> nak {{ {}, {}, false, {:?} }}", channel_id, hash, chunks);
     let mut vec = ser::to_vec_packed(&(channel_id, hash, false)).map_err(|err| {
         ProtocolError::MessageCreationError {
             message: "NAK".to_owned(),
@@ -113,7 +116,10 @@ pub fn chunk(
     chunk: &[u8],
 ) -> Result<Vec<u8>, ProtocolError> {
     let chunk_bytes = Value::Bytes(chunk.to_vec());
-    info!("-> {{ {}, {}, {}, chunk_data }}", channel_id, hash, index);
+    info!(
+        "-> chunk {{ {}, {}, {}, chunk_data }}",
+        channel_id, hash, index
+    );
     ser::to_vec_packed(&(channel_id, hash, index, chunk_bytes)).map_err(|err| {
         ProtocolError::MessageCreationError {
             message: "chunk".to_owned(),
@@ -130,7 +136,7 @@ pub fn import_setup_success(
     mode: u32,
 ) -> Result<Vec<u8>, ProtocolError> {
     info!(
-        "-> {{ {}, true, {}, {}, {} }}",
+        "-> import_success {{ {}, true, {}, {}, {} }}",
         channel_id, hash, num_chunks, mode
     );
 
@@ -144,7 +150,7 @@ pub fn import_setup_success(
 
 // Create successful export request response message
 pub fn operation_success(channel_id: u32, hash: &str) -> Result<Vec<u8>, ProtocolError> {
-    info!("-> {{ {}, true, {} }}", channel_id, hash);
+    info!("-> operation_success {{ {}, true, {} }}", channel_id, hash);
     ser::to_vec_packed(&(channel_id, true, hash)).map_err(|err| {
         ProtocolError::MessageCreationError {
             message: "operation success".to_owned(),
@@ -155,7 +161,10 @@ pub fn operation_success(channel_id: u32, hash: &str) -> Result<Vec<u8>, Protoco
 
 // Create an operation failure response message
 pub fn operation_failure(channel_id: u32, error: &str) -> Result<Vec<u8>, ProtocolError> {
-    info!("-> {{ {}, false, {} }}", channel_id, error);
+    info!(
+        "-> operation_failure {{ {}, false, {} }}",
+        channel_id, error
+    );
     ser::to_vec_packed(&(channel_id, false, error)).map_err(|err| {
         ProtocolError::MessageCreationError {
             message: "operation failure".to_owned(),
@@ -167,7 +176,7 @@ pub fn operation_failure(channel_id: u32, error: &str) -> Result<Vec<u8>, Protoc
 // Create sync message
 #[allow(dead_code)]
 pub fn sync(channel_id: u32, hash: &str) -> Result<Vec<u8>, ProtocolError> {
-    info!("-> {{ {}, {} }}", channel_id, hash);
+    info!("-> sync {{ {}, {} }}", channel_id, hash);
     ser::to_vec_packed(&(channel_id, hash)).map_err(|err| ProtocolError::MessageCreationError {
         message: "sync".to_owned(),
         err,
@@ -175,7 +184,7 @@ pub fn sync(channel_id: u32, hash: &str) -> Result<Vec<u8>, ProtocolError> {
 }
 
 pub fn cleanup(channel_id: u32, hash: Option<String>) -> Result<Vec<u8>, ProtocolError> {
-    info!("-> {{ {}, cleanup, {:?}, }}", channel_id, hash);
+    info!("-> cleanup {{ {}, cleanup, {:?}, }}", channel_id, hash);
     ser::to_vec_packed(&(channel_id, "cleanup", hash)).map_err(|err| {
         ProtocolError::MessageCreationError {
             message: "cleanup".to_owned(),
