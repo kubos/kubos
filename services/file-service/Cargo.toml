@@ -10,13 +10,13 @@ failure = "0.1.2"
 file-protocol = { path = "../../libs/file-protocol" }
 kubos-system = { path = "../../apis/system-api" }
 log = "^0.4.0"
-serde_cbor = "0.8"
+serde_cbor = "0.10"
 
 [dev-dependencies]
 blake2-rfc = "0.2.18"
 rand = "0.5.5"
 serde = "1.0.58"
-serde_cbor = "0.8"
+serde_cbor = "0.10"
 tempfile = "3"
 
 [package.metadata.release]
