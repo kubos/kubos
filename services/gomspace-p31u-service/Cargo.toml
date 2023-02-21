@@ -8,7 +8,7 @@ edition = "2018"
 gomspace-p31u-api = { path = "../../apis/gomspace-p31u-api"}
 kubos-service = { path = "../../services/kubos-service" }
 rust-i2c = { path = "../../hal/rust-hal/rust-i2c" }
-juniper = "0.11"
+juniper = "0.15"
 syslog = "4.0"
 log = "^0.4.0"
 failure = "0.1.2"

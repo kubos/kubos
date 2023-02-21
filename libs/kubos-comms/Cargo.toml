@@ -11,7 +11,7 @@ repository.workspace = true
 [dependencies]
 byteorder = "1.2.7"
 failure = "0.1.3"
-juniper =  "0.11.1"
+juniper =  "0.15.10"
 kubos-system = { version = "=1.23.0", path = "../../apis/system-api" }
 log = "^0.4.0"
 pnet = "0.31.0"

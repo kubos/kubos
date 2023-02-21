@@ -8,7 +8,7 @@ edition = "2018"
 clyde-3g-eps-api = { path = "../../apis/clyde-3g-eps-api" }
 eps-api = { path = "../../apis/eps-api" }
 failure = "0.1.2"
-juniper =  "0.11"
+juniper =  "0.15"
 kubos-service = { path = "../kubos-service" }
 log = "^0.4.0"
 rust-i2c = { path = "../../hal/rust-hal/rust-i2c" }

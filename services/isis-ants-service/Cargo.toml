@@ -10,7 +10,7 @@ nos3 = ["isis-ants-api/nos3"]
 [dependencies]
 failure = "0.1.2"
 isis-ants-api = { path = "../../apis/isis-ants-api" }
-juniper =  "0.11"
+juniper =  "0.15"
 kubos-service = { path = "../kubos-service" }
 log = "^0.4.0"
 
