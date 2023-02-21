@@ -16,7 +16,7 @@ novatel-oem6-api = { path = "../../apis/novatel-oem6-api" }
 
 [dev-dependencies]
 serde_json = "1.0.10"
-warp = "0.1.12"
+warp = "0.3.3"
 
 [package.metadata.release]
 release = false

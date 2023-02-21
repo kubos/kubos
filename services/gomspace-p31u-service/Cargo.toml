@@ -15,7 +15,7 @@ failure = "0.1.2"
 
 [dev-dependencies]
 serde_json = "1.0"
-warp = "0.1.12"
+warp = "0.3.3"
 
 [package.metadata.release]
 release = false

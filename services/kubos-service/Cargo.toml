@@ -15,7 +15,7 @@ juniper = "0.11"
 juniper_warp = "0.2.0"
 kubos-system = { version = "=1.23.0", path = "../../apis/system-api" }
 log = "^0.4.0"
-warp = "0.1.12"
+warp = "0.3.3"
 # Pinning this to 0.3.15 due to kubos linux build issues with v0.3.16
 pkg-config = "= 0.3.15"
 
