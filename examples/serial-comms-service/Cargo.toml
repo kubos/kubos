@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 failure = "0.1.3"
-juniper =  "0.11"
+juniper =  "0.15"
 kubos-comms = { path = "../../libs/kubos-comms" }
 kubos-system = { path = "../../apis/system-api" }
 kubos-service = { path = "../../services/kubos-service" }
