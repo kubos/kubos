@@ -1,14 +1,18 @@
 [package]
-name = "comms-service"
-version = "0.1.1"
+name = "kubos-comms"
 authors = ["Josh Roppo <joshua.roppo@xplore.com>", "William Greer <wgreer184@gmail.com>", "Sam Justice <sam.justice1@gmail.com"]
 edition = "2018"
+version.workspace = true
+description.workspace = true
+license.workspace = true
+documentation.workspace = true
+repository.workspace = true
 
 [dependencies]
 byteorder = "1.2.7"
 failure = "0.1.3"
 juniper =  "0.11.1"
-kubos-system = { path = "../../apis/system-api" }
+kubos-system = { version = "=1.23.0", path = "../../apis/system-api" }
 log = "^0.4.0"
 pnet = "0.31.0"
 reqwest = "0.9"

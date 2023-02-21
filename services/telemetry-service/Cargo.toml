@@ -20,3 +20,6 @@ time = "0.1"
 [dev-dependencies]
 reqwest = "0.9.9"
 tempfile = "3"
+
+[package.metadata.release]
+release = false

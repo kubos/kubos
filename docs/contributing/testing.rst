@@ -64,9 +64,9 @@ creating a ``build`` dir in the test folder and running ``cmake .. && make``.
 
 To run the tests the same way that CircleCI does, navigate to the top level of the Kubos repo and issue this command::
 
-    $ python3 $PWD/tools/ci_c.py
+    $ python3 ./tools/ci/c_build.py
 
-If a new C module has been created, it will need to be added to the ``projects`` list in ``tools/ci_c.py``
+If a new C module has been created, it will need to be added to the ``projects`` list in ``tools/ci/c_build.py``
 before the script will run the tests.
 
 Unit Tests

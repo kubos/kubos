@@ -1,8 +1,12 @@
 [package]
 name = "kubos-telemetry-db"
-version = "0.1.0"
-authors = ["Marshall Culpepper <marshall@kubos.com>"]
+authors = ["Marshall Culpepper <marshall@xplore.com>"]
 edition = "2018"
+version.workspace = true
+description.workspace = true
+license.workspace = true
+documentation.workspace = true
+repository.workspace = true
 
 [dependencies]
 diesel = { version = "1.0.0", features = ["sqlite"] }

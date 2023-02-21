@@ -21,4 +21,5 @@ futures = "*"
 tempfile = "3.0"
 utils = { path = "../../utils" }
 
-
+[package.metadata.release]
+release = false

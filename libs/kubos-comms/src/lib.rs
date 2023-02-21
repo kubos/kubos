@@ -25,7 +25,7 @@
 //! # Example Usage
 //!
 //! ```rust,no_run
-//! use comms_service::*;
+//! use kubos_comms::*;
 //! use std::net::{Ipv4Addr, UdpSocket};
 //! use std::sync::{Arc, Mutex};
 //!

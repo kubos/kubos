@@ -12,3 +12,6 @@ kubos-system = { path = "../../apis/system-api" }
 log = "^0.4.0"
 serde_cbor = "0.8"
 shell-protocol = { path = "../../libs/shell-protocol" }
+
+[package.metadata.release]
+release = false

@@ -11,4 +11,5 @@ kubos-system = { path = "../../../apis/system-api" }
 rand = "0.5.5"
 tempfile = "3"
 
-
+[package.metadata.release]
+release = false

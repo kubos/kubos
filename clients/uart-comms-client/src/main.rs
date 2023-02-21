@@ -30,8 +30,8 @@ mod comms;
 mod kiss;
 
 use clap::{App, Arg};
-use comms_service::{LinkPacket, PayloadType, SpacePacket};
 use failure::{bail, Error};
+use kubos_comms::{LinkPacket, PayloadType, SpacePacket};
 use std::fs::File;
 use std::io::Read;
 use std::time::Duration;

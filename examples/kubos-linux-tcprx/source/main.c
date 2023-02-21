@@ -116,7 +116,7 @@ int main(int argc, char * argv[])
             }
             else
             {
-                printf("Message being sent: %s\nNumber of bytes sent: %d\n",
+                printf("Message being sent: %s\nNumber of bytes sent: %lu\n",
                        reply, strlen(reply));
             }
         } /* End of message receive loop */

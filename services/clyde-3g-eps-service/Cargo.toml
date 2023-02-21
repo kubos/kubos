@@ -16,3 +16,6 @@ rust-i2c = { path = "../../hal/rust-hal/rust-i2c" }
 [dev-dependencies]
 serde_json = "1.0"
 warp = "0.1.12"
+
+[package.metadata.release]
+release = false

@@ -7,3 +7,6 @@ edition = "2018"
 
 [build-dependencies]
 kubos-build-helper = { path = "../../../kubos-build-helper" }
+
+[package.metadata.release]
+release = false

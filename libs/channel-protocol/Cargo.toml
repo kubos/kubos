@@ -11,3 +11,6 @@ log = "^0.4.0"
 rand = "0.5"
 serde_cbor = "0.8"
 simplelog = "^0.5.0"
+
+[package.metadata.release]
+release = false

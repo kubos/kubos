@@ -29,8 +29,8 @@
 //!
 
 use crate::comms::*;
-use comms_service::*;
 use failure::Error;
+use kubos_comms::*;
 use kubos_system::logger as ServiceLogger;
 use kubos_system::Config as ServiceConfig;
 use log::error;

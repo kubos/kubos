@@ -9,3 +9,6 @@ extern-lib = { path = "../extern-lib" }
 kubos-service = { path = "../../../services/kubos-service" }
 juniper = "0.11"
 log = "^0.4.0"
+
+[package.metadata.release]
+release = false
