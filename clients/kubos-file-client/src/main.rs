@@ -325,6 +325,7 @@ fn main() {
 
     if let Err(err) = result {
         error!("Operation failed: {}", err);
+        std::process::exit(1);
     } else {
         info!("Operation successful");
     }
