@@ -1,2 +1,2 @@
 mock==3.0.5
-setuptools==40.6.3
+setuptools==65.5.1
