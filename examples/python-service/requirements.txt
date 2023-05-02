@@ -1,4 +1,4 @@
-flask==2.2.2
+flask==2.3.2
 graphql-server==3.0.0b5
 graphene==3.1.1
 -f ../../libs/kubos-service kubos_service==1.0
