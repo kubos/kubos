@@ -26,8 +26,6 @@ use std::os::unix::fs::MetadataExt;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::str;
-use std::thread;
-use std::time::Duration;
 
 const HASH_SIZE: usize = 16;
 
@@ -267,56 +265,63 @@ pub fn initialize_file(
         err,
     })?;
 
-    // Create necessary storage directory
-    fs::create_dir_all(&storage_path).map_err(|err| ProtocolError::StorageError {
-        action: format!("create dir {}", storage_path),
-        err,
-    })?;
-
-    // Create a temp copy of the file to use for hashing and chunking
-    let temp_path = Path::new(&storage_path).join(format!(".{}", time::get_time().nsec));
-    fs::copy(&source_path, &temp_path).map_err(|err| ProtocolError::StorageError {
-        action: format!("copy {:?} to temp file {:?}", source_path, temp_path),
-        err,
-    })?;
-
     // Calculate hash of temp file
     let hash = calc_file_hash(source_path, hash_chunk_size)?;
 
-    // Chunk and store temp file into hash directory
-    let mut output = File::open(&temp_path).map_err(|err| ProtocolError::StorageError {
-        action: format!("open temp file {:?}", temp_path),
-        err,
-    })?;
-    let mut index = 0;
-    loop {
-        let mut chunk = vec![0u8; transfer_chunk_size];
-        match output.read(&mut chunk) {
-            Ok(n) => {
-                if n == 0 {
-                    break;
+    // Lazily initialize the chunk staging area
+    let num_chunks = match load_meta(prefix, &hash) {
+        Ok(chunks) => chunks,
+        Err(_) => {
+            // Create necessary storage directory
+            fs::create_dir_all(&storage_path).map_err(|err| ProtocolError::StorageError {
+                action: format!("create dir {}", storage_path),
+                err,
+            })?;
+
+            // Create a temp copy of the file to use for hashing and chunking
+            let temp_path = Path::new(&storage_path).join(format!(".{}", time::get_time().nsec));
+            fs::copy(&source_path, &temp_path).map_err(|err| ProtocolError::StorageError {
+                action: format!("copy {:?} to temp file {:?}", source_path, temp_path),
+                err,
+            })?;
+
+            // Chunk and store temp file into hash directory
+            let mut output = File::open(&temp_path).map_err(|err| ProtocolError::StorageError {
+                action: format!("open temp file {:?}", temp_path),
+                err,
+            })?;
+            let mut index = 0;
+            loop {
+                let mut chunk = vec![0u8; transfer_chunk_size];
+                match output.read(&mut chunk) {
+                    Ok(n) => {
+                        if n == 0 {
+                            break;
+                        }
+                        store_chunk(prefix, &hash, index, &chunk[0..n])?;
+                        index += 1;
+                    }
+                    Err(e) => {
+                        return Err(ProtocolError::StorageError {
+                            action: format!("read chunk from temp {:?}", temp_path),
+                            err: e,
+                        });
+                    }
                 }
-                store_chunk(prefix, &hash, index, &chunk[0..n])?;
-                index += 1;
             }
-            Err(e) => {
-                return Err(ProtocolError::StorageError {
-                    action: format!("read chunk from temp {:?}", temp_path),
-                    err: e,
-                });
+            store_meta(prefix, &hash, index)?;
+            match fs::remove_file(&temp_path) {
+                Ok(_) => {}
+                Err(e) => warn!("Failed to remove temp file {:?} : {}", temp_path, e),
             }
+            index
         }
-    }
-    store_meta(prefix, &hash, index)?;
-    match fs::remove_file(&temp_path) {
-        Ok(_) => {}
-        Err(e) => warn!("Failed to remove temp file {:?} : {}", temp_path, e),
-    }
+    };
 
     if let Ok(meta) = fs::metadata(source_path) {
-        Ok((hash, index, meta.mode()))
+        Ok((hash, num_chunks, meta.mode()))
     } else {
-        Ok((hash, index, 0o644))
+        Ok((hash, num_chunks, 0o644))
     }
 }
 
@@ -455,7 +460,6 @@ fn calc_file_hash(path: &str, hash_chunk_size: usize) -> Result<String, Protocol
             chunk.len()
         };
         reader.consume(length);
-        thread::sleep(Duration::from_millis(2));
     }
 
     Ok(hasher
